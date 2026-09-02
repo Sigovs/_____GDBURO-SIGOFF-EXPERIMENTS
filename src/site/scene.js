@@ -75,13 +75,14 @@ function workshopEnvironment(renderer, scene) {
 
 /* ── the scene ───────────────────────────────────────────────────────────── */
 
-export async function createScene(canvas, { ticker, reduced = false } = {}) {
+export async function createScene(canvas, { ticker, reduced = false, onProgress } = {}) {
   const stage = createStage(canvas, {
     fov: 34,            // DNA51 — 28-40 compresses and reads heroic; a machine deserves the long lens
     near: 0.2,
     far: 60,
     exposure: 1.15,     // tuned against the render, not left at 1 (DNA56)
-    background: 0x0a0c0d,
+    background: null,   // transparent — the backdrop and the receding type are behind this canvas
+
     ticker,
   });
 
@@ -93,7 +94,13 @@ export async function createScene(canvas, { ticker, reduced = false } = {}) {
   // sinks the far end of the hall so the machine's silhouette has somewhere to
   // separate against. One depth idea per view (DM6) — there is no parallax layer
   // and no second spatial system anywhere on this page.
-  scene.fog = new THREE.Fog(0x0a0c0d, 9, 30);
+  //
+  // The range was 9..30 and it had to move. The wide station now stands 24 units
+  // out instead of 15, and at 9..30 that put the machine 71% fogged — the shot
+  // that exists to show the whole thing would have shown a stain. 14..52 gives
+  // the new wide shot about the same atmosphere the old one had (~0.29), and
+  // leaves every close station clear.
+  scene.fog = new THREE.Fog(0x0a0c0d, 14, 52);
 
   const key = new THREE.DirectionalLight(0xfff0dc, 3.4);
   key.position.set(-5.5, 8.5, 3.2);
@@ -116,7 +123,9 @@ export async function createScene(canvas, { ticker, reduced = false } = {}) {
 
   scene.add(key, fill, rim);
 
-  const gltf = await loadModel(renderer, MODEL);
+  // onProgress is passed straight through rather than synthesised here: the only
+  // honest source for how much of the machine has arrived is the transfer itself.
+  const gltf = await loadModel(renderer, MODEL, { onProgress });
   const model = gltf.scene;
 
   const findings = auditMaterials(model);
@@ -137,7 +146,27 @@ export async function createScene(canvas, { ticker, reduced = false } = {}) {
   });
 
   const rig = createRig(model);
-  scene.add(rig.root);
+
+  /*
+    THE SPIN AXIS.
+
+    The machine turns on its own vertical axis; the camera does not orbit it.
+    Those are different things and they look different: an orbit swings the whole
+    world past the frame — ground, shadow, light direction and all — while a spin
+    leaves the room where it is and turns the object standing in it.
+
+    It is a WRAPPER group rather than rig.root's own rotation.y, because the rig
+    root carries rotation.x = -90deg to convert the survey's Z-up frame to the
+    scene's Y-up one. Rotating it about its own Y would turn the machine about a
+    horizontal axis — it would tip over rather than turn round.
+
+    The group sits at the origin, which is where the machine's base column stands,
+    so the axis of the spin is the axis of the machine.
+  */
+  const spin = new THREE.Group();
+  spin.name = 'spin';
+  spin.add(rig.root);
+  scene.add(spin);
 
   // Contact shadow, always (DNA59). Sized to the machine's actual footprint
   // rather than to a round number — a shadow plane wider than the subject is a
@@ -223,23 +252,78 @@ export async function createScene(canvas, { ticker, reduced = false } = {}) {
   // The signature move's whole content is its own stillness, so what it reads
   // has to be the real thing: the projected screen height of the tool plate,
   // every frame, with no smoothing that could hide a wobble.
-  const levelEl = document.querySelector('[data-level]');
+  // The rule and the marks are two elements at two depths, so the geometry they
+  // share is published to :root rather than written onto one of them.
+  const ruleEl = document.querySelector('[data-level]');
+  const marksEl = document.querySelector('[data-level-marks]');
+  const rootEl = document.documentElement;
+
+  const level = {
+    setState(state) {
+      const on = state !== 'off';
+      if (ruleEl) ruleEl.hidden = !on;
+      if (marksEl) marksEl.hidden = !on;
+      // NOT `data-level`: that is the rule element's own hook, and writing the
+      // same attribute onto :root made document.querySelector('[data-level]')
+      // return <html>. The rule then silently stopped being styled and the
+      // module was toggling `hidden` on the whole document.
+      rootEl.dataset.levelState = on ? state : 'introduced';
+    },
+    /** Scrubbed, so it is written directly rather than transitioned. */
+    setFade(v) {
+      const value = v === null ? '' : String(v);
+      if (ruleEl) ruleEl.style.opacity = value;
+      if (marksEl) marksEl.style.opacity = value;
+    },
+  };
+
+  // The readout. Real camera state, printed — azimuth around the machine and the
+  // distance the camera is standing at. Both are read off the camera every frame
+  // rather than mirrored from the station table, so if the two ever disagree the
+  // readout tells the truth about what is on screen.
+  const readoutEl = document.querySelector('[data-readout]');
+  let lastAz = -999;
+
+  const updateReadout = () => {
+    if (!readoutEl) return;
+    const az = (Math.atan2(camera.position.x, camera.position.z) * 180 / Math.PI + 360) % 360;
+    if (Math.abs(az - lastAz) < 0.5) return;
+    lastAz = az;
+    const dist = Math.hypot(camera.position.x, camera.position.z);
+    readoutEl.textContent = `AZ ${az.toFixed(0).padStart(3, '0')}\u00b0 \u00b7 ${dist.toFixed(1)} M`;
+  };
+
   const flange = new THREE.Vector3();
   let lastTop = -1;
+  let lastLeft = -1;
 
   const updateLevel = () => {
-    if (!levelEl) return;
+    if (!ruleEl && !marksEl) return;
     rig.flangePoint(flange).project(camera);
+
     const top = (1 - (flange.y + 1) / 2) * 100;
-    if (Math.abs(top - lastTop) < 0.001) return;
-    lastTop = top;
-    levelEl.style.top = top.toFixed(3) + '%';
+    if (Math.abs(top - lastTop) >= 0.001) {
+      lastTop = top;
+      rootEl.style.setProperty('--level-y', top.toFixed(3) + '%');
+    }
+
+    // The horizontal position of the same point. The line is no longer a rule of
+    // constant weight: it carries the accent at full strength HERE and falls away
+    // either side, because this is the only place on it that is a measurement.
+    // Clamped rather than left free — when the plate leaves the frame the ramp
+    // should walk off the edge, not resolve to a gradient stop in the hundreds.
+    const left = Math.min(Math.max((flange.x + 1) / 2 * 100, -25), 125);
+    if (Math.abs(left - lastLeft) >= 0.001) {
+      lastLeft = left;
+      rootEl.style.setProperty('--level-x', left.toFixed(3) + '%');
+    }
   };
 
   let moving = true;
   stage.onFrame((dt) => {
     const settled = rigCam.update(dt);
     updateLevel();
+    updateReadout();
     // The contact shadow is a full extra scene pass, so it runs while anything
     // is actually moving and stops when nothing is (DNA75). A still frame does
     // not need its shadow re-rendered sixty times a second.
@@ -257,10 +341,20 @@ export async function createScene(canvas, { ticker, reduced = false } = {}) {
     model,
     rig,
     rigCam,
-    levelEl,
+    level,
     mobile,
     /** Marks the scene dirty so the contact shadow re-renders this frame. */
     touch() { moving = true; },
+
+    /**
+     * Turns the machine on its own vertical axis, in degrees. The level line
+     * follows it without being told: it reads the flange's WORLD position, and
+     * the spin group is one of that node's ancestors.
+     */
+    setSpin(deg) {
+      spin.rotation.y = deg * Math.PI / 180;
+      moving = true;
+    },
     /** Crossfade the lighting setup. See LIGHT above — one world, five setups. */
     setLight: applyLight,
     setExposure: (v) => stage.setExposure(v),

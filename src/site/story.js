@@ -52,6 +52,21 @@ export function place(station) {
   };
 }
 
+/** The polar blend, before it is turned into world space. */
+export function mixStation(from, to, t) {
+  return {
+    azimuth: lerp(from.azimuth, to.azimuth, t),
+    radius: lerp(from.radius, to.radius, t),
+    height: lerp(from.height, to.height, t),
+    fov: lerp(from.fov, to.fov, t),
+    target: {
+      x: lerp(from.target.x, to.target.x, t),
+      y: lerp(from.target.y, to.target.y, t),
+      z: lerp(from.target.z, to.target.z, t),
+    },
+  };
+}
+
 export function blendStations(from, to, t) {
   return place({
     azimuth: lerp(from.azimuth, to.azimuth, t),
@@ -78,22 +93,30 @@ const SHOTS = {
     trigger: '#impact',
     from: at(40, 3.30, 0.95, V(0.30, 1.45, 0), 46),
     to:   at(18, 2.70, 0.72, V(0.42, 1.55, 0), 48),
-    pose: { from: 0.00, to: 0.06, at: [0.10, 1.0] },
+    pose: { from: 0.00, to: 0.10, at: [0.15, 0.95] },
     light: 'sculpt',
+    lightAt: [0.00, 0.30],
     level: 'off',
   },
 
-  // 02 — all the way round to the far side, and wide. The biggest single change
+  // 02 — all the way round to the far side, and wide.
+  //
+  // The station was 15.0 at h 3.30, then 24.0 at h 6.40, and 24 was too far: the
+  // machine set to about an eighth of the frame width and the shot's own claim —
+  // 2 744 mm, standing still — cannot be read off a subject that small. 20.0 at
+  // h 5.60 is the width that is clearly wider than it was and still a
+  // composition rather than a speck in a field. Measured in the render, twice. The biggest single change
   // of frame on the page: 178deg of travel and 2.7m -> 15m in one shot.
   scale: {
     trigger: '#scale',
     from: at(18, 2.70, 0.72, V(0.42, 1.55, 0), 48),
-    to:   at(196, 15.0, 3.30, V(0.35, 1.30, 0), 28),
+    to:   at(110, 11.0, 3.80, V(0.35, 1.30, 0), 34),
     // Opens fast then holds: the negative space is the composition, and it only
     // becomes one once the travel has stopped.
     camEase: easeOut,
-    pose: { from: 0.06, to: 0.26, at: [0.22, 0.94] },
+    pose: { from: 0.10, to: 0.30, at: [0.18, 0.92] },
     light: 'clean',
+    lightAt: [0.12, 0.58],
     level: 'off',
   },
 
@@ -102,20 +125,26 @@ const SHOTS = {
   // mechanism rather than as a silhouette.
   rear: {
     trigger: '#rear',
-    from: at(196, 15.0, 3.30, V(0.35, 1.30, 0), 28),
-    to:   at(268, 5.60, 2.05, V(0.30, 1.85, 0), 36),
-    pose: { from: 0.26, to: 0.56, at: [0.08, 0.82] },
+    from: at(110, 11.0, 3.80, V(0.35, 1.30, 0), 34),
+    to:   at(250, 4.30, 1.55, V(0.30, 1.80, 0), 38),
+    pose: { from: 0.30, to: 0.60, at: [0.05, 0.88] },
     light: 'side',
+    lightAt: [0.04, 0.40],
     level: 'proving',
   },
 
   // 04 — high. Looking down the top of the boom while the tool comes round.
   above: {
     trigger: '#above',
-    from: at(268, 5.60, 2.05, V(0.30, 1.85, 0), 36),
-    to:   at(328, 6.20, 5.05, V(0.95, 1.60, 0), 40),
-    pose: { from: 0.56, to: 0.79, at: [0.12, 0.86] },
+    from: at(250, 4.30, 1.55, V(0.30, 1.80, 0), 38),
+    to:   at(315, 5.20, 7.40, V(0.95, 1.55, 0), 50),
+    // Arrives in the first half and HOLDS. Without this the aerial only exists on
+    // the shot's very last frame: stopped at 55% it still read as a raised
+    // three-quarter, which is a view the page already has twice.
+    camEase: easeOut,
+    pose: { from: 0.60, to: 0.79, at: [0.10, 0.90] },
     light: 'top',
+    lightAt: [0.20, 0.66],
     level: 'off',
   },
 
@@ -124,14 +153,15 @@ const SHOTS = {
   // because a macro that also travels is a blur.
   macro: {
     trigger: '#macro',
-    from: at(328, 6.20, 5.05, V(0.95, 1.60, 0), 40),
+    from: at(315, 5.20, 7.40, V(0.95, 1.55, 0), 50),
     to:   at(372, 1.45, 2.30, V(1.78, 2.05, 0), 30),
     // Arrives in the first half and then HOLDS. easeIn was tried and spends most
     // of the section still travelling, so most stoppable frames in the macro shot
     // were not macro frames — which fails MJ4 for the shot that most depends on it.
     camEase: (t) => easeOut(clamp01(t / 0.52)),
-    pose: { from: 0.79, to: 0.86, at: [0.0, 0.55] },
+    pose: { from: 0.79, to: 0.87, at: [0.00, 0.62] },
     light: 'specular',
+    lightAt: [0.00, 0.34],
     level: 'off',
   },
 
@@ -148,10 +178,11 @@ const SHOTS = {
   hero: {
     trigger: '#hero',
     from: at(372, 1.45, 2.30, V(1.78, 2.05, 0), 30),
-    to:   at(545, 7.80, 1.32, V(1.05, 1.28, 0), 40),
+    to:   at(545, 8.40, 1.05, V(1.05, 1.24, 0), 40),
     camEase: easeOut,
-    pose: { from: 0.86, to: 1.00, at: [0.06, 0.62] },
+    pose: { from: 0.87, to: 1.00, at: [0.04, 0.72] },
     light: 'hero',
+    lightAt: [0.16, 0.62],
     level: 'proving',
   },
 };
@@ -164,11 +195,11 @@ const SHOTS = {
 // does not survive is the framing, so that is what changes.
 const MOBILE = {
   impact: [at(40, 4.60, 1.05, V(0.35, 1.50, 0), 52), at(18, 4.10, 0.85, V(0.45, 1.60, 0), 54)],
-  scale:  [at(18, 4.10, 0.85, V(0.45, 1.60, 0), 54), at(196, 16.5, 3.40, V(0.35, 1.45, 0), 34)],
-  rear:   [at(196, 16.5, 3.40, V(0.35, 1.45, 0), 34), at(268, 7.60, 2.20, V(0.35, 1.80, 0), 42)],
-  above:  [at(268, 7.60, 2.20, V(0.35, 1.80, 0), 42), at(328, 8.20, 5.30, V(0.95, 1.60, 0), 46)],
-  macro:  [at(328, 8.20, 5.30, V(0.95, 1.60, 0), 46), at(372, 2.05, 2.28, V(1.76, 2.05, 0), 36)],
-  hero:   [at(372, 2.05, 2.28, V(1.76, 2.05, 0), 36), at(545, 10.4, 1.50, V(1.05, 1.28, 0), 46)],
+  scale:  [at(18, 4.10, 0.85, V(0.45, 1.60, 0), 54), at(110, 15.0, 4.60, V(0.35, 1.45, 0), 40)],
+  rear:   [at(110, 15.0, 4.60, V(0.35, 1.45, 0), 40), at(250, 5.60, 1.70, V(0.35, 1.75, 0), 44)],
+  above:  [at(250, 5.60, 1.70, V(0.35, 1.75, 0), 44), at(315, 6.60, 7.80, V(0.95, 1.55, 0), 56)],
+  macro:  [at(315, 6.60, 7.80, V(0.95, 1.55, 0), 56), at(372, 2.05, 2.28, V(1.76, 2.05, 0), 36)],
+  hero:   [at(372, 2.05, 2.28, V(1.76, 2.05, 0), 36), at(545, 11.0, 1.25, V(1.05, 1.24, 0), 46)],
 };
 
 const ORDER = ['impact', 'scale', 'rear', 'above', 'macro', 'hero'];
@@ -181,18 +212,14 @@ export function openingStation(mobile) {
 /* ── the story ───────────────────────────────────────────────────────────── */
 
 export function createStory(scope, world) {
-  const { rigCam, rig, levelEl } = world;
+  const { rigCam, rig, level } = world;
   const mob = world.mobile;
 
   const track = (name) =>
     (mob && MOBILE[name] ? { from: MOBILE[name][0], to: MOBILE[name][1] } : { from: SHOTS[name].from, to: SHOTS[name].to });
 
   const put = (station) => { rigCam.set(station); world.touch(); };
-  const setLevel = (state) => {
-    if (!levelEl) return;
-    levelEl.hidden = state === 'off';
-    levelEl.dataset.state = state === 'off' ? 'introduced' : state;
-  };
+  const setLevel = (state) => level?.setState(state);
 
   const ctx = gsap.context(() => {
     ORDER.forEach((name, i) => {
@@ -200,23 +227,20 @@ export function createStory(scope, world) {
       const prev = i > 0 ? SHOTS[ORDER[i - 1]] : null;
       const t = track(name);
 
-      // Only the ACTIVE shot's copy is present. A shot is one viewport of
-      // composition inside a section a little taller than one viewport, so the
-      // next section's type necessarily enters the frame before the current
-      // shot's scrub finishes. In fast, out slow, so a boundary reads as a beat
-      // — the machine alone — rather than as a hole.
-      const copy = gsap.utils.toArray(`${shot.trigger} .type, ${shot.trigger} .frame`);
-      const IN = 0.07;
-      // The hero's best frame is its LAST — full extension arrives late — and a
-      // sticky block gets pushed out of the top of its own section as that
-      // section ends. So the closing statement is given a longer exit than the
-      // others: it is gone by the time the crop would reach it, rather than
-      // being cropped while still at full opacity.
-      const OUT = name === 'hero' ? 0.30 : 0.16;
-      const presence = (p) =>
-        i === 0 ? clamp01((1 - p) / OUT) : clamp01(Math.min(p / IN, (1 - p) / OUT));
-      const showCopy = (v) => { for (const el of copy) el.style.opacity = String(v); };
-      showCopy(i === 0 ? 1 : 0);
+      /*
+        THE COPY IS NOT THIS MODULE'S ANY MORE.
+
+        This used to hold a presence curve — opacity in over the first 7% of the
+        section, out over the last 16% — written onto `.type` and `.frame` every
+        frame. It was the second owner of those elements' opacity, and it was the
+        louder one: reveal.js plays each block's arrival on its own clock, and
+        every one of those arrivals was happening inside a parent this curve was
+        holding at zero. The gestures ran, correctly, and nobody ever saw one.
+
+        One owner per property (G6). reveal.js has the copy — it brings it in when
+        the section arrives and takes it out when the section leaves, which is the
+        same job this curve was doing, done once.
+      */
 
       ScrollTrigger.create({
         trigger: shot.trigger,
@@ -234,15 +258,97 @@ export function createStory(scope, world) {
           // between choreography and two things happening at once.
           rig.setPose(lerp(shot.pose.from, shot.pose.to, ease(span(p, shot.pose.at[0], shot.pose.at[1]))));
 
-          world.setLight(shot.light, clamp01(p / 0.45), prev?.light ?? shot.light);
-          showCopy(presence(p));
+          // The light has its own window too, and a different one per shot. It
+        // used to crossfade over 0..0.45 everywhere, which put every lighting
+        // change on the same clock as every other lighting change — four
+        // channels moving in step is one channel wearing four names.
+        const [la, lb] = shot.lightAt ?? [0.0, 0.45];
+        world.setLight(shot.light, ease(span(p, la, lb)), prev?.light ?? shot.light);
           setLevel(shot.level);
         },
         onEnterBack: () => setLevel(shot.level),
-        onLeave: () => showCopy(0),
-        onLeaveBack: () => showCopy(i === 0 ? 1 : 0),
       });
     });
+
+    /*
+      The record's own station. The hero's closing frame walked to it rather than
+      cutting: same azimuth, so nothing swings — the camera only steps in and
+      re-centres, which reads as attention rather than as a new shot.
+    */
+    const recordFrom = mob && MOBILE.hero ? MOBILE.hero[1] : SHOTS.hero.to;
+    /*
+      THE LAST FRAME IS THE ONE THE VISITOR CAN TURN.
+
+      Everything before it is authored: the camera goes where the shot says. Here
+      the argument is finished and the machine is simply present, so this is the
+      one place where handing over the axis costs nothing and gives the page its
+      only piece of real interaction — 360 degrees of it, around the same vertical
+      axis the whole story orbited.
+
+      IT TURNS THE MACHINE, NOT THE CAMERA. An orbit would swing the whole world
+      past the frame — ground, cast shadow, key direction and all — and read as
+      the room moving rather than the object turning. The spin group in scene.js
+      rotates the rig about the world vertical, through the machine's own base.
+
+      HORIZONTAL ONLY, and touch-action keeps the vertical gesture with the page:
+      a drag surface that swallowed vertical scroll would trap a phone visitor on
+      the last screen, which is the worst place on the page to be trapped.
+
+      The camera keeps doing its own job underneath: the record's approach still
+      runs on scroll while the machine holds whatever heading the visitor gave it.
+    */
+    let spin = 0;
+    let recordP = 0;
+    let dragging = false;
+    let lastX = 0;
+
+    /*
+      THE LAST SCREEN HOLDS THE HERO'S CLOSING FRAME. It does not travel to a
+      station of its own.
+
+      It used to: the camera stepped in and walked the machine right, ending at
+      radius 9.00 with the target pushed to x 3.05 — printed as AZ 166 / 9.2 M.
+      That was built from "the arm moves a little right and gets a little bigger",
+      and it was then replaced by a specific frame: AZ 178 / 8.3 M, which is
+      exactly this station at record progress zero. So the request that produced
+      the move has been superseded by one that names its destination, and the
+      honest way to honour the second is to stop moving.
+
+      Identical to `recordFrom`, deliberately and not by accident — the blend below
+      still runs, resolves to the same station at every progress, and the frame is
+      held. What moves on this screen is the machine, and only when the visitor
+      turns it.
+    */
+    const RECORD_VIEW = recordFrom;
+
+    const putRecord = () => put(blendStations(recordFrom, RECORD_VIEW, ease(recordP)));
+
+    const surface = document.querySelector('[data-orbit]');
+    if (surface) {
+      const down = (e) => {
+        dragging = true;
+        lastX = e.clientX;
+        surface.setPointerCapture?.(e.pointerId);
+        surface.dataset.grabbing = '';
+      };
+      const move = (e) => {
+        if (!dragging) return;
+        // 0.32 deg per pixel: a full turn is about a thousand pixels of travel,
+        // which is one comfortable sweep of a trackpad rather than a flick.
+        spin += (e.clientX - lastX) * 0.32;
+        lastX = e.clientX;
+        world.setSpin(spin);
+      };
+      const up = (e) => {
+        dragging = false;
+        surface.releasePointerCapture?.(e.pointerId);
+        delete surface.dataset.grabbing;
+      };
+      surface.addEventListener('pointerdown', down);
+      surface.addEventListener('pointermove', move);
+      surface.addEventListener('pointerup', up);
+      surface.addEventListener('pointercancel', up);
+    }
 
     // The record: the scene falls away rather than being covered. An opaque
     // surface travelling across live content cuts a hard edge through it (U13).
@@ -253,12 +359,29 @@ export function createStory(scope, world) {
       scrub: true,
       invalidateOnRefresh: true,
       onUpdate: (self) => {
-        world.setExposure(lerp(1.18, 0.34, self.progress));
-        if (levelEl) levelEl.style.opacity = String(1 - clamp01(self.progress * 2));
+        // The machine clears the column. The text block sits on the LEFT through
+        // the record, so the camera walks the arm to the right of the frame and
+        // closes in slightly while it does — the measurements and the thing they
+        // measure end up side by side instead of stacked on each other. The
+        // target moves +x, which on this camera's heading is screen-left, so the
+        // machine travels screen-right.
+        recordP = self.progress;
+        putRecord();
+
+        // 0.14, not 0.34. This number is now the only thing standing between
+        // --ink and a lit orange casting: the record's scrim was deleted, so the
+        // frame going down IS the legibility mechanism. Measured on the render
+        // behind the table rather than picked for mood.
+        world.setExposure(lerp(1.18, 0.14, self.progress));
+        level?.setFade(1 - clamp01(self.progress * 2));
       },
       onLeaveBack: () => {
+        spin = 0;
+        world.setSpin(0);   // leaving the last screen returns the machine to its authored heading
+        recordP = 0;
+        put(recordFrom);
         world.setExposure(1.18);
-        if (levelEl) levelEl.style.opacity = '';
+        level?.setFade(null);
       },
     });
   }, scope);
@@ -275,7 +398,7 @@ export function createStory(scope, world) {
  * what the travel demonstrated.
  */
 export function createStill(world) {
-  const { rigCam, rig, levelEl } = world;
+  const { rigCam, rig, level } = world;
   const station = world.mobile && MOBILE.hero ? MOBILE.hero[1] : SHOTS.hero.to;
   const s = place(station);
 
@@ -283,10 +406,7 @@ export function createStill(world) {
   rigCam.cut({ position: s.position, target: s.target, fov: s.fov });
   world.setLight('hero', 1);
 
-  if (levelEl) {
-    levelEl.hidden = false;
-    levelEl.dataset.state = 'proving';
-  }
+  level?.setState('proving');
   world.touch();
   return () => {};
 }

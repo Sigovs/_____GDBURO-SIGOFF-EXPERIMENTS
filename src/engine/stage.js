@@ -22,10 +22,18 @@ export function createStage(canvas, {
   const mobile = window.matchMedia('(max-width: 767px)').matches;
   const cap = mobile ? BUDGET.mobile.dpr : BUDGET.desktop.dpr;
 
+  // background: null asks for a TRANSPARENT stage. The page then composites the
+  // scene over whatever is behind the canvas — which is how the opening's type
+  // can recede behind the machine instead of dissolving in front of it, and how
+  // one backdrop can sit under the whole page. Verified before it was switched:
+  // an empty region of this canvas measured #0a0c0d, the exact value of the
+  // page's --ground, so nothing about the ordinary frame changes.
+  const transparent = background === null;
+
   const renderer = new THREE.WebGLRenderer({
     canvas,
     antialias,
-    alpha: false,
+    alpha: transparent,
     powerPreference: 'high-performance',
   });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, cap));
@@ -36,7 +44,8 @@ export function createStage(canvas, {
   renderer.shadowMap.type = THREE.PCFShadowMap; // PCFSoft is deprecated as of three r185
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(background);
+  scene.background = transparent ? null : new THREE.Color(background);
+  if (transparent) renderer.setClearAlpha(0);
 
   const camera = new THREE.PerspectiveCamera(fov, 1, near, far);
   camera.position.set(0, 1.4, 6);

@@ -32,6 +32,22 @@
   --accent:        #f2903f;  /* PROVED — --paint lifted to clear 3:1 as a 1px rule. This is the level line and nothing else. */
   --accent-quiet:  #8a5a35;  /* AUTHORED — the line before it means anything, in act three. */
 
+  /* The same two colours as channels. The level line is no longer a solid rule:
+     it carries the accent at full strength only where the tool plate actually is
+     and falls to nothing either side, which needs an alpha ramp rather than a
+     second hex. Same pigment, one derivation, expressed twice. */
+  --ink-rgb:          242 244 245;   /* --ink as channels, so a display figure can sit back without a second grey */
+  --accent-rgb:       242 144 63;
+  --accent-quiet-rgb: 138  90 53;
+
+  /* How far the line reaches either side of the contact point, and where the
+     ramp's shoulder sits. PROVED against the render: at 30% the line reads as a
+     short dash rather than as a rule crossing the frame; past about 46% it stops
+     being possible to see where the bright point is, which is the whole content
+     of the device. */
+  --level-reach:    40%;
+  --level-shoulder: 16%;
+
   /* ── rules ──────────────────────────────────────────────────────────── */
   --rule:          #23282b;  /* PROVED — the hairline. Visible, never structural. */
   --rule-bright:   #394045;  /* AUTHORED — the rail's active mark. */
@@ -79,6 +95,12 @@
   --s-3xl: 6rem;
   --s-4xl: 9rem;
 
+  /* How far the record's overlay is held below the top of its section — the
+     last frame gets that much clear air before the measurements arrive over it.
+     A token because the surface and the padding must be the SAME number, and two
+     copies of 92svh is how they stop being the same number. */
+  --record-lead: 92svh;
+
   --rail-w: 8.5rem;  /* PROVED - the rail is its own column, not an overlay in the gutter. At 14px mono, "03 ANATOMY" sets to 8.1rem; the token is that measurement plus a hair. */
   --gutter: clamp(1.5rem, 5vw, 5.5rem);  /* stays generous on mobile — that is where the signal survives or dies (DNA69). */
 
@@ -88,6 +110,10 @@
   --d-quick: 240ms;
   --d-base:  450ms;
   --d-slow:  800ms;
+  /* The page's ONE ambient loop (motion D4), spent here on purpose: the pulse at
+     the point where the plate meets the line. Slow, because it is a measurement
+     being taken rather than a heartbeat. */
+  --d-ping:  2200ms;
   --e-enter: cubic-bezier(0.22, 1, 0.36, 1);
   --e-exit:  cubic-bezier(0.55, 0, 1, 0.45);   /* NOT --e-enter reversed: an ease-out on an exit spends its travel in the first third and turns an 800ms fade into a 400ms snap with an invisible tail (U20). */
 
@@ -95,13 +121,23 @@
   /* Six shots. The two carrying the largest camera travel and the largest pose
      change get the most room; the macro is short because an approach that
      outlasts its own arrival becomes a wait. */
-  --shot-1: 115vh;   /* impact — low crop, held */
-  --shot-2: 150vh;   /* scale  — 178deg of travel, the biggest single change */
-  --shot-3: 160vh;   /* rear   — the mechanical event */
-  --shot-4: 130vh;   /* above  — high angle, tool comes round */
-  --shot-5: 105vh;   /* macro  — one joint, brief */
-  --shot-6: 170vh;   /* hero   — the release, and it needs room after it */
-  /* 805vh total = 8.05 viewport-heights for six shots, plus the record. */
+  /*
+    TRIMMED, against stopped frames rather than against the plan. Every shot was
+    scrolled through and asked the one question: is anything happening here? The
+    camera eases arrive well before each section ends, so the tail of every shot
+    was hold — and hold is only negative space while something is still resolving.
+
+    Shot 02 lost the most: its camera is easeOut, so it was landing at about 55%
+    and then standing still for two thirds of a viewport. Shot 06 lost 30vh of
+    the same. Nothing lost a beat that had anything in it.
+  */
+  --shot-1: 110vh;   /* impact — low crop, held */
+  --shot-2: 120vh;   /* scale  — the swing to broadside, and it lands early */
+  --shot-3: 130vh;   /* rear   — the mechanical event, the largest pose change */
+  --shot-4: 120vh;   /* above  — the aerial, and the tool coming round */
+  --shot-5: 100vh;   /* macro  — one joint, brief on purpose */
+  --shot-6: 140vh;   /* hero   — the release */
+  /* 720vh, down from 805. */
 }
 
 @media (max-width: 767px) {
@@ -120,12 +156,12 @@
       phone the argument has to arrive sooner — what is cut is the approach, never
       the thing being approached.
     */
-    --shot-1: 105vh;
-    --shot-2: 135vh;
-    --shot-3: 145vh;
-    --shot-4: 120vh;
-    --shot-5: 100vh;
-    --shot-6: 130vh;
+    --shot-1: 100vh;
+    --shot-2: 115vh;
+    --shot-3: 125vh;
+    --shot-4: 110vh;
+    --shot-5:  95vh;
+    --shot-6: 120vh;
     /* 590vh. Shorter travel on a device held in one hand, and the pose change
        keeps the largest share because it is the only thing here that a still
        image could not have said. */

@@ -57,19 +57,179 @@ body {
 
 /* ── the field ───────────────────────────────────────────────────────────── */
 
+/*
+  THE STACK, and it is the whole spatial argument of the page in four lines:
+
+    -2  .backdrop        one field, fixed, dimmed. It does not scroll.
+    -1  .intro[data-behind]   the opening's type once it has stepped back
+     0  .stage           the machine, on a TRANSPARENT canvas
+     +  the page         everything positioned after it, in tree order
+
+  The canvas being transparent is what makes -1 mean anything: without it the
+  type would not recede behind the machine, it would simply be deleted. See
+  engine/stage.js, where `background: null` asks for that.
+*/
+
+.backdrop {
+  position: fixed; inset: 0; z-index: -2;
+  display: block; width: 100%; height: 100%;
+  pointer-events: none;
+}
+
 .stage { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 .stage canvas { display: block; width: 100%; height: 100%; }
 
+/* ── the instrument layer ────────────────────────────────────────────────
+   Corner registrations and a live readout. Hairlines only, at --rule, so it
+   registers as the frame the machine is being measured in rather than as
+   ornament laid on top of it. It never crosses the reading zone: the ticks live
+   in the corners and the readout sits under the masthead's own line. */
+
+.marks {
+  position: fixed; inset: 0; z-index: 8;
+  pointer-events: none;
+}
+.marks__tick {
+  position: absolute;
+  width: 14px; height: 14px;
+  border: 0 solid var(--rule);
+}
+.marks__tick--tl { top: var(--s-md); left: var(--gutter); border-top-width: var(--hair); border-left-width: var(--hair); }
+.marks__tick--tr { top: var(--s-md); right: var(--gutter); border-top-width: var(--hair); border-right-width: var(--hair); }
+.marks__tick--bl { bottom: var(--s-md); left: var(--gutter); border-bottom-width: var(--hair); border-left-width: var(--hair); }
+.marks__tick--br { bottom: var(--s-md); right: var(--gutter); border-bottom-width: var(--hair); border-right-width: var(--hair); }
+
+.marks__readout {
+  position: absolute;
+  top: calc(var(--s-md) + 1.9rem);
+  right: var(--gutter);
+  font: 500 var(--t-label)/1 var(--face-mono);
+  letter-spacing: var(--tr-label);
+  color: var(--ink-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 767px) {
+  /* On a phone the corners are where the thumbs are and the readout would sit on
+     the kicker. The frame keeps its two upper registrations and nothing else. */
+  .marks__tick--bl, .marks__tick--br, .marks__readout { display: none; }
+}
+
+/* Shot 06's statement sits IN the room rather than over it: below the stage, so
+   the arm extending through it is part of the reveal. That is what `riseBehind`
+   in reveal.js is named for. */
+.shot--hero .type { z-index: -1; }
+
 /* ── the level line ──────────────────────────────────────────────────────── */
 
+/*
+  The line is not a solid rule any more. It carries the accent at full strength
+  at the CONTACT POINT — the projected position of the tool plate, written into
+  --level-x by scene.js every frame — and falls to nothing either side.
+
+  WHY. A rule of constant weight across the frame claims the whole width is the
+  measurement. It is not: the measurement is one point, and everything either
+  side of it is the line explaining where that point sits. Ramping the alpha says
+  that, and it says it without adding a colour, a glow or a second idea. A glow
+  was the other candidate and it was refused: it would turn an instrument into an
+  effect on the one page whose argument is that its figures were measured.
+
+  TWO LAYERS, NOT ONE PROPERTY. The quiet state and the proving state used to be
+  a border-color transition. A gradient cannot be transitioned and a custom
+  property does not interpolate unless it is registered, so the quiet ramp is the
+  element's own background and the bright ramp is ::before over it, crossfaded on
+  opacity. Same authored slow change of state, same timing token.
+*/
+
 .level {
-  position: absolute; left: 0; right: 0; top: 62%; height: 0;
-  border-top: var(--hair) solid var(--accent-quiet);
+  position: fixed; left: 0; right: 0;
+  z-index: -1;          /* BEHIND the stage: the machine passes in front of it */
+  pointer-events: none;
+  top: var(--level-y, 62%);
+  height: var(--hair);
+  background: linear-gradient(90deg,
+    rgb(var(--accent-quiet-rgb) / 0)    calc(var(--level-x, 50%) - var(--level-reach)),
+    rgb(var(--accent-quiet-rgb) / 0.34) calc(var(--level-x, 50%) - var(--level-shoulder)),
+    rgb(var(--accent-quiet-rgb) / 1)    var(--level-x, 50%),
+    rgb(var(--accent-quiet-rgb) / 0.34) calc(var(--level-x, 50%) + var(--level-shoulder)),
+    rgb(var(--accent-quiet-rgb) / 0)    calc(var(--level-x, 50%) + var(--level-reach)));
   opacity: 0;
-  transition: border-color var(--d-slow) var(--e-enter), opacity var(--d-slow) var(--e-enter);
+  transition: opacity var(--d-slow) var(--e-enter);
 }
-.level[data-state="introduced"] { opacity: 1; }
-.level[data-state="proving"] { opacity: 1; border-top-color: var(--accent); }
+.level::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg,
+    rgb(var(--accent-rgb) / 0)    calc(var(--level-x, 50%) - var(--level-reach)),
+    rgb(var(--accent-rgb) / 0.34) calc(var(--level-x, 50%) - var(--level-shoulder)),
+    rgb(var(--accent-rgb) / 1)    var(--level-x, 50%),
+    rgb(var(--accent-rgb) / 0.34) calc(var(--level-x, 50%) + var(--level-shoulder)),
+    rgb(var(--accent-rgb) / 0)    calc(var(--level-x, 50%) + var(--level-reach)));
+  opacity: 0;
+  transition: opacity var(--d-slow) var(--e-enter);
+}
+/* The marks layer: annotation, on the glass, above the machine. z-index 0 and
+   placed after .stage in the document, so it paints over the canvas and still
+   under the shots' own type — which is exactly where it sat before the split. */
+.level-marks {
+  position: fixed; left: 0; right: 0;
+  top: var(--level-y, 62%);
+  height: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--d-slow) var(--e-enter);
+}
+.level[hidden], .level-marks[hidden] { display: none; }
+
+:root[data-level-state="introduced"] .level,
+:root[data-level-state="proving"]    .level,
+:root[data-level-state="introduced"] .level-marks,
+:root[data-level-state="proving"]    .level-marks { opacity: 1; }
+:root[data-level-state="proving"] .level::before { opacity: 1; }
+
+/* ── the contact point ───────────────────────────────────────────────────
+   Where the line meets the plate. A 3px core and one ring leaving it — the
+   page's single ambient loop (motion D4), and it is spent on the one element
+   whose entire content is that a reading is being taken and holding at 0.000.
+
+   It pulses only in `proving`. In `introduced` the line has not yet claimed
+   anything, so the point is present and still; a mark that pulses before it
+   means something is decoration, and this page has none. */
+
+.level__node {
+  position: absolute;
+  left: var(--level-x, 50%);
+  top: 50%;
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  background: var(--accent-quiet);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity var(--d-slow) var(--e-enter), background-color var(--d-slow) var(--e-enter);
+}
+:root[data-level-state="introduced"] .level__node { opacity: 0.6; }
+:root[data-level-state="proving"]  .level__node { opacity: 1; background: var(--accent); }
+
+.level__node::after {
+  content: "";
+  position: absolute; inset: -1px;
+  border-radius: 50%;
+  border: var(--hair) solid var(--accent);
+  opacity: 0;
+}
+:root[data-level-state="proving"] .level__node::after {
+  animation: level-ping var(--d-ping) var(--e-enter) infinite;
+}
+
+/* Scale and opacity only — both compositor properties, so the loop costs no
+   layout. It rests at zero for the last third rather than restarting on the
+   instant it lands: a ring that re-fires with no gap reads as a spinner. */
+@keyframes level-ping {
+  0%   { transform: scale(1);   opacity: 0.7; }
+  62%  { transform: scale(6.5); opacity: 0; }
+  100% { transform: scale(6.5); opacity: 0; }
+}
 
 .level__label {
   position: absolute; right: 0; top: var(--s-2xs);
@@ -87,7 +247,7 @@ body {
   opacity: 0;
   transition: opacity var(--d-base) var(--e-enter);
 }
-.level[data-state="proving"] .level__label { opacity: 1; }
+:root[data-level-state="proving"] .level__label { opacity: 1; }
 
 /* ── masthead — the only persistent layer, and it is counted (U10) ───────── */
 
@@ -230,6 +390,47 @@ h1, h2 {
   pointer-events: none;
   z-index: 12;
 }
+/*
+  THE NEGATIVE MARGIN MUST NOT ESCAPE ITS SECTION.
+
+  `margin-bottom: -100svh` exists to pull the `.type` that FOLLOWS a frame up
+  over it. Shot 01 is the only section whose frame has nothing following it, and
+  there the margin has no sibling to act on: it collapses through the section
+  itself, cancels its 844px of height, and the document flow never advances past
+  shot 01 at all. Measured, not deduced — a 1px probe inserted immediately after
+  #impact reported document top 0 while the section's own bottom was 844, and
+  #scale sat at the same position as #impact.
+
+  The visible symptom was the two shots sharing one screen: at scroll 420 on a
+  390x844 viewport, shot 01's kicker and edge were at full opacity alongside shot
+  02's "2 744", because both sections were genuinely active at the same scroll.
+
+  Where the frame is the last child it has nothing to overlay, so it keeps its own
+  height. Written structurally rather than as `.shot--impact` so a future section
+  built the same way cannot inherit the same collapse.
+*/
+.frame:last-child { margin-bottom: 0; }
+
+/*
+  ENTRANCES ARE CLIPPED BY THEIR OWN FRAME, NOT BY THE PAGE.
+
+  The copy slides in from the frame edge, so it rests OUTSIDE that edge until its
+  cue fires — shot 01's kicker and edge sit at x:74, whose right edge measured 425
+  against a 375px content box. `overflow-x: clip` on body was supposed to be the
+  net and it was not: the page scrolled 50px sideways when asked to. Measured with
+  window.scrollTo(200,0), which moved scrollX to 50.
+
+  Clipping the container removes the overflow at its source instead of hiding it,
+  and it is also the more correct statement: the type enters from the edge of ITS
+  FRAME. overflow-y stays visible or the mobile scrim — which is deliberately
+  taller than its box — would be cut, and a sticky element would become a scroll
+  container.
+*/
+.frame, .type {
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
 .frame > * { grid-row: 3; }
 .frame > .kicker { grid-row: 1; }
 .frame--end { justify-items: end; text-align: right; }
@@ -253,26 +454,132 @@ h1, h2 {
 
 /* ── the record ──────────────────────────────────────────────────────────── */
 
+/*
+  The record sits DIRECTLY on the last frame. No plate, no band, no surface.
+
+  It had a scrim — --ground at 0.86 over a blur — and the scrim was the thing
+  doing the legibility work. It is gone, and the work moved to where it should
+  have been in the first place: the LIGHT. story.js already drops the scene's
+  exposure as the record arrives, so the machine is dimmed rather than covered.
+  A panel over a photograph is a panel; a frame that goes down as the text comes
+  up is a scene ending.
+
+  That makes the exposure floor a CONTRAST control, not a mood one, and it is
+  measured rather than chosen — see the note on it in story.js.
+*/
+
+/*
+  THE LAST SCREEN HOLDS EVERYTHING, AT ANY SIZE.
+
+  It used to open with --record-lead — 92svh of clear air before the first line —
+  so the record was always taller than a screen by construction. That lead is
+  gone and the section is now exactly one viewport, with the block centred in it.
+
+  What scales is the SPACING, never the type. Every measurement here is
+  functional text and the floor under functional text is 14px (I7), so the row
+  rhythm compresses on a short window and the words do not. That sets a real
+  limit and it is worth stating: at 14px with the rows fully closed up the block
+  needs about 620px, so it holds from roughly a 660px-tall window upward. Below
+  that the section scrolls rather than shrinking the type under its floor —
+  breaking the floor to win the claim would be trading a rule for a layout.
+*/
 .shot--record {
-  background: linear-gradient(to bottom, transparent, var(--ground-lift) 34%);
-  padding: 92svh var(--gutter) var(--s-3xl);
+  background: none;
+  min-height: 100svh;
+  /* Top clears the masthead — it is fixed at --s-md and the record scrolls under
+     it, so anything less puts the heading behind the wordmark. Bottom clears the
+     colophon, which is taken out of the flow below. */
+  padding: clamp(2.75rem, 5.5svh, 6rem) var(--gutter) clamp(2rem, 4svh, 5rem);
+  display: grid;
+  align-content: center;
 }
-.record { max-width: 62ch; margin-inline: auto; }
-.record__head { font-size: clamp(1.75rem, 3vw, 2.75rem); margin-bottom: var(--s-md); }
 
+/*
+  The column sits LEFT and it sits BEHIND the machine.
+
+  Left, because the camera walks the arm to the right of the frame through this
+  section (story.js) — the measurements and the thing they measure end up beside
+  each other rather than one on top of the other.
+
+  Behind, because that is where it is in the room. The canvas is transparent, so
+  z-index -1 puts the column at the machine's depth and the arm occludes it the
+  way it occludes the level line. It is legible there because the frame goes
+  DOWN as the column comes up: the exposure ramp in story.js is doing the work a
+  scrim used to do.
+*/
+.record {
+  position: relative;
+  z-index: -1;
+  /* Wider than the 54ch it started at. The column has to hold one screen, and
+     the cheapest line to remove is a WRAPPED one: at 54ch the provenance ran to
+     six lines, at 68ch it runs to four, and four lines of 14px text is 40px the
+     section no longer has to find. Still well inside the reading target. */
+  max-width: 68ch;
+  margin-inline: 0;
+}
+
+/*
+  THE PLATE — colour under the type rather than behind the block.
+
+  It is set on the LINE, not on the heading, so it is the shape of the words and
+  not the shape of a container; and `box-decoration-break: clone` gives the note
+  the same treatment per line, which is what makes it read as a marker laid over
+  the words rather than a rectangle drawn behind them.
+
+  --ground on --accent measures 8.0:1, so the type is darker on its plate than
+  --ink ever is on the page — the plate is the most legible thing in the section,
+  which is right for the one section that is nothing but claims.
+*/
+/*
+  THE PLATE — colour under the type rather than behind the block.
+
+  Set on the LINE, not on the heading, so it is the shape of the words and not
+  the shape of a container; `box-decoration-break: clone` gives the note the same
+  treatment per line, which is what makes it read as a marker laid over the words
+  rather than a rectangle drawn behind them.
+
+  --ground on --accent measures 8.0:1 — the type is darker on its plate than
+  --ink ever is on the page, which is right for the one section that is nothing
+  but claims.
+*/
+.record__head {
+  /* Tied to viewport HEIGHT, not width: on a short window the thing competing
+     for space is vertical, and a heading sized off the width does not know that. */
+  font-size: clamp(1.375rem, 3.2svh, 2.75rem);
+  margin-bottom: clamp(var(--s-2xs), 1.8svh, var(--s-md));
+  display: inline-block;
+}
+.record .record__head .line {
+  display: inline-block;
+  background: var(--accent);
+  color: var(--ground);
+  padding: 0.06em 0.3em 0.12em;
+}
+
+/* The rule on the left goes with the plate: a marker laid over the words and a
+   bracket beside them are two devices saying the same thing, and the plate says
+   it louder. */
 .note {
-  font-size: var(--t-label); line-height: var(--lh-label);
-  color: var(--ink-muted);
-  border-left: var(--hair) solid var(--rule);
-  padding-left: var(--s-sm);
-  margin: 0 0 var(--s-lg);
+  display: inline;
+  font-size: var(--t-label); line-height: clamp(1.55, 0.22svh, 1.85);
+  color: var(--ground);
+  background: var(--accent);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  padding: 0.16em 0.34em;
+  margin: 0;
 }
+.note-wrap { margin: 0 0 clamp(var(--s-sm), 3.4svh, var(--s-2xl)); }
 
-.plate { width: 100%; border-collapse: collapse; font-size: var(--t-label); margin-bottom: var(--s-xl); }
+.plate {
+  width: 100%; border-collapse: collapse;
+  font-size: var(--t-label);
+  margin-bottom: clamp(var(--s-sm), 3.2svh, var(--s-xl));
+}
 .plate tr { border-top: var(--hair) solid var(--rule); }
 .plate tr:last-child { border-bottom: var(--hair) solid var(--rule); }
-.plate th { text-align: left; font-weight: 400; color: var(--ink-muted); padding: var(--s-xs) 0; }
-.plate td { text-align: right; color: var(--ink); padding: var(--s-xs) 0; white-space: nowrap; }
+.plate th { text-align: left; font-weight: 400; color: var(--ink-muted); padding: clamp(0.2rem, 0.7svh, 0.75rem) 0; }
+.plate td { text-align: right; color: var(--ink); padding: clamp(0.2rem, 0.7svh, 0.75rem) 0; white-space: nowrap; }
 
 .provenance {
   font-size: var(--t-label); line-height: var(--lh-label);
@@ -281,11 +588,72 @@ h1, h2 {
 .provenance code { font-family: var(--face-mono); font-size: 0.92em; color: var(--ink); }
 .provenance em { color: var(--ink); font-style: normal; }
 
+/*
+  THE ORBIT SURFACE — the right half of the last screen, where the machine is.
+
+  It is the only element on this page that takes a pointer, and it is scoped to
+  the half of the frame the column does not use, so selecting the measurements is
+  never intercepted by it.
+
+  touch-action: pan-y is not a detail. Without it a horizontal drag surface
+  swallows the vertical gesture and a phone visitor cannot scroll off the last
+  screen — the worst place on the page to be stuck.
+*/
+.orbit {
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 46%;
+  z-index: 6;
+  cursor: grab;
+  touch-action: pan-y;
+  display: grid;
+  align-content: end;
+  justify-items: end;
+  padding: var(--gutter);
+}
+.orbit[data-grabbing] { cursor: grabbing; }
+
+.orbit__hint {
+  font: 500 var(--t-label)/1 var(--face-mono);
+  letter-spacing: var(--tr-label);
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  border: var(--hair) solid var(--rule);
+  padding: 0.55em 0.9em;
+  transition: color var(--d-base) var(--e-enter), border-color var(--d-base) var(--e-enter);
+}
+.orbit:hover .orbit__hint { color: var(--ink-muted); border-color: var(--rule-bright); }
+
+@media (max-width: 767px) {
+  /* On a phone the column already uses the full width, so the surface takes the
+     lower band the table does not reach into. */
+  .orbit { width: 100%; top: auto; height: 26%; }
+}
+
+/* The still path resolves the scene to one composed frame; a turntable would be
+   the page moving after it said it would not (MJ9).
+
+   Both selectors, because the forced path and the media query must show the same
+   page: ?reduced=1 exists so this deliverable can be opened on purpose (DNA88),
+   and a debug flag that renders a DIFFERENT reduced page is worse than no flag.
+   The rest of this sheet already pairs them; this rule had only the media half. */
+:root[data-reduced] .orbit { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .orbit { display: none; }
+}
+
+/* No band, no border, no height of its own. It sits at the foot of the last
+   screen the way the secondary line sits at the foot of the first. */
 .colophon {
-  position: relative; z-index: 10;
-  background: var(--ground-lift);
-  border-top: var(--hair) solid var(--rule);
-  padding: var(--s-xl) var(--gutter);
+  position: absolute;
+  left: var(--gutter);
+  bottom: clamp(0.75rem, 2.4svh, var(--s-md));
+  z-index: 10;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: 0;
 }
 .colophon p { margin: 0; font-size: var(--t-label); color: var(--ink-muted); }
 
@@ -342,7 +710,9 @@ h1, h2 {
 :root[data-reduced] .shot { min-height: auto !important; }
 :root[data-reduced] .shot--impact .type { z-index: 10; }
 :root[data-reduced] .display { opacity: 0.5; }
-:root[data-reduced] .level { opacity: 1; border-top-color: var(--accent); }
+:root[data-reduced] .level,
+:root[data-reduced] .level-marks { opacity: 1; }
+:root[data-reduced] .level::before { opacity: 1; }
 :root[data-reduced] .level__label { opacity: 1; }
 :root[data-reduced] .frame { position: static; height: auto; margin-bottom: 0; }
 :root[data-reduced] .shot--record { padding-top: var(--s-3xl); }
@@ -362,8 +732,154 @@ h1, h2 {
   .shot--record { padding-top: var(--s-3xl); }
   .shot--impact .type { z-index: 10; }
   .display { opacity: 0.5; }
-  .level { opacity: 1; border-top-color: var(--accent); }
+  .level, .level-marks { opacity: 1; }
+  .level::before { opacity: 1; }
   .level__label { opacity: 1; }
+}
+
+
+/* ── the wait ────────────────────────────────────────────────────────────
+   A tumbling wireframe cube, orange, with a status word under it. Ported from a
+   React/Tailwind component — see src/site/preload.js for what the port changed.
+
+   It is SEATED, not centred. Dead centre would put a 1px accent edge across
+   187px of near-white letterforms, where it sits at 1.7:1 against the glyphs and
+   disappears (color I1). preload.js measures the type and writes --preload-shift
+   so the group lands in the empty band under it, on the ground the accent was
+   derived to clear 3:1 against.
+
+   `hidden` needs an explicit rule: the UA sets [hidden]{display:none} at the
+   lowest specificity there is, and .preload{display:grid} beats it. An overlay
+   that ignores its own hidden attribute is the failure this element is most able
+   to cause, since it spans the viewport. */
+
+.preload {
+  position: fixed;
+  inset: 0;
+  z-index: 30;          /* above the opening (25) — the only thing in front of it, and only until it is not */
+  display: grid;
+  place-content: center;
+  pointer-events: none; /* it reports, it never intercepts (MJ6) */
+  perspective: 640px;   /* the cube is a solid, so it is drawn like one */
+}
+.preload[hidden] { display: none; }
+
+.preload__group {
+  --cube: 96px;         /* AUTHORED — read against a 1440 field at arm's length. 76px was the first value and it registered as a detail rather than as the thing the page was waiting on; 96 is the size at which it is unmistakably the active element without becoming a subject. */
+  --cube-half: calc(var(--cube) / 2);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-md);
+  transform: translateY(var(--preload-shift, 0px)) scale(0.94);
+  opacity: 0;
+  transition:
+    opacity var(--d-base) var(--e-enter),
+    transform var(--d-slow) var(--e-enter);
+}
+
+.preload[data-preload="on"] .preload__group {
+  opacity: 1;
+  transform: translateY(var(--preload-shift, 0px)) scale(1);
+}
+
+/* The exit opens outward as it goes, so the group reads as clearing the frame
+   rather than switching off. 6% — a direction, not a zoom. */
+.preload[data-preload="done"] .preload__group {
+  opacity: 0;
+  transform: translateY(var(--preload-shift, 0px)) scale(1.06);
+  transition:
+    opacity var(--d-base) var(--e-exit),
+    transform var(--d-slow) var(--e-enter);
+}
+
+.preload__cube {
+  position: relative;
+  width: var(--cube);
+  height: var(--cube);
+  transform-style: preserve-3d;
+  animation: preload-tumble 3.6s linear infinite;
+}
+
+/* One continuous tumble on two axes. Linear on purpose: an eased loop has a
+   moment where it slows, and a machine that hesitates once per revolution reads
+   as stalling rather than turning. */
+@keyframes preload-tumble {
+  from { transform: rotateX(0deg) rotateY(0deg); }
+  to   { transform: rotateX(360deg) rotateY(360deg); }
+}
+
+.preload__face {
+  position: absolute;
+  inset: 0;
+  border: var(--hair) solid var(--accent);
+  backface-visibility: hidden;
+}
+
+/* The plus, drawn rather than imported: two rules at exactly the hairline the
+   cube's own edges are set in. An icon is a glyph and its stroke matches its
+   neighbours (typography I8) — an icon library's default weight would not. */
+.preload__face::before,
+.preload__face::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background: var(--accent);
+}
+.preload__face::before {
+  width: 22px; height: var(--hair);
+  transform: translate(-50%, -50%);
+}
+.preload__face::after {
+  width: var(--hair); height: 22px;
+  transform: translate(-50%, -50%);
+}
+
+.preload__face:nth-child(1) { transform: rotateY(0deg)    translateZ(var(--cube-half)); }
+.preload__face:nth-child(2) { transform: rotateY(180deg)  translateZ(var(--cube-half)); }
+.preload__face:nth-child(3) { transform: rotateY(90deg)   translateZ(var(--cube-half)); }
+.preload__face:nth-child(4) { transform: rotateY(-90deg)  translateZ(var(--cube-half)); }
+.preload__face:nth-child(5) { transform: rotateX(90deg)   translateZ(var(--cube-half)); }
+.preload__face:nth-child(6) { transform: rotateX(-90deg)  translateZ(var(--cube-half)); }
+
+/* The label is NOT accent. "ENGINEERED IN MOTION" is already an orange tracked
+   mono line a short distance above it, and a second one directly under it makes
+   two elements of the same rank arguing about which is the label (DNA7). The
+   cube carries the colour; the word carries the fact. --ink-dim is 4.5:1 at
+   14px, which is the floor for functional text and not 3:1. */
+.preload__status {
+  margin: 0;
+  font: 500 var(--t-label)/1 var(--face-mono);
+  letter-spacing: var(--tr-label);
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.preload__status::after { content: "\2026"; }   /* the ellipsis is one glyph, never three periods */
+
+/* Shot 01's corner copy is suppressed while the loader is up, for exactly the
+   reason the opening already suppresses it: two sets of type in one frame, one of
+   them not yet addressed to the visitor. Before the loader existed the intro
+   reached "running" within a frame of first paint and this never showed; the hold
+   opened that window, and on a phone the corner copy lands directly on top of the
+   status word. .preload precedes main in the document, so ~ reaches it. */
+.preload[data-preload="on"] ~ main .shot--impact .frame,
+.preload[data-preload="done"] ~ main .shot--impact .frame { opacity: 0 !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* No tumble. The cube is held at a three-quarter angle — a designed still
+     rather than the absence of an animation (MJ9), and the status word still
+     changes, because that is information rather than decoration. */
+  .preload__cube {
+    animation: none;
+    transform: rotateX(-24deg) rotateY(32deg);
+  }
+  .preload__group,
+  .preload[data-preload="on"] .preload__group,
+  .preload[data-preload="done"] .preload__group {
+    transform: translateY(var(--preload-shift, 0px));
+  }
 }
 
 
@@ -379,13 +895,25 @@ h1, h2 {
   z-index: 25;
   display: grid;
   place-content: center;
-  padding: var(--gutter);
+  /* No gutter. The designation is set edge to edge, and --gutter is a clamp —
+     it is not a constant fraction of the viewport, so any padding here would
+     make one vw font-size fit at one width and overflow at another. */
+  padding: 0;
   pointer-events: none;
   text-align: center;
 }
 /* Once the opening has landed it is out of the way entirely: it must not sit in
    front of shot 01 collecting nothing. */
-.intro[data-intro="done"] { display: none; }
+/* Only where it never receded — the reduced-motion path, which has no opening at
+   all. Once it HAS stepped back, it stays: it is at a distance behind the
+   machine, and the scroll is what carries it off (reveal.js). */
+.intro[data-intro="done"]:not([data-behind]) { display: none; }
+
+/* The departure. Below the stage, where the machine occludes it — the type
+   leaves by going into the scene rather than by dissolving in front of it.
+   intro.js sets this as the recede tween starts, while the camera is still
+   travelling, so the occlusion reads as the machine coming forward. */
+.intro[data-behind] { z-index: -1; }
 
 /* Shot 01's own corner copy is set to full opacity the moment the story is
    wired, which is before the opening has finished — two sets of type competing
@@ -393,15 +921,49 @@ h1, h2 {
    deliberate: the story writes inline opacity, and inline loses to it. */
 .intro[data-intro="running"] ~ main .shot--impact .frame { opacity: 0 !important; }
 
+/*
+  ONE LINE, THE WIDTH OF THE SCREEN.
+
+  A single vw value fits at every width and not just at one, because the string
+  is fixed: type width scales linearly with font-size and font-size scales
+  linearly with vw, so the proportion is constant. Measured in the render for
+  "KR 700 PA" in this face at this tracking — it is not a round number because
+  the string it fits is not a round string.
+*/
 .intro__title {
   font-family: var(--face-display);
-  font-weight: 600;
-  font-size: clamp(3.25rem, 13vw, 12rem);
-  line-height: 0.88;
-  letter-spacing: -0.045em;
+  font-weight: 700;
+  /* MEASURED, at 1440: "KR 700 PA" set 740px wide at 13.05vw, so filling the
+     frame needs 25.41vw. 24.6 is that, held a hair inside the edge — the page's
+     overflow-x: clip is a net and never the fix, so the line must not reach the
+     edge by rounding. One value serves every width: the string is fixed, type
+     width scales with font-size, and font-size scales with vw. */
+  font-size: 24.6vw;
+  line-height: 0.9;
+  letter-spacing: -0.055em;
   margin: 0;
-  display: grid;
-  justify-items: center;
+  white-space: nowrap;
+}
+.intro__line { display: block; }
+
+/*
+  SPLIT-FLAP CELLS.
+
+  Each character gets a fixed cell, because a board has fixed cells and because
+  a proportional face changes advance width with every character the flap passes
+  through — the line would breathe by tens of pixels while it settled, and the
+  one thing asked of it is that it hold the width of the screen. The widths are
+  written in `em` by intro.js from the character's own measured advance, so they
+  scale with the vw font-size instead of pinning the line to one viewport.
+*/
+.flap {
+  display: inline-block;
+  text-align: center;
+  /* Without this the space between "KR" and "700" collapses to zero, the cell
+     measures 0, and the designation sets as KR700PA. An inline-block whose only
+     content is a space has no width unless the whitespace is preserved. */
+  white-space: pre;
+  will-change: transform;
 }
 /* Each line is its own clip context so the wipe runs per line rather than over
    the block — the difference between a reveal and a curtain. */
@@ -410,13 +972,39 @@ h1, h2 {
   will-change: clip-path, transform;
 }
 
+/*
+  The secondary line sits at the FOOT of the screen, at the gutter, and that is
+  its resting place in the stylesheet rather than somewhere it is moved to. With
+  no script it is a caption where it belongs; the opening steps it in from the
+  side once the movement has finished.
+
+  It is outside .intro on purpose. The title steps back behind the machine and
+  goes to a distance — this has to stay in front and stay readable, and a child
+  of a layer that has gone to z-index -1 cannot.
+*/
 .intro__sub {
-  margin: var(--s-lg) 0 0;
+  position: fixed;
+  left: var(--gutter);
+  bottom: var(--s-xl);
+  z-index: 26;
+  margin: 0;
   font: 500 var(--t-label)/1 var(--face-mono);
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--accent);
+  pointer-events: none;
+  white-space: nowrap;
 }
+.intro__sub .step { display: inline-block; white-space: pre; }
+
+/* Each authored line of a heading becomes its own block, so the lines can be
+   staggered and blurred independently. This rule is not cosmetic: splitLines()
+   consumes the <br> it split on, and without `display: block` the parts run
+   together — "Precision" and "is mechanical." set as one line. The .stat
+   headings are excluded because their parts are already flex items with their
+   own baseline relationship, and blockifying them breaks it. */
+h2:not(.stat) .line { display: block; }
+
 
 /* ── the statistic ───────────────────────────────────────────────────────
    A figure set large enough to be a mass rather than a number, with its unit
@@ -426,15 +1014,27 @@ h1, h2 {
   display: flex;
   align-items: baseline;
   gap: 0.28em;
-  font-family: var(--face-mono);
-  font-weight: 500;
+  /* The display face, at its heaviest, rather than the mono. A figure this size
+     is a MASS in the composition before it is a number, and the mono was setting
+     it as a readout — thin, evenly spaced, and belonging to the same voice as the
+     14px labels. The measurement discipline it was carrying survives in
+     tabular-nums on .stat__fig, which is the part that actually needed it. */
+  font-family: var(--face-display);
+  font-weight: 700;
   font-size: clamp(3.5rem, 11.5vw, 13rem);
   line-height: 0.86;
   letter-spacing: -0.03em;
   margin: 0;
 }
 .type--rear .stat, .type--above .stat { justify-content: flex-end; }
-.stat__fig { font-variant-numeric: tabular-nums; }
+/* Set back off the ground rather than sitting on it at full ink. It is a mass,
+   and a mass at full --ink competes with the machine for the front of the frame.
+   Tabular figures are not optional here: the counter rewrites this text every
+   frame, and proportional digits would make the unit beside it shuffle. */
+.stat__fig {
+  font-variant-numeric: tabular-nums;
+  color: rgb(var(--ink-rgb) / 0.72);
+}
 .stat__unit {
   font-size: 0.19em;
   letter-spacing: 0.18em;
@@ -450,7 +1050,9 @@ h1, h2 {
 }
 
 @media (max-width: 767px) {
-  .intro__title { font-size: clamp(2.75rem, 17vw, 5rem); }
+  /* No override. The full-bleed value is a proportion, so it is already right
+     at 390 as it is at 1440 — a phone-specific size would be narrower than the
+     screen, which is the one thing this line must not be. */
   .stat { font-size: clamp(2.75rem, 19vw, 6rem); }
   .type--rear, .type--above, .type--macro, .type--scale, .type--hero {
     text-align: left !important;

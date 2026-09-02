@@ -97,7 +97,21 @@ body {
   display: flex; justify-content: space-between; align-items: baseline;
   gap: var(--s-md);
   pointer-events: none;
-  mix-blend-mode: difference;
+}
+
+/* The masthead crosses whatever the camera puts under it, and in the macro shot
+   that is a lit orange casting filling the frame. Difference blending is right
+   over the dark hall and turns the wordmark cyan over paint — so it is gone, and
+   what holds legibility instead is a gradient that is opaque at the top edge and
+   fades to nothing well before it becomes a band (U17, DNA21). */
+.masthead::before {
+  content: '';
+  position: absolute;
+  inset: -1.5rem calc(var(--gutter) * -1) auto;
+  height: 6rem;
+  background: linear-gradient(to bottom, rgb(10 12 13 / 0.88), rgb(10 12 13 / 0));
+  z-index: -1;
+  pointer-events: none;
 }
 .wordmark {
   font: 600 var(--t-label)/1 var(--face-body);
@@ -185,17 +199,15 @@ h1, h2 {
 
 .huge { font-size: clamp(3rem, 9.5vw, 11rem); max-width: 14ch; }
 
-/* The kicker crosses whatever the camera puts under it, so it cannot be a
-   colour that only works on the ground — orange-on-orange castings measured
-   almost nothing. Difference blending keeps it legible over the dark hall AND
-   over a lit orange surface without introducing a scrim the composition does
-   not want (DM5, and DNA21's note that the fix is a differently CONSTRUCTED
-   scrim rather than a deeper one — here, none at all). */
+/* The kicker was orange, which measured almost nothing against the orange
+   castings it sits over (DM5). It is now plain ink, and what keeps it legible is
+   a composition decision rather than a blend mode: its frame is placed in the
+   corner of each shot where the ground is actually dark. Blending was tried and
+   removed — over paint, difference reads cyan. */
 .kicker {
   font: 500 var(--t-label)/1 var(--face-mono);
   letter-spacing: 0.22em; text-transform: uppercase;
-  color: #fff;
-  mix-blend-mode: difference;
+  color: var(--ink);
   margin: 0;
 }
 
@@ -322,18 +334,6 @@ h1, h2 {
   .shot--impact .type { place-content: end center !important; text-align: center !important; }
   .display { font-size: clamp(3rem, 21vw, 6rem); opacity: 0.22; }
 
-  /* Difference blending is right over a dark hall and wrong over a lit orange
-     casting, which is what sits behind the masthead for most of a phone scroll:
-     it turned the wordmark cyan. Solid ink plus the scrim below it instead. */
-  .masthead { mix-blend-mode: normal; }
-  .masthead::before {
-    content: '';
-    position: absolute; inset: -1.4rem calc(var(--gutter) * -1) auto;
-    height: 5.5rem;
-    background: linear-gradient(to bottom, rgb(10 12 13 / 0.85), rgb(10 12 13 / 0));
-    z-index: -1;
-  }
-  .kicker { mix-blend-mode: normal; }
   .huge { font-size: clamp(2.5rem, 12vw, 4rem); }
   .edge { position: static; margin: var(--s-md) 0 0; }
   .level__label { padding-left: 2.5em; }

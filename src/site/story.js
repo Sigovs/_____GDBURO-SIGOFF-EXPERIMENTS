@@ -88,7 +88,7 @@ const SHOTS = {
     trigger: '#macro',
     cam: {
       from: { pos: V(2.95, 1.86, 5.85), target: V(1.02, 1.72, 0), fov: 34 },
-      to:   { pos: V(2.28, 2.42, 1.18), target: V(1.78, 2.16, 0), fov: 26 },
+      to:   { pos: V(2.16, 2.28, 1.52), target: V(1.74, 2.08, 0), fov: 27 },
     },
     mob: { from: { pos: V(2.40, 1.90, 8.60), target: V(1.00, 1.62, 0), fov: 42 },
            to:   { pos: V(2.30, 2.36, 2.10), target: V(1.76, 2.12, 0), fov: 34 } },
@@ -100,7 +100,7 @@ const SHOTS = {
   release: {
     trigger: '#release',
     cam: {
-      from: { pos: V(2.28, 2.42, 1.18), target: V(1.78, 2.16, 0), fov: 26 },
+      from: { pos: V(2.16, 2.28, 1.52), target: V(1.74, 2.08, 0), fov: 27 },
       to:   { pos: V(1.28, 1.30, 7.40), target: V(1.12, 1.28, 0), fov: 38 },
     },
     // The arm reaches full extension well before the camera finishes retreating,
@@ -159,11 +159,17 @@ export function createStory(scope, world) {
       // own progress is what keeps one frame showing one composition, which is
       // the whole claim being made about stopping anywhere (MJ4).
       const copy = gsap.utils.toArray(`${shot.trigger} .type, ${shot.trigger} .frame`);
-      const band = 0.14;
+      // In faster than out. At a shot boundary the outgoing shot is at p=1 and
+      // the incoming at p=0, so both are necessarily at zero for a moment — the
+      // question is only how long. A short asymmetric band makes that a beat
+      // between chapters (the machine and its measuring line, alone, which is a
+      // composed frame) rather than a hole with nothing in it.
+      const IN = 0.07;
+      const OUT = 0.16;
       const presence = (p) =>
         i === 0
-          ? clamp01((1 - p) / band)                       // shot one is already here
-          : clamp01(Math.min(p / band, (1 - p) / band));
+          ? clamp01((1 - p) / OUT)                        // shot one is already here
+          : clamp01(Math.min(p / IN, (1 - p) / OUT));
       const showCopy = (v) => { for (const el of copy) el.style.opacity = String(v); };
       showCopy(i === 0 ? 1 : 0);
 

@@ -42,3 +42,9 @@ public/decoders/
 # history until that is settled. Committing it is the one action that cannot be
 # undone quietly.
 assets/models/midnight-division*
+
+# Verification captures. Browser screenshots taken while checking the render are
+# working notes, not deliverables — three of them were committed by a careless
+# `git add -A` in ff43f10 and removed in the commit after it.
+/*.png
+.playwright-mcp/

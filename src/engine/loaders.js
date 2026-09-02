@@ -17,8 +17,14 @@ let cached = null;
 export function createLoaders(renderer) {
   if (cached) return cached;
 
-  const draco = new DRACOLoader().setDecoderPath('/decoders/draco/');
-  const ktx2 = new KTX2Loader().setTranscoderPath('/decoders/basis/').detectSupport(renderer);
+  // BASE_URL, not a leading slash. The decoders live in public/ and are served
+  // beside the app, so a root-absolute path is only correct when the app is AT
+  // the root — deployed under a subpath it resolves to the domain root, 404s,
+  // and the model silently never loads. The page then sits on its opening frame
+  // forever with no error a visitor could interpret.
+  const base = import.meta.env?.BASE_URL ?? '/';
+  const draco = new DRACOLoader().setDecoderPath(base + 'decoders/draco/');
+  const ktx2 = new KTX2Loader().setTranscoderPath(base + 'decoders/basis/').detectSupport(renderer);
 
   const gltf = new GLTFLoader();
   gltf.setDRACOLoader(draco);

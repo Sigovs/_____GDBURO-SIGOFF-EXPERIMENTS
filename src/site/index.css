@@ -6,18 +6,18 @@
   right, five times, and no amount of camera work rescues a page whose every
   frame has the same skeleton.
 
-  So the type positions are the composition:
-    01 IMPACT       centred, LARGE, and BEHIND the machine — it is met, not read
-    02 SCALE        small, hard right, against the widest field on the page
-    03 ARTICULATION left, low, with the machine crossing it
-    04 MACRO        one corner, almost absent
-    05 RELEASE      full width, low, the machine extended across it
-    06 RECORD       a single measured column — convention, deliberately
+  So the type GEOMETRY is the composition, and no two shots share one:
+    01 IMPACT    a corner only — the machine has the frame
+    02 SCALE     an enormous cropped figure, hard left, against the widest field
+    03 REAR      centred low, the machine crossing above it
+    04 ABOVE     a figure at the top-right edge, cropped by the viewport
+    05 MACRO     two words in one corner, almost absent
+    06 HERO      full width, low, the arm stretched through it
+    07 RECORD    one measured column — convention, deliberately
 
-  No chapter rail. It was five numbered links that made the page read as an
-  editorial microsite, and it earned its place by being navigation for a page
-  that is one continuous shot. The skip link keeps the record reachable, which
-  is the only route that was doing real work.
+  No chapter rail. Five numbered links were what made the page read as an
+  editorial microsite; the skip link keeps the record reachable, which is the
+  only route that was doing real work.
 */
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -128,12 +128,13 @@ body {
 main { position: relative; z-index: 10; }
 
 .shot { position: relative; }
-.shot--impact       { min-height: var(--shot-1); }
-.shot--scale        { min-height: var(--shot-2); }
-.shot--articulation { min-height: var(--shot-3); }
-.shot--macro        { min-height: var(--shot-4); }
-.shot--release      { min-height: var(--shot-5); }
-.shot--record       { min-height: auto; }
+.shot--impact { min-height: var(--shot-1); }
+.shot--scale  { min-height: var(--shot-2); }
+.shot--rear   { min-height: var(--shot-3); }
+.shot--above  { min-height: var(--shot-4); }
+.shot--macro  { min-height: var(--shot-5); }
+.shot--hero   { min-height: var(--shot-6); }
+.shot--record { min-height: auto; }
 
 /*
   The type holds still while the world travels under it, so every stop is a
@@ -152,23 +153,15 @@ main { position: relative; z-index: 10; }
   width: 100%;
 }
 
-/* 01 — behind the machine. The first screen is a meeting, not a headline with a
-   picture beside it, and z-index is the entire device. */
-.shot--impact { z-index: 1; }
-.shot--impact .type { z-index: -1; top: 33svh; text-align: center; }
-
-/* Each shot places its type somewhere the previous one did not. */
-.shot--scale .type       { top: 62svh; }   /* low-left against the widest field on the page */
-/* Top-left, not bottom-left: the level line tracks the tool plate and lands
-   around 55-60% of the frame in this shot, so copy placed low sits tangent to
-   it — a rule grazing a cap-height, which C9 calls the ambiguous middle. Above
-   the line the relationship is committed and the line reads as belonging to the
-   machine rather than to the paragraph. It also stops shot three and shot five
-   sharing a corner. */
-.shot--articulation .type { top: 13svh; }
-.shot--macro .type       { top: 18svh; text-align: right; }
-.shot--macro .type h2    { margin-left: auto; }   /* text-align alone leaves the BLOCK at the left edge */
-.shot--release .type     { top: 60svh; }
+/* Each shot places its type where no other shot does, and at a different SIZE
+   and a different crop — the geometry of the composition changes, not just the
+   corner it sits in. */
+.type--scale { top: 12svh; }
+.type--rear  { top: 62svh; text-align: center; }
+.type--above { top: 14svh; text-align: right; }
+.type--above .stat { margin-left: auto; }
+.type--macro { top: 22svh; }
+.type--hero  { top: 17svh; }
 
 /* ── type ────────────────────────────────────────────────────────────────── */
 
@@ -181,21 +174,9 @@ h1, h2 {
   text-wrap: balance;
 }
 
-.display {
-  font-size: clamp(4.5rem, 17vw, 18rem);
-  letter-spacing: -0.04em;
-  color: var(--ink);
-  /* Behind the machine on a dark ground, so it is dimmed to sit in the scene
-     rather than on it. It is not carrying information the visitor needs — the
-     kicker above it names the machine in full — so DNA17 is satisfied and the
-     page survives this layer being removed entirely. */
-  opacity: 0.16;
-  white-space: nowrap;
-}
 
-.shot--scale h2,
-.shot--articulation h2,
-.shot--macro h2 { font-size: clamp(2.25rem, 5vw, 4.5rem); max-width: 18ch; }
+.shot--rear h2,
+.shot--macro h2 { font-size: clamp(2.25rem, 5.2vw, 4.75rem); max-width: 18ch; }
 
 .huge { font-size: clamp(3rem, 9.5vw, 11rem); max-width: 14ch; }
 
@@ -374,4 +355,103 @@ h1, h2 {
   .display { opacity: 0.5; }
   .level { opacity: 1; border-top-color: var(--accent); }
   .level__label { opacity: 1; }
+}
+
+
+/* ── the opening ─────────────────────────────────────────────────────────
+   A shot, not a loader. The type is real, at its final size, and present in the
+   document before any script runs — the timeline reveals it (G7, DNA74). With
+   JavaScript gone this is the page's first heading and nothing about it is
+   hidden waiting for a class. */
+
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  display: grid;
+  place-content: center;
+  padding: var(--gutter);
+  pointer-events: none;
+  text-align: center;
+}
+/* Once the opening has landed it is out of the way entirely: it must not sit in
+   front of shot 01 collecting nothing. */
+.intro[data-intro="done"] { display: none; }
+
+/* Shot 01's own corner copy is set to full opacity the moment the story is
+   wired, which is before the opening has finished — two sets of type competing
+   in the same frame. It is held back until the opening lands. !important is
+   deliberate: the story writes inline opacity, and inline loses to it. */
+.intro[data-intro="running"] ~ main .shot--impact .frame { opacity: 0 !important; }
+
+.intro__title {
+  font-family: var(--face-display);
+  font-weight: 600;
+  font-size: clamp(3.25rem, 13vw, 12rem);
+  line-height: 0.88;
+  letter-spacing: -0.045em;
+  margin: 0;
+  display: grid;
+  justify-items: center;
+}
+/* Each line is its own clip context so the wipe runs per line rather than over
+   the block — the difference between a reveal and a curtain. */
+.intro__line {
+  display: block;
+  will-change: clip-path, transform;
+}
+
+.intro__sub {
+  margin: var(--s-lg) 0 0;
+  font: 500 var(--t-label)/1 var(--face-mono);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* ── the statistic ───────────────────────────────────────────────────────
+   A figure set large enough to be a mass rather than a number, with its unit
+   riding the cap-height beside it. Tabular, because it is a measurement (I5). */
+
+.stat {
+  display: flex;
+  align-items: baseline;
+  gap: 0.28em;
+  font-family: var(--face-mono);
+  font-weight: 500;
+  font-size: clamp(3.5rem, 11.5vw, 13rem);
+  line-height: 0.86;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+.type--rear .stat, .type--above .stat { justify-content: flex-end; }
+.stat__fig { font-variant-numeric: tabular-nums; }
+.stat__unit {
+  font-size: 0.19em;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.stat__cap {
+  margin: var(--s-sm) 0 0;
+  font: 400 var(--t-label)/1 var(--face-mono);
+  letter-spacing: var(--tr-label);
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+@media (max-width: 767px) {
+  .intro__title { font-size: clamp(2.75rem, 17vw, 5rem); }
+  .stat { font-size: clamp(2.75rem, 19vw, 6rem); }
+  .type--rear, .type--above, .type--macro, .type--scale, .type--hero {
+    text-align: left !important;
+  }
+  .type--rear .stat, .type--above .stat { justify-content: flex-start; }
+  .type--above .stat { margin-left: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* No opening at all — the page is simply already open. */
+  .intro { position: static; padding-block: var(--s-4xl) var(--s-2xl); }
+  .intro__line { clip-path: none !important; transform: none !important; }
 }

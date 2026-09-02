@@ -92,16 +92,16 @@
   --e-exit:  cubic-bezier(0.55, 0, 1, 0.45);   /* NOT --e-enter reversed: an ease-out on an exit spends its travel in the first third and turns an 800ms fade into a 400ms snap with an invisible tail (U20). */
 
   /* ── shot extents — the scroll budget, declared (DNA38) ──────────────── */
-  /* Compact on purpose. The previous cut ran 900vh and the page felt like a
-     carousel; these five total 6.6, and the two shots that carry mechanical
-     action get the most room because they are the only ones with something to
-     spend it on. */
-  --shot-1: 120vh;   /* impact — a held frame, short */
-  --shot-2: 110vh;   /* scale  — the release, shorter still */
-  --shot-3: 170vh;   /* articulation — the pose change, the longest */
-  --shot-4: 110vh;   /* macro  — one detail, held */
-  --shot-5: 150vh;   /* release — the hero, and room to breathe after it */
-  /* 660vh total = 6.6 viewport-heights. */
+  /* Six shots. The two carrying the largest camera travel and the largest pose
+     change get the most room; the macro is short because an approach that
+     outlasts its own arrival becomes a wait. */
+  --shot-1: 115vh;   /* impact — low crop, held */
+  --shot-2: 150vh;   /* scale  — 178deg of travel, the biggest single change */
+  --shot-3: 160vh;   /* rear   — the mechanical event */
+  --shot-4: 130vh;   /* above  — high angle, tool comes round */
+  --shot-5: 105vh;   /* macro  — one joint, brief */
+  --shot-6: 170vh;   /* hero   — the release, and it needs room after it */
+  /* 805vh total = 8.05 viewport-heights for six shots, plus the record. */
 }
 
 @media (max-width: 767px) {
@@ -120,11 +120,12 @@
       phone the argument has to arrive sooner — what is cut is the approach, never
       the thing being approached.
     */
-    --shot-1: 110vh;
-    --shot-2: 100vh;
-    --shot-3: 150vh;
-    --shot-4: 100vh;
-    --shot-5: 130vh;
+    --shot-1: 105vh;
+    --shot-2: 135vh;
+    --shot-3: 145vh;
+    --shot-4: 120vh;
+    --shot-5: 100vh;
+    --shot-6: 130vh;
     /* 590vh. Shorter travel on a device held in one hand, and the pose change
        keeps the largest share because it is the only thing here that a still
        image could not have said. */

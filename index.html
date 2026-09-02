@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KR 700 PA — the hand that never tilts · Buro Lab</title>
+<title>KR 700 PA — engineered in motion · Buro Lab</title>
 <meta name="description" content="A KUKA KR 700 PA palletiser, reconstructed from a 107-solid CAD file and re-articulated on its real hinge centres. Its arm sweeps three metres and its tool plate never tilts.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Crect width=%2716%27 height=%2716%27 fill=%27%230a0c0d%27/%3E%3Crect x=%271%27 y=%277.5%27 width=%2714%27 height=%271%27 fill=%27%23f2903f%27/%3E%3C/svg%3E">
 <link rel="stylesheet" href="/src/site/tokens.css">
@@ -12,13 +12,12 @@
 <body>
 
 <!--
-  Five shots, one continuous world. The static build still stands alone (DNA39,
-  MJ5, G7): every statement and every number below is in the document, and with
-  the scripts removed what is lost is the machine moving — which is the argument,
-  not the content.
+  Six shots, one continuous world, one camera journey of about 490 degrees.
 
-  The canvas is decoration to assistive tech (DNA80). Everything it shows is said
-  in text.
+  The static build stands alone (DNA39, MJ5, G7): every statement and figure is
+  in the document. Remove the scripts and what is lost is the machine moving,
+  which is the argument rather than the content. The canvas is decoration to
+  assistive tech (DNA80).
 -->
 
 <a class="skip" href="#record">Skip to the measurements</a>
@@ -40,59 +39,73 @@
   </div>
 </div>
 
+<!--
+  The opening. Real text at its final size, present in the document before any
+  script runs — the intro REVEALS it, it does not create it, so with JavaScript
+  gone this is simply the page's first heading (DNA74, G7).
+-->
+<div class="intro" data-intro="idle">
+  <div class="intro__type">
+    <h1 class="intro__title">
+      <span class="intro__line">KR&nbsp;700</span>
+      <span class="intro__line">PA</span>
+    </h1>
+    <p class="intro__sub">Engineered in motion</p>
+  </div>
+</div>
+
 <main>
 
-  <!-- 01 IMPACT — extreme crop. The machine is not shown whole; it is met. -->
+  <!-- 01 IMPACT — low, close, cropped. Azimuth 40 -> 18, camera below the shoulder. -->
   <section class="shot shot--impact" id="impact" data-shot="1">
-    <!-- The frame is first so its negative bottom margin collapses its own flow
-         height and everything after it overlays rather than stacks. -->
     <div class="frame frame--end">
       <p class="kicker">KUKA &middot; palletiser</p>
       <p class="edge">Nothing here moves by accident.</p>
     </div>
-    <div class="type type--behind">
-      <h1 class="display">KR&nbsp;700&nbsp;PA</h1>
-    </div>
   </section>
 
-  <!-- 02 SCALE — release into the widest frame on the page. -->
+  <!-- 02 SCALE — 178 degrees round to the far side, and wide. -->
   <section class="shot shot--scale" id="scale" data-shot="2">
-    <div class="type type--right">
-      <h2><span class="fig">2&thinsp;744</span> millimetres.<br>Standing still.</h2>
-      <p class="edge-note">Floor to the top of its balance linkage. <span class="fig">3&thinsp;070</span> across at full span.</p>
+    <div class="type type--scale">
+      <h2 class="stat"><span class="stat__fig">2 744</span><span class="stat__unit">mm</span></h2>
+      <p class="stat__cap">Standing still</p>
     </div>
   </section>
 
-  <!-- 03 ARTICULATION — the mechanical event. Pose and camera both move, offset. -->
-  <section class="shot shot--articulation" id="articulation" data-shot="3">
-    <div class="type type--left">
-      <h2>One motion.<br>Four axes.</h2>
-      <p class="edge-note">
-        Two closed linkages hold the plate flat while the arm drives. Nothing
-        corrects it &mdash; the steel cannot do anything else.
-      </p>
+  <!-- 03 REAR — rear three-quarter, the balance linkage nearest the camera. -->
+  <section class="shot shot--rear" id="rear" data-shot="3">
+    <div class="type type--rear">
+      <h2>Four axes.<br>One motion.</h2>
     </div>
   </section>
 
-  <!-- 04 MACRO — one detail, close enough to stop reading as a website. -->
-  <section class="shot shot--macro" id="macro" data-shot="4">
-    <div class="frame frame--end">
-      <p class="edge">Three members of <span class="fig">1&thinsp;300&nbsp;mm</span>, measured between bearing centres.</p>
+  <!-- 04 ABOVE — high angle down the boom while the tool comes round. -->
+  <section class="shot shot--above" id="above" data-shot="4">
+    <div class="frame frame--start">
+      <p class="edge">Two closed linkages. The plate holds flat while the arm drives.</p>
     </div>
-    <div class="type type--corner">
+    <div class="type type--above">
+      <h2 class="stat"><span class="stat__fig">3 070</span><span class="stat__unit">mm</span></h2>
+      <p class="stat__cap">Across, at full span</p>
+    </div>
+  </section>
+
+  <!-- 05 MACRO — one joint. The machine leaves the frame entirely. -->
+  <section class="shot shot--macro" id="macro" data-shot="5">
+    <div class="type type--macro">
       <h2>Precision<br>is mechanical.</h2>
     </div>
   </section>
 
-  <!-- 05 RELEASE — the strongest pose, the full width of the screen. -->
-  <section class="shot shot--release" id="release" data-shot="5">
-    <div class="type type--wide">
+  <!-- 06 HERO — 130 degrees round from the opening, low and wide. -->
+  <section class="shot shot--hero" id="hero" data-shot="6">
+    <div class="type type--hero">
       <h2 class="huge">The hand that<br>never tilts.</h2>
     </div>
   </section>
 
   <!-- The record. Convention is permitted; formlessness is not (C19). -->
-  <section class="shot shot--record" id="record" data-shot="6">
+  <section class="shot shot--record" id="record" data-shot="7">
     <div class="record">
       <h2 class="record__head">Measured, not quoted</h2>
       <p class="note">

@@ -10,6 +10,7 @@ import { refreshOnResize } from '../motion/context.js';
 import { branch, prefersReduced } from '../motion/media.js';
 import { createScene } from './scene.js';
 import { createStory, createStill } from './story.js';
+import { playIntro } from './intro.js';
 
 // The reduced-motion path is a DELIVERABLE with its own composition (DNA43,
 // MJ9), and DNA88 asks for it to be opened rather than described. Browsers give
@@ -17,6 +18,12 @@ import { createStory, createStill } from './story.js';
 // same branch the media query would take. It changes nothing for a visitor who
 // does not type it, and it is the only way this path gets looked at.
 const FORCE_REDUCED = new URLSearchParams(location.search).has('reduced');
+
+// A page whose first two seconds are an authored shot has to actually start at
+// the top. Browsers restore the previous scroll offset on reload by default,
+// which lands the visitor mid-story with the opening already skipped — and it
+// looks like the intro is broken rather than like the browser being helpful.
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
 const canvas = document.getElementById('scene');
 
@@ -38,6 +45,16 @@ async function boot() {
   // Branch, never shrink (G5, MJ8, DNA70). The mobile scene is a different
   // composition rather than the desktop one at a smaller size, and reduced
   // motion is its own authored state rather than the absence of the others.
+  // The opening runs BEFORE the scroll story is wired, and lands on exactly the
+  // station shot 01 opens from, so there is nothing to reconcile at handover.
+  // Under reduced motion it does not run at all.
+  let stopIntro = () => {};
+  if (!FORCE_REDUCED && !prefersReduced()) {
+    stopIntro = playIntro(world);
+  } else {
+    document.querySelector('[data-intro]')?.setAttribute('data-intro', 'done');
+  }
+
   const teardown = FORCE_REDUCED
     ? (createStill(world), () => {})
     : branch(document.documentElement, {
@@ -58,6 +75,7 @@ async function boot() {
 
   window.addEventListener('pagehide', () => {
     teardown?.();
+    stopIntro();
     stopRefresh();
     world.dispose();
   }, { once: true });

@@ -55,17 +55,19 @@ import RIG from '../../assets/robo hand/rig.json';
 // flange coordinates beside them are where the tool plate actually lands, solved
 // from the linkage rather than eyeballed from a screenshot.
 export const POSES = {
-  // Tucked in over its own base. The machine at rest between cycles.
-  A: { a1: 0.00, a2: -0.45, a3: 0.62, a4: 0.00 },   // flange ~ (928, 1313)
-  // The shoulder opens and the arm comes up. Mid-lift.
-  B: { a1: -0.20, a2: -0.10, a3: 0.30, a4: 0.40 },  // flange ~ (1538, 1809)
-  // Reaching out and high, elbow open, plate held flat at the top of the arc.
-  C: { a1: 0.10, a2: 0.22, a3: -0.10, a4: -0.30 },  // flange ~ (1993, 2299)
-  // Full working extension, placing low and far. The widest silhouette it makes.
-  D: { a1: 0.35, a2: 0.50, a3: 0.55, a4: 0.90 },    // flange ~ (2152, 1361)
+  // A — compressed. Folded back over its own base, flange low and tucked in.
+  A: { a1:  0.00, a2: -0.70, a3:  0.85, a4:  0.00 },   // flange ~ ( 461,  915)
+  // B — the shoulder rises and opens. The arm clears the column.
+  B: { a1: -0.28, a2: -0.30, a3:  0.35, a4:  0.50 },   // flange ~ (1266, 1696)
+  // C — extended hard across space and high. The widest vertical reach.
+  C: { a1:  0.15, a2:  0.22, a3: -0.30, a4: -0.40 },   // flange ~ (1850, 2569)
+  // D — the tool comes round while the arm holds out level.
+  D: { a1:  0.42, a2:  0.34, a3:  0.05, a4:  1.60 },   // flange ~ (2148, 2061)
+  // E — full working extension, placing far and low. The widest silhouette.
+  E: { a1:  0.42, a2:  0.52, a3:  0.62, a4:  2.40 },   // flange ~ (2125, 1272)
 };
 
-export const POSE_ORDER = ['A', 'B', 'C', 'D'];
+export const POSE_ORDER = ['A', 'B', 'C', 'D', 'E'];
 
 const lerp = (a, b, t) => a + (b - a) * t;
 

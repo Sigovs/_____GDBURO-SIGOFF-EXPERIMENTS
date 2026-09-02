@@ -163,6 +163,9 @@ export async function createScene(canvas, { ticker, reduced = false } = {}) {
      (U11 arriving through the lighting): the reflections stay continuous, so
      the machine is recognisably in the same hall the whole way down. */
   const LIGHT = {
+    // 00 — where the opening starts. One rim and almost nothing else, so the
+    // machine exists as an edge before it exists as an object.
+    dark:     { key: [-4.2, 6.0, 2.2, 0.16], fill: [5, -1.5, 4, 0.05], rim: [2.6, 1.4, -6.2, 1.05], exposure: 0.72 },
     // 01 — sculptural rim. Almost no fill: at this crop the form is read from
     // one bright edge running down the casting, and the rest can go.
     sculpt:   { key: [-4.2, 6.0, 2.2, 2.1], fill: [5, -1.5, 4, 0.30], rim: [2.6, 1.4, -6.2, 3.4], exposure: 1.12 },
@@ -174,7 +177,10 @@ export async function createScene(canvas, { ticker, reduced = false } = {}) {
     // 04 — specular. Close enough that the subject IS the highlight, so the key
     // is tight and hot and the fill barely exists.
     specular: { key: [-2.0, 3.2, 3.4, 4.6], fill: [4, 0.4, 3, 0.22], rim: [2.2, 1.0, -3.4, 3.0], exposure: 0.98 },
-    // 05 — resolved. Broad key, real fill, rim back to separating the arm from
+    // 04 — from above. The key comes over the top so the boom's upper surfaces
+    // carry the frame and the floor falls away into nothing.
+    top:      { key: [-1.6, 9.5, 1.4, 3.6], fill: [5, 0.2, 4, 0.55], rim: [3.2, 2.4, -6.0, 1.7], exposure: 1.14 },
+    // 06 — resolved. Broad key, real fill, rim back to separating the arm from
     // the hall. The frame is wide again and everything has to hold together.
     hero:     { key: [-6.0, 7.0, 3.0, 3.0], fill: [6.5, -1.2, 5, 0.80], rim: [3.4, 1.4, -7.0, 2.6], exposure: 1.20 },
   };

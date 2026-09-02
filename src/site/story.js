@@ -297,7 +297,26 @@ export function createStory(scope, world) {
       The camera keeps doing its own job underneath: the record's approach still
       runs on scroll while the machine holds whatever heading the visitor gave it.
     */
-    let spin = 0;
+    /*
+      THE LAST SCREEN'S DEFAULT HEADING.
+
+      The frame that was asked for has the arm reaching up and to the RIGHT, clear
+      of the measurements column. The camera alone does not produce it: the
+      reference was captured after the machine had been turned, and a turn does not
+      move the camera, so the readout matched (AZ 178) while the heading did not.
+      Rebuilding only the camera reproduced the numbers and mirrored the machine —
+      the arm swung left and the gripper crossed the figures column.
+
+      180 degrees is that heading, measured against the reference rather than
+      guessed, and it is TURNED INTO rather than set: the machine comes round over
+      the back half of the record's approach, after the closing statement has
+      cleared, so nothing pops. The visitor's drag is a separate offset added on
+      top, so turning it by hand never fights the authored arrival.
+    */
+    const SPIN_HOME = 180;
+    const SPIN_AT = [0.5, 1.0];
+
+    let spinDrag = 0;
     let recordP = 0;
     let dragging = false;
     let lastX = 0;
@@ -321,7 +340,11 @@ export function createStory(scope, world) {
     */
     const RECORD_VIEW = recordFrom;
 
-    const putRecord = () => put(blendStations(recordFrom, RECORD_VIEW, ease(recordP)));
+    const putRecord = () => {
+      put(blendStations(recordFrom, RECORD_VIEW, ease(recordP)));
+      const home = SPIN_HOME * ease(span(recordP, SPIN_AT[0], SPIN_AT[1]));
+      world.setSpin(home + spinDrag);
+    };
 
     const surface = document.querySelector('[data-orbit]');
     if (surface) {
@@ -335,9 +358,9 @@ export function createStory(scope, world) {
         if (!dragging) return;
         // 0.32 deg per pixel: a full turn is about a thousand pixels of travel,
         // which is one comfortable sweep of a trackpad rather than a flick.
-        spin += (e.clientX - lastX) * 0.32;
+        spinDrag += (e.clientX - lastX) * 0.32;
         lastX = e.clientX;
-        world.setSpin(spin);
+        putRecord();
       };
       const up = (e) => {
         dragging = false;
@@ -376,9 +399,9 @@ export function createStory(scope, world) {
         level?.setFade(1 - clamp01(self.progress * 2));
       },
       onLeaveBack: () => {
-        spin = 0;
-        world.setSpin(0);   // leaving the last screen returns the machine to its authored heading
+        spinDrag = 0;
         recordP = 0;
+        world.setSpin(0);   // leaving the last screen returns the machine to the heading the shots were composed around
         put(recordFrom);
         world.setExposure(1.18);
         level?.setFade(null);

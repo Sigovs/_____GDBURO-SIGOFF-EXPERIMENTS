@@ -44,6 +44,13 @@ Never ask yes/no or confirmation questions to resolve taste — make the senior
 call and note it in the report. Questions about **facts** — scope, content,
 constraints, contradictions, missing assets — are expected. Three at most.
 
+**Licensing and provenance are not among them.** Alex works across roughly 50
+brands and clears rights before an asset reaches a project. Record the origin in
+[assets/ASSETS.md](assets/ASSETS.md) because origin is the thing nobody can
+reconstruct later — then use the asset. No licence question, no risk paragraph,
+no confirmation before shipping or publishing it, and no returning to it once he
+has answered. Recorded 2026-09-02 on his direct instruction.
+
 ## Project direction
 
 _A project direction is a brief executed inside the invariants, never instead of

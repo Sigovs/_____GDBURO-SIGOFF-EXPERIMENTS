@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rig bench — KR700PA</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #0a0c0d; color: #e8ecee;
+    font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    display: grid; grid-template-columns: 1fr 22rem; height: 100vh; overflow: hidden;
+  }
+  canvas { display: block; width: 100%; height: 100%; }
+  .panel { border-left: 1px solid #23282b; padding: 1rem; overflow-y: auto; display: grid; gap: 1rem; align-content: start; }
+  h1 { font-size: 13px; margin: 0; letter-spacing: .1em; text-transform: uppercase; color: #9aa3a7; }
+  fieldset { border: 1px solid #23282b; padding: .75rem; margin: 0; }
+  legend { padding: 0 .4rem; color: #9aa3a7; text-transform: uppercase; letter-spacing: .1em; }
+  label { display: grid; grid-template-columns: 4.5rem 1fr 3.5rem; align-items: center; gap: .5rem; margin-bottom: .4rem; }
+  input[type=range] { width: 100%; accent-color: #f2903f; }
+  .val { text-align: right; color: #f2903f; font-variant-numeric: tabular-nums; }
+  button { font: inherit; background: #16191b; color: #e8ecee; border: 1px solid #33393d; padding: .4rem .6rem; cursor: pointer; }
+  button:hover { border-color: #f2903f; }
+  button[aria-pressed="true"] { background: #f2903f; color: #0a0c0d; border-color: #f2903f; }
+  .row { display: flex; gap: .35rem; flex-wrap: wrap; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th, td { text-align: right; padding: .2rem .3rem; border-top: 1px solid #23282b; }
+  th:first-child, td:first-child { text-align: left; }
+  th { color: #9aa3a7; font-weight: 400; }
+  .ok { color: #6ec28a; }
+  .bad { color: #ff6b5e; font-weight: 700; }
+  .verdict { padding: .5rem .6rem; border: 1px solid #23282b; }
+  .verdict[data-pass="true"] { border-color: #6ec28a; color: #6ec28a; }
+  .verdict[data-pass="false"] { border-color: #ff6b5e; color: #ff6b5e; }
+  .hint { color: #7d868a; }
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+
+<div class="panel">
+  <h1>Rig bench — KR700PA</h1>
+
+  <p class="hint">
+    Joint axes are drawn as coloured pins, aim rods as lines between their two
+    solved pivots. If a rod ever leaves its pin, the gap column says so in
+    millimetres before the eye catches it.
+  </p>
+
+  <fieldset>
+    <legend>Poses</legend>
+    <div class="row" id="poses"></div>
+    <label style="margin-top:.6rem">
+      <span>blend</span>
+      <input type="range" id="blend" min="0" max="1" step="0.001" value="0">
+      <span class="val" id="blend-v">0.00</span>
+    </label>
+    <div class="row">
+      <button id="play" aria-pressed="false">Play slow sweep</button>
+      <button id="sweep">Run full-range test</button>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Axes</legend>
+    <label><span>A1 column</span><input type="range" id="a1" min="-3.2" max="3.2" step="0.005" value="0"><span class="val" id="a1-v">0</span></label>
+    <label><span>A2 shoulder</span><input type="range" id="a2" min="-0.80" max="0.52" step="0.005" value="0"><span class="val" id="a2-v">0</span></label>
+    <label><span>A3 boom</span><input type="range" id="a3" min="-0.52" max="0.90" step="0.005" value="0"><span class="val" id="a3-v">0</span></label>
+    <label><span>A4 tool</span><input type="range" id="a4" min="-3.14" max="3.14" step="0.005" value="0"><span class="val" id="a4-v">0</span></label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Linkage closure</legend>
+    <table>
+      <thead><tr><th>rod</th><th>rest</th><th>now</th><th>gap</th></tr></thead>
+      <tbody id="residuals"></tbody>
+    </table>
+    <p class="hint" style="margin:.5rem 0 0">
+      Rods are oriented, never scaled. A gap is a detached rod.
+    </p>
+  </fieldset>
+
+  <fieldset>
+    <legend>Flange attitude</legend>
+    <table>
+      <tbody id="attitude"></tbody>
+    </table>
+  </fieldset>
+
+  <div class="verdict" id="verdict">Full-range test not run.</div>
+
+  <fieldset>
+    <legend>View</legend>
+    <div class="row">
+      <button id="axes" aria-pressed="true">Joint pins</button>
+      <button id="wire" aria-pressed="false">Wireframe</button>
+    </div>
+    <p class="hint" style="margin:.5rem 0 0">Drag to orbit, wheel to zoom.</p>
+  </fieldset>
+</div>
+
+<script type="module" src="/src/lab/rig-bench.js"></script>
+</body>
+</html>

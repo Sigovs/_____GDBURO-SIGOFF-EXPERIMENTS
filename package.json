@@ -21,6 +21,7 @@
   "devDependencies": {
     "@gltf-transform/cli": "^4.5.0",
     "draco3d": "^1.5.7",
+    "occt-import-js": "^0.0.23",
     "vite": "^8.2.2"
   }
 }

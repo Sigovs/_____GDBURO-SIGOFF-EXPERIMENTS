@@ -1,38 +1,140 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Buro Lab — index</title>
-  <meta name="robots" content="noindex">
-  <link rel="stylesheet" href="/src/styles/lab.css">
-  <style>
-    body { display: grid; place-items: center; }
-    main { max-width: 62ch; padding: 8vh 6vw; }
-    h1 { font: inherit; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink-dim); margin: 0 0 24px; }
-    ul { list-style: none; padding: 0; margin: 0 0 32px; }
-    li { margin: 6px 0; }
-    p { color: var(--ink-dim); }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KR 700 PA — the hand that never tilts · Buro Lab</title>
+<meta name="description" content="A KUKA KR 700 PA palletiser, reconstructed from a 107-solid CAD file and re-articulated on its real hinge centres. Its arm sweeps three metres and its tool plate never tilts.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Crect width=%2716%27 height=%2716%27 fill=%27%230a0c0d%27/%3E%3Crect x=%271%27 y=%277.5%27 width=%2714%27 height=%271%27 fill=%27%23f2903f%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/src/site/tokens.css">
+<link rel="stylesheet" href="/src/site/index.css">
 </head>
 <body>
-  <!-- This is the workshop door, not the site.
-       The site's index.html is written after BRIEF.md is complete (DNA1) and
-       replaces this file. Nothing here is a design decision. -->
-  <main>
-    <h1>Buro Lab</h1>
-    <ul>
-      <li><a href="/lab/">Intake bench</a> — scale, budget and material audit for an incoming object</li>
-      <li><a href="/lab/shots.html">Shot bench</a> — the seven shots, driven by scroll</li>
-    </ul>
-    <p>
-      No page exists yet. The concept gate in <b>BRIEF.md</b> is open, and no markup
-      for the site is written before it is closed.
-    </p>
-    <p>
-      Sources go in <b>assets/source/</b> · <code>npm run convert</code> ·
-      <code>npm run inspect</code>.
-    </p>
-  </main>
+
+<!--
+  Five shots, one continuous world. The static build still stands alone (DNA39,
+  MJ5, G7): every statement and every number below is in the document, and with
+  the scripts removed what is lost is the machine moving — which is the argument,
+  not the content.
+
+  The canvas is decoration to assistive tech (DNA80). Everything it shows is said
+  in text.
+-->
+
+<a class="skip" href="#record">Skip to the measurements</a>
+
+<header class="masthead">
+  <span class="wordmark">Buro&nbsp;Lab</span>
+  <span class="masthead__meta">Machine study 01</span>
+</header>
+
+<div class="stage" aria-hidden="true">
+  <canvas id="scene"></canvas>
+  <!--
+    The signature move: a DOM rule locked each frame to the projected height of
+    the tool plate. Its content is its own stillness — while the arm drives
+    through its range, every link rotates against it and it does not move.
+  -->
+  <div class="level" data-level hidden>
+    <span class="level__label">Tool plate &middot; 0.000&deg;</span>
+  </div>
+</div>
+
+<main>
+
+  <!-- 01 IMPACT — extreme crop. The machine is not shown whole; it is met. -->
+  <section class="shot shot--impact" id="impact" data-shot="1">
+    <!-- The frame is first so its negative bottom margin collapses its own flow
+         height and everything after it overlays rather than stacks. -->
+    <div class="frame frame--end">
+      <p class="kicker">KUKA &middot; palletiser</p>
+      <p class="edge">Nothing here moves by accident.</p>
+    </div>
+    <div class="type type--behind">
+      <h1 class="display">KR&nbsp;700&nbsp;PA</h1>
+    </div>
+  </section>
+
+  <!-- 02 SCALE — release into the widest frame on the page. -->
+  <section class="shot shot--scale" id="scale" data-shot="2">
+    <div class="type type--right">
+      <h2><span class="fig">2&thinsp;744</span> millimetres.<br>Standing still.</h2>
+      <p class="edge-note">Floor to the top of its balance linkage. <span class="fig">3&thinsp;070</span> across at full span.</p>
+    </div>
+  </section>
+
+  <!-- 03 ARTICULATION — the mechanical event. Pose and camera both move, offset. -->
+  <section class="shot shot--articulation" id="articulation" data-shot="3">
+    <div class="type type--left">
+      <h2>One motion.<br>Four axes.</h2>
+      <p class="edge-note">
+        Two closed linkages hold the plate flat while the arm drives. Nothing
+        corrects it &mdash; the steel cannot do anything else.
+      </p>
+    </div>
+  </section>
+
+  <!-- 04 MACRO — one detail, close enough to stop reading as a website. -->
+  <section class="shot shot--macro" id="macro" data-shot="4">
+    <div class="frame frame--end">
+      <p class="edge">Three members of <span class="fig">1&thinsp;300&nbsp;mm</span>, measured between bearing centres.</p>
+    </div>
+    <div class="type type--corner">
+      <h2>Precision<br>is mechanical.</h2>
+    </div>
+  </section>
+
+  <!-- 05 RELEASE — the strongest pose, the full width of the screen. -->
+  <section class="shot shot--release" id="release" data-shot="5">
+    <div class="type type--wide">
+      <h2 class="huge">The hand that<br>never tilts.</h2>
+    </div>
+  </section>
+
+  <!-- The record. Convention is permitted; formlessness is not (C19). -->
+  <section class="shot shot--record" id="record" data-shot="6">
+    <div class="record">
+      <h2 class="record__head">Measured, not quoted</h2>
+      <p class="note">
+        Every figure below was measured from the file in this repository. No
+        manufacturer specification is used. The designation &ldquo;KR 700 PA&rdquo;
+        conventionally implies a 700&nbsp;kg payload, and that figure does not
+        appear here, because an implication is not a source.
+      </p>
+
+      <table class="plate">
+        <caption class="visually-hidden">Measured properties of the KR 700 PA model</caption>
+        <tbody>
+          <tr><th scope="row">Overall height</th><td class="fig">2 744 mm</td></tr>
+          <tr><th scope="row">Overall span</th><td class="fig">3 070 mm</td></tr>
+          <tr><th scope="row">Linkage members</th><td class="fig">3 &times; 1 300 mm</td></tr>
+          <tr><th scope="row">Driven axes</th><td class="fig">4</td></tr>
+          <tr><th scope="row">Closed loops</th><td class="fig">2</td></tr>
+          <tr><th scope="row">Solids in source</th><td class="fig">107</td></tr>
+          <tr><th scope="row">Triangles</th><td class="fig">137 613</td></tr>
+          <tr><th scope="row">Draw-call floor</th><td class="fig">9</td></tr>
+          <tr><th scope="row">Payload</th><td class="fig">442 KB</td></tr>
+          <tr><th scope="row">Worst plate tilt, full range</th><td class="fig">0.000&deg;</td></tr>
+        </tbody>
+      </table>
+
+      <p class="provenance">
+        <em>KR 700 PA</em>, obtained from CGTrader under its Royalty&nbsp;Free
+        License. STEP converted with <code>tools/step-to-glb.mjs</code>; hinge
+        centres derived by <code>tools/rod-ends.mjs</code> and the hierarchy
+        recorded in <code>assets/robo&nbsp;hand/rig.json</code>. KUKA and
+        KR&nbsp;700&nbsp;PA are marks of their owner, used to name the machine
+        accurately and not under licence or endorsement.
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="colophon">
+  <p><span class="wordmark">Buro&nbsp;Lab</span> &mdash; machine study 01</p>
+</footer>
+
+<script type="module" src="/src/site/index.js"></script>
 </body>
 </html>

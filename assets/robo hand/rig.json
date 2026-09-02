@@ -1,0 +1,167 @@
+{
+  "_": [
+    "KR700PA — the kinematic hierarchy, reconstructed from geometry.",
+    "",
+    "The STEP carries no assembly tree: one PRODUCT, zero NEXT_ASSEMBLY_USAGE_OCCURRENCE,",
+    "107 MANIFOLD_SOLID_BREP, every one unnamed and every one the same green. Everything",
+    "below was measured, and the measurements are named so the next person can disagree",
+    "with the reasoning rather than with the result.",
+    "",
+    "THE TWO PARALLELOGRAMS. tools/rod-ends.mjs finds each solid's principal axis and the",
+    "centroid of its end caps. That gives real attachment points instead of bbox corners,",
+    "and two closed loops fall out of them:",
+    "",
+    "  LOOP A   shoulder(420,900) -> rearBot(-237,1370)  =  (-657, 470)",
+    "           elbow(420,2185)   -> rearTop(-237,2655)  =  (-657, 465)",
+    "",
+    "  LOOP B   elbow -> tieStart(830,2482)              =  ( 410, 297)",
+    "           wrist(1720,2200) -> tieEnd(2130,2497)    =  ( 410, 297)",
+    "",
+    "Loop A holds the ROCKER at a constant world attitude however the shoulder swings.",
+    "Loop B then hangs off the rocker and holds the FLANGE at a constant world attitude",
+    "however the boom swings. Together they are why a palletiser's tool plate stays flat",
+    "through the entire reach with no controller correcting anything — and why rigging",
+    "this as a plain open chain produces a machine that visibly cannot do its job.",
+    "",
+    "PIVOTS ARE DERIVED, NOT COPIED FROM ROD TIPS. A rod's bearing eyes are inset from",
+    "its geometric ends — solid 28 runs 1393..2635 between pivots at 1370..2655, inset 23",
+    "and 20, symmetrically. Taking the tips as pivots is what makes a linkage that looks",
+    "right at rest and comes apart in motion. rearTop and tieEnd are therefore COMPUTED",
+    "from the loop closure (RT = E + RB - S, TE = W + TS - E), which makes both loops",
+    "exact and means the aim-solved rods never need to stretch to reach.",
+    "",
+    "SOLID ASSIGNMENT IS MEASURED. tools/rig-assign.mjs names a few unmistakable seeds per",
+    "link and assigns every other solid to the seed its VERTICES are nearest — not its",
+    "centroid, which for a long bracket can sit closer to the wrong link than any part of",
+    "the bracket does. It also reports which solids were within 25mm of a rival link;",
+    "those were the four bearing caps, which read identically on either side.",
+    "",
+    "Pivots are in the STEP's own millimetres, Z-up. The root carries unitScale and the",
+    "Z-up -> Y-up turn, so every number here stays in the frame the survey printed."
+  ],
+
+  "unitScale": 0.001,
+  "unassigned": "column",
+  "defaultMaterial": "graphite",
+
+  "links": [
+    {
+      "name": "base",
+      "role": "fixed",
+      "pivot": [0, 0, 0],
+      "solids": [41, 42, 43, 44, 71, 72, 73, 79],
+      "_": "The floor slab, the 995 cylinder and the connection boxes behind it. The only thing in the machine allowed to be still."
+    },
+    {
+      "name": "column",
+      "parent": "base",
+      "role": "yaw",
+      "pivot": [0, 0, 470],
+      "axis": [0, 0, 1],
+      "limits": [-3.228859, 3.228859],
+      "rest": 0,
+      "solids": [1, 2, 3, 21, 22, 23, 27, 52, 74, 80, 88, 89, 93, 105, 106],
+      "_": "A1. Solid 41 is centred on (0,0) to within 0.3mm across a 995 diameter, so the axis is measured rather than fitted. Carries the shoulder pivot and, through strut 52 and bracket 27, the rear rod's lower pivot."
+    },
+    {
+      "name": "lowerArm",
+      "parent": "column",
+      "role": "pitch",
+      "pivot": [420, 0, 900],
+      "axis": [0, 1, 0],
+      "limits": [-0.80, 0.52],
+      "rest": 0,
+      "solids": [4, 5, 6, 7, 8, 20, 86, 87, 90, 91, 92],
+      "_": "A2. Solid 8 is the tall casting; solid 91 is the rod alongside it, and BOTH span the same two pivots (900 and 2185), so they are one rigid link and not a parallelogram pair."
+    },
+    {
+      "name": "boom",
+      "parent": "lowerArm",
+      "role": "pitch",
+      "pivot": [420, 0, 2185],
+      "axis": [0, 1, 0],
+      "limits": [-0.52, 0.90],
+      "rest": 0,
+      "level": "world",
+      "solids": [9, 10, 11, 12, 13, 32, 34, 35, 38, 54, 56, 60, 68, 69, 70, 75, 76, 81, 83, 84, 85, 94, 95, 96],
+      "_": "A3. The 1681 beam, from x=175 to x=1744 at z~2212 — it extends BEHIND the elbow, which is what a parallelogram needs something to push against. `level: world` means its driven angle is a WORLD attitude, so the shoulder's swing is cancelled for it rather than added to it."
+    },
+    {
+      "name": "rocker",
+      "parent": "lowerArm",
+      "role": "passive",
+      "pivot": [420, 0, 2185],
+      "axis": [0, 1, 0],
+      "level": "column",
+      "solids": [18, 19, 25, 26, 31, 36, 37, 39, 50, 51, 53, 55, 57, 61, 62, 63, 64, 65, 66],
+      "_": "The plate across the top, carrying rearTop at one end and tieStart at the other. A SIBLING of the boom on the same elbow pivot, not a child of it: loop A fixes its attitude to the column's, and loop B then hangs off it. This link is the whole mechanism, and the first rig did not have it at all."
+    },
+    {
+      "name": "flange",
+      "parent": "boom",
+      "role": "passive",
+      "pivot": [1720, 0, 2200],
+      "axis": [0, 1, 0],
+      "level": "rocker",
+      "solids": [14, 15, 33, 40, 58, 59, 67, 77, 78, 82, 97, 101, 103, 104],
+      "_": "The wrist, at the bearing caps 67/96. Loop B ties its attitude to the rocker's, so it holds level through both the shoulder's and the boom's whole range."
+    },
+    {
+      "name": "tool",
+      "parent": "flange",
+      "role": "yaw",
+      "pivot": [2018, 0, 2030],
+      "axis": [0, 0, 1],
+      "limits": [-3.14159, 3.14159],
+      "rest": 0,
+      "solids": [16, 98, 99, 100, 102],
+      "_": "A4. Solids 16, 98, 99, 100 and 102 are the only ones past the wrist sitting on the machine's centreline (|y| < 10mm), stacked z 1831..2225 — that is a shaft, and its axis is vertical. Because the flange holds level, this axis stays vertical through the whole cycle, which is exactly what lets a palletiser square a box to a pallet."
+    },
+    {
+      "name": "rearRod",
+      "parent": "column",
+      "role": "aim",
+      "pivot": [-237, 0, 1370],
+      "solids": [0, 24, 28, 29, 30, 45, 46, 47, 48, 49],
+      "aim": {
+        "restDir": [0, 0, 1],
+        "target": { "link": "rocker", "point": [-237, 0, 2655] }
+      },
+      "_": "Loop A's rod. Its orientation is SOLVED from both attachment pivots every frame, not inherited as a child rotation — that is the difference between a rod and a rod that floats off its joint. rearTop is computed as E + RB - S so the span is exactly the arm's 1285 and the rod never has to stretch to reach."
+    },
+    {
+      "name": "tieRod",
+      "parent": "rocker",
+      "role": "aim",
+      "pivot": [830, 0, 2482],
+      "solids": [17],
+      "aim": {
+        "restDir": [1, 0, 0],
+        "target": { "link": "flange", "point": [2130, 0, 2497] }
+      },
+      "_": "Loop B's rod. Solid 17 spans 806..2153 and its pivots are 830..2130 — inset 24 and 23, symmetrically, which is what a clevis end looks like. tieEnd is computed as W + TS - E so the span is exactly the boom's 1300."
+    }
+  ],
+
+  "materials": {
+    "paint": {
+      "baseColor": [0.55, 0.075, 0.006, 1],
+      "metallic": 0.0,
+      "roughness": 0.40,
+      "links": ["column", "lowerArm", "boom", "rocker"],
+      "_": "Linear. Renders sRGB #C0521A — a deeper, redder industrial orange than the amber the first pass produced. tokens.css derives the interface accent from this value, so the two move together or the derivation becomes a false claim about the artefact."
+    },
+    "graphite": {
+      "baseColor": [0.055, 0.058, 0.065, 1],
+      "metallic": 0.45,
+      "roughness": 0.50,
+      "links": ["base"]
+    },
+    "steel": {
+      "baseColor": [0.42, 0.43, 0.46, 1],
+      "metallic": 0.95,
+      "roughness": 0.28,
+      "links": ["tieRod", "rearRod", "flange", "tool"]
+    }
+  }
+}

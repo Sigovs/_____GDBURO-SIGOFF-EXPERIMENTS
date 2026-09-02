@@ -16,6 +16,7 @@ export default defineConfig({
         index: resolve(import.meta.dirname, 'index.html'),
         lab: resolve(import.meta.dirname, 'lab/index.html'),
         shots: resolve(import.meta.dirname, 'lab/shots.html'),
+        rig: resolve(import.meta.dirname, 'lab/rig.html'),
       },
     },
   },

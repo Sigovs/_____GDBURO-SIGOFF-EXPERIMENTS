@@ -1,0 +1,132 @@
+/*
+  tokens.css — INDEX1
+
+  Every value is either PROVED (it exists because the composition needed exactly
+  this and the render was measured) or AUTHORED (invented, with the job it does
+  written beside it). Nothing below it introduces a raw number.
+
+  PALETTE DERIVATION (color I5 — the accent is derived and the derivation stated).
+  The accent is the machine's own paint. `assets/robo hand/rig.json` writes the
+  paint material at linear [0.48, 0.091, 0.014], which renders sRGB #B85520 — a
+  muted industrial orange. That colour is correct on 500 kg of steel and far too
+  dark for a 1px rule on a near-black ground, so the interface accent is the same
+  hue lifted until a hairline clears 3:1 against the ground. Same pigment, two
+  jobs, one derivation. The lift is not a free hand: hue and chroma are held, only
+  luminance moves.
+
+  The ground is not "dark because cinematic". A palletiser is read by its
+  highlights — the light that skids along a machined edge is the whole reason its
+  form is legible — and highlights need somewhere to be bright against (DNA22).
+*/
+
+:root {
+  /* ── ground and ink ─────────────────────────────────────────────────── */
+  --ground:        #0a0c0d;  /* PROVED — the hall. Blue-green cast, not neutral black: a neutral ground made the steel read purple against the cool key. */
+  --ground-lift:   #121517;  /* PROVED — the record's band, one step up so a dense table separates from the scene without a border (D4). */
+  --ink:           #f2f4f5;  /* PROVED — 17.4:1 on --ground. */
+  --ink-muted:     #9aa3a7;  /* PROVED — 7.1:1. Body-adjacent notes and captions. */
+  --ink-dim:       #7d868a;  /* PROVED — the quietest ink that still clears AA. It carries the rail links, the scroll cue and the plate's source column, all at 14px, so 4.5:1 is the floor and not 3:1: 14px is not large text. The first value here was #6c7579, which measured 4.16:1 on the ground and 3.89:1 on the lifted band and was documented as passing. It was not. Measured on the render, which is the only place the answer exists (color I6). */
+
+  /* ── the accent, and its one job ────────────────────────────────────── */
+  --paint:         #b85520;  /* PROVED — the machine's own material, converted from the glTF linear factor. Reference value; not used as ink. */
+  --accent:        #f2903f;  /* PROVED — --paint lifted to clear 3:1 as a 1px rule. This is the level line and nothing else. */
+  --accent-quiet:  #8a5a35;  /* AUTHORED — the line before it means anything, in act three. */
+
+  /* ── rules ──────────────────────────────────────────────────────────── */
+  --rule:          #23282b;  /* PROVED — the hairline. Visible, never structural. */
+  --rule-bright:   #394045;  /* AUTHORED — the rail's active mark. */
+  --hair:          1px;      /* the one literal. A hairline is 1 device pixel by definition. */
+
+  /* ── type ───────────────────────────────────────────────────────────── */
+  /*
+    AUTHORED, and a judgment call: no webfont ships. The payload budget has room
+    for one, but a licensed grotesque is a decision about the studio's identity
+    and this page is a machine study, not the identity. So the distinction is
+    carried by setting — scale, tracking, measure and restraint — rather than by
+    a purchased face. Named as the first upgrade if this becomes the front door.
+  */
+  --face-display: "Helvetica Neue", Helvetica, Inter, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --face-body:    "Helvetica Neue", Helvetica, Inter, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --face-mono:    ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* Adjacent ranks differ by at least 1.6x or they are one rank wearing two sizes (DNA7). */
+  --t-h1:    clamp(3.25rem, 8.6vw, 9.25rem);  /* 52 -> 148 */
+  --t-h2:    clamp(2.375rem, 5.2vw, 4.75rem); /* 38 -> 76 */
+  --t-lede:  clamp(1.1875rem, 1.5vw, 1.375rem);
+  --t-body:  1.0625rem;                        /* 17px */
+  --t-label: 0.875rem;                         /* 14px — the floor (I7), never below */
+
+  --lh-display: 0.94;   /* PROVED — set at 148px, where 1.1 opened a gap the composition read as a break. */
+  --lh-body:    1.62;
+  --lh-label:   1.45;
+
+  --tr-display: -0.028em; /* PROVED — optical, corrected at 148px, not chosen at 16 (I10, DNA11). */
+  --tr-label:   0.09em;   /* uppercase is tracked and short (I4). */
+
+  --measure: 34ch;        /* 60-75 characters is the reading target; 34ch is the *column*, and the body sits at ~62 characters in it. */
+
+  /* ── space ──────────────────────────────────────────────────────────── */
+  /* One scale. Internal gaps are always smaller than the external gap around
+     the group they belong to (spacing I3) — the ramp is what makes that checkable. */
+  --s-3xs: 0.25rem;
+  --s-2xs: 0.5rem;
+  --s-xs:  0.75rem;
+  --s-sm:  1rem;
+  --s-md:  1.5rem;
+  --s-lg:  2rem;
+  --s-xl:  3rem;
+  --s-2xl: 4rem;
+  --s-3xl: 6rem;
+  --s-4xl: 9rem;
+
+  --rail-w: 8.5rem;  /* PROVED - the rail is its own column, not an overlay in the gutter. At 14px mono, "03 ANATOMY" sets to 8.1rem; the token is that measurement plus a hair. */
+  --gutter: clamp(1.5rem, 5vw, 5.5rem);  /* stays generous on mobile — that is where the signal survives or dies (DNA69). */
+
+  /* ── motion ─────────────────────────────────────────────────────────── */
+  /* Mirrors src/motion/tokens.js. Two files, one family; the CSS side owns
+     entrances and states, the JS side owns the scrubbed camera. */
+  --d-quick: 240ms;
+  --d-base:  450ms;
+  --d-slow:  800ms;
+  --e-enter: cubic-bezier(0.22, 1, 0.36, 1);
+  --e-exit:  cubic-bezier(0.55, 0, 1, 0.45);   /* NOT --e-enter reversed: an ease-out on an exit spends its travel in the first third and turns an 800ms fade into a 400ms snap with an invisible tail (U20). */
+
+  /* ── shot extents — the scroll budget, declared (DNA38) ──────────────── */
+  /* Compact on purpose. The previous cut ran 900vh and the page felt like a
+     carousel; these five total 6.6, and the two shots that carry mechanical
+     action get the most room because they are the only ones with something to
+     spend it on. */
+  --shot-1: 120vh;   /* impact — a held frame, short */
+  --shot-2: 110vh;   /* scale  — the release, shorter still */
+  --shot-3: 170vh;   /* articulation — the pose change, the longest */
+  --shot-4: 110vh;   /* macro  — one detail, held */
+  --shot-5: 150vh;   /* release — the hero, and room to breathe after it */
+  /* 660vh total = 6.6 viewport-heights. */
+}
+
+@media (max-width: 767px) {
+  :root {
+    /*
+      Mobile is a recomposition, not a stack (DNA67, C12).
+
+      What is reduced is the number of CAMERA acts — three, not five — and never
+      the number of sections. Acts two and three keep every word they have; they
+      stop being their own shots and become reading passages the approach runs
+      underneath. Zeroing them would have deleted content to avoid re-composing,
+      which is U7, and it is the exact shortcut this rule exists to catch.
+
+      So: two scroll-driven acts at full height, three passages sized by their own
+      content. The peak keeps the largest single extent on the page, because on a
+      phone the argument has to arrive sooner — what is cut is the approach, never
+      the thing being approached.
+    */
+    --shot-1: 110vh;
+    --shot-2: 100vh;
+    --shot-3: 150vh;
+    --shot-4: 100vh;
+    --shot-5: 130vh;
+    /* 590vh. Shorter travel on a device held in one hand, and the pose change
+       keeps the largest share because it is the only thing here that a still
+       image could not have said. */
+  }
+}

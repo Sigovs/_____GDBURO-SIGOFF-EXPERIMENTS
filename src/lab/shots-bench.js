@@ -59,7 +59,7 @@ if (first) {
   const body = new THREE.Mesh(new THREE.BoxGeometry(4, 1.1, 1.8), carPaint({ color: 0x14181d }));
   body.position.y = 0.85;
   const skirt = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.3, 1.9), matte());
-  skirt.position.y = 0.3;
+  skirt.position.y = 0.15; // seated on the ground — a floating mass has no contact to shadow
   for (const mesh of [body, skirt]) {
     mesh.castShadow = true;
     mesh.receiveShadow = true;

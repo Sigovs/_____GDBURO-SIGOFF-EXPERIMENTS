@@ -33,7 +33,7 @@ export function createStage(canvas, {
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = exposure;
   renderer.shadowMap.enabled = !mobile;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.type = THREE.PCFShadowMap; // PCFSoft is deprecated as of three r185
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(background);

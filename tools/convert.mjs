@@ -29,6 +29,7 @@ const SOURCE = join(ROOT, 'assets', 'source');
 const MODELS = join(ROOT, 'assets', 'models');
 const SOURCE_EXT = new Set(['.fbx', '.obj', '.blend', '.gltf', '.glb']);
 const VALUE_FLAGS = new Set(['--scale', '--texture', '--texture-size']);
+const GLTF_TRANSFORM = join(ROOT, 'node_modules', '@gltf-transform', 'cli', 'bin', 'cli.js');
 
 const BLENDER_CANDIDATES = [
   process.env.BLENDER,
@@ -117,9 +118,11 @@ for (const src of files) {
 
   // Blender exports uncompressed above so that one tool owns geometry
   // compression — one place to change it, one place it can go wrong.
+  // Called through node rather than the npx shim: Node refuses to spawn a .cmd
+  // without a shell, and the shim is the only Windows entry point npx offers.
   const gt = spawnSync(
-    process.platform === 'win32' ? 'npx.cmd' : 'npx',
-    ['gltf-transform', 'optimize', raw, out,
+    process.execPath,
+    [GLTF_TRANSFORM, 'optimize', raw, out,
       '--compress', 'draco',
       '--texture-compress', opt('--texture', 'webp'),
       '--texture-size', opt('--texture-size', '2048'),

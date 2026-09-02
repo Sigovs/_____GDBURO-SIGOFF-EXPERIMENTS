@@ -14,7 +14,7 @@ the prompt's source in the brief — not "AI".
 
 | file | origin | licence | commercial use | converted | notes |
 |---|---|---|---|---|---|
-| _(none yet)_ | | | | | |
+| lion-statue-decimated.glb | ../______3D ASSET LIBRARY/props/statues/lion_statue — original vendor unrecorded | **unknown** | **unknown — do not ship** | default flags, no --scale | Pipeline proof only: 0.9 MB FBX to 0.1 MB glb, 18,956 tris, 1 prim. Delete or replace once a real subject arrives, or find its licence first. |
 
 **Columns.** `origin` — where the file came from, by name, with a URL where one
 exists. `licence` — the actual licence, not "free". `commercial use` — yes / no /

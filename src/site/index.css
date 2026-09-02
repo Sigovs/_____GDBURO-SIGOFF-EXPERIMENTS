@@ -92,7 +92,8 @@ body {
 /* ── masthead — the only persistent layer, and it is counted (U10) ───────── */
 
 .masthead {
-  position: fixed; top: var(--s-md); left: var(--gutter); right: var(--gutter);
+  position: fixed; top: var(--s-md); left: 0; right: 0;
+  padding-inline: var(--gutter);
   z-index: 30;
   display: flex; justify-content: space-between; align-items: baseline;
   gap: var(--s-md);
@@ -107,7 +108,12 @@ body {
 .masthead::before {
   content: '';
   position: absolute;
-  inset: -1.5rem calc(var(--gutter) * -1) auto;
+  /* inset 0 on the sides, not a negative gutter. A scrim that reaches the
+     viewport edge by overhanging its parent makes the DOCUMENT wider than the
+     viewport, which is U6 — and it does it invisibly, because a pseudo-element
+     never shows up in a scan of real elements. The parent is full-bleed with
+     internal padding instead. */
+  inset: -1.5rem 0 auto;
   height: 6rem;
   background: linear-gradient(to bottom, rgb(10 12 13 / 0.88), rgb(10 12 13 / 0));
   z-index: -1;
@@ -303,7 +309,10 @@ h1, h2 {
   .type::before {
     content: '';
     position: absolute;
-    inset: -12svh calc(var(--gutter) * -1) -40svh;
+    /* .type is border-box and full width, so its padding box already reaches
+       both viewport edges — inset 0 is enough and a negative margin would put
+       the overflow straight back. */
+    inset: -12svh 0 -40svh;
     background: linear-gradient(to top,
       rgb(10 12 13 / 0.94) 0%,
       rgb(10 12 13 / 0.82) 34%,

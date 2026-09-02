@@ -1,0 +1,15 @@
+node_modules/
+dist/
+build/
+.cache/
+*.log
+.env
+.env.*
+.DS_Store
+Thumbs.db
+
+# 3D pipeline
+assets/source/**        # source FBX/BLEND — hundreds of MB, they live in the library
+!assets/source/.gitkeep
+assets/models/*.raw.glb # Blender's uncompressed intermediate
+public/decoders/        # copied out of three on postinstall

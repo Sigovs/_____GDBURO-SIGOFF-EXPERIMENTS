@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shot bench — Buro Lab</title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="/src/styles/lab.css">
+  <style>
+    /* one act = one viewport-height, so the scroller IS the declared budget */
+    #scroller { height: calc(var(--acts, 8) * 100vh); }
+  </style>
+</head>
+<body>
+  <canvas id="stage" class="stage"></canvas>
+
+  <section class="panel panel--left">
+    <h1>Shot bench</h1>
+    <p class="hint">Seven shots, one act each. The camera and its target move; the object never spins.</p>
+    <hr>
+    <h2>Shot list</h2>
+    <ul class="models" data-acts></ul>
+    <p class="hint">budget <b data-budget>—</b> · subject <b data-subject>—</b></p>
+  </section>
+
+  <section class="panel panel--right">
+    <h2>Readout</h2>
+    <table><tbody data-readout></tbody></table>
+    <hr>
+    <p class="hint">
+      <b>1–8</b> jumps to eight evenly spaced stops. Judge each one as a composed
+      frame — a page that only looks right in motion is not finished.<br><br>
+      <b>b</b> toggles the budget readout.
+    </p>
+    <hr>
+    <p><a href="/lab/">Intake bench →</a><br><a href="/">Index</a></p>
+  </section>
+
+  <!-- The scroller is the transport. Nothing is written into it: this bench
+       tests camera language, and copy here would be a page nobody briefed. -->
+  <div id="scroller" class="scroller" aria-hidden="true"></div>
+
+  <script type="module" src="/src/lab/shots-bench.js"></script>
+</body>
+</html>

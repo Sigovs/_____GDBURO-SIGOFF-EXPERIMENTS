@@ -11,6 +11,8 @@
 //   1.25  ENGINEERED IN MOTION contracts out of wide tracking
 //   1.45  the machine makes one small mechanical settle — a real pose change,
 //         not a bounce, driven through the same rig the scroll drives
+//   2.20  and then it LAYS ITSELF OUT: the arm reaches slowly forward, the
+//         closing beat, running under the secondary line as that steps in
 //   2.60  everything has landed EXACTLY on shot 01's opening station
 //
 // WHY IT LANDS RATHER THAN ENDS. The final camera value is read from
@@ -28,6 +30,23 @@ import { gsap } from '../motion/context.js';
 import { place, openingStation, OPEN } from './story.js';
 
 const RAD = Math.PI / 180;
+
+/*
+  THE POSE THE OPENING HANDS OVER.
+
+  0.10 is where the machine stands when the first frame is cut — slightly off its
+  rest, so the settle at 1.45 has somewhere to travel from. 0.02 is that rest.
+  0.12 is where the opening LEAVES it, arm reaching forward.
+
+  POSE_END is not a free number: it is shot 01's `pose.from` in story.js, and the
+  two have to stay equal or the first scroll of the page snaps the arm back to a
+  position the opening had already moved it out of. The whole pose chain was
+  shifted up to meet it rather than the opening being made to fold back — an
+  opening that ends by undoing its own last gesture is not a closing beat.
+*/
+const POSE_OPEN = 0.10;
+const POSE_REST = 0.02;
+const POSE_END = 0.12;
 
 /**
  * Puts the world on the opening's FIRST FRAME without starting anything.
@@ -54,6 +73,11 @@ export function playIntro(world, { onDone, revealType = true } = {}) {
   const finish = () => {
     world.rigCam.set(target);
     world.setLight('sculpt', 1);
+    // The pose is resolved here too, not only through the timeline: when the
+    // opening is skipped outright — a reload part way down the page — the
+    // timeline never runs, and the arm would otherwise sit at whatever the rig
+    // was built holding until the first scroll corrected it.
+    world.rig.setPose(POSE_END);
     world.touch();
     root?.setAttribute('data-intro', 'done');
     onDone?.();
@@ -72,7 +96,7 @@ export function playIntro(world, { onDone, revealType = true } = {}) {
 
   const state = {
     t: 0,          // 0..1 along the camera leg
-    pose: 0.10,    // the machine starts slightly off its rest and settles onto it
+    pose: POSE_OPEN,   // slightly off its rest, so the settle has somewhere to come from
     light: 0,
   };
 
@@ -97,7 +121,21 @@ export function playIntro(world, { onDone, revealType = true } = {}) {
 
   // 1.45 — one mechanical settle. A real pose change through the real rig, so
   // the linkage moves the way it will move for the rest of the page.
-  tl.to(state, { pose: 0.0, duration: 1.0, ease: 'power2.inOut' }, 1.45);
+  tl.to(state, { pose: POSE_REST, duration: 1.0, ease: 'power2.inOut' }, 1.45);
+
+  /*
+    2.20 — THE ARM LAYS ITSELF OUT.
+
+    The closing beat, and the slowest thing in the opening: 1.5s on a symmetrical
+    ease, so it has no attack and no snap at either end — a machine under load
+    reaching forward, not a UI element animating. It starts while the secondary
+    line is still stepping in, because the two are one moment rather than a queue.
+
+    It is deliberately SHORT in travel. This is the arm beginning to open, not the
+    full extension — that belongs to the hero, six shots later, and spending it
+    here would leave the page nothing to arrive at.
+  */
+  tl.to(state, { pose: POSE_END, duration: 1.5, ease: 'power1.inOut' }, 2.20);
 
   /* ── the board ─────────────────────────────────────────────────────────
      The designation is SET, one character at a time, the way an airport board

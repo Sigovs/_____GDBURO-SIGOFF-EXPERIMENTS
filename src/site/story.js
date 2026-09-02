@@ -93,7 +93,10 @@ const SHOTS = {
     trigger: '#impact',
     from: at(40, 3.30, 0.95, V(0.30, 1.45, 0), 46),
     to:   at(18, 2.70, 0.72, V(0.42, 1.55, 0), 48),
-    pose: { from: 0.00, to: 0.10, at: [0.15, 0.95] },
+    // 0.12 is where the OPENING leaves the arm (POSE_END in intro.js). These two
+    // must stay equal or the first scroll snaps the arm back out of the position
+    // the opening just moved it into.
+    pose: { from: 0.12, to: 0.20, at: [0.15, 0.95] },
     light: 'sculpt',
     lightAt: [0.00, 0.30],
     level: 'off',
@@ -114,7 +117,7 @@ const SHOTS = {
     // Opens fast then holds: the negative space is the composition, and it only
     // becomes one once the travel has stopped.
     camEase: easeOut,
-    pose: { from: 0.10, to: 0.30, at: [0.18, 0.92] },
+    pose: { from: 0.20, to: 0.34, at: [0.18, 0.92] },
     light: 'clean',
     lightAt: [0.12, 0.58],
     level: 'off',
@@ -127,7 +130,7 @@ const SHOTS = {
     trigger: '#rear',
     from: at(110, 11.0, 3.80, V(0.35, 1.30, 0), 34),
     to:   at(250, 4.30, 1.55, V(0.30, 1.80, 0), 38),
-    pose: { from: 0.30, to: 0.60, at: [0.05, 0.88] },
+    pose: { from: 0.34, to: 0.60, at: [0.05, 0.88] },
     light: 'side',
     lightAt: [0.04, 0.40],
     level: 'proving',

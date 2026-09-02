@@ -69,9 +69,11 @@ const CHOREO = {
 const TARGETS = {
   impact: ['.kicker', '.edge'],
   scale:  ['.stat__fig', '.stat__unit', '.stat__cap'],
-  rear:   ['@lines'],
-  above:  ['.edge', '.stat__fig', '.stat__unit', '.stat__cap'],
-  macro:  ['@lines'],
+  // The leader is always LAST in its shot's sequence: it annotates a composition,
+  // so it arrives once that composition is there to annotate.
+  rear:   ['@lines', '.pin__label'],
+  above:  ['.edge', '.stat__fig', '.stat__unit', '.stat__cap', '.pin__label'],
+  macro:  ['@lines', '.pin__label'],
   hero:   ['@lines'],
 };
 

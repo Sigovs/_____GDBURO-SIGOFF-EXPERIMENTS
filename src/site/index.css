@@ -765,7 +765,11 @@ h1, h2 {
 .preload[hidden] { display: none; }
 
 .preload__group {
-  --cube: 96px;         /* AUTHORED — read against a 1440 field at arm's length. 76px was the first value and it registered as a detail rather than as the thing the page was waiting on; 96 is the size at which it is unmistakably the active element without becoming a subject. */
+  /* AUTHORED, and halved. 96px read as the subject of the wait rather than its
+     mark — at that size the cube was the largest thing on a screen whose actual
+     content is the machine's name. 48px still registers as the active element
+     and stops competing with the type it sits under. */
+  --cube: 48px;
   --cube-half: calc(var(--cube) / 2);
 
   display: flex;
@@ -829,11 +833,11 @@ h1, h2 {
   background: var(--accent);
 }
 .preload__face::before {
-  width: 22px; height: var(--hair);
+  width: 11px; height: var(--hair);
   transform: translate(-50%, -50%);
 }
 .preload__face::after {
-  width: var(--hair); height: 22px;
+  width: var(--hair); height: 11px;
   transform: translate(-50%, -50%);
 }
 
@@ -1004,6 +1008,73 @@ h1, h2 {
    headings are excluded because their parts are already flex items with their
    own baseline relationship, and blockifying them breaks it. */
 h2:not(.stat) .line { display: block; }
+
+
+/* ── leaders ─────────────────────────────────────────────────────────────
+   Three callouts along the scroll, and three is the number: a machine study
+   annotated at every joint stops being a study and becomes a diagram.
+
+   ZERO-HEIGHT STICKY. The pin sticks to the top of the viewport and contributes
+   nothing to the flow, so it can hold across its whole shot without the negative
+   margin that `.frame` uses — the same negative margin that collapsed shot 01 out
+   of the document. A device that has already caused one layout bug is not worth
+   reusing when `height: 0` does the same job with nothing to escape.
+
+   Each label is a rule with a dot at the pointing end: a leader, drawn the way a
+   drawing draws one, rather than a floating caption. --ink-dim on the ground
+   measures 4.5:1 at 14px, which is the floor for functional text and not 3:1. */
+
+.pin {
+  position: sticky;
+  top: 0;
+  height: 0;
+  z-index: 11;
+  pointer-events: none;
+}
+
+.pin__label {
+  position: absolute;
+  top: 28svh;
+  font: 500 var(--t-label)/1 var(--face-mono);
+  letter-spacing: var(--tr-label);
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  white-space: nowrap;
+  padding-bottom: 0.6em;
+  border-bottom: var(--hair) solid var(--rule-bright);
+}
+
+/* The dot is the point of the leader — the end that means "this". */
+.pin__label::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* The rear shot's level label already owns its right edge, and two mono
+   uppercase labels stacked sixty pixels apart in one corner are two annotations
+   of the same rank arguing — the leader goes left there. Placement per shot is
+   the composition's, not a default. */
+.pin--right .pin__label { right: var(--gutter); }
+.pin--right .pin__label::after { left: -2px; }
+.pin--left  .pin__label { left: var(--gutter); }
+.pin--left  .pin__label::after { right: -2px; }
+
+.pin--mid .pin__label { top: 46svh; }
+.pin--low .pin__label { top: 64svh; }
+
+@media (max-width: 767px) {
+  /* The type sits at the FOOT of the frame on a phone, so the leaders go to the
+     head of it. Moved, never hidden — content parity holds across viewports. */
+  .pin__label,
+  .pin--mid .pin__label,
+  .pin--low .pin__label { top: 15svh; }
+  .pin--right .pin__label { right: var(--gutter); }
+  .pin--left  .pin__label { left: var(--gutter); }
+}
 
 
 /* ── the statistic ───────────────────────────────────────────────────────

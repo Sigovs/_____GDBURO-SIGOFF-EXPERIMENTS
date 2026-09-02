@@ -48,3 +48,4 @@ assets/models/midnight-division*
 # `git add -A` in ff43f10 and removed in the commit after it.
 /*.png
 .playwright-mcp/
+.shots/

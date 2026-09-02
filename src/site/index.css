@@ -341,8 +341,25 @@ h1, h2 {
 }
 
 
-.shot--rear h2,
-.shot--macro h2 { font-size: clamp(2.25rem, 5.2vw, 4.75rem); max-width: 18ch; }
+/* The rear shot keeps the page's h2 rank. */
+.shot--rear h2 { font-size: var(--t-h2); max-width: 18ch; }
+
+/*
+  ABRUPT SCALE — borrowed from the vault's Oil Stain Lab record (rating 3), whose
+  strength is read as "abrupt changes in scale, cropped words".
+
+  This file's own header says shot 05 is "two words in one corner, almost absent",
+  and it was not: rear and macro shared ONE rule — `.shot--rear h2, .shot--macro
+  h2` — so the macro heading sat at 75px against the rear shot's 75px, the same
+  rank wearing the same size, one shot after the other. The page documented a drop
+  it never made.
+
+  35px against 75px is 2.16x, which clears the 1.6x that separates one rank from
+  the next (DNA7), so this is a rank below rather than the same rank shrunk. It
+  builds the rhythm the vault credits: rear large, macro almost absent, hero at
+  137px — big, quiet, biggest.
+*/
+.shot--macro h2 { font-size: clamp(1.25rem, 2.4vw, 2.25rem); max-width: 22ch; }
 
 .huge { font-size: clamp(3rem, 9.5vw, 11rem); max-width: 14ch; }
 
@@ -899,10 +916,14 @@ h1, h2 {
   z-index: 25;
   display: grid;
   place-content: center;
-  /* No gutter. The designation is set edge to edge, and --gutter is a clamp —
-     it is not a constant fraction of the viewport, so any padding here would
-     make one vw font-size fit at one width and overflow at another. */
+  /* No gutter. The designation is set past both edges, and --gutter is a clamp —
+     it is not a constant fraction of the viewport, so any padding here would make
+     one vw font-size crop by one amount at one width and another at the next. */
   padding: 0;
+  /* The crop happens HERE. Without it the oversized line extends the document and
+     the page scrolls sideways — the same failure the shot copy caused, fixed the
+     same way: clipped by the box it belongs to rather than netted by the body. */
+  overflow: clip;
   pointer-events: none;
   text-align: center;
 }
@@ -942,7 +963,26 @@ h1, h2 {
      overflow-x: clip is a net and never the fix, so the line must not reach the
      edge by rounding. One value serves every width: the string is fixed, type
      width scales with font-size, and font-size scales with vw. */
-  font-size: 24.6vw;
+  /*
+    CROPPED, not fitted — the other half of the Oil Stain Lab borrowing.
+
+    24.6vw sized the designation to sit exactly inside the frame. 27.4vw runs it
+    PAST both edges: about 28% of the K and the A are cut by the viewport, which
+    is unmistakably a crop rather than an accident, and the name still reads.
+
+    It is applied HERE and nowhere else on purpose. Every other large piece of
+    type on this page is either a measured figure or a single-instance statement,
+    and cropping either of those produces a misreading — "744 mm" is a different
+    height, and half a sentence is a different sentence. The designation is the
+    one large mark that is stated exactly elsewhere as well: in the document
+    title, in the heading's aria-label, and in the record's provenance line. So
+    the crop costs no information at all, which is the only condition under which
+    it is worth having.
+
+    One value at every width, for the same reason 24.6 was: the string is fixed
+    and both type width and font size scale linearly with vw.
+  */
+  font-size: 27.4vw;
   line-height: 0.9;
   letter-spacing: -0.055em;
   margin: 0;
@@ -1058,9 +1098,30 @@ h2:not(.stat) .line { display: block; }
    uppercase labels stacked sixty pixels apart in one corner are two annotations
    of the same rank arguing — the leader goes left there. Placement per shot is
    the composition's, not a default. */
-.pin--right .pin__label { right: var(--gutter); }
+/*
+  A SCRIM, CONSTRUCTED THE WAY THE LEVEL LABEL'S IS.
+
+  A leader crosses whatever the camera puts behind it, and in the macro shot that
+  is a lit blue-steel linkage: --ink-dim measured legible on the ground and
+  disappeared over the metal. Contrast is fixed at the BACKGROUND layer against
+  the worst region, not hoped for (color I3).
+
+  Not a new device — the same gradient the level label already uses: opaque under
+  the glyphs, faded to nothing before it reaches an edge, so it never draws the
+  hard line a rectangle would over a deliberately transparent ground (U17). It
+  runs away from the label's own anchor, which is why each side has its own. */
+
+.pin--right .pin__label {
+  right: var(--gutter);
+  padding-left: 3.5em;
+  background: linear-gradient(to left, rgb(10 12 13 / 0.92) 62%, rgb(10 12 13 / 0));
+}
 .pin--right .pin__label::after { left: -2px; }
-.pin--left  .pin__label { left: var(--gutter); }
+.pin--left  .pin__label {
+  left: var(--gutter);
+  padding-right: 3.5em;
+  background: linear-gradient(to right, rgb(10 12 13 / 0.92) 62%, rgb(10 12 13 / 0));
+}
 .pin--left  .pin__label::after { right: -2px; }
 
 .pin--mid .pin__label { top: 46svh; }

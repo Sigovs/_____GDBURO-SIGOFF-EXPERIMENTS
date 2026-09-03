@@ -54,3 +54,4 @@ assets/models/midnight-division*
 versions/
 
 # playwright browsers live in the machine cache, not here
+tools/.shoot-run.mjs

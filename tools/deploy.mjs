@@ -26,7 +26,7 @@
 
 import { execFileSync } from 'node:child_process';
 import {
-  rmSync, writeFileSync, readFileSync, existsSync, readdirSync, cpSync, mkdtempSync, statSync,
+  rmSync, writeFileSync, readFileSync, existsSync, readdirSync, cpSync, mkdtempSync, statSync, renameSync,
 } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -109,8 +109,8 @@ console.log('');
 rmSync(DIST, { recursive: true, force: true });
 build(publicBase);
 
-if (!existsSync(join(DIST, 'index.html'))) {
-  console.error('\n  dist/index.html is missing — the build produced nothing to publish.\n');
+if (!existsSync(join(DIST, 'index1.html'))) {
+  console.error('\n  dist/index1.html is missing — the build produced nothing to publish.\n');
   process.exit(1);
 }
 
@@ -134,8 +134,17 @@ const target = join(work, slug);
 rmSync(target, { recursive: true, force: true });
 cpSync(DIST, target, { recursive: true });
 
+// The source entry is index1.html, because index.html in the repo root is the
+// portal. A served folder still has to answer on its own root, so the built page
+// takes the index name HERE rather than the site being named for the deploy.
+renameSync(join(target, 'index1.html'), join(target, 'index.html'));
+
 // Drop folders whose entry has been removed from the register.
-const generated = new Set(['index.html', '.nojekyll', '.git']);
+// Everything this script writes itself, so the sweep below cannot mistake it for
+// an orphaned variant. `previews` belongs here: it was being deleted as unknown
+// and then re-copied a few lines later, which netted to no change and would have
+// wiped the pictures the moment the copy was reordered or failed.
+const generated = new Set(['index.html', '.nojekyll', '.git', 'previews']);
 for (const entry of readdirSync(work)) {
   if (generated.has(entry)) continue;
   const p = join(work, entry);

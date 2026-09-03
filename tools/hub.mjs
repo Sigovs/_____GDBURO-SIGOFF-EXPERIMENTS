@@ -36,49 +36,48 @@ export function previewFor(root, slug) {
  * @param {string}  opts.base        /gd_buro_tests/
  */
 export function buildHub(register, { mode, root, repoRoot = root, isLive, origin, base }) {
-  const local = mode === 'local';
+  // PORTAL is the file in the project root: opened from disk, so every link has
+  // to be absolute or it resolves against file:// and goes nowhere. REMOTE is the
+  // same page at the root of the branch, where relative links are correct and
+  // shorter. They differ in exactly this and nothing else.
+  const portal = mode === 'portal';
 
   const cards = register.variants.map((v) => {
     const live = isLive(v);
     const shot = previewFor(root, v.slug);
-    const remoteUrl = `${origin}${base}${v.slug}/`;
+    const abs = `${origin}${base}${v.slug}/`;
+
     const entries = v.entries?.length ? v.entries : [{ path: '', label: 'Open' }];
+    const href = (path) => (portal ? abs + path : `${v.slug}/${path}`);
 
-    // Locally the card opens the dev server, because that is the copy being
-    // worked on. Remotely it opens the published folder. The other address is
-    // always offered as a second link rather than hidden — the whole point of
-    // the page is getting to a specific build quickly.
-    const primary = local
-      ? (v.dev || 'http://localhost:5180/')
-      : `${v.slug}/`;
-
-    const links = entries.map((e) => {
-      const href = local
-        ? (v.dev || 'http://localhost:5180/') + e.path
-        : `${v.slug}/${e.path}`;
-      return `          <a href="${esc(href)}"${local ? ' target="_blank" rel="noopener"' : ''}>${esc(e.label)}</a>`;
-    });
-
-    if (local && live) {
-      links.push(`          <a href="${esc(remoteUrl)}" target="_blank" rel="noopener" class="alt">Deployed</a>`);
-    }
+    // A card whose build is not published has nothing to link to, so it says so
+    // rather than offering a link into a 404.
+    const links = live
+      ? entries.map((e) =>
+        `          <a href="${esc(href(e.path))}"${portal ? ' target="_blank" rel="noopener"' : ''}>${esc(e.label)}</a>`)
+      : [`          <span class="pending">npm run deploy -- ${esc(v.slug)}</span>`];
 
     const media = shot
       ? `<img src="${esc(shot)}" alt="" loading="lazy" width="1440" height="900">`
-      : `<p class="noshot">no preview — node tools/shoot.mjs</p>`;
+      : '<p class="noshot">no preview — npm run shoot</p>';
 
-    // The status line says something true and useful in each context: locally,
-    // whether the dev server is answering; remotely, whether the folder exists
-    // on the branch. Neither is decoration and neither is guessed.
-    const status = local
-      ? `<span class="dot" data-probe="${esc(v.dev || 'http://localhost:5180/')}" title="dev server"></span>`
-      : (live ? '' : `<span class="tag tag--gone">not deployed</span>`);
+    const status = live ? '' : '<span class="tag tag--gone">not deployed</span>';
+    const primary = live ? href('') : null;
 
-    return `      <article class="card${live || local ? '' : ' card--gone'}">
-        <a class="card__shot" href="${esc(primary)}"${local ? ' target="_blank" rel="noopener"' : ''}>
+    // The shot is the click target when there is somewhere to go, and a plain
+    // element when there is not — a dead <a> is a link that lies about itself.
+    const shotBlock = primary
+      ? `<a class="card__shot" href="${esc(primary)}"${portal ? ' target="_blank" rel="noopener"' : ''}>
           ${media}
           ${status}
-        </a>
+        </a>`
+      : `<div class="card__shot">
+          ${media}
+          ${status}
+        </div>`;
+
+    return `      <article class="card${live ? '' : ' card--gone'}">
+        ${shotBlock}
         <div class="card__meta">
           <p class="card__line"><span>${esc(v.date || '')}</span><span class="card__status">${esc(v.status || '')}</span></p>
           <h2 class="card__name">${esc(v.name)}</h2>
@@ -101,26 +100,18 @@ ${links.join('\n')}
     .replaceAll('{{TITLE}}', esc(register.title))
     .replaceAll('{{SUBJECT}}', esc(register.subject))
     .replace('{{CARDS}}', cards)
-    .replace('{{LEAD}}', local
-      ? 'Open in a real browser — VS Code&rsquo;s built-in preview does not put WebGL on screen. A green dot means the dev server is answering; if it is grey, run <code>npm run dev</code>.'
+    .replace('{{LEAD}}', portal
+      ? 'Every version is a published build — the links go straight to it, so this page needs nothing running. Open them in a real browser: VS Code&rsquo;s built-in preview does not put WebGL on screen.'
       : 'Each version is a full build at its own address.')
-    .replace('{{COUNT}}', local
+    .replace('{{COUNT}}', portal
       ? `${n} version${n === 1 ? '' : 's'} · ${liveCount} deployed`
       : `${liveCount} version${liveCount === 1 ? '' : 's'} live`)
     .replace('{{BUILT}}', new Date().toISOString().slice(0, 10))
     .replace('{{REPO}}', esc(register.repo))
-    .replace('{{FOOT}}', local
-      ? `<p>New version: <code>node tools/new-variant.mjs v02-slug "Name" "note"</code></p>
-    <p>Previews: <code>node tools/shoot.mjs</code> — screenshots every version at its hero frame.</p>
-    <p>Publish: <code>npm run deploy -- v02-slug</code></p>`
+    .replace('{{FOOT}}', portal
+      ? `<p>This page is generated. The site itself is <code>index1.html</code>; run it with <code>npm run dev</code>.</p>
+    <p>New version: <code>npm run new-variant -- v02-slug "Name" "note"</code></p>
+    <p>Then: <code>npm run deploy -- v02-slug</code> · <code>npm run shoot</code> · <code>npm run hub</code></p>`
       : `<p><a href="${esc(register.repo)}">Source</a></p>`)
-    .replace('{{PROBE}}', local
-      ? `<script>
-document.querySelectorAll('.dot').forEach(d => {
-  fetch(d.dataset.probe, { mode: 'no-cors', cache: 'no-store' })
-    .then(() => d.classList.add('dot--up'))
-    .catch(() => {});
-});
-</script>`
-      : '');
+    .replace('{{PROBE}}', '');
 }

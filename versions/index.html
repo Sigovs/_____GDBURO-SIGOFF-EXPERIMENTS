@@ -218,22 +218,23 @@ footer a { color: var(--ink-muted); }
     <p class="eyebrow">Buro Lab</p>
     <h1>Machine study 01</h1>
     <p class="subject">KUKA KR 700 PA</p>
-    <p class="lead">Every version is a published build — the links go straight to it, so this page needs nothing running. Open them in a real browser: VS Code&rsquo;s built-in preview does not put WebGL on screen.</p>
+    <p class="lead">Open in a real browser — VS Code&rsquo;s built-in preview does not put WebGL on screen. A green dot means the dev server is answering; if it is grey, run <code>npm run dev</code>.</p>
   </header>
 
   <div class="grid">
       <article class="card">
-        <a class="card__shot" href="https://sigovs.github.io/gd_buro_tests/v01-level-line/" target="_blank" rel="noopener">
+        <a class="card__shot" href="http://localhost:5180/" target="_blank" rel="noopener">
           <img src="previews/v01-level-line.jpg" alt="" loading="lazy" width="1440" height="900">
-          
+          <span class="dot" data-probe="http://localhost:5180/" title="dev server"></span>
         </a>
         <div class="card__meta">
           <p class="card__line"><span>2026-09-03</span><span class="card__status">current</span></p>
           <h2 class="card__name">The level line</h2>
           <p class="card__note">Six camera stations around roughly 490° of travel. The datum lives in the room rather than on the glass, so the arm occludes it. Split-flap opening; instrument layer reads real azimuth and distance.</p>
           <div class="card__links">
-          <a href="https://sigovs.github.io/gd_buro_tests/v01-level-line/" target="_blank" rel="noopener">The page</a>
-          <a href="https://sigovs.github.io/gd_buro_tests/v01-level-line/lab/rig.html" target="_blank" rel="noopener">Rig bench</a>
+          <a href="http://localhost:5180/" target="_blank" rel="noopener">The page</a>
+          <a href="http://localhost:5180/lab/rig.html" target="_blank" rel="noopener">Rig bench</a>
+          <a href="https://sigovs.github.io/gd_buro_tests/v01-level-line/" target="_blank" rel="noopener" class="alt">Deployed</a>
           </div>
         </div>
       </article>
@@ -241,12 +242,18 @@ footer a { color: var(--ink-muted); }
 
   <footer>
     <p class="footer__count">1 version · 1 deployed · built 2026-09-03</p>
-    <p>This page is generated. The site itself is <code>index1.html</code>; run it with <code>npm run dev</code>.</p>
-    <p>New version: <code>npm run new-variant -- v02-slug "Name" "note"</code></p>
-    <p>Then: <code>npm run deploy -- v02-slug</code> · <code>npm run shoot</code> · <code>npm run hub</code></p>
+    <p>New version: <code>node tools/new-variant.mjs v02-slug "Name" "note"</code></p>
+    <p>Previews: <code>node tools/shoot.mjs</code> — screenshots every version at its hero frame.</p>
+    <p>Publish: <code>npm run deploy -- v02-slug</code></p>
   </footer>
 
 </div>
-
+<script>
+document.querySelectorAll('.dot').forEach(d => {
+  fetch(d.dataset.probe, { mode: 'no-cors', cache: 'no-store' })
+    .then(() => d.classList.add('dot--up'))
+    .catch(() => {});
+});
+</script>
 </body>
 </html>

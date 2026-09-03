@@ -1,30 +1,36 @@
 # Buro Lab — INDEX1 · KR 700 PA
 
-## → Versions
+## → index.html
 
-### **https://sigovs.github.io/gd_buro_tests/**
+**Click `index.html` in the file tree.** That is the portal: every version, with
+a picture of each, and links straight to the published build. It needs no server
+and no build — open it as a file.
 
-The index of every variant, with a direct link to each. In the file tree as
-`!VERSIONS.url` (Windows) and `!VERSIONS.webloc` (Mac) — double-click either.
-They sort to the top of the file list on purpose, and they are committed, so the
-link is there on whichever machine opens the folder.
+The same page is published at
+**https://sigovs.github.io/gd_buro_tests/** for sharing.
+
+> **The site itself is `index1.html`**, not `index.html`. The portal took the
+> index name because that is the file a person clicks without being told to. Run
+> the site with `npm run dev`; the deploy renames the built entry back to
+> `index.html` inside each version folder, so `/v01-level-line/` still resolves.
 
 | | |
 |---|---|
-| `npm run deploy` | build and publish the variant marked `current` |
-| `npm run deploy -- v02-name` | publish a named variant |
-| `npm run deploy -- --list` | what is registered, and where each one is |
+| `npm run hub` | rebuild `index.html` |
+| `npm run shoot` | screenshot every version into `previews/` |
+| `npm run new-variant -- v02-slug "Name" "note"` | register a version |
+| `npm run deploy -- v02-slug` | publish it |
+| `npm run deploy -- --list` | what is registered and where |
 
 ### Adding a variant
 
-Add an entry to [variants.json](variants.json), then deploy it. The register is
-the source of truth in both directions: a slug that is not listed is refused
-rather than published as an untitled folder, and a folder whose entry has been
-deleted is removed by the next deploy. Nothing is orphaned by hand.
+Register it, build it, publish it, shoot it, rebuild the portal. The register in
+[variants.json](variants.json) is the source of truth in both directions: an
+unregistered slug is refused rather than published as an untitled folder, and a
+folder whose entry is deleted is removed by the next deploy.
 
-Each variant is published to its own path — `/v01-level-line/` — and the index
-at the root is regenerated from the register every time, so it never lists a
-version that is not there or omits one that is.
+Each version is published to its own path — `/v01-level-line/` — and both copies
+of the portal are regenerated from one template, so they cannot drift.
 
 ---
 

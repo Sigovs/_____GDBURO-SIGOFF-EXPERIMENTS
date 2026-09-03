@@ -50,8 +50,7 @@ assets/models/midnight-division*
 .playwright-mcp/
 .shots/
 
-# the local hub is generated — versions/ is an output, not a source
-versions/
 
 # playwright browsers live in the machine cache, not here
 tools/.shoot-run.mjs
+.portal-check.png

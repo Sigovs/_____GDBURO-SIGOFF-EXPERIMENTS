@@ -1,19 +1,30 @@
 # Buro Lab — INDEX1 · KR 700 PA
 
-## → Live
+## → Versions
 
 ### **https://sigovs.github.io/gd_buro_tests/**
 
-Rig bench: **https://sigovs.github.io/gd_buro_tests/lab/rig.html**
+The index of every variant, with a direct link to each. In the file tree as
+`!VERSIONS.url` (Windows) and `!VERSIONS.webloc` (Mac) — double-click either.
+They sort to the top of the file list on purpose, and they are committed, so the
+link is there on whichever machine opens the folder.
 
-Also in the file tree as `!LIVE-SITE.url` (Windows) and `!LIVE-SITE.webloc`
-(Mac) — double-click either. They sort to the top of the file list on purpose,
-and they are committed, so the link is there on whichever machine the folder is
-opened from rather than living in somebody's chat history.
+| | |
+|---|---|
+| `npm run deploy` | build and publish the variant marked `current` |
+| `npm run deploy -- v02-name` | publish a named variant |
+| `npm run deploy -- --list` | what is registered, and where each one is |
 
-Deployed from `master` to the `gh-pages` branch of
-[Sigovs/gd_buro_tests](https://github.com/Sigovs/gd_buro_tests). Redeploy with
-`npm run deploy`.
+### Adding a variant
+
+Add an entry to [variants.json](variants.json), then deploy it. The register is
+the source of truth in both directions: a slug that is not listed is refused
+rather than published as an untitled folder, and a folder whose entry has been
+deleted is removed by the next deploy. Nothing is orphaned by hand.
+
+Each variant is published to its own path — `/v01-level-line/` — and the index
+at the root is regenerated from the register every time, so it never lists a
+version that is not there or omits one that is.
 
 ---
 

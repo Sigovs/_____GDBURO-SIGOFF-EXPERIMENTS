@@ -1,7 +1,27 @@
-# Buro Lab — 3D / scroll base
+# Buro Lab — INDEX1 · KR 700 PA
 
-A base, not a page. The engine, the asset pipeline and two instruments; the site
-itself does not exist yet and will not until `BRIEF.md` is complete (`DNA1`).
+## → Live
+
+### **https://sigovs.github.io/gd_buro_tests/**
+
+Rig bench: **https://sigovs.github.io/gd_buro_tests/lab/rig.html**
+
+Also in the file tree as `!LIVE-SITE.url` (Windows) and `!LIVE-SITE.webloc`
+(Mac) — double-click either. They sort to the top of the file list on purpose,
+and they are committed, so the link is there on whichever machine the folder is
+opened from rather than living in somebody's chat history.
+
+Deployed from `master` to the `gh-pages` branch of
+[Sigovs/gd_buro_tests](https://github.com/Sigovs/gd_buro_tests). Redeploy with
+`npm run deploy`.
+
+---
+
+Machine study 01: a KUKA KR 700 PA palletiser, reconstructed from a 107-solid
+STEP file with no assembly tree, re-articulated on hinge centres derived from its
+own rod ends, and shot as six camera stations around roughly 490° of travel. Its
+arm sweeps three metres and its tool plate never tilts, and the page exists to
+make you see the not-tilting.
 
 ```
 npm install
@@ -10,7 +30,8 @@ npm run dev        http://localhost:5180
 
 | | |
 |---|---|
-| `/` | the workshop door — replaced by the site's index once there is one |
+| `/` | **INDEX1** — the page |
+| `/lab/rig.html` | **rig bench** — the articulation, driven directly, one axis at a time |
 | `/lab/` | **intake bench** — scale, budget and material audit for an incoming object |
 | `/lab/shots.html` | **shot bench** — the seven shots, driven by scroll |
 
@@ -37,8 +58,14 @@ copy. See [CLAUDE.md](CLAUDE.md) for the resolution order and
 [docs/ENGINE.md](docs/ENGINE.md) for what the engine already handles and what it
 deliberately leaves out.
 
-## What is not here yet, on purpose
+## The concept gate
 
-Tokens, type scale, palette, hero, page. The token layer is extracted from the
-hero once the hero exists (`PROCESS.md` §4) — inventing it now is how a palette
-gets discovered as wrong at the one moment it matters.
+[BRIEF.md](BRIEF.md) is complete and it was complete before the first line of
+markup (`DNA1`). It carries the Design Read, the feeling curve, the peak, the
+page grammar, the signature move, both shot lists, the budget and the claims
+ledger — including the numbers considered and then *rejected* for want of a
+source, which is the half of a ledger that usually goes unwritten.
+
+Every figure on the page was measured from the file in this repository. No
+manufacturer specification is quoted anywhere, and the designation's implied
+700 kg payload is deliberately absent from the render.

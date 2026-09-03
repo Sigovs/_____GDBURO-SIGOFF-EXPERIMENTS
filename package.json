@@ -3,11 +3,12 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "3D / scroll laboratory. Engine, asset pipeline and instruments. The site is not built until BRIEF.md is complete.",
+  "description": "INDEX1 — a KUKA KR 700 PA palletiser reconstructed from a 107-solid STEP file, re-articulated on its own hinge centres, and shot as six camera stations.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "deploy": "node tools/deploy.mjs",
     "decoders": "node tools/decoders.mjs",
     "convert": "node tools/convert.mjs",
     "inspect": "node tools/inspect.mjs",
@@ -23,5 +24,10 @@
     "draco3d": "^1.5.7",
     "occt-import-js": "^0.0.23",
     "vite": "^8.2.2"
+  },
+  "homepage": "https://sigovs.github.io/gd_buro_tests/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sigovs/gd_buro_tests.git"
   }
 }

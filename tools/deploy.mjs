@@ -30,6 +30,7 @@ import {
 } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
+import { buildHub } from './hub.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const DIST = join(ROOT, 'dist');
@@ -151,47 +152,23 @@ writeFileSync(join(work, '.nojekyll'), '');
 
 /* ── the index ───────────────────────────────────────────────────────────── */
 
-const esc = (s) => String(s)
-  .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-  .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-
 const isLive = (v) => existsSync(join(work, v.slug, 'index.html'));
 
-const cards = REGISTER.variants.map((v) => {
-  const live = isLive(v);
-  const entries = v.entries?.length ? v.entries : [{ path: '', label: 'Open' }];
+// Previews are carried onto the branch so the deployed hub shows the same
+// pictures the local one does. They are the content of that page — a version
+// list with no pictures is variants.json with a stylesheet.
+if (existsSync(join(ROOT, 'previews'))) {
+  cpSync(join(ROOT, 'previews'), join(work, 'previews'), { recursive: true });
+}
 
-  const links = live
-    ? '<div class="variant__links">\n'
-      + entries.map((e) => `            <a href="${esc(v.slug)}/${esc(e.path)}">${esc(e.label)}</a>`).join('\n')
-      + '\n          </div>'
-    : `<p class="missing">Not deployed yet &mdash; npm run deploy -- ${esc(v.slug)}</p>`;
-
-  return `      <article class="variant${live ? '' : ' variant--gone'}">
-        <div class="variant__meta">
-          <span>${esc(v.date || '')}</span>
-          <span class="variant__status">${esc(v.status || '')}</span>
-        </div>
-        <div>
-          <h2 class="variant__name">${esc(v.name)}</h2>
-          <p class="variant__note">${esc(v.note || '')}</p>
-          ${links}
-        </div>
-      </article>`;
-}).join('\n');
-
-const liveCount = REGISTER.variants.filter(isLive).length;
-
-const template = readFileSync(join(ROOT, 'versions', 'index.html'), 'utf8');
-const page = template
-  .replaceAll('{{TITLE}}', esc(REGISTER.title))
-  .replaceAll('{{SUBJECT}}', esc(REGISTER.subject))
-  .replace('{{VARIANTS}}', cards)
-  .replace('{{COUNT}}', `${liveCount} version${liveCount === 1 ? '' : 's'} live`)
-  .replace('{{BUILT}}', new Date().toISOString().slice(0, 10))
-  .replace('{{REPO}}', esc(REGISTER.repo));
-
-writeFileSync(join(work, 'index.html'), page);
+writeFileSync(join(work, 'index.html'), buildHub(REGISTER, {
+  mode: 'remote',
+  root: work,
+  repoRoot: ROOT,
+  isLive,
+  origin: ORIGIN,
+  base: BASE,
+}));
 
 /* ── publish ─────────────────────────────────────────────────────────────── */
 

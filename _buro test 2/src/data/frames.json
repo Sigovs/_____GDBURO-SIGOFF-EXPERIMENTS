@@ -1,0 +1,744 @@
+{
+ "act03/garage": {
+  "caption": "SUITE INTERIOR, OCCUPIED - DEVELOPER RENDER",
+  "origin": "render",
+  "source": "Scene-18_1-scaled.jpg",
+  "register": "cool",
+  "crop_landscape": [
+   0.16,
+   0.04,
+   0.94,
+   0.84
+  ],
+  "crop_portrait": [
+   0.34,
+   0.02,
+   0.92,
+   0.94
+  ],
+  "landscape": [
+   {
+    "w": 2200,
+    "file": "assets/img/act03/garage-2200.jpg",
+    "kb": 156.6
+   },
+   {
+    "w": 1600,
+    "file": "assets/img/act03/garage-1600.jpg",
+    "kb": 98.2
+   },
+   {
+    "w": 1100,
+    "file": "assets/img/act03/garage-1100.jpg",
+    "kb": 56.2
+   },
+   {
+    "w": 760,
+    "file": "assets/img/act03/garage-760.jpg",
+    "kb": 31.9
+   }
+  ],
+  "portrait": [
+   {
+    "w": 900,
+    "file": "assets/img/act03/garage-p900.jpg",
+    "kb": 62.8
+   },
+   {
+    "w": 640,
+    "file": "assets/img/act03/garage-p640.jpg",
+    "kb": 37.9
+   }
+  ],
+  "tone": "#202021"
+ },
+ "act03/lounge": {
+  "caption": "MEZZANINE, FINISHED - DEVELOPER RENDER",
+  "origin": "render",
+  "source": "Scene-12_1-scaled.jpg",
+  "register": "cool",
+  "crop_landscape": [
+   0.42,
+   0.02,
+   1.0,
+   1.0
+  ],
+  "crop_portrait": [
+   0.52,
+   0.0,
+   1.0,
+   1.0
+  ],
+  "landscape": [
+   {
+    "w": 2200,
+    "file": "assets/img/act03/lounge-2200.jpg",
+    "kb": 294.0
+   },
+   {
+    "w": 1600,
+    "file": "assets/img/act03/lounge-1600.jpg",
+    "kb": 188.8
+   },
+   {
+    "w": 1100,
+    "file": "assets/img/act03/lounge-1100.jpg",
+    "kb": 107.7
+   },
+   {
+    "w": 760,
+    "file": "assets/img/act03/lounge-760.jpg",
+    "kb": 60.2
+   }
+  ],
+  "portrait": [
+   {
+    "w": 900,
+    "file": "assets/img/act03/lounge-p900.jpg",
+    "kb": 155.0
+   },
+   {
+    "w": 640,
+    "file": "assets/img/act03/lounge-p640.jpg",
+    "kb": 90.8
+   }
+  ],
+  "tone": "#413d39"
+ },
+ "act03/personalized": {
+  "caption": "OWNER FIT-OUT - DEVELOPER RENDER",
+  "origin": "render",
+  "source": "Scene-14_1-scaled.jpg",
+  "register": "cool",
+  "crop_landscape": [
+   0.0,
+   0.06,
+   0.62,
+   1.0
+  ],
+  "crop_portrait": [
+   0.04,
+   0.04,
+   0.52,
+   1.0
+  ],
+  "landscape": [
+   {
+    "w": 2200,
+    "file": "assets/img/act03/personalized-2200.jpg",
+    "kb": 202.8
+   },
+   {
+    "w": 1600,
+    "file": "assets/img/act03/personalized-1600.jpg",
+    "kb": 129.1
+   },
+   {
+    "w": 1100,
+    "file": "assets/img/act03/personalized-1100.jpg",
+    "kb": 73.2
+   },
+   {
+    "w": 760,
+    "file": "assets/img/act03/personalized-760.jpg",
+    "kb": 41.5
+   }
+  ],
+  "portrait": [
+   {
+    "w": 900,
+    "file": "assets/img/act03/personalized-p900.jpg",
+    "kb": 108.3
+   },
+   {
+    "w": 640,
+    "file": "assets/img/act03/personalized-p640.jpg",
+    "kb": 63.5
+   }
+  ],
+  "tone": "#2a2727"
+ },
+ "act04/graze": {
+  "caption": "GRAZING LIGHT ACROSS A STONE PLANE",
+  "origin": "render",
+  "source": "Scene-18_1-scaled.jpg",
+  "register": "cool",
+  "crop_landscape": [
+   0.0,
+   0.22,
+   0.34,
+   0.56
+  ],
+  "crop_portrait": [
+   0.02,
+   0.2,
+   0.26,
+   0.62
+  ],
+  "landscape": [
+   {
+    "w": 2200,
+    "file": "assets/img/act04/graze-2200.jpg",
+    "kb": 109.7
+   },
+   {
+    "w": 1600,
+    "file": "assets/img/act04/graze-1600.jpg",
+    "kb": 73.0
+   },
+   {
+    "w": 1100,
+    "file": "assets/img/act04/graze-1100.jpg",
+    "kb": 44.7
+   },
+   {
+    "w": 760,
+    "file": "assets/img/act04/graze-760.jpg",
+    "kb": 26.5
+   }
+  ],
+  "portrait": [
+   {
+    "w": 900,
+    "file": "assets/img/act04/graze-p900.jpg",
+    "kb": 54.3
+   },
+   {
+    "w": 640,
+    "file": "assets/img/act04/graze-p640.jpg",
+    "kb": 34.7
+   }
+  ],
+  "tone": "#0e0e0f"
+ },
+ "act05/lounge": {
+  "caption": "CLUBHOUSE LOUNGE - DEVELOPER RENDER",
+  "origin": "render",
+  "source": "Scene-17_1-scaled.jpg",
+  "register": "warm",
+  "crop_landscape": [
+   0.0,
+   0.0,
+   0.86,
+   1.0
+  ],
+  "crop_portrait": [
+   0.14,
+   0.0,
+   0.66,
+   1.0
+  ],
+  "landscape": [
+   {
+    "w": 2200,
+    "file": "assets/img/act05/lounge-2200.jpg",
+    "kb": 321.6
+   },
+   {
+    "w": 1600,
+    "file": "assets/img/act05/lounge-1600.jpg",
+    "kb": 188.9
+   },
+   {
+    "w": 1100,
+    "file": "assets/img/act05/lounge-1100.jpg",
+    "kb": 101.7
+   },
+   {
+    "w": 760,
+    "file": "assets/img/act05/lounge-760.jpg",
+    "kb": 55.0
+   }
+  ],
+  "portrait": [
+   {
+    "w": 900,
+    "file": "assets/img/act05/lounge-p900.jpg",
+    "kb": 146.7
+   },
+   {
+    "w": 640,
+    "file": "assets/img/act05/lounge-p640.jpg",
+    "kb": 83.5
+   }
+  ],
+  "tone": "#564c40"
+ },
+ "act05/bar": {
+  "caption": "ROOFTOP BAR AND LOUNGE - DEVELOPER RENDER",
+  "origin": "render",
+  "source": "Scene-21-scaled.jpg",
+  "register": "warm",
+  "crop_landscape": [
+   0.0,
+   0.0,
+   0.72,
+   1.0
+  ],
+  "crop_portrait": [
+   0.04,
+   0.0,
+   0.56,
+   1.0
+  ],
+  "landscape": [
+   {
+    "w": 2200,
+    "file": "assets/img/act05/bar-2200.jpg",
+    "kb": 292.2
+   },
+   {
+    "w": 1600,
+    "file": "assets/img/act05/bar-1600.jpg",
+    "kb": 177.3
+   },
+   {
+    "w": 1100,
+    "file": "assets/img/act05/bar-1100.jpg",
+    "kb": 95.6
+   },
+   {
+    "w": 760,
+    "file": "assets/img/act05/bar-760.jpg",
+    "kb": 50.7
+   }
+  ],
+  "portrait": [
+   {
+    "w": 900,
+    "file": "assets/img/act05/bar-p900.jpg",
+    "kb": 118.0
+   },
+   {
+    "w": 640,
+    "file": "assets/img/act05/bar-p640.jpg",
+    "kb": 66.9
+   }
+  ],
+  "tone": "#5a5246"
+ },
+ "act05/business": {
+  "caption": "BUSINESS AND EVENT SPACE - DEVELOPER RENDER",
+  "origin": "render",
+  "source": "Scene-16_1-scaled.jpg",
+  "register": "warm",
+  "crop_landscape": [
+   0.1,
+   0.0,
+   1.0,
+   1.0
+  ],
+  "crop_portrait": [
+   0.3,
+   0.0,
+   0.86,
+   1.0
+  ],
+  "landscape": [
+   {
+    "w": 2200,
+    "file": "assets/img/act05/business-2200.jpg",
+    "kb": 266.5
+   },
+   {
+    "w": 1600,
+    "file": "assets/img/act05/business-1600.jpg",
+    "kb": 160.2
+   },
+   {
+    "w": 1100,
+    "file": "assets/img/act05/business-1100.jpg",
+    "kb": 87.6
+   },
+   {
+    "w": 760,
+    "file": "assets/img/act05/business-760.jpg",
+    "kb": 48.5
+   }
+  ],
+  "portrait": [
+   {
+    "w": 900,
+    "file": "assets/img/act05/business-p900.jpg",
+    "kb": 113.7
+   },
+   {
+    "w": 640,
+    "file": "assets/img/act05/business-p640.jpg",
+    "kb": 64.0
+   }
+  ],
+  "tone": "#574a3e"
+ },
+ "act00/perimeter": {
+  "caption": "PERIMETER AT NIGHT - STAND-IN, NOT THE PROPERTY",
+  "origin": "standin",
+  "source": "gen-perimeter.jpg",
+  "register": "cool",
+  "crop_landscape": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ],
+  "crop_portrait": [
+   0.3,
+   0.0,
+   1.0,
+   1.0
+  ],
+  "landscape": [
+   {
+    "w": 2200,
+    "file": "assets/img/act00/perimeter-2200.jpg",
+    "kb": 93.5
+   },
+   {
+    "w": 1600,
+    "file": "assets/img/act00/perimeter-1600.jpg",
+    "kb": 47.3
+   },
+   {
+    "w": 1100,
+    "file": "assets/img/act00/perimeter-1100.jpg",
+    "kb": 22.5
+   },
+   {
+    "w": 760,
+    "file": "assets/img/act00/perimeter-760.jpg",
+    "kb": 11.9
+   }
+  ],
+  "portrait": [
+   {
+    "w": 900,
+    "file": "assets/img/act00/perimeter-p900.jpg",
+    "kb": 57.3
+   },
+   {
+    "w": 640,
+    "file": "assets/img/act00/perimeter-p640.jpg",
+    "kb": 27.5
+   }
+  ],
+  "tone": "#16191c"
+ },
+ "act01/frontage": {
+  "caption": "INTERNAL FRONTAGE - STAND-IN, NOT THE PROPERTY",
+  "origin": "standin",
+  "source": "gen-frontage.jpg",
+  "register": "cool",
+  "crop_landscape": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ],
+  "crop_portrait": [
+   0.22,
+   0.0,
+   0.86,
+   1.0
+  ],
+  "landscape": [
+   {
+    "w": 2200,
+    "file": "assets/img/act01/frontage-2200.jpg",
+    "kb": 240.2
+   },
+   {
+    "w": 1600,
+    "file": "assets/img/act01/frontage-1600.jpg",
+    "kb": 137.5
+   },
+   {
+    "w": 1100,
+    "file": "assets/img/act01/frontage-1100.jpg",
+    "kb": 71.6
+   },
+   {
+    "w": 760,
+    "file": "assets/img/act01/frontage-760.jpg",
+    "kb": 37.7
+   }
+  ],
+  "portrait": [
+   {
+    "w": 900,
+    "file": "assets/img/act01/frontage-p900.jpg",
+    "kb": 94.2
+   },
+   {
+    "w": 640,
+    "file": "assets/img/act01/frontage-p640.jpg",
+    "kb": 51.4
+   }
+  ],
+  "tone": "#3a3e43"
+ },
+ "act03/delivered": {
+  "caption": "SUITE AS DELIVERED - STAND-IN, NOT THE PROPERTY",
+  "origin": "standin",
+  "source": "gen-delivered-mezz.jpg",
+  "register": "cool",
+  "crop_landscape": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ],
+  "crop_portrait": [
+   0.22,
+   0.0,
+   0.86,
+   1.0
+  ],
+  "landscape": [
+   {
+    "w": 2200,
+    "file": "assets/img/act03/delivered-2200.jpg",
+    "kb": 123.0
+   },
+   {
+    "w": 1600,
+    "file": "assets/img/act03/delivered-1600.jpg",
+    "kb": 68.4
+   },
+   {
+    "w": 1100,
+    "file": "assets/img/act03/delivered-1100.jpg",
+    "kb": 36.1
+   },
+   {
+    "w": 760,
+    "file": "assets/img/act03/delivered-760.jpg",
+    "kb": 19.9
+   }
+  ],
+  "portrait": [
+   {
+    "w": 900,
+    "file": "assets/img/act03/delivered-p900.jpg",
+    "kb": 41.2
+   },
+   {
+    "w": 640,
+    "file": "assets/img/act03/delivered-p640.jpg",
+    "kb": 22.2
+   }
+  ],
+  "tone": "#3e3f40"
+ },
+ "act04/floor": {
+  "caption": "SEALED FLOOR - STAND-IN, NOT THE PROPERTY",
+  "origin": "standin",
+  "source": "gen-floor.jpg",
+  "register": "cool",
+  "crop_landscape": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ],
+  "crop_portrait": [
+   0.24,
+   0.0,
+   0.8,
+   1.0
+  ],
+  "landscape": [
+   {
+    "w": 2200,
+    "file": "assets/img/act04/floor-2200.jpg",
+    "kb": 164.6
+   },
+   {
+    "w": 1600,
+    "file": "assets/img/act04/floor-1600.jpg",
+    "kb": 96.7
+   },
+   {
+    "w": 1100,
+    "file": "assets/img/act04/floor-1100.jpg",
+    "kb": 52.7
+   },
+   {
+    "w": 760,
+    "file": "assets/img/act04/floor-760.jpg",
+    "kb": 29.1
+   }
+  ],
+  "portrait": [
+   {
+    "w": 900,
+    "file": "assets/img/act04/floor-p900.jpg",
+    "kb": 79.1
+   },
+   {
+    "w": 640,
+    "file": "assets/img/act04/floor-p640.jpg",
+    "kb": 44.5
+   }
+  ],
+  "tone": "#464a4d"
+ },
+ "act04/seal": {
+  "caption": "DOOR SEAL AT FLOOR - STAND-IN, NOT THE PROPERTY",
+  "origin": "standin",
+  "source": "gen-seal.jpg",
+  "register": "cool",
+  "crop_landscape": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ],
+  "crop_portrait": [
+   0.24,
+   0.0,
+   0.8,
+   1.0
+  ],
+  "landscape": [
+   {
+    "w": 2200,
+    "file": "assets/img/act04/seal-2200.jpg",
+    "kb": 195.4
+   },
+   {
+    "w": 1600,
+    "file": "assets/img/act04/seal-1600.jpg",
+    "kb": 112.0
+   },
+   {
+    "w": 1100,
+    "file": "assets/img/act04/seal-1100.jpg",
+    "kb": 62.3
+   },
+   {
+    "w": 760,
+    "file": "assets/img/act04/seal-760.jpg",
+    "kb": 35.2
+   }
+  ],
+  "portrait": [
+   {
+    "w": 900,
+    "file": "assets/img/act04/seal-p900.jpg",
+    "kb": 103.1
+   },
+   {
+    "w": 640,
+    "file": "assets/img/act04/seal-p640.jpg",
+    "kb": 57.4
+   }
+  ],
+  "tone": "#3f4449"
+ },
+ "act05/community": {
+  "caption": "CLUB INTERIOR, THE COMPOUND BEYOND - STAND-IN, NOT THE PROPERTY",
+  "origin": "standin",
+  "source": "gen-community.jpg",
+  "register": "warm",
+  "crop_landscape": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ],
+  "crop_portrait": [
+   0.26,
+   0.0,
+   0.9,
+   1.0
+  ],
+  "landscape": [
+   {
+    "w": 2200,
+    "file": "assets/img/act05/community-2200.jpg",
+    "kb": 299.0
+   },
+   {
+    "w": 1600,
+    "file": "assets/img/act05/community-1600.jpg",
+    "kb": 165.0
+   },
+   {
+    "w": 1100,
+    "file": "assets/img/act05/community-1100.jpg",
+    "kb": 88.5
+   },
+   {
+    "w": 760,
+    "file": "assets/img/act05/community-760.jpg",
+    "kb": 49.0
+   }
+  ],
+  "portrait": [
+   {
+    "w": 900,
+    "file": "assets/img/act05/community-p900.jpg",
+    "kb": 130.7
+   },
+   {
+    "w": 640,
+    "file": "assets/img/act05/community-p640.jpg",
+    "kb": 69.8
+   }
+  ],
+  "tone": "#413f38"
+ },
+ "act07/roadway": {
+  "caption": "ONE DOOR OPEN - STAND-IN, NOT THE PROPERTY",
+  "origin": "standin",
+  "source": "gen-roadway.jpg",
+  "register": "cool",
+  "crop_landscape": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ],
+  "crop_portrait": [
+   0.24,
+   0.0,
+   0.88,
+   1.0
+  ],
+  "landscape": [
+   {
+    "w": 2200,
+    "file": "assets/img/act07/roadway-2200.jpg",
+    "kb": 255.6
+   },
+   {
+    "w": 1600,
+    "file": "assets/img/act07/roadway-1600.jpg",
+    "kb": 139.8
+   },
+   {
+    "w": 1100,
+    "file": "assets/img/act07/roadway-1100.jpg",
+    "kb": 71.0
+   },
+   {
+    "w": 760,
+    "file": "assets/img/act07/roadway-760.jpg",
+    "kb": 37.1
+   }
+  ],
+  "portrait": [
+   {
+    "w": 900,
+    "file": "assets/img/act07/roadway-p900.jpg",
+    "kb": 107.0
+   },
+   {
+    "w": 640,
+    "file": "assets/img/act07/roadway-p640.jpg",
+    "kb": 56.8
+   }
+  ],
+  "tone": "#2d2f2f"
+ }
+}

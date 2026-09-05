@@ -1,0 +1,730 @@
+@import './tokens.css';
+
+/* ==================================================================================
+   THE PRIVATE PADDOCK
+
+   Split stage — plan and room, cut-seamed. A persistent narrow index at the left edge
+   against a full-bleed stage that changes by cut.
+
+   Two structural rules govern nearly every declaration below:
+
+   1. RULES AND ALIGNMENT, NEVER BOXES. There is no bordered container anywhere on this
+      page. A container marks a system boundary, and this page's only system boundary is
+      the compound perimeter. This is what makes a card grid impossible to build here by
+      accident rather than merely discouraged.
+   2. INTERFACE ELEVATION DOES NOT EXIST. Depth is occlusion and light fall-off. There
+      is no box-shadow in this file. If a thing needs to come forward, it gets light.
+   ================================================================================== */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--face-grotesque);
+  font-size: var(--t-body);
+  line-height: 1.6;
+  overflow-x: hidden;          /* the field breaks the grid; the page never scrolls sideways */
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img, svg { display: block; max-width: 100%; }
+h1, h2, h3, p, ul, ol, figure, dl, dd { margin: 0; }
+ul, ol { list-style: none; padding: 0; }
+
+/* Focus ring: --ink, 2px, 2px offset. Decided by measurement, not preference — the
+   worst case is a focusable element sitting on a lit bay, which measures 3.69:1 and
+   passes. --lume-cold was the more elegant candidate and measures 2.90:1 there. */
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+:focus:not(:focus-visible) { outline: none; }
+
+.u-visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  clip-path: inset(50%); overflow: hidden; white-space: nowrap;
+}
+
+/* Skip link — the page is ~13.8vh of scroll, so bypassing it matters more than usual. */
+.skip {
+  position: fixed; top: var(--s-2); left: var(--s-2); z-index: 100;
+  transform: translateY(-200%);
+  background: var(--deck); color: var(--ink);
+  padding: var(--s-3) var(--s-4);
+  font: 500 var(--t-micro)/1.2 var(--face-mono);
+  letter-spacing: .12em; text-transform: uppercase; text-decoration: none;
+  border: var(--rule-partition);
+}
+.skip:focus { transform: translateY(0); }
+
+/* ---------------------------------------------------------------------------------
+   TYPE — two voices doing every role by size, weight and position.
+   Optical correction is encoded here, not remembered.
+   --------------------------------------------------------------------------------- */
+
+.t-display {
+  font-size: var(--t-display);
+  line-height: .95;
+  letter-spacing: -.02em;
+  font-weight: 500;
+  text-wrap: balance;
+  max-width: 30ch;
+}
+.t-h2 { font-size: var(--t-h2); line-height: 1.05; letter-spacing: -.015em; font-weight: 500; text-wrap: balance; }
+.t-h3 { font-size: var(--t-h3); line-height: 1.15; letter-spacing: -.01em; font-weight: 500; }
+.t-lead { font-size: var(--t-lead); line-height: 1.35; text-wrap: balance; max-width: 45ch; color: var(--ink-85); }
+.t-body { font-size: var(--t-body); line-height: 1.6; text-wrap: pretty; max-width: 65ch; color: var(--ink-70); }
+
+/* Mono micro-label. Uppercase is tracked and short — labels and act numbers only,
+   never a sentence, never a paragraph, never a headline. */
+.t-label {
+  font-family: var(--face-mono);
+  font-size: var(--t-micro);
+  line-height: 1.2;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-55);
+  font-weight: 400;
+}
+.t-mono { font-family: var(--face-mono); font-size: var(--t-micro); line-height: 1.5; letter-spacing: .02em; }
+
+/* Tabular figures everywhere numbers align. */
+.t-fig { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1; }
+
+/* The page's ONE chromatic role: scarcity. It lives in the record and the terms — in
+   the textual layer only — and never in the plan geometry (§3, §10 P9). Four instances
+   on the page, all of them the same fact: how many are gone. */
+.t-scarce { color: var(--oxide-text); }
+
+/* ---------------------------------------------------------------------------------
+   THE PERSISTENT HEADER
+
+   An ordinary hairline with a wordmark, a phone number and TOUR. The experiment happens
+   entirely in the field behind it. It is counted as a mass, it never goes opaque over
+   live content, and it is the reason no act needs to repeat a primary CTA.
+   --------------------------------------------------------------------------------- */
+
+.header {
+  position: fixed; inset: 0 0 auto 0; z-index: 40;
+  display: grid;
+  grid-template-columns: auto auto 1fr auto auto;
+  align-items: center;
+  gap: var(--s-5);
+  min-height: var(--header-h);
+  padding: var(--s-4) var(--margin);
+  border-bottom: var(--rule-construction);
+  background: none;
+  backdrop-filter: none;   /* no frosted glass anywhere on this page */
+}
+
+/* THE SAFE-HEADER RULE.
+
+   The header stays transparent and content still passes beneath it — but the pass is
+   authored instead of incidental. The scrim is a sibling of the bar, taller than it by
+   --header-fade, and it is nearly solid across the text band and then falls to nothing
+   inside 44px. What that removes is the long half-veiled zone the old ramp left behind
+   it (.55 at 58% of the bar's own height), where passing copy was dimmed just enough to
+   fight the wordmark and not enough to read as background. Now a mass is either behind
+   the bar and unambiguously dimmed, or it is clear.
+
+   It is still a directional scrim and not a panel: no fill, no border, no blur, and it
+   crosses no live content at full strength (`U13`, `color I4`). */
+.header::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 calc(var(--header-fade) * -1) 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(to bottom,
+    rgb(7 8 10 / .92) 0%,
+    rgb(7 8 10 / .88) 62%,
+    rgb(7 8 10 / .34) 84%,
+    rgb(7 8 10 / 0) 100%);
+}
+
+/* The second half of the same rule: a composed mass never RESTS inside the safe zone.
+   Acts 00 and 07 bottom-anchor their display block inside a full-height field, so the
+   block is boxed to start below the header band — it can grow downward, never upward
+   into the bar. */
+.field__stage {
+  position: absolute;
+  inset: var(--header-safe) 0 0 0;
+  align-content: end;
+  padding: 0 var(--margin) clamp(3rem, 7vw, 6rem) calc(var(--margin) + 28px);
+  z-index: 2;
+}
+
+.header__mark { display: flex; align-items: baseline; gap: var(--s-3); text-decoration: none; color: var(--ink); }
+.header__mark strong { font-weight: 600; letter-spacing: .16em; font-size: var(--t-micro); text-transform: uppercase; }
+.header__act { color: var(--ink-40); font-variant-numeric: tabular-nums; }
+.header__where { color: var(--ink-55); }
+.header__tel { color: var(--ink-70); text-decoration: none; }
+.header__tel:hover { color: var(--ink); }
+
+/* The one action the page carries from the first screen. A hairline affordance, not a
+   filled button — there is no gradient button and no elevation on this page. */
+.header__tour {
+  font-family: var(--face-mono);
+  font-size: var(--t-micro);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink);
+  padding: var(--s-2) var(--s-4);
+  border: var(--rule-partition);
+  transition: border-color var(--dur-quick) var(--ease-enter),
+              color var(--dur-quick) var(--ease-enter);
+}
+.header__tour:hover { border-color: var(--ink-70); }
+
+@media (max-width: 860px) {
+  .header { grid-template-columns: auto 1fr auto; gap: var(--s-3); padding: var(--s-3) var(--margin); }
+  .header__where, .header__tel { display: none; }
+}
+
+/* ---------------------------------------------------------------------------------
+   THE PLAN RAIL
+
+   The page's persistent architectural and navigational language. It orients, and
+   nothing else. It is the darkest, thinnest mass on screen and it never carries the
+   optical centre — edges are where the eye goes when a composition is not resolved, so
+   this one is deliberately quiet for six of eight acts.
+   --------------------------------------------------------------------------------- */
+
+.rail {
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  width: calc(var(--margin) + 28px);
+  z-index: 30;
+  pointer-events: none;
+  display: grid; place-items: start center;
+  padding-block: 96px var(--s-8);
+}
+.rail__svg { width: 100%; height: 100%; overflow: visible; }
+.rail__line { fill: none; stroke: var(--ink-16); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.rail__mark { fill: none; stroke: var(--ink-40); stroke-width: 1; vector-effect: non-scaling-stroke; }
+
+/* The marker is an instrument, so it moves linearly with scroll — no easing, no lag.
+   It is the only element on the page that moves continuously. */
+.rail__marker { fill: var(--ink-70); }
+
+/* On one column the rail leaves the column set entirely and its job moves to a
+   position line under the header. It still moves; it is orientation, not decoration. */
+.rail__progress { display: none; }
+
+@media (max-width: 1024px) {
+  .rail {
+    left: 0; right: 0; top: 0; bottom: auto;
+    width: auto; height: 2px;
+    padding: 0;
+  }
+  .rail__svg { display: none; }
+  .rail__progress {
+    display: block; height: 2px; width: 100%;
+    transform-origin: 0 50%; transform: scaleX(0);
+    background: var(--ink-40);
+  }
+}
+
+/* ---------------------------------------------------------------------------------
+   THE GRID
+
+        col   1  │ 2 ────────────────────── 8 │ 9 ──────── 12
+              RAIL│          STAGE            │    RECORD
+
+   The field is the only thing allowed to break the grid, and it breaks it completely.
+   Full bleed, edge to edge — never a 90%-width "almost aligned" image. Partial breaks
+   are what make a grid read as decoration behind content rather than as the composition.
+   --------------------------------------------------------------------------------- */
+
+.act {
+  position: relative;
+  padding-block: var(--act-pad);
+  padding-inline: var(--margin);
+  padding-left: calc(var(--margin) + 28px);   /* the rail's column */
+}
+
+.act__grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  gap: var(--gutter);
+  align-items: start;
+}
+
+.span-stage  { grid-column: 1 / span 7; }
+.span-record { grid-column: 8 / span 5; }
+.span-text   { grid-column: 1 / span 6; }
+.span-wide   { grid-column: 1 / span 8; }   /* the two display moments, 00 and 07 */
+.span-full   { grid-column: 1 / -1; }
+
+@media (max-width: 1024px) {
+  :root { --cols: 8; }
+  .act { padding-left: var(--margin); padding-top: calc(var(--act-pad) * .8); }
+  .span-stage  { grid-column: 1 / -1; }
+  .span-record { grid-column: 1 / -1; }
+  .span-text   { grid-column: 1 / -1; }
+  .span-wide   { grid-column: 1 / -1; }
+}
+@media (max-width: 640px) {
+  :root { --cols: 4; --gutter: 16px; }
+}
+
+/* --- Registers. One ground for the whole page, in three states. Each register change
+   is the concept rather than a section's preference, and `ground` never changes owner. */
+.act[data-register='surveyed'] { background: var(--deck); }
+.act[data-register='warm']     { background: var(--ground); }
+
+/* ---------------------------------------------------------------------------------
+   THE FIELD — full-bleed photography
+   --------------------------------------------------------------------------------- */
+
+/* Full bleed WITHOUT the 100vw trick. `width: 100vw` counts the vertical scrollbar and
+   pushes the page 8-15px wide, which is a horizontal page scroll — banned outright
+   (U6), and the kind of defect that only shows up when you measure scrollWidth rather
+   than look. Every field on this page already lives inside a zero-padding act, so it
+   is full width at 100% and needs no negative margin at all. */
+.field {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: var(--void);
+}
+.field--full { min-height: 100svh; }
+.field--sticky { position: sticky; top: 0; height: 100svh; }
+.field__img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  /* object-fit is a fallback, not a decision: crops are authored per breakpoint in
+     build-frames.py and served by <picture>. This only catches odd aspect ratios. */
+}
+.field__pic { display: block; width: 100%; height: 100%; }
+.field--full .field__pic, .field--full .field__img { position: absolute; inset: 0; }
+
+/* The lateral plate is wider than the frame so it has somewhere to travel — the only
+   lateral movement on the page. It must come AFTER the rule above: `inset: 0` pins
+   both edges, and an oversized image with `right: 0` still in force gets snapped back
+   to the frame width, which leaves an uncovered strip at the trailing edge as soon as
+   the dolly moves. `right: auto` is the whole fix. */
+/* `max-width: none` because the reset at the top of this file caps every image at
+   100% of its container, which silently clamps the oversize back to the frame. */
+.field--sticky .field__img { width: 122%; max-width: none; left: 0; right: auto; }
+
+/* A caption belongs to its frame and sits in the frame's quiet region — never over the
+   subject, never centred, never in a scrim box. There is no translucent panel over
+   imagery anywhere on this page. Legibility is fixed at the background layer by
+   position first, then by a directional scrim measured on the composited render. */
+.field__caption {
+  position: absolute; z-index: 2;
+  left: var(--margin); bottom: var(--s-6);
+  max-width: 46ch;
+  color: var(--ink-70);
+}
+.field__caption--tr { left: auto; right: var(--margin); top: 96px; bottom: auto; text-align: right; }
+
+.field__scrim {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+}
+.field__scrim--b { background: linear-gradient(to top, rgb(7 8 10 / .78) 0%, rgb(7 8 10 / .34) 22%, rgb(7 8 10 / 0) 46%); }
+.field__scrim--tr { background: linear-gradient(to bottom left, rgb(7 8 10 / .70) 0%, rgb(7 8 10 / 0) 42%); }
+.field__scrim--l { background: linear-gradient(to right, rgb(7 8 10 / .88) 0%, rgb(7 8 10 / .74) 26%, rgb(7 8 10 / .34) 46%, rgb(7 8 10 / 0) 68%); }
+/* The record column's own scrim. The peak's four states are not equally dark — LOUNGE
+   is bright right across the frame — so the plate needs its ground fixed at the
+   background layer rather than hoping the photograph is kind. This is a directional
+   scrim, measured on the composited render; it is NOT a panel and NOT frosted glass,
+   both of which are banned over imagery on this page (IM5, U13). */
+.field__scrim--r { background: linear-gradient(to left, rgb(7 8 10 / .94) 0%, rgb(7 8 10 / .86) 26%, rgb(7 8 10 / .46) 46%, rgb(7 8 10 / 0) 68%); }
+
+/* ---------------------------------------------------------------------------------
+   THE INK FLOOR OVER PHOTOGRAPHY
+
+   --ink-55 measures 5.50:1 on --ground and 5.41:1 on --deck, and it is the documented
+   floor for functional text. Over a PHOTOGRAPH it is not, and the token table cannot
+   tell you that: measured on the composited render behind act 03's scrim it lands at
+   3.49:1 on the plate keys and 4.07:1 on the truth line. Both fail.
+
+   So dimmed ink stops one step higher inside a field. The background is fixed first —
+   the scrims above were deepened — and this is the second half of the same fix, not a
+   substitute for it (`color I4`, `I6`).
+   --------------------------------------------------------------------------------- */
+.field .t-label,
+.field .plate__k,
+.field .dated,
+.field [data-state-truth] { color: var(--ink-70); }
+
+/* Loading is a matched placeholder — the frame's own average tone at its own aspect
+   ratio. No skeleton shimmer, no blur-up bloom: the placeholder matches what replaces
+   it in picture as well as in box. */
+.field__pic { background: var(--tone, var(--void)); }
+
+/* ---------------------------------------------------------------------------------
+   THE RECORD COLUMN
+
+   Present in all eight acts, on the same ground. This is the structural counterweight
+   to the failure this page is most likely to have — atmosphere instead of evidence.
+   --------------------------------------------------------------------------------- */
+
+.record { display: grid; gap: var(--s-5); }
+.record__head { display: grid; gap: var(--s-2); padding-bottom: var(--s-3); border-bottom: var(--rule-partition); }
+
+/* A spec plate composed as an object: mono keys, tabular values, hairline rules
+   between rows, no box. */
+.plate { display: grid; gap: 0; }
+.plate__row {
+  display: grid;
+  grid-template-columns: minmax(9rem, 1fr) minmax(0, 1.2fr);
+  gap: var(--s-4);
+  padding-block: var(--s-3);
+  border-bottom: var(--rule-partition);
+  align-items: baseline;
+}
+.plate__row:last-child { border-bottom: 0; }
+.plate__k { font-family: var(--face-mono); font-size: var(--t-micro); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-55); }
+.plate__v { font-size: var(--t-micro); color: var(--ink); font-variant-numeric: tabular-nums; }
+.plate__v strong { font-weight: 600; }
+
+/* Dated figures carry their date in the render. The ledger is not the reader's. */
+.dated { color: var(--ink-40); font-family: var(--face-mono); font-size: var(--t-micro); letter-spacing: .06em; }
+
+/* ---------------------------------------------------------------------------------
+   ACT 02 — THE COMPOUND. The surveyed register.
+   --------------------------------------------------------------------------------- */
+
+.compound { position: relative; }
+.compound__stage { position: relative; width: 100%; }
+/* The viewBox is a camera and it crops. `overflow: visible` would let all 121 bays
+   paint outside the frame the camera is looking through, which is not a reframe — it
+   is the drawing escaping its column. */
+.compound__svg { width: 100%; height: auto; display: block; overflow: hidden; }
+.compound__stage { overflow: hidden; }
+
+/* State is light, plus the record, plus a word. Never a pin, a dot, a pill or a
+   coloured marker — availability dots are the Zillow tell. */
+.bay {
+  fill: var(--mass);
+  stroke: var(--ink-40);
+  stroke-width: .6;
+  vector-effect: non-scaling-stroke;
+  transition: fill var(--dur-base) var(--ease-enter);
+  cursor: pointer;
+}
+.bay:hover { fill: var(--mass-lit); }
+.bay[data-state='focused'] { fill: var(--mass-lit); }
+/* Selection is illumination, not decoration. No glow, no bloom, no emissive edge, no
+   outline — a selected surface is a surface with light falling on it, and it measures
+   3.91:1 against its unlit neighbour and 4.45:1 against the ground. */
+.bay[aria-pressed='true'], .bay[data-state='lit'] { fill: var(--bay-lit); }
+/* SOLD = the absence of light, and nothing else on the drawing.
+   A sold bay can never take light: it sits one step BELOW --mass at rest and stays
+   there while its neighbours lift, so at building level it is the only dark thing in a
+   lit run — 4.35:1 against --bay-lit. There is no tick, no dot, no pin, no fill and no
+   coloured boundary anywhere in the plan geometry (`§10 P9`). The word SOLD is carried
+   by the record and by the suite's accessible name, which is where meaning belongs. */
+.bay[data-sold='true'] {
+  fill: var(--mass-sold);
+  stroke: var(--ink-16);
+  cursor: default;
+}
+.bay[data-sold='true']:hover { fill: var(--mass-sold); }
+.compound[data-level='building'] .bldg[data-focus='true'] .bay[data-sold='true'],
+.compound[data-level='suite']    .bldg[data-focus='true'] .bay[data-sold='true'] {
+  fill: var(--mass-sold);
+}
+
+.mass-run { fill: var(--mass); stroke: var(--ink-40); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.mass-civic { fill: var(--mass); stroke: var(--ink-40); stroke-width: 1; vector-effect: non-scaling-stroke; }
+/* The roadway reads as a lifted plane, so it is a wide soft stroke rather than a
+   filled polygon — a road has a width, not an outline. */
+.mass-road-line { stroke: var(--roadway); stroke-width: 34; stroke-linecap: round; stroke-linejoin: round; opacity: .85; }
+/* The extruded side walls. Value, not shadow. */
+.mass-side { fill: var(--void); stroke: var(--ink-16); stroke-width: .5; vector-effect: non-scaling-stroke; }
+.perimeter { fill: none; stroke: var(--ink-70); stroke-width: 2; vector-effect: non-scaling-stroke; }
+
+/* Subordination is by light, never by an overlay: masses lose light, not presence. */
+.bldg { transition: opacity var(--dur-base) var(--ease-enter); }
+.compound[data-level='building'] .bldg:not([data-focus='true']) .bay,
+.compound[data-level='suite']    .bldg:not([data-focus='true']) .bay { fill: var(--mass); stroke: var(--ink-16); }
+
+/* No floating labels over a building. All text lives in the record column, keyed by a
+   hairline leader to a real anchor point that stays anchored for the whole act. */
+.leader { stroke: var(--ink-40); stroke-width: 1; fill: none; vector-effect: non-scaling-stroke; }
+
+/* The key is typographic. It used to be four colour swatches — 18x10 chips, one of
+   them oxide — which is a pill cluster reading state by hue, and it broke both `§10 P9`
+   and `color I2` in the same eighteen pixels. State on this drawing is light, the
+   record, and a word, so the key describes the light rather than sampling it. */
+.legend { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-6); }
+.legend__item { display: flex; align-items: baseline; gap: var(--s-2); }
+.legend__term { color: var(--ink-70); }
+.legend__gloss { color: var(--ink-40); }
+
+/* The level control. A real control with real states, not a mood chapter about
+   exclusivity — and the same control the keyboard reaches. */
+.levels { display: flex; gap: var(--s-4); flex-wrap: wrap; }
+.level-btn {
+  appearance: none; background: none; color: var(--ink-55);
+  border: 0; border-bottom: 1px solid transparent;
+  padding: var(--s-2) 0;
+  font-family: var(--face-mono); font-size: var(--t-micro);
+  letter-spacing: .12em; text-transform: uppercase; cursor: pointer;
+  transition: color var(--dur-quick) var(--ease-enter), border-color var(--dur-quick) var(--ease-enter);
+}
+.level-btn:hover { color: var(--ink-70); }
+.level-btn[aria-current='true'] { color: var(--ink); border-bottom-color: var(--ink-70); }
+
+/* The accessible list beneath the drawing. Not a substitute control — the same one.
+   The rail's meaning is never carried by the drawing alone. */
+/* Bounded on desktop: a pinned act must not change height, and 121 rows would make it
+   five viewports tall. Every suite is present and reachable — the region is a labelled
+   list, not a truncation. On one column the pin is gone and the bound is lifted. */
+.bay-list {
+  display: grid; gap: var(--s-2);
+  max-height: 34svh; overflow-y: auto; overscroll-behavior: contain;
+  padding-right: var(--s-3);
+}
+@media (max-width: 1024px) {
+  .bay-list { max-height: none; overflow: visible; grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+@media (max-width: 560px) { .bay-list { grid-template-columns: 1fr; } }
+.bay-list__btn {
+  appearance: none; background: none; color: var(--ink-70);
+  border: 0; border-bottom: var(--rule-construction);
+  padding: var(--s-3) 0; text-align: left; cursor: pointer;
+  font-family: var(--face-mono); font-size: var(--t-micro); letter-spacing: .06em;
+  transition: color var(--dur-quick) var(--ease-enter);
+  min-height: 44px;                       /* touch target */
+}
+.bay-list__btn:hover { color: var(--ink); }
+.bay-list__btn[aria-pressed='true'] { color: var(--ink); border-bottom-color: var(--ink-70); }
+.bay-list__btn[disabled] { color: var(--ink-40); cursor: default; }
+
+/* ---------------------------------------------------------------------------------
+   ACT 03 — THE PEAK. One locked camera, four states.
+   --------------------------------------------------------------------------------- */
+
+.suite { position: relative; }
+.suite__states { position: relative; }
+.suite__state { position: absolute; inset: 0; opacity: 0; }
+.suite__state[data-active='true'] { opacity: 1; }
+
+/* `C6-TEMP`. The four state assets are three developer renders from three viewpoints
+   plus one stand-in — they are NOT one camera, so the change may not be choreographed
+   as a morph. What is permitted is a cut with a restrained crossfade, which is what a
+   change of editorial plate looks like and is honest about the discontinuity.
+
+   OPACITY ONLY. No transform, no scale, no translate: scale-matching or
+   position-matching between two different viewpoints is precisely the fake continuity
+   the rule exists to forbid. */
+.suite__state { transition: opacity var(--dur-base) var(--ease-enter); }
+.suite__state { transform: none !important; }
+
+.state-nav { display: flex; gap: var(--s-5); flex-wrap: wrap; }
+
+/* The footprint notation — the drawing that just became this room, kept where the
+   reader can check it against what they are looking at. ~40mm, hairline. */
+/* ~40mm at reading distance. It is NOTATION, not an object — see the fill note below. */
+.footprint { width: 104px; }
+.footprint svg { width: 100%; height: auto; }
+.footprint__outline { fill: none; stroke: var(--ink-40); stroke-width: 1; vector-effect: non-scaling-stroke; }
+/* --bay-lit here would make a flat interface rectangle the brightest thing on screen,
+   and L3 is absolute: the brightest pixel on the page is always inside a photograph and
+   the interface never emits light. The notation is a drawing at --mass-lit, read by its
+   hairline outline. */
+.footprint__sel { fill: var(--mass-lit); stroke: none; opacity: .55; }
+.footprint__mezz { fill: none; stroke: var(--ink-16); stroke-width: 1; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
+
+/* ---------------------------------------------------------------------------------
+   ACT 04 — MACHINE / SPACE. Macro. Three frames, no whole car and no whole room.
+   --------------------------------------------------------------------------------- */
+
+.macro { display: grid; gap: var(--gutter); }
+.macro__cell { display: grid; gap: var(--s-3); align-content: start; }
+.macro__frame { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: var(--void); }
+.macro__frame img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ACT 04 — a descent into detail, not a comparison row.
+
+   These three frames used to be a 3x1 equal-column grid, and act 05's three club
+   frames were the same grid again: two consecutive acts using one device, which the
+   section-language ledger reads as the same section twice. Act 04 is INTIMACY, so it
+   staggers — three unequal frames at three scales, stepping down and across, with the
+   air between them doing the work the empty half of the act used to do badly. Three
+   equal columns would be a claim that these are parallel and equal in rank (`DNA9`);
+   they are a sequence. */
+.macro--stagger {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: start;
+}
+.macro--stagger > :nth-child(1) { grid-column: 1 / span 4;  grid-row: 1; }
+.macro--stagger > :nth-child(2) { grid-column: 6 / span 5;  grid-row: 1; margin-block-start: clamp(1.25rem, 2.5vw, 2rem); }
+.macro--stagger > :nth-child(3) { grid-column: 2 / span 5;  grid-row: 2; margin-block-start: var(--s-5); }
+.macro--stagger > :nth-child(1) .macro__frame { aspect-ratio: 3 / 2; }
+.macro--stagger > :nth-child(2) .macro__frame { aspect-ratio: 16 / 9; }
+.macro--stagger > :nth-child(3) .macro__frame { aspect-ratio: 21 / 9; }
+
+/* ACT 05 — one dominant and two subordinates (`C1`), which is a different composition
+   from act 04's stagger and from anything else on the page. The lead frame is the one
+   that carries the act's argument: people in the room, and the compound through the
+   glass behind them. The pair beneath are unequal and sit on different axes. */
+.club {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--gutter);
+  align-items: start;
+}
+.club__lead { grid-column: 1 / span 8; }
+.club__lead .macro__frame { aspect-ratio: 21 / 9; }
+.club__a { grid-column: 1 / span 4; margin-block-start: var(--s-5); }
+.club__a .macro__frame { aspect-ratio: 3 / 2; }
+.club__b { grid-column: 6 / span 6; margin-block-start: var(--s-5); }
+.club__b .macro__frame { aspect-ratio: 21 / 9; }
+
+@media (max-width: 860px) {
+  .macro, .macro--stagger, .club { grid-template-columns: 1fr; }
+  .macro--stagger > *, .club > * { grid-column: 1 / -1 !important; grid-row: auto !important; margin-block-start: 0 !important; }
+  .macro--stagger .macro__frame, .club .macro__frame { aspect-ratio: 16 / 9; }
+}
+
+/* ---------------------------------------------------------------------------------
+   ACT 06 — OWNERSHIP. Not an image, a document. The highest text density on the page,
+   and it is the content. Specification is content, not an appendix.
+   --------------------------------------------------------------------------------- */
+
+.doc { display: grid; gap: var(--s-7); }
+.doc__block { display: grid; gap: var(--s-4); }
+.doc__cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gutter) var(--s-8); }
+@media (max-width: 860px) { .doc__cols { grid-template-columns: 1fr; } }
+
+.spec-list { display: grid; gap: 0; }
+.spec-list li {
+  padding-block: var(--s-3);
+  border-bottom: var(--rule-partition);
+  font-size: var(--t-micro);
+  color: var(--ink-70);
+  display: grid; grid-template-columns: 2.5rem 1fr; gap: var(--s-3);
+}
+.spec-list li span:first-child { font-family: var(--face-mono); color: var(--ink-40); font-variant-numeric: tabular-nums; }
+
+/* The A <-> B diagram. One shared plan: the depth axis and the mezzanine band are
+   locked and visibly locked, and only the width edge travels. Because the depth is
+   anchored, the visitor reads the difference as WIDTH, which is what it actually is,
+   instead of as "one is bigger". */
+.ab { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: var(--s-8); align-items: start; }
+@media (max-width: 860px) { .ab { grid-template-columns: 1fr; } }
+.ab__stage svg { width: 100%; height: auto; }
+.ab__unit { fill: var(--mass); stroke: var(--ink-70); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.ab__mezz { fill: var(--mass-lit); stroke: none; opacity: .5; }
+.ab__dim { stroke: var(--ink-40); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.ab__dim-locked { stroke: var(--ink-70); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.ab__car { fill: none; stroke: var(--ink-16); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.ab__t { font-family: var(--face-mono); font-size: 13px; letter-spacing: .08em; fill: var(--ink-55); text-transform: uppercase; }
+.ab__t--locked { fill: var(--ink-70); }
+
+/* An expandable schedule that does not move the list it lives in. */
+.disclose { border-bottom: var(--rule-partition); }
+.disclose__btn {
+  appearance: none; background: none; border: 0; width: 100%;
+  display: flex; justify-content: space-between; align-items: center; gap: var(--s-4);
+  padding: var(--s-4) 0; cursor: pointer; text-align: left;
+  color: var(--ink); font-family: var(--face-mono); font-size: var(--t-micro);
+  letter-spacing: .12em; text-transform: uppercase;
+  min-height: 44px;
+}
+.disclose__btn:hover { color: var(--ink); }
+.disclose__sign { color: var(--ink-40); font-variant-numeric: tabular-nums; }
+.disclose__body { display: none; padding-bottom: var(--s-5); }
+.disclose[data-open='true'] .disclose__body { display: block; }
+
+/* ---------------------------------------------------------------------------------
+   ACT 07 — PRIVATE TOUR. One action, at full size for the first time.
+   --------------------------------------------------------------------------------- */
+
+.close__actions { display: flex; gap: var(--s-6); align-items: center; flex-wrap: wrap; }
+.action {
+  display: inline-flex; align-items: center; gap: var(--s-3);
+  font-family: var(--face-mono); font-size: var(--t-micro);
+  letter-spacing: .12em; text-transform: uppercase; text-decoration: none;
+  color: var(--ink);
+  padding: var(--s-4) var(--s-6);
+  border: var(--rule-boundary);
+  transition: background-color var(--dur-quick) var(--ease-enter);
+  min-height: 44px;
+}
+.action:hover { background: rgb(236 238 241 / .06); }
+.action--quiet { border: 0; border-bottom: var(--rule-partition); padding: var(--s-3) 0; color: var(--ink-70); }
+.action--quiet:hover { background: none; color: var(--ink); }
+
+/* ---------------------------------------------------------------------------------
+   FOOTER — shares act 06's ground and grid. No new register, no fade to empty.
+   --------------------------------------------------------------------------------- */
+
+/* The footer hangs from a rule rather than floating in a gap. It used to carry its own
+   96px padding INSIDE an .act that already had --act-pad, so the space above the
+   columns was two paddings stacked and read as the page running out rather than
+   ending. One boundary, one interval, and the ending is designed (`DNA30`, `C19`). */
+.footer { background: var(--deck); padding-block: 0 var(--s-7); }
+.footer > .act { padding-block: var(--s-6) 0; }
+.footer__rule { border-top: var(--rule-partition); margin-bottom: var(--s-6); }
+.footer__cols { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--gutter); }
+@media (max-width: 860px) { .footer__cols { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.footer a { color: var(--ink-70); text-decoration: none; }
+.footer a:hover { color: var(--ink); }
+.footer__note { color: var(--ink-40); max-width: 70ch; }
+
+/* ---------------------------------------------------------------------------------
+   MOTION HOOKS
+
+   The static page must stand alone (`MJ5`, `G7`), so nothing here hides content ahead
+   of a script. Elements are visible by default and the motion layer opts them in only
+   after it has confirmed it took hold — a silent no-op is indistinguishable from a
+   page where motion was never designed.
+   --------------------------------------------------------------------------------- */
+
+[data-arrive] { opacity: 1; }
+.js-motion [data-arrive] { opacity: 0; }
+.js-motion [data-arrive].is-in { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .js-motion [data-arrive] { opacity: 1; }
+  * { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
+
+/* ---------------------------------------------------------------------------------
+   THE ENTER LAYER — the signature's hand-off, and the only place a photograph is seen
+   through a drawing.
+
+   A fixed full-viewport layer holding act 03's plate, clipped to the selected
+   footprint's own screen-space quadrilateral. It sits above the compound and below the
+   header, so the page's one persistent mass is never crossed. It exists only during the
+   last quarter of act 02's pin and is removed the moment the pin releases.
+   --------------------------------------------------------------------------------- */
+.enter {
+  position: fixed; inset: 0; z-index: 35;
+  pointer-events: none;
+  display: none;
+}
+.enter__plate {
+  position: absolute; inset: 0;
+  background-color: var(--void);
+  background-size: cover;
+  background-position: center;
+  will-change: clip-path;
+}
+/* The outline is the drawing, and it is the last thing to leave. Hairline weight at the
+   boundary rule's value — this is the compound perimeter's own language, arriving at
+   the moment the footprint becomes a door. */
+.enter__line { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.enter__outline {
+  fill: none;
+  stroke: var(--ink-70);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+@media (prefers-reduced-motion: reduce) { .enter { display: none !important; } }

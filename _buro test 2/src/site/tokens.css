@@ -1,0 +1,129 @@
+/* ==================================================================================
+   TOKENS — the resolved visual system.
+
+   Every value here is transcribed from docs/visual-direction.md, which measured them
+   before any markup existed. Nothing in this file is a new decision; where a value
+   looks arbitrary, its derivation and its measured contrast ratio are in that file.
+
+   The two rules that matter most when editing this:
+     - There is no light mode (§1). Inverting this scheme would put dark ink on dark
+       rooms; the correct inversion is a different page.
+     - The accent is LIGHT, not hue (§3). If something needs emphasis and reaches for
+       a colour here, it needs illumination instead.
+   ================================================================================== */
+
+:root {
+  /* --- GROUND. Five steps, and the darkness has information in it. --------------- */
+  --void:      #07080A;   /* outside the compound; the black point of every photograph */
+  --ground:    #0E1013;   /* the page */
+  --deck:      #171B20;   /* surveyed ground — acts 02 and 06 */
+  --roadway:   #1F242A;   /* the plan's road plane, near-planar and slightly lifted */
+
+  /* --- MASS. Building values sit close together on purpose; LIGHT separates them. - */
+  --mass:      #1A1E23;   /* a building face, unlit */
+  --mass-sold: #101317;   /* a bay that can never take light — SOLD. 1.11:1 under --mass
+                             at rest, and 4.35:1 under --bay-lit once its neighbours
+                             illuminate. The absence IS the signal (§3). */
+  --mass-lit:  #3A424B;   /* a building face, focused */
+  --bay-lit:   #6E7C88;   /* ONE bay, illuminated — the selection state */
+
+  /* --- INK. One near-white, never #fff. ------------------------------------------ */
+  --ink:       #ECEEF1;
+  --ink-85:    rgb(236 238 241 / .85);
+  --ink-70:    rgb(236 238 241 / .70);   /* 8.28:1 on --ground — body */
+  --ink-55:    rgb(236 238 241 / .55);   /* 5.50:1 — the floor for functional text */
+  --ink-40:    rgb(236 238 241 / .40);   /* 3.46:1 — rules that carry information */
+  --ink-16:    rgb(236 238 241 / .16);   /* 1.53:1 — construction lines, decoration ONLY */
+
+  /* --- LIGHT --------------------------------------------------------------------- */
+  --lume-cold: #CBD6DE;   /* LED interior spill — the compound */
+  --lume-warm: #E9DCC4;   /* the clubhouse, and nowhere else */
+
+  /* --- ACCENT. One hue, one role, and it never touches the drawing. ---------------
+     Revised 2026-09-05. The accent used to be a MARK on the plan — a 2.8-unit oxide
+     tick inside each sold bay — which is precisely the coloured marker `§10 P9` bans,
+     and the Zillow tell it names. There is now no oxide anywhere in the plan geometry.
+     What remains is one TEXTUAL accent, in the record and the terms only, on the word
+     and the figure that carry scarcity.
+
+     #C86B60 measures 4.72:1 on --deck and 5.20:1 on --ground, so it clears the 4.5
+     floor for 14px mono in both registers. It sits at 52% saturation, which is above
+     the dialect's 8–25% guidance: that is a measured constraint rather than a taste
+     choice — desaturating further drops it under AA on this ground, and an accent that
+     cannot be read is not a quieter accent, it is a broken one. */
+  --oxide-text: #C86B60;
+
+  /* --- THE HEADER SAFE ZONE ------------------------------------------------------
+     One rule for every act: the header is a band, not a line, and content is either
+     clearly BEHIND it or clearly CLEAR of it — never half-veiled in between.
+     --header-h     the bar itself, wordmark to hairline
+     --header-fade  the tail below it, where the scrim falls to nothing
+     --header-safe  the two together: the region no composed mass may rest inside */
+  --header-h:    72px;
+  --header-fade: 44px;
+  --header-safe: calc(var(--header-h) + var(--header-fade));
+
+  /* --- LINE WEIGHT. Three weights, and each one means something. ------------------
+     A line's weight states what kind of edge it is. A fourth weight would be a fourth
+     kind of edge, and the drawing does not have one. 1px at every DPR — chasing 0.5px
+     produces a line that disappears on half the devices that see it. */
+  --rule-construction: 1px solid var(--ink-16);  /* decoration — may never carry meaning */
+  --rule-partition:    1px solid var(--ink-40);  /* carries information — meets 3:1 */
+  --rule-boundary:     2px solid var(--ink-70);  /* perimeter, selection, focus */
+
+  /* --- TYPE. Two voices, seven roles, differentiated by size and position. --------
+     Stand-ins, declared: Archivo for ABC Diatype, IBM Plex Mono for ABC Diatype Mono.
+     The final call is made on screen with the page's own strings (§4). */
+  --face-grotesque: 'Archivo', ui-sans-serif, system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --face-mono:      'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --t-micro:   0.875rem;                                   /* 14px — the floor, fixed */
+  --t-body:    clamp(1rem, 0.35vw + 0.95rem, 1.125rem);
+  --t-lead:    clamp(1.125rem, 0.9vw + 1rem, 1.5rem);
+  --t-h3:      clamp(1.5rem, 1.6vw + 1.1rem, 2rem);
+  --t-h2:      clamp(2rem, 3vw + 1.2rem, 3.25rem);
+  --t-display: clamp(2.75rem, 6vw + 1rem, 6rem);
+
+  /* --- SPACING. 4px base, documented scale, no magic numbers. --------------------- */
+  --s-1: .25rem;  --s-2: .5rem;  --s-3: .75rem;  --s-4: 1rem;   --s-5: 1.5rem;
+  --s-6: 2rem;    --s-7: 3rem;   --s-8: 4rem;    --s-9: 6rem;   --s-10: 8rem;
+
+  /* Act padding is EVEN, top and bottom (§6). This sets aside the house bottom-heavy
+     rule deliberately: the page's meter is eight enclosures at a regular beat, and
+     bottom-heavy padding would make them read as editorial chapters instead. */
+  --act-pad: clamp(4rem, 9vw, 8rem);
+
+  /* --- GRID ---------------------------------------------------------------------- */
+  --cols: 12;
+  --gutter: 24px;
+  --margin: clamp(20px, 4vw, 72px);
+  --baseline: 8px;
+
+  /* --- MOTION. Five durations. A value not on this list does not ship (§9). ------- */
+  --dur-instant:  90ms;   /* state confirmed, focus ring */
+  --dur-quick:   180ms;   /* hover, functional text arrival */
+  --dur-base:    320ms;   /* UI state change, record arrival */
+  --dur-door:    640ms;   /* THE APERTURE — the page's signature duration */
+  --dur-settle: 1200ms;   /* an act's composed frame settling after a cut */
+
+  --ease-enter: cubic-bezier(.16, 1, .30, 1);   /* entrances — a strong out */
+  --ease-exit:  cubic-bezier(.70, 0, .84, 0);   /* exits — in */
+  /* --ease-door is a GSAP CustomEase and is registered in motion.js. This is its
+     closest CSS approximation, for the handful of transitions that never touch GSAP. */
+  --ease-door:  cubic-bezier(.62, 0, .20, 1);
+}
+
+/* Mobile re-authors the aperture rather than scaling it: the travel is shorter, so
+   640ms reads as sluggish rather than heavy (`M4`). */
+@media (max-width: 640px) {
+  :root { --dur-door: 420ms; }
+}
+
+/* The reduced-motion path is an authored state, act by act (§12) — not a disabled
+   page. Durations collapse; nothing is hidden, no sequence is left unresolved, and
+   selection still works because it is a state change rather than a motion. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-quick: 1ms; --dur-base: 1ms; --dur-door: 1ms; --dur-settle: 1ms;
+  }
+}

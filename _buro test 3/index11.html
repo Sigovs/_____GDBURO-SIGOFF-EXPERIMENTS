@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rests — the silence at true size</title>
+<meta name="description" content="The six standard rests of 4/4 drawn at true relative duration on one surface, where the silence is the figure and the sound is the ground." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+/* ===========================================================================
+   RESTS — a free-topic study. Nothing behind it: no client, no product.
+
+   COMPOSITION READ
+     Subject        the six standard rests of 4/4, at true relative duration on
+                    one surface.
+     Dialect        brief-derived, engraved-notation: hairlines, exact
+                    placement, no ornament, position carries meaning.
+                    auction-editorial is not used and would be wrong — this
+                    subject has no provenance to state.
+     Governing idea THE SILENCE IS THE FIGURE; THE SOUND IS THE GROUND.
+                    Figure-ground is inverted deliberately and stays legible (C4).
+     Dominant       the whole rest, because it is 50.79% of the bar. Dominance
+                    is a measured fact here, not a decision — C1 arrived at
+                    through C8 rather than asserted.
+     Dimensionality ABSENT. Depth would imply the silences sit above the ground;
+                    they are cut into it. Edge and overlap carry the reading.
+     Accent         none, and that is the decision rather than an omission.
+                    color-taste I5 governs how an accent is derived when there
+                    is one; this subject has no colour, and reaching for a
+                    highlight is precisely the default I5 exists to catch. What
+                    would have been the accent is the void.
+
+   THE ARITHMETIC, so every width on this page is checkable
+     whole 4 · half 2 · quarter 1 · eighth 0.5 · sixteenth 0.25 · 32nd 0.125
+     sum 7.875 beats
+     50.794% · 25.397% · 12.698% · 6.349% · 3.175% · 1.587%
+
+   RECOMPOSITION (C12)
+     Above 64rem the bar runs as one course.
+     Between 48 and 64rem it WRAPS like a line of type, and the rag is not a
+     defect — it is the proportion, made visible by where the line breaks.
+     Below 48rem width stops being able to carry the ratio at all: a 32nd rest
+     would be five pixels. The carrier changes to HEIGHT and the same six ratios
+     stand vertically. The idea is preserved; the mechanism is replaced.
+   ======================================================================== */
+:root{
+  --s1:.25rem; --s2:.5rem; --s3:.75rem; --s4:1rem; --s5:1.5rem;
+  --s6:2rem;   --s7:3rem;  --s8:4rem;   --s9:6rem;
+
+  --paper:#f2f0ea;                 /* the void — what the page is about      */
+  --ink:#171614;                   /* the ground — 15.36:1 apart             */
+  --ink-pale:rgba(242,240,234,.62);
+  --ink-hair:rgba(242,240,234,.26);
+  --paper-soft:rgba(23,22,20,.62);
+  --paper-hair:rgba(23,22,20,.24);
+
+  --serif:"Source Serif 4",Georgia,serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+
+  /* pixels per beat. One number governs every width on the page, so the
+     proportions cannot drift apart by hand. */
+  /* A bar of four four fills its measure — that is what a bar is. The beat is
+     therefore derived from the measure itself, not from the viewport, so the
+     seven and seven-eighths beats span it exactly and the leftover space that
+     read as unfinished layout disappears. */
+  --ppb:calc((100% - (5 * var(--gap))) / 7.875);
+  /* Between 48 and 64rem the beat is deliberately kept LARGER than the measure
+     can hold, so the bar wraps like a line of type and the rag becomes the
+     proportion showing itself. The plan claimed this; without the override the
+     bar simply shrank and never broke. */
+  --gap:2px;
+  --pad:clamp(1rem,3.4vw,4rem);
+  --maxw:96rem;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ink);color:var(--paper);font-family:var(--mono);
+  -webkit-font-smoothing:antialiased;font-size:1rem;line-height:1.5}
+p,h1,h2,dl,dd{margin:0}
+.wrap{max-width:var(--maxw);margin-inline:auto;padding-inline:var(--pad);width:100%}
+.k{font-family:var(--mono);font-size:.625rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--ink-pale)}
+.num{font-variant-numeric:tabular-nums}
+:where(a,button):focus-visible{outline:2px solid var(--paper);outline-offset:3px}
+
+.head{padding-block:var(--s7) var(--s6)}
+.head h1{font-family:var(--serif);font-weight:400;
+  font-size:clamp(1.75rem,3.4vw,3.25rem);line-height:1.04;letter-spacing:-.02em;
+  max-width:19ch;margin-top:var(--s4)}
+.head h1 em{font-style:italic}
+.head p{max-width:52ch;margin-top:var(--s5);font-family:var(--serif);
+  font-size:clamp(.9375rem,1vw,1.0625rem);line-height:1.6;color:var(--ink-pale)}
+
+/* =========================================================================
+   THE BAR. Voids cut into an ink field. Nothing here is rounded: a rounded
+   void would read as a drawn shape rather than as something removed.
+   ====================================================================== */
+.bar{display:flex;flex-wrap:wrap;gap:var(--gap);align-items:stretch;
+  padding-block:var(--s6) 0}
+.rest{position:relative;background:var(--paper);color:var(--ink);
+  /* the one line that carries the whole composition */
+  width:calc(var(--ppb) * var(--b));
+  /* A flex item's default minimum is its content, so the narrow voids stopped
+     shrinking and the page began lying about the only thing it claims. The
+     declared width has to win outright. */
+  flex:0 0 auto;min-width:0;min-inline-size:0;
+  min-height:clamp(9rem,26vh,17rem);
+  display:flex;flex-direction:column;justify-content:space-between;
+  /* With border-box a box cannot be narrower than its own padding, so a fixed
+     inline padding quietly becomes a floor and the narrow voids stop obeying
+     the ratio. The padding is therefore always smaller than the smallest void. */
+  padding:var(--s4) clamp(.3rem,1.1vw,1rem) var(--s3);overflow:hidden}
+.rest__n{font-family:var(--serif);font-size:clamp(.875rem,1.05vw,1.1875rem);
+  line-height:1.1;letter-spacing:-.008em}
+.rest__b{font-family:var(--mono);font-size:.625rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--paper-soft);font-variant-numeric:tabular-nums}
+.rest__p{font-family:var(--serif);font-variant-numeric:tabular-nums;
+  font-size:clamp(1rem,1.9vw,2.25rem);line-height:1;letter-spacing:-.02em}
+
+/* a void too narrow to hold its own name says so with a leader, which is the
+   engraver's answer and not a compromise */
+/* Below a certain width a void cannot carry any mark at all without setting a
+   floor under itself. It carries none, and the leader beneath names it — which
+   is the engraver's answer rather than a compromise. */
+.rest--tight{padding:0}
+.rest--tight .rest__n,.rest--tight .rest__b,.rest--tight .rest__p{
+  position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);
+  white-space:nowrap}
+/* the leader is a pointer, not a measurement — tying it to the beat made it
+   overflow the measure the moment the beat grew */
+.lead{display:flex;flex-wrap:wrap;gap:var(--s3);align-items:baseline;
+  padding-block:var(--s3) 0}
+.lead__line{flex:1 1 4rem;min-width:2rem;height:1px;background:var(--ink-hair);
+  align-self:center}
+.lead__t{flex:0 1 auto;font-size:.625rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-pale)}
+
+/* the scale under the bar exists only to prove the widths */
+.scale{display:flex;gap:var(--gap);padding-top:var(--s3);flex-wrap:wrap}
+.scale span{width:calc(var(--ppb) * var(--b));border-top:1px solid var(--ink-hair);
+  padding-top:var(--s2);font-size:.5625rem;letter-spacing:.12em;
+  color:var(--ink-pale);font-variant-numeric:tabular-nums;overflow:hidden;
+  white-space:nowrap}
+
+.coda{padding-block:var(--s7) var(--s8);display:grid;gap:var(--s6)}
+@media (min-width:64rem){ .coda{grid-template-columns:5fr 7fr;gap:var(--s8)} }
+.coda h2{font-family:var(--serif);font-weight:400;
+  font-size:clamp(1.25rem,1.9vw,1.75rem);line-height:1.14;max-width:22ch}
+.coda p{font-family:var(--serif);font-size:.9375rem;line-height:1.7;
+  color:var(--ink-pale);max-width:56ch}
+.coda p+p{margin-top:var(--s4)}
+.sum{display:grid;grid-template-columns:1fr auto;column-gap:var(--s5)}
+.sum dt{padding-block:.5rem;border-top:1px solid var(--ink-hair);
+  font-size:.625rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-pale)}
+.sum dd{padding-block:.5rem;border-top:1px solid var(--ink-hair);text-align:right;
+  font-variant-numeric:tabular-nums;font-size:.8125rem}
+.sum .tot dt,.sum .tot dd{border-top:1px solid var(--ink-pale)}
+
+/* =========================================================================
+   BELOW 48rem the carrier changes. Width can no longer hold the ratio — a
+   32nd would be five pixels — so HEIGHT takes it and the bar stands up.
+   ====================================================================== */
+@media (max-width:47.99rem){
+  :root{--ppb:clamp(1.6rem,13vh,6rem)}
+  .bar{flex-direction:column;flex-wrap:nowrap;padding-block:var(--s5) 0}
+  /* standing up, the same trap moves to the block axis */
+  .rest{width:100%;min-height:0;min-block-size:0;height:calc(var(--ppb) * var(--b));
+    flex-direction:row;align-items:center;justify-content:space-between;
+    gap:var(--s4);padding:.3rem var(--s4)}
+  /* The two smallest stay unmarked here too: at twelve pixels tall a label
+     would set a floor and break the only claim the page makes. Every value is
+     stated in the table below, so nothing is lost. */
+  .rest--tight{padding:0}
+  .rest__b{display:none}
+  .rest__p{font-size:clamp(.875rem,3.6vw,1.25rem)}
+  .lead,.scale{display:none}
+}
+@media (min-width:48rem) and (max-width:63.99rem){
+  :root{--ppb:15vw}
+  /* The scale wraps at its own breakpoints, not the bar's, so in the wrapped
+     state it stands under the wrong voids. A scale that mismeasures is worse
+     than none; the percentages inside the voids carry the proof here. */
+  .scale{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+
+<main>
+  <header class="head wrap">
+    <p class="k">Six rests &middot; one bar of four four</p>
+    <h1>The silence is the figure. The sound is the <em>ground</em>.</h1>
+    <p>Six standard rests, drawn at true relative duration on one surface. Every
+      width below is the same number of pixels per beat, so nothing here has been
+      composed by eye. Half of the bar is a single silence.</p>
+  </header>
+
+  <section class="wrap" aria-labelledby="bar-h">
+    <h2 id="bar-h" class="k">Drawn at true relative duration</h2>
+
+    <div class="bar">
+      <div class="rest" style="--b:4">
+        <p class="rest__n">Whole rest<br /><span class="rest__b">Semibreve</span></p>
+        <p class="rest__p">50.794%</p>
+      </div>
+      <div class="rest" style="--b:2">
+        <p class="rest__n">Half<br /><span class="rest__b">Minim</span></p>
+        <p class="rest__p">25.397%</p>
+      </div>
+      <div class="rest" style="--b:1">
+        <p class="rest__n">Quarter<br /><span class="rest__b">Crotchet</span></p>
+        <p class="rest__p">12.698%</p>
+      </div>
+      <div class="rest" style="--b:.5">
+        <p class="rest__n">Eighth</p>
+        <p class="rest__p">6.349%</p>
+      </div>
+      <div class="rest rest--tight" style="--b:.25">
+        <p class="rest__n">Sixteenth<br /><span class="rest__b">Semiquaver</span></p>
+        <p class="rest__p">3.175%</p>
+      </div>
+      <div class="rest rest--tight" style="--b:.125">
+        <p class="rest__n">Thirty-second<br /><span class="rest__b">Demisemiquaver</span></p>
+        <p class="rest__p">1.587%</p>
+      </div>
+    </div>
+
+    <div class="scale" aria-hidden="true">
+      <span style="--b:4">4 beats</span>
+      <span style="--b:2">2</span>
+      <span style="--b:1">1</span>
+      <span style="--b:.5">&frac12;</span>
+      <span style="--b:.25">&frac14;</span>
+      <span style="--b:.125">&#8539;</span>
+    </div>
+
+    <div class="lead" aria-hidden="true">
+      <span class="lead__line"></span>
+      <span class="lead__t">The last two are too narrow to hold their own names</span>
+    </div>
+  </section>
+
+  <section class="coda wrap" aria-labelledby="coda-h">
+    <div>
+      <h2 id="coda-h">Nothing here was sized by eye.</h2>
+      <p>One value governs every width: pixels per beat. Each void multiplies it
+        by its own duration and by nothing else. Change the viewport and all six
+        move together, which is the only reason the comparison means anything.</p>
+      <p>Where the line breaks is not a layout accident. It breaks where the beats
+        run out of room, so the rag is the proportion showing itself.</p>
+      <p>Below the width at which a thirty-second rest would be five pixels, the
+        page stops using width. Height takes the ratio instead and the bar stands
+        up. Same idea, different carrier.</p>
+    </div>
+    <dl class="sum">
+      <dt>Whole &middot; semibreve</dt><dd class="num">4 &middot; 50.794%</dd>
+      <dt>Half &middot; minim</dt><dd class="num">2 &middot; 25.397%</dd>
+      <dt>Quarter &middot; crotchet</dt><dd class="num">1 &middot; 12.698%</dd>
+      <dt>Eighth &middot; quaver</dt><dd class="num">0.5 &middot; 6.349%</dd>
+      <dt>Sixteenth &middot; semiquaver</dt><dd class="num">0.25 &middot; 3.175%</dd>
+      <dt>Thirty-second &middot; demisemiquaver</dt><dd class="num">0.125 &middot; 1.587%</dd>
+      <div class="tot" style="display:contents">
+        <dt>Sum</dt><dd class="num">7.875 beats &middot; 100%</dd>
+      </div>
+    </dl>
+  </section>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,149 @@
+{
+ "01": [
+  {
+   "file": "assets/strip/case-01-a.webp",
+   "w": 1280,
+   "h": 800
+  },
+  {
+   "file": "assets/strip/case-01-b.webp",
+   "w": 1280,
+   "h": 800
+  },
+  {
+   "file": "assets/strip/case-01-c.webp",
+   "w": 1280,
+   "h": 800
+  },
+  {
+   "file": "assets/strip/case-01-d.webp",
+   "w": 1280,
+   "h": 800
+  },
+  {
+   "file": "assets/strip/case-01-e.webp",
+   "w": 370,
+   "h": 800
+  }
+ ],
+ "02": [
+  {
+   "file": "assets/strip/case-02-a.webp",
+   "w": 1280,
+   "h": 800
+  },
+  {
+   "file": "assets/strip/case-02-b.webp",
+   "w": 1280,
+   "h": 800
+  },
+  {
+   "file": "assets/strip/case-02-c.webp",
+   "w": 1280,
+   "h": 800
+  },
+  {
+   "file": "assets/strip/case-02-d.webp",
+   "w": 1280,
+   "h": 800
+  },
+  {
+   "file": "assets/strip/case-02-e.webp",
+   "w": 370,
+   "h": 800
+  }
+ ],
+ "03": [
+  {
+   "file": "assets/strip/case-03-a.webp",
+   "w": 1280,
+   "h": 800
+  },
+  {
+   "file": "assets/strip/case-03-b.webp",
+   "w": 1280,
+   "h": 800
+  },
+  {
+   "file": "assets/strip/case-03-c.webp",
+   "w": 1280,
+   "h": 800
+  },
+  {
+   "file": "assets/strip/case-03-d.webp",
+   "w": 1280,
+   "h": 800
+  },
+  {
+   "file": "assets/strip/case-03-e.webp",
+   "w": 370,
+   "h": 800
+  }
+ ],
+ "04": [
+  {
+   "file": "assets/strip/case-04-a.webp",
+   "w": 1280,
+   "h": 800
+  },
+  {
+   "file": "assets/strip/case-04-b.webp",
+   "w": 1280,
+   "h": 800
+  },
+  {
+   "file": "assets/strip/case-04-c.webp",
+   "w": 1280,
+   "h": 800
+  },
+  {
+   "file": "assets/strip/case-04-d.webp",
+   "w": 1280,
+   "h": 800
+  },
+  {
+   "file": "assets/strip/case-04-e.webp",
+   "w": 370,
+   "h": 800
+  }
+ ],
+ "05": [
+  {
+   "file": "assets/strip/case-05-a.webp",
+   "w": 1920,
+   "h": 800
+  },
+  {
+   "file": "assets/strip/case-05-b.webp",
+   "w": 1920,
+   "h": 800
+  },
+  {
+   "file": "assets/strip/case-05-c.webp",
+   "w": 789,
+   "h": 800
+  },
+  {
+   "file": "assets/strip/case-05-d.webp",
+   "w": 756,
+   "h": 800
+  },
+  {
+   "file": "assets/strip/case-05-e.webp",
+   "w": 324,
+   "h": 800
+  }
+ ],
+ "06": [
+  {
+   "file": "assets/strip/case-06-a.webp",
+   "w": 1422,
+   "h": 800
+  },
+  {
+   "file": "assets/strip/case-06-b.webp",
+   "w": 1422,
+   "h": 800
+  }
+ ]
+}

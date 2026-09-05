@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>gd_buro — every version in this folder</title>
+<meta name="description" content="An index of the design studies in this repository. Each card links to one version." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+/* ===========================================================================
+   PORTAL — scaffolding, not a design. Tokens are lifted verbatim from
+   index1.html so this page cannot invent a system of its own. No accent
+   colour, no shadow, no radius, no JavaScript.
+   ======================================================================== */
+:root{
+  --space-1:.25rem; --space-2:.5rem;  --space-3:.75rem; --space-4:1rem;
+  --space-5:1.5rem; --space-6:2rem;   --space-7:3rem;   --space-8:4rem;
+  --space-9:6rem;   --space-10:8rem;
+
+  --text-xs:.6875rem;
+  --text-sm:clamp(.8125rem,.8vw + .7rem,.9375rem);
+  --text-body:clamp(1rem,.35vw + .95rem,1.125rem);
+  --text-h3:clamp(1.25rem,1vw + 1rem,1.5rem);
+  --text-h2:clamp(2rem,3vw + 1.2rem,3.25rem);
+
+  --bg:#0e0f11;
+  --bg-raised:#16181b;
+  --ink:#f2f1ee;
+  --ink-70:rgba(242,241,238,.72);
+  --ink-58:rgba(242,241,238,.58);
+  --rule:rgba(242,241,238,.14);
+  --rule-strong:rgba(242,241,238,.38);
+
+  --dur-2:.25s;
+  --ease-out:cubic-bezier(.22,1,.36,1);
+
+  --mat:clamp(1.5rem,5vw,7rem);
+  --font-body:"Inter Tight","Inter","Helvetica Neue",Arial,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--font-body); font-size:var(--text-body);
+  line-height:1.55; font-weight:300;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit}
+code{font-family:var(--font-mono); font-size:.9em; color:var(--ink-70)}
+
+.page{max-width:96rem; margin-inline:auto; padding:var(--mat) var(--mat) var(--space-10)}
+
+/* ---- masthead ---------------------------------------------------------- */
+.masthead{border-block-end:1px solid var(--rule); padding-block-end:var(--space-6)}
+.masthead h1{
+  font-size:var(--text-h2); font-weight:500; letter-spacing:-.02em;
+  line-height:1.05; margin:0 0 var(--space-4);
+}
+.masthead p{
+  margin:0; max-width:60ch; color:var(--ink-70); font-size:var(--text-sm);
+}
+.label{
+  font-family:var(--font-mono); font-size:var(--text-xs); font-weight:400;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-58);
+}
+.masthead .label{display:block; margin:0 0 var(--space-5)}
+
+/* ---- group ------------------------------------------------------------- */
+.group{margin-block-start:var(--space-9)}
+.group__head{
+  display:flex; align-items:baseline; gap:var(--space-4); flex-wrap:wrap;
+  border-block-end:1px solid var(--rule); padding-block-end:var(--space-3);
+  margin-block-end:var(--space-6);
+}
+.group__head h2{
+  margin:0; font-size:var(--text-sm); font-weight:500; letter-spacing:.01em;
+}
+.group__head .label{margin-inline-start:auto}
+
+/* ---- grid -------------------------------------------------------------- */
+.grid{
+  display:grid; gap:var(--space-8) var(--space-6);
+  grid-template-columns:repeat(auto-fill,minmax(18rem,1fr));
+  list-style:none; margin:0; padding:0;
+}
+.grid > li{display:flex} /* so the card fills the stretched row */
+
+/* ---- card: the whole thing is the link --------------------------------- */
+.card{display:flex; flex-direction:column; flex:1; text-decoration:none}
+.card:focus-visible{outline:2px solid var(--ink); outline-offset:6px}
+
+.shot{
+  position:relative; display:grid; place-items:center;
+  aspect-ratio:16/10; overflow:hidden;
+  background:var(--bg-raised); border:1px solid var(--rule);
+  transition:border-color var(--dur-2) var(--ease-out);
+}
+/* the fallback: an <object> renders its own content when the file is absent,
+   so a missing capture reads as a label instead of a broken image. */
+.shot object{
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; object-position:50% 0;
+  pointer-events:none; /* the anchor keeps the click */
+  border:0;
+}
+.shot .none{
+  font-family:var(--font-mono); font-size:var(--text-xs);
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-58);
+}
+.card:hover .shot,.card:focus-visible .shot{border-color:var(--rule-strong)}
+
+.meta{
+  display:flex; align-items:baseline; gap:var(--space-3);
+  margin-block:var(--space-4) var(--space-3);
+}
+.meta .no{color:var(--ink)}
+.meta .file{margin-inline-start:auto; text-transform:none; letter-spacing:.06em}
+
+.card h3{
+  margin:0 0 var(--space-3); font-size:var(--text-h3); font-weight:400;
+  letter-spacing:-.01em; line-height:1.2;
+}
+.card p{margin:0 0 var(--space-3); font-size:var(--text-sm); color:var(--ink-70)}
+/* selector carries .card so it out-ranks `.card p` above — otherwise the
+   margin-top:auto that pushes this to the foot of the card never applies */
+.card p.settles{
+  margin:auto 0 0; padding-block-start:var(--space-3);
+  border-block-start:1px solid var(--rule);
+  font-size:var(--text-sm); color:var(--ink-58);
+}
+.settles b{
+  display:block; font-family:var(--font-mono); font-size:var(--text-xs);
+  font-weight:400; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ink-58); margin-block-end:var(--space-2);
+}
+
+/* ---- colophon ---------------------------------------------------------- */
+.colophon{
+  margin-block-start:var(--space-10); padding-block-start:var(--space-5);
+  border-block-start:1px solid var(--rule);
+  font-size:var(--text-sm); color:var(--ink-58); max-width:72ch;
+}
+.colophon a{color:var(--ink-70)}
+
+@media (max-width:40rem){
+  .grid{grid-template-columns:1fr}
+  .meta{flex-wrap:wrap}
+  .meta .file{margin-inline-start:0}
+  .group__head .label{margin-inline-start:0}
+}
+</style>
+</head>
+<body>
+<main class="page">
+
+  <header class="masthead">
+    <span class="label">gd_buro &nbsp;&middot;&nbsp; old mountain &nbsp;&middot;&nbsp; 19 versions</span>
+    <h1>Every version in this folder.</h1>
+    <p>An index, not a portfolio. Each card opens one page. What a version is and
+       what it was built to settle are taken from the repository&rsquo;s own record
+       &mdash; the README, the file&rsquo;s own title and description, and the
+       commit that shipped it. Nothing here is invented. Some pages have to be
+       served rather than opened from disk, and say so.</p>
+  </header>
+
+  <!-- ==================================================================== -->
+  <section class="group">
+    <div class="group__head">
+      <h2>The portfolio, and three variants of it</h2>
+      <span class="label">index1 &ndash; index4</span>
+    </div>
+    <ul class="grid">
+
+      <li><a class="card" href="index1.html">
+        <span class="shot"><span class="none">no preview yet</span>
+          <object data="previews/index1.jpg" type="image/jpeg" aria-label="Screenshot of index1.html"></object></span>
+        <span class="meta label"><span class="no">01</span><span class="file">index1.html</span></span>
+        <h3>Selected Work</h3>
+        <p>The portfolio itself. Six chapters &mdash; Cauley Ferrari, Prestige
+           Imports, Pagani of Chicago, Dimamid, MODA Miami for Sotheby&rsquo;s,
+           Porsche Restoration &mdash; on a gallery-neutral ground with no
+           chromatic accent at all.</p>
+        <p class="settles"><b>Built to settle</b>Whether each case can be shown in
+           its client&rsquo;s own art direction with the portfolio never putting a
+           frame around it: the only furniture is a rail that sits in the same
+           place on every case, so the eye stops seeing it and starts comparing
+           the work.</p>
+      </a></li>
+
+      <li><a class="card" href="index2.html">
+        <span class="shot"><span class="none">no preview yet</span>
+          <object data="previews/index2.jpg" type="image/jpeg" aria-label="Screenshot of index2.html"></object></span>
+        <span class="meta label"><span class="no">02</span><span class="file">index2.html</span></span>
+        <h3>Variant B &mdash; motion-led</h3>
+        <p>Each case is a stage pinned with <code>position:sticky</code> and
+           scrubbed by scroll progress. Not variant A with animation added.</p>
+        <p class="settles"><b>Built to settle</b>Whether the same six chapters read
+           differently as a sequence you move through rather than a document you
+           read. Motion is the deliverable here, so the register comes from the
+           brief and auction-editorial is not selected.</p>
+      </a></li>
+
+      <li><a class="card" href="index3.html">
+        <span class="shot"><span class="none">no preview yet</span>
+          <object data="previews/index3.jpg" type="image/jpeg" aria-label="Screenshot of index3.html"></object></span>
+        <span class="meta label"><span class="no">03</span><span class="file">index3.html</span></span>
+        <h3>Variant C &mdash; the corridor</h3>
+        <p>Three.js and GSAP. Six planes on a zig-zag corridor with real
+           perspective and fog; scroll drives the camera through it. Serve this one
+           &mdash; over <code>file://</code> it falls back to the document by
+           design, because WebGL cannot use CORS-tainted local images.</p>
+        <p class="settles"><b>Built to settle</b>The fair criticism that A and B
+           changed the mechanism but not the language &mdash; both a dark plane, a
+           full-bleed photograph and mono labels. This changes the medium: the
+           cases stop being pictures on a page and become objects in a space you
+           travel through.</p>
+      </a></li>
+
+      <li><a class="card" href="index4.html">
+        <span class="shot"><span class="none">no preview yet</span>
+          <object data="previews/index4.jpg" type="image/jpeg" aria-label="Screenshot of index4.html"></object></span>
+        <span class="meta label"><span class="no">04</span><span class="file">index4.html</span></span>
+        <h3>Variant D &mdash; canon page</h3>
+        <p>A 3D moment for each case, then that case&rsquo;s own frames unrolling
+           sideways with text, six times. Vertical scroll drives both and the page
+           itself never scrolls sideways. Also needs serving.</p>
+        <p class="settles"><b>Built to settle</b>Two things declared rather than
+           borrowed: the Van de Graaf canon as the actual construction system, and
+           an ambient shader that had to earn its place under the ambient tier
+           &mdash; achromatic, low amplitude, no bloom.</p>
+      </a></li>
+
+    </ul>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section class="group">
+    <div class="group__head">
+      <h2>Meridian Motor Group &mdash; one dealership brief, five answers</h2>
+      <span class="label">index5 &ndash; index9</span>
+    </div>
+    <ul class="grid">
+
+      <li><a class="card" href="index5.html">
+        <span class="shot"><span class="none">no preview yet</span>
+          <object data="previews/index5.jpg" type="image/jpeg" aria-label="Screenshot of index5.html"></object></span>
+        <span class="meta label"><span class="no">05</span><span class="file">index5.html</span></span>
+        <h3>Meridian &mdash; the free-form design</h3>
+        <p>A sport-and-exotic dealer site for someone comparing a six-figure
+           purchase. Eight live listings chosen by measurement rather than by eye.
+           The map is a keyless OpenStreetMap embed and will not render from
+           <code>file://</code>.</p>
+        <p class="settles"><b>Built to settle</b>A stated dialect yield: build dark
+           first is set aside, because every photograph is a white studio sweep and
+           on a dark ground each car becomes a glaring rectangle in a void. Bone
+           ground &mdash; and the off-black / off-white rule outlives the
+           direction.</p>
+      </a></li>
+
+      <li><a class="card" href="index6.html">
+        <span class="shot"><span class="none">no preview yet</span>
+          <object data="previews/index6.jpg" type="image/jpeg" aria-label="Screenshot of index6.html"></object></span>
+        <span class="meta label"><span class="no">06</span><span class="file">index6.html</span></span>
+        <h3>Meridian on the AAN stack</h3>
+        <p>The same design landed in the ecosystem AAN developers build in &mdash;
+           compile-time Sass, no CDN, Bootstrap 4, jQuery, Owl &mdash; delivered as
+           HTML plus <code>custom.scss</code> and its compiled CSS, because dev
+           handoff is the point.</p>
+        <p class="settles"><b>Built to settle</b>What index5 was doing that would
+           not have survived handoff: runtime custom properties for theming, a
+           Google Fonts link, and an inventory built from a JS template that left
+           the page empty with scripting off.</p>
+      </a></li>
+
+      <li><a class="card" href="index7.html">
+        <span class="shot"><span class="none">no preview yet</span>
+          <object data="previews/index7.jpg" type="image/jpeg" aria-label="Screenshot of index7.html"></object></span>
+        <span class="meta label"><span class="no">07</span><span class="file">index7.html</span></span>
+        <h3>The Folio</h3>
+        <p>A vehicle as an entry in one continuous register: a folio number, a
+           chassis as its real name, and numbered inspection points that bind the
+           photograph to the specification in both directions.</p>
+        <p class="settles"><b>Built to settle</b>The criticism of index5, which is
+           not defended: it declared auction-editorial and delivered a dealership
+           template underneath &mdash; split hero, search bar, three-column card
+           grid. Bone paint on a stock skeleton. This rebuilds the compositional
+           system.</p>
+      </a></li>
+
+      <li><a class="card" href="index8.html">
+        <span class="shot"><span class="none">no preview yet</span>
+          <object data="previews/index8.jpg" type="image/jpeg" aria-label="Screenshot of index8.html"></object></span>
+        <span class="meta label"><span class="no">08</span><span class="file">index8.html</span></span>
+        <h3>Night Drive &mdash; direction A</h3>
+        <p>The folio, register and archive concept abandoned entirely. Graphite
+           ground, one warm light on actions only, cinematic cropping, two-up
+           inventory, and one signature interaction: the pass, where a still
+           photograph drifts inside its fixed frame and reads as a car going by.</p>
+        <p class="settles"><b>Built to settle</b>The photography problem. All eight
+           sources are bright studio shots, and a dark direction on them risks
+           faking atmosphere. Cutting the cars off their sweeps failed; the answer
+           was to crop tight enough that the car fills the frame.</p>
+      </a></li>
+
+      <li><a class="card" href="index9.html">
+        <span class="shot"><span class="none">no preview yet</span>
+          <object data="previews/index9.jpg" type="image/jpeg" aria-label="Screenshot of index9.html"></object></span>
+        <span class="meta label"><span class="no">09</span><span class="file">index9.html</span></span>
+        <h3>Night Drive, through the pipeline</h3>
+        <p>The same brief rebuilt as process rather than surface: the vault queried
+           before any visual decision, a composition pass before styling, three
+           type voices, and a working finance calculator as a real dominant.</p>
+        <p class="settles"><b>Built to settle</b>Four corrections to index8, each
+           conceded. Cards restored, because banning them threw away what the buyer
+           needs. The palette re-derived from a hue census &mdash; 89.4% of every
+           saturated pixel is red, so red is the one hue an action must never take.</p>
+      </a></li>
+
+    </ul>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section class="group">
+    <div class="group__head">
+      <h2>Single-surface studies, free topic</h2>
+      <span class="label">index10 &ndash; index15</span>
+    </div>
+    <ul class="grid">
+
+      <li><a class="card" href="index10.html">
+        <span class="shot"><span class="none">no preview yet</span>
+          <object data="previews/index10.jpg" type="image/jpeg" aria-label="Screenshot of index10.html"></object></span>
+        <span class="meta label"><span class="no">10</span><span class="file">index10.html</span></span>
+        <h3>440 &mdash; one object, two authorities</h3>
+        <p>A tuning fork described at once by metrology and by a collector&rsquo;s
+           register: two documentary systems that both claim authority and are both
+           right. Neither is softened.</p>
+        <p class="settles"><b>Built to settle</b>Where two systems can meet. The
+           only fact they share is the number, so the number is the seam &mdash;
+           one figure set once, standing in both systems at the same time and
+           clipped exactly on the rule between them.</p>
+      </a></li>
+
+      <li><a class="card" href="index11.html">
+        <span class="shot"><span class="none">no preview yet</span>
+          <object data="previews/index11.jpg" type="image/jpeg" aria-label="Screenshot of index11.html"></object></span>
+        <span class="meta label"><span class="no">11</span><span class="file">index11.html</span></span>
+        <h3>Rests &mdash; the silence at true size</h3>
+        <p>The six standard rests of 4/4 cut as voids into an ink field, at true
+           relative duration, on one surface. Two values only, so grayscale is the
+           design and there is no accent at all.</p>
+        <p class="settles"><b>Built to settle</b>Whether figure-ground can be
+           inverted on purpose and stay legible, with dominance measured rather
+           than chosen &mdash; the whole rest dominates because it is 50.794% of
+           the bar. Below 48rem the carrier changes from width to height.</p>
+      </a></li>
+
+      <li><a class="card" href="index12.html">
+        <span class="shot"><span class="none">no preview yet</span>
+          <object data="previews/index12.jpg" type="image/jpeg" aria-label="Screenshot of index12.html"></object></span>
+        <span class="meta label"><span class="no">12</span><span class="file">index12.html</span></span>
+        <h3>Bath &mdash; what the dye pot will give you</h3>
+        <p>A natural-dye predictor. Five dyestuffs, four mordants and four fibres,
+           and every one of the eighty results is computed from a stated model
+           rather than picked by hand.</p>
+        <p class="settles"><b>Built to settle</b>Colour as the function rather than
+           the decoration: the result floods the page because the result is the
+           answer, and the ink is not a token &mdash; it is solved against the
+           computed field until it clears 4.5:1, and prints the ratio it reached.</p>
+      </a></li>
+
+      <li><a class="card" href="index13.html">
+        <span class="shot"><span class="none">no preview yet</span>
+          <object data="previews/index13.jpg" type="image/jpeg" aria-label="Screenshot of index13.html"></object></span>
+        <span class="meta label"><span class="no">13</span><span class="file">index13.html</span></span>
+        <h3>The Second Sunrise</h3>
+        <p>A fictional 1984 advertising poster for the Macintosh. Drawn geometry in
+           SVG for the machine, CSS for sky, corona, rays, grid and bloom.
+           Not affiliated with Apple.</p>
+        <p class="settles"><b>Built to settle</b>Whether the promise can be made
+           visible instead of stated. The claim is that the machine is a source of
+           daylight, so the scene is lit <em>by</em> it &mdash; remove the
+           Macintosh and the poster goes dark, which is the argument.</p>
+      </a></li>
+
+      <li><a class="card" href="index14.html">
+        <span class="shot"><span class="none">no preview yet</span>
+          <object data="previews/index14.jpg" type="image/jpeg" aria-label="Screenshot of index14.html"></object></span>
+        <span class="meta label"><span class="no">14</span><span class="file">index14.html</span></span>
+        <h3>Overview &mdash; we didn&rsquo;t invent this colour</h3>
+        <p>A fictional campaign for an architectural paint brand whose entire range
+           is sampled from orbit. Every frame is NASA, public domain, credited on
+           the sheet; no illustration substitutes for any of it.</p>
+        <p class="settles"><b>Built to settle</b>That the reveal belongs in the
+           crop rather than in the copy &mdash; the photograph is cropped past the
+           point where it reads as geography and starts reading as a painted
+           surface. The headline is set across a real edge in the picture: one ink,
+           two fields, both legible.</p>
+      </a></li>
+
+      <li><a class="card" href="index15.html">
+        <span class="shot"><span class="none">no preview yet</span>
+          <object data="previews/index15.jpg" type="image/jpeg" aria-label="Screenshot of index15.html"></object></span>
+        <span class="meta label"><span class="no">15</span><span class="file">index15.html</span></span>
+        <h3>Fovea &mdash; the detail was never the problem</h3>
+        <p>An advertisement for an optics brand whose hero plate is neither a
+           photograph nor a generation: a printed page imaged through two loupes by
+           tracing 224 million photons through a Seidel aberration model of each
+           element.</p>
+        <p class="settles"><b>Built to settle</b>Whether the product claim can be
+           the artwork. A moulded singlet gives an RMS spot of 27.8px; the aspheric
+           achromat, given the larger aperture, gives 2.2px. The word under the
+           second lens is the brand name, legible through one lens and not the
+           other.</p>
+      </a></li>
+
+    </ul>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section class="group">
+    <div class="group__head">
+      <h2>Client and brand studies</h2>
+      <span class="label">index16 &middot; index20 &middot; 360 &middot; miller</span>
+    </div>
+    <ul class="grid">
+
+      <li><a class="card" href="index16.html">
+        <span class="shot"><span class="none">no preview yet</span>
+          <object data="previews/index16.jpg" type="image/jpeg" aria-label="Screenshot of index16.html"></object></span>
+        <span class="meta label"><span class="no">16</span><span class="file">index16.html</span></span>
+        <h3>Bentley Washington DC</h3>
+        <p>A retailer page &mdash; model range, approved pre-owned, Mulliner
+           commissioning, service and ownership. The first page produced through
+           the brief compiler rather than by reading the taste system by hand.
+           A design study, not affiliated with Bentley Motors.</p>
+        <p class="settles"><b>Built to settle</b>What happens when the palette is
+           given rather than derived. Under an OEM identity standard the green, the
+           whites and the face are mandated, and deriving one here would be a
+           rebrand nobody asked for &mdash; so the measurement moved to where the
+           photography sits instead.</p>
+      </a></li>
+
+      <li><a class="card" href="index20.html">
+        <span class="shot"><span class="none">no preview yet</span>
+          <object data="previews/index20.jpg" type="image/jpeg" aria-label="Screenshot of index20.html"></object></span>
+        <span class="meta label"><span class="no">20</span><span class="file">index20.html</span></span>
+        <h3>Visitor Nexus</h3>
+        <p>A hero built from three separated plates &mdash; sky, mountain,
+           foreground &mdash; with pointer parallax as a restrained camera, a route
+           drawn on scroll with three anchored annotations, and a paired transition
+           out of the pin. A design study, not affiliated with Visitor Nexus.</p>
+        <p class="settles"><b>Built to settle</b>That each annotation should turn
+           open as one thin cartographic plane hinged on the edge its leader
+           reaches. The previous entrance left roughly 0.13% of the width on screen
+           and read as a plain text fade.</p>
+      </a></li>
+
+      <li><a class="card" href="360/index.html">
+        <span class="shot"><span class="none">no preview yet</span>
+          <object data="previews/360.jpg" type="image/jpeg" aria-label="Screenshot of 360/index.html"></object></span>
+        <span class="meta label"><span class="no">360</span><span class="file">360/index.html</span></span>
+        <h3>360 Auto Care, Lynbrook NY</h3>
+        <p>A complete redesign of the repair-shop preview: diagnostics,
+           maintenance, NYS inspections, tires and major repair. Two drawings
+           constructed by arithmetic rather than traced, and a map built from real
+           OpenStreetMap tiles baked in at build time, so the page still makes no
+           external request.</p>
+        <p class="settles"><b>Built to settle</b>The palette by census rather than
+           by choice. 68.4% of all saturation in the nine photographs sits in
+           10&ndash;49&deg;, and the original site&rsquo;s electric-blue accent
+           sits inside the second band &mdash; so it cannot be told apart from the
+           evidence.</p>
+      </a></li>
+
+      <li><a class="card" href="miller/index.html">
+        <span class="shot"><span class="none">no preview yet</span>
+          <object data="previews/miller.jpg" type="image/jpeg" aria-label="Screenshot of miller/index.html"></object></span>
+        <span class="meta label"><span class="no">M</span><span class="file">miller/index.html</span></span>
+        <h3>Miller Motorcars, Greenwich</h3>
+        <p>A homepage redesign study for a fifty-year independent house. Names are
+           navigation, logos are evidence, vehicles are the experience &mdash; and
+           in the marque field exactly one logo is visible at any moment.</p>
+        <p class="settles"><b>Built to settle</b>The changing register as a
+           signature that can be measured: selecting a marque rewrites six
+           compositional tokens &mdash; crop ratio, focal position, pace, tracking,
+           air and scale. It moves composition; hue never changes.</p>
+      </a></li>
+
+    </ul>
+  </section>
+
+  <p class="colophon">
+    Previews are 1440&times;900 captures taken with Chrome over the DevTools
+    Protocol and are not retouched. This page is static HTML with no scripting,
+    and the versions it links to are unchanged. The former
+    <code>index.html</code> is now <a href="index1.html">index1.html</a>, and
+    variants B, C and D point at its new name. The portfolio&rsquo;s own record is
+    in <a href="README.md">README.md</a>.
+  </p>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,301 @@
+/* ===========================================================================
+   MILLER MOTORCARS — homepage. Recomposed against the art-direction reference.
+   Redesign study; not affiliated with Miller Motorcars.
+
+   WHAT THE REFERENCE CHANGED
+     The opening is mineral and light, not a cinematic dark plate — the car sits
+     on the ground the page is made of, with a vertical year rail holding the
+     left edge and one action only. Inventory arrives third, as a mosaic of
+     unequal blocks that alternate mineral and graphite, so commercial,
+     cinematic and documentary registers sit inside one section instead of
+     alternating whole bands. The marque field is compact: names are the index,
+     ONE logo appears for the selected marque, and the vehicle stays dominant.
+     Logos appear once more at the foot as a signature field at natural widths.
+
+   PALETTE — derived (color-taste I5)
+     A hue census across every photograph in assets/brands: the imagery owns
+     10-40deg (21%) and 190-210deg (69%). The clearest free territory is 110deg,
+     80deg from anything the pictures carry — deep forest green, 6.45:1 as text
+     on the mineral ground and 7.62:1 carrying white. Signal only: one button,
+     the active marque, the link arrows. Never on a logo.
+   ======================================================================== */
+:root{
+  --s1:.25rem; --s2:.5rem;  --s3:.75rem; --s4:1rem;  --s5:1.5rem;
+  --s6:2rem;   --s7:3rem;   --s8:4rem;   --s9:6rem;  --s10:8rem; --s11:12rem;
+
+  --ink:#14171a;
+  --ink70:rgba(20,23,26,.70);   /* 6.15:1 */
+  --ink61:rgba(20,23,26,.61);   /* 4.59:1 — solved, not nudged */
+  --paper:#edece8;
+  --paper2:#e4e3de;
+  --graphite:#1b1e21;
+  --graphite2:#24282c;
+  --rule:rgba(20,23,26,.16);
+  --rule2:rgba(20,23,26,.48);   /* 3.09:1 */
+  --sig:#305e26;
+
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --sans:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+
+  --maxw:88rem;
+  --pad:clamp(1rem,3vw,3.5rem);
+  --bleed:calc((100vw - min(100vw,var(--maxw))) / 2 + var(--pad));
+  --e:cubic-bezier(.22,1,.36,1);
+
+  --r-crop:3/2; --r-pos:50% 50%; --r-pace:.42s; --r-track:.08em; --r-scale:1;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+html,body{overflow-x:clip}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+  font-size:1rem;line-height:1.5;-webkit-font-smoothing:antialiased}
+img,svg{display:block;max-width:100%}
+a{color:inherit}
+h1,h2,h3,h4,p,figure,dl,dd{margin:0}
+ul{margin:0;padding:0;list-style:none}
+.wrap{max-width:var(--maxw);margin-inline:auto;padding-inline:var(--pad);width:100%}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:where(a,button,[tabindex]):focus-visible{outline:2px solid var(--sig);outline-offset:3px}
+.skip{position:absolute;left:-9999px;top:0;z-index:99;background:var(--sig);color:#fff;padding:.75rem 1rem}
+.skip:focus{left:0}
+
+/* TYPOGRAPHY — thirteen roles. Serif sets statements and figures; sans carries
+   navigation, specification and every piece of technical data. The serif never
+   sets a specification. */
+.t-display{font-family:var(--serif);font-weight:700;
+  font-size:clamp(2.75rem,6.4vw,6rem);line-height:.94;letter-spacing:-.03em}
+.t-h1{font-family:var(--serif);font-weight:700;
+  font-size:clamp(1.75rem,2.5vw,2.25rem);line-height:1.04;letter-spacing:-.022em}
+.t-h2{font-family:var(--serif);font-weight:700;
+  font-size:clamp(1.375rem,1.9vw,1.75rem);line-height:1.1;letter-spacing:-.018em}
+.t-h3{font-family:var(--sans);font-weight:600;font-size:.9375rem;line-height:1.25;
+  letter-spacing:.06em;text-transform:uppercase}
+.t-eyebrow{font-family:var(--sans);font-weight:600;font-size:.6875rem;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--ink61)}
+.t-lead{font-family:var(--sans);font-weight:400;font-size:1rem;line-height:1.6;color:var(--ink70)}
+.t-body{font-family:var(--sans);font-weight:400;font-size:.9375rem;line-height:1.65;color:var(--ink70)}
+.t-nav{font-family:var(--sans);font-weight:500;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase}
+.t-cta{font-family:var(--sans);font-weight:600;font-size:.6875rem;letter-spacing:.16em;text-transform:uppercase}
+.t-meta{font-family:var(--sans);font-weight:400;font-size:.75rem;letter-spacing:.1em;
+  text-transform:uppercase;font-variant-numeric:tabular-nums;color:var(--ink61)}
+.t-spec{font-family:var(--sans);font-weight:500;font-size:.8125rem;letter-spacing:.08em;
+  font-variant-numeric:tabular-nums}
+.t-caption{font-family:var(--sans);font-weight:400;font-size:.75rem;line-height:1.5;color:var(--ink61)}
+.t-legal{font-family:var(--sans);font-weight:400;font-size:.6875rem;line-height:1.5;color:var(--ink61)}
+
+.dark{background:var(--graphite);color:#f0efec;
+  --ink:#f0efec; --ink70:rgba(240,239,236,.72); --ink61:rgba(240,239,236,.60);
+  --rule:rgba(240,239,236,.18); --rule2:rgba(240,239,236,.42)}
+
+.btn{display:inline-flex;align-items:center;gap:var(--s3);padding:.9rem 1.5rem;
+  font-family:var(--sans);font-weight:600;font-size:.6875rem;letter-spacing:.16em;
+  text-transform:uppercase;text-decoration:none;border:1px solid var(--rule2);
+  background:none;color:inherit;cursor:pointer;
+  transition:background .25s var(--e),color .25s var(--e),border-color .25s var(--e)}
+.btn:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn--sig{background:var(--sig);border-color:var(--sig);color:#fff}
+.btn--sig:hover{background:#26491e;border-color:#26491e;color:#fff}
+.lnk{display:inline-flex;align-items:center;gap:var(--s3);text-decoration:none;
+  font-family:var(--sans);font-weight:600;font-size:.6875rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--sig)}
+.lnk i{font-style:normal;transition:transform .3s var(--e)}
+.lnk:hover i{transform:translateX(.35rem)}
+.dark .lnk,.lot--b .lnk,.lot--c .lnk,.own__c .lnk{color:#8fc47f}
+
+/* =============================================================== 01 HEADER */
+.hdr{border-bottom:1px solid var(--rule)}
+.hdr__in{display:flex;align-items:center;gap:var(--s6);padding-block:var(--s5)}
+.hdr__mark img{width:clamp(8rem,11vw,10.5rem)}
+.hdr nav{flex:1 1 auto;display:flex;justify-content:center}
+.hdr nav ul{display:flex;gap:var(--s7)}
+.hdr nav a{text-decoration:none;color:var(--ink70);white-space:nowrap}
+.hdr nav a:hover{color:var(--sig)}
+.hdr__util{display:flex;gap:var(--s5);flex:0 0 auto}
+.hdr__util a{text-decoration:none;color:var(--ink61);white-space:nowrap}
+.hdr__util a:hover{color:var(--ink)}
+@media (max-width:73.99rem){ .hdr nav{display:none} }
+@media (max-width:29.99rem){ .hdr__util .u-hide{display:none} }
+
+/* ================================================================= 02 HERO */
+.hero{position:relative;border-bottom:1px solid var(--rule);overflow:hidden}
+.hero__in{display:grid;gap:var(--s6);align-items:center;padding-block:var(--s8) var(--s7)}
+@media (min-width:64rem){ .hero__in{grid-template-columns:5fr 7fr;gap:var(--s7);
+  padding-block:var(--s9) var(--s8)} }
+.hero__rail{position:absolute;left:calc(var(--pad) - .25rem);top:var(--s8);bottom:var(--s8);
+  display:none;flex-direction:column;align-items:center;gap:var(--s5)}
+@media (min-width:80rem){ .hero__rail{display:flex} }
+.hero__rail span{writing-mode:vertical-rl;font-family:var(--sans);font-weight:400;
+  font-size:.6875rem;letter-spacing:.4em;color:var(--ink61);font-variant-numeric:tabular-nums}
+.hero__rail::after{content:"";flex:1 1 auto;width:1px;background:var(--rule2)}
+@media (min-width:80rem){ .hero__say{padding-left:var(--s7)} }
+.hero__say .t-display{margin-top:var(--s5);text-transform:uppercase}
+.hero__say .t-lead{margin-top:var(--s5);max-width:30ch}
+.hero__say .btn{margin-top:var(--s6)}
+.hero__car{margin-right:calc(var(--bleed) * -1)}
+@media (max-width:63.99rem){ .hero__car{margin-right:calc(var(--pad) * -1)} }
+/* the hero must not share a ratio with a repeated unit: the lot images render
+   at 16/9, so the opening crop is wider */
+.hero__car img{width:100%;height:auto;aspect-ratio:21/9;object-fit:cover;object-position:56% 48%}
+
+/* ======================================================= 03 ACTION STRIP -- */
+.strip{border-bottom:1px solid var(--rule)}
+.strip__in{display:grid;grid-template-columns:repeat(2,1fr)}
+@media (min-width:56rem){ .strip__in{grid-template-columns:repeat(5,1fr)} }
+.strip a{display:flex;flex-direction:column;gap:var(--s3);text-decoration:none;
+  border-left:1px solid var(--rule);padding:var(--s5);transition:background .25s var(--e)}
+.strip a:first-child{border-left:0;padding-left:0}
+.strip a:hover{background:var(--paper2)}
+.strip a:hover .strip__t{color:var(--sig)}
+.strip__n{font-family:var(--sans);font-weight:400;font-size:.6875rem;letter-spacing:.16em;
+  color:var(--ink61);font-variant-numeric:tabular-nums}
+.strip__t{font-family:var(--sans);font-weight:600;font-size:.8125rem;letter-spacing:.12em;
+  text-transform:uppercase}
+
+/* ==================================================== 04 INVENTORY MOSAIC */
+.mosaic{display:grid;grid-template-columns:1fr}
+@media (min-width:64rem){
+  .mosaic{grid-template-columns:repeat(12,1fr)}
+  .lot--a{grid-column:span 7} .lot--b{grid-column:span 5}
+  .lot--c{grid-column:span 5} .lot--d{grid-column:span 7}
+}
+.lot{position:relative;display:flex;flex-direction:column;gap:var(--s5);
+  padding:var(--s7) var(--pad) 0;border-bottom:1px solid var(--rule);overflow:hidden}
+.lot--b,.lot--c{background:var(--graphite);color:#f0efec;
+  --ink:#f0efec; --ink70:rgba(240,239,236,.72); --ink61:rgba(240,239,236,.60);
+  --rule:rgba(240,239,236,.18); --rule2:rgba(240,239,236,.42);
+  border-bottom-color:var(--graphite)}
+.lot__img{margin-inline:calc(var(--pad) * -1);margin-top:auto}
+.lot__img img{width:100%;height:auto}
+.lot__say{position:relative;z-index:2}
+.lot__n{font-family:var(--serif);font-weight:700;font-size:clamp(1.25rem,1.9vw,1.75rem);
+  letter-spacing:-.018em;line-height:1.1;margin-top:var(--s3)}
+.lot__n a{text-decoration:none}
+.lot__n a::after{content:"";position:absolute;inset:0}
+.lot__s{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s5);margin-top:var(--s3)}
+.lot__p{font-family:var(--serif);font-weight:700;font-size:clamp(1.125rem,1.5vw,1.5rem);
+  font-variant-numeric:tabular-nums;margin-top:var(--s5)}
+.lot__a{margin-top:var(--s3);position:relative;z-index:3}
+.mosaic__foot{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:var(--s4) var(--s6);
+  align-items:baseline;justify-content:space-between;padding:var(--s6) var(--pad)}
+
+/* ====================================================== 05 MARQUE FIELD -- */
+.field{display:grid;grid-template-columns:1fr;border-top:1px solid var(--rule)}
+@media (min-width:64rem){ .field{grid-template-columns:4fr 8fr} }
+.field__list{padding:var(--s8) var(--s6) var(--s8) var(--pad);display:flex;flex-direction:column}
+.field__head{margin-bottom:var(--s6)}
+/* eight names in one run breaks the floor; the split is by depth of stock */
+.mq__cap{margin:var(--s5) 0 var(--s3)}
+.mq__cap:first-child{margin-top:0}
+.mq{display:flex;align-items:center;gap:var(--s4);width:100%;padding:.55rem 0 .55rem var(--s4);
+  border:0;border-left:2px solid transparent;background:none;text-align:left;font:inherit;
+  cursor:pointer;color:var(--ink70);
+  transition:color .2s var(--e),border-color .2s var(--e)}
+.mq:hover{color:var(--ink)}
+.mq[aria-selected="true"]{color:var(--sig);border-left-color:var(--sig)}
+.mq__n{font-family:var(--sans);font-weight:500;font-size:.875rem;
+  letter-spacing:var(--r-track);text-transform:uppercase;white-space:nowrap;
+  transition:letter-spacing var(--r-pace) var(--e)}
+.mq[aria-selected="true"] .mq__n{font-weight:600}
+/* the one logo: the selected marque only, at its own proportions, never green */
+.field__logo{margin-left:auto;height:2.2rem;display:none;align-items:center}
+.mq[aria-selected="true"] .field__logo{display:flex}
+.field__logo img{height:100%;width:auto;max-width:8.5rem;object-fit:contain;opacity:.85}
+.field__foot{margin-top:auto;padding-top:var(--s7)}
+.field__plate{position:relative;background:var(--graphite);overflow:hidden;
+  aspect-ratio:var(--r-crop);transition:aspect-ratio var(--r-pace) var(--e)}
+.field__plate img{width:100%;height:100%;object-fit:cover;object-position:var(--r-pos);
+  transform:scale(var(--r-scale));
+  transition:object-position var(--r-pace) var(--e),transform var(--r-pace) var(--e),
+    opacity .3s var(--e)}
+.field__plate.is-swapping img{opacity:0}
+.field__none{position:absolute;inset:0;display:none;flex-direction:column;
+  justify-content:flex-end;padding:var(--s6);background:var(--graphite2);color:#f0efec}
+.field__plate.is-empty .field__none{display:flex}
+.field__plate.is-empty{aspect-ratio:3/2}
+
+[data-register="ferrari"]     {--r-crop:4/5;  --r-pos:52% 46%; --r-pace:.26s; --r-track:.14em; --r-scale:1.06}
+[data-register="rolls-royce"] {--r-crop:16/9; --r-pos:48% 52%; --r-pace:.72s; --r-track:.05em; --r-scale:1}
+[data-register="mclaren"]     {--r-crop:21/9; --r-pos:56% 50%; --r-pace:.16s; --r-track:.12em; --r-scale:1.03}
+[data-register="bugatti"]     {--r-crop:1/1;  --r-pos:50% 48%; --r-pace:.5s;  --r-track:.2em;  --r-scale:1}
+[data-register="pagani"]      {--r-crop:1/1;  --r-pos:54% 50%; --r-pace:.5s;  --r-track:.2em;  --r-scale:1}
+[data-register="classics"]    {--r-crop:5/4;  --r-pos:50% 50%; --r-pace:.6s;  --r-track:.02em; --r-scale:1}
+[data-register="bentley"]     {--r-crop:3/2;  --r-pos:50% 54%; --r-pace:.44s; --r-track:.08em; --r-scale:1}
+[data-register="aston-martin"]{--r-crop:3/2;  --r-pos:50% 50%; --r-pace:.44s; --r-track:.08em; --r-scale:1}
+[data-register="maserati"]    {--r-crop:3/2;  --r-pos:52% 50%; --r-pace:.38s; --r-track:.1em;  --r-scale:1.02}
+
+/* ========================================================= 06 OWNERSHIP -- */
+.own{padding-block:var(--s9)}
+.own__head{display:flex;flex-wrap:wrap;gap:var(--s3) var(--s4);align-items:baseline;
+  margin-bottom:var(--s7)}
+.own__head .t-h1{text-transform:uppercase;letter-spacing:.02em}
+.own__head em{font-style:normal;color:var(--ink61)}
+.own__grid{display:grid;gap:1px;background:rgba(240,239,236,.18);grid-template-columns:1fr}
+@media (min-width:40rem){ .own__grid{grid-template-columns:repeat(2,1fr)} }
+@media (min-width:64rem){ .own__grid{grid-template-columns:repeat(4,1fr)} }
+.own__c{background:var(--graphite);padding:var(--s6);display:flex;flex-direction:column;
+  gap:var(--s4);min-height:14rem}
+.own__c .t-body{flex:1 1 auto}
+
+/* ====================================================== 07 ANNIVERSARY --- */
+.anniv{padding-block:var(--s9);border-top:1px solid var(--rule)}
+.anniv__grid{display:grid;gap:var(--s7);align-items:center}
+@media (min-width:64rem){ .anniv__grid{grid-template-columns:5fr 4fr;gap:var(--s9)} }
+.anniv__yr{font-family:var(--serif);font-weight:400;
+  font-size:clamp(2.75rem,6vw,5.5rem);line-height:1;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.anniv__side{border-left:1px solid var(--rule);padding-left:var(--s6)}
+@media (max-width:63.99rem){ .anniv__side{border-left:0;padding-left:0;
+  border-top:1px solid var(--rule);padding-top:var(--s6)} }
+
+/* ==================================================== 08 EVIDENCE FIELD -- */
+.evid{padding-block:var(--s8);border-top:1px solid var(--rule);text-align:center}
+.evid__row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
+  gap:var(--s7) var(--s9);margin-top:var(--s7)}
+.evid__row a{display:flex;align-items:center;height:2.4rem;opacity:.82;
+  transition:opacity .25s var(--e)}
+.evid__row a:hover{opacity:1}
+.evid__row img{height:100%;width:auto;max-width:11rem;object-fit:contain}
+/* eight marks read as one signature block, set in two lines of four so no run
+   of identical anchors exceeds six */
+.evid__row--2{margin-top:var(--s7)}
+.evid .lnk{margin-top:var(--s8)}
+
+/* ========================================================= 09 GREENWICH -- */
+.place{display:grid;grid-template-columns:1fr;border-top:1px solid var(--rule)}
+@media (min-width:64rem){ .place{grid-template-columns:7fr 5fr} }
+.place__img{background:var(--graphite);aspect-ratio:16/9;overflow:hidden}
+.place__img img{width:100%;height:100%;object-fit:cover}
+.place__say{padding:var(--s8) var(--pad)}
+.place__facts{margin-top:var(--s6)}
+.place__facts dt{padding-top:var(--s4);border-top:1px solid var(--rule)}
+.place__facts dd{margin:var(--s2) 0 var(--s5);font-variant-numeric:tabular-nums}
+.place__acts{display:flex;flex-wrap:wrap;gap:var(--s3);margin-top:var(--s6)}
+
+footer{padding-block:var(--s7);border-top:1px solid var(--rule)}
+.foot{display:flex;flex-wrap:wrap;gap:var(--s4) var(--s7);align-items:baseline;
+  justify-content:space-between}
+.foot nav{display:flex;flex-wrap:wrap;gap:var(--s5)}
+.foot a{text-decoration:none;color:var(--ink61)}
+.foot a:hover{color:var(--ink)}
+
+/* ========================================================== RESPONSIVE --- */
+.field__mobile-logo{display:none}
+@media (max-width:63.99rem){
+  .field__list{padding:var(--s7) var(--pad)}
+  .field__names{display:flex;gap:var(--s2);overflow-x:auto;overscroll-behavior-x:contain;
+    scroll-snap-type:x proximity;padding-bottom:var(--s3);
+    margin-inline:calc(var(--pad) * -1);padding-inline:var(--pad)}
+  .mq{width:auto;flex:0 0 auto;border-left:0;border:1px solid var(--rule2);
+    padding:var(--s3) var(--s4);scroll-snap-align:start}
+  .mq[aria-selected="true"]{background:var(--sig);border-color:var(--sig);color:#fff}
+  .field__logo{display:none!important}
+  .field__mobile-logo{display:flex;align-items:center;height:2rem;margin-top:var(--s5)}
+  .field__mobile-logo img{height:100%;width:auto;max-width:8rem;object-fit:contain;opacity:.85}
+  .lot{padding-bottom:var(--s6)}
+  .lot__img{margin-top:var(--s5)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition-duration:.001ms!important;animation-duration:.001ms!important}
+  .field__plate.is-swapping img{opacity:1}
+}

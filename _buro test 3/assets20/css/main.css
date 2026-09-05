@@ -1,0 +1,728 @@
+/* =========================================================================
+   index20 — Visitor Nexus, hero only.
+
+   PALETTE measured off the XD prototype: ground #0B0F1E, orange #FF9300,
+   cyan #00ECFF; 74.6% of the prototype's chroma sits in 220-230deg.
+
+   PLATE measured before it was used: apex at 63.8% x / 25.5% y of the frame,
+   and the brightest pixel behind the headline band is L 209 — so white ink
+   unscrimmed would be 1.52:1. Legibility is therefore fixed at the background
+   layer with a directional scrim (color I4), never by weighting the type.
+
+   Every mark on this screen is drawn: the summit ring, the route, the cross.
+   The only bitmap is the plate.
+   ====================================================================== */
+
+@font-face { font-family: 'Inter Tight'; font-weight: 400; font-style: normal;
+  font-display: swap; src: url(../fonts/inter-tight-400.woff2) format('woff2'); }
+@font-face { font-family: 'Inter Tight'; font-weight: 500; font-style: normal;
+  font-display: swap; src: url(../fonts/inter-tight-500.woff2) format('woff2'); }
+@font-face { font-family: 'Inter Tight'; font-weight: 600; font-style: normal;
+  font-display: swap; src: url(../fonts/inter-tight-600.woff2) format('woff2'); }
+@font-face { font-family: 'Inter Tight'; font-weight: 800; font-style: normal;
+  font-display: swap; src: url(../fonts/inter-tight-800.woff2) format('woff2'); }
+@font-face { font-family: 'Plex Mono'; font-weight: 400; font-style: normal;
+  font-display: swap; src: url(../fonts/plex-mono-400.woff2) format('woff2'); }
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+body { margin: 0; }
+img { max-width: 100%; height: auto; display: block; }
+
+:root {
+  --bg: #0B0F1E;
+  --ink: #FFFFFF;
+  --ink-78: #FFFFFFc7;
+  --orange: #FF9300;
+  --cyan: #00ECFF;
+  --rule: #FFFFFF24;
+
+  --sans: 'Inter Tight', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'Plex Mono', ui-monospace, Consolas, monospace;
+
+  --s2:.5rem; --s3:.75rem; --s4:1rem; --s5:1.5rem; --s6:2rem; --s7:3rem; --s8:4rem;
+  --gut: clamp(1.5rem, 4.5vw, 5.5rem);
+  --col: min(1560px, 100% - var(--gut) * 2);
+
+  --t-xs: .875rem;
+  --t-sm: clamp(.875rem, .2vw + .84rem, .9375rem);
+  --t-body: clamp(.9375rem, .28vw + .88rem, 1.0625rem);
+  --t-sub: clamp(1.25rem, 1.3vw + .85rem, 2rem);
+  --t-display: clamp(2.25rem, 4.8vw + .6rem, 5.5rem);
+
+  --ease: cubic-bezier(.22,1,.36,1);
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: var(--t-body);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+.skip { position: absolute; left: -9999px; }
+.skip:focus { left: var(--s4); top: var(--s4); z-index: 99; background: var(--orange);
+  color: #0B0F1E; padding: var(--s3) var(--s5); }
+:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+
+/* =========================================================================
+   MASTHEAD — sits over the plate. The phone number and Log in are the means
+   of the visitor's task, so nothing on this page ever moves them (C14).
+   ====================================================================== */
+/* One instrument, not a row of links floating on a photograph. It reads over
+   the star field without competing with the headline, which stays the focal
+   point: the bar is dark, small in the frame, and its only bright element is
+   the single action. */
+.mh {
+  /* fixed, not absolute: a bar that folds on scroll has to still be there
+     when the reader has scrolled. Absolute meant it left with the hero. */
+  position: fixed; top: 22px; left: 50%; transform: translateX(-50%);
+  z-index: 40;
+  transition: top .3s var(--ease), min-height .3s var(--ease),
+              background-color .3s var(--ease);
+  width: min(1300px, calc(100% - var(--gut) * 2));
+  min-height: 70px;
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center;
+  gap: clamp(1rem, 2.4vw, 2.25rem);
+  padding: 0 clamp(1rem, 1.8vw, 1.75rem);
+  border-radius: 18px;
+  background: rgba(7, 13, 27, .58);
+  -webkit-backdrop-filter: blur(18px) saturate(125%);
+  backdrop-filter: blur(18px) saturate(125%);
+  border: 1px solid rgba(255, 255, 255, .09);
+  box-shadow:
+    0 18px 44px -18px rgba(0, 0, 0, .72),
+    inset 0 1px 0 rgba(255, 255, 255, .07);
+}
+/* one line of bold text, not a stacked lockup */
+.mark {
+  position: relative;
+  font-weight: 800; font-size: 1.0625rem; line-height: 1;
+  letter-spacing: .04em; white-space: nowrap;
+  text-decoration: none; color: var(--ink);
+}
+.mark__dot {
+  position: absolute; left: .82em; top: -.12em;
+  width: .26em; height: .26em; border-radius: 50%;
+  background: var(--cyan); box-shadow: 0 0 10px 2px rgba(0,236,255,.7);
+}
+
+/* the links sit close together — distance between them was reading as
+   disconnection rather than as air */
+.mh__nav ul { display: flex; gap: clamp(1.25rem, 2vw, 2.25rem); list-style: none; margin: 0;
+  padding: 0; justify-content: center; }
+/* the item itself takes a pill on hover, rather than growing a rule under it */
+.mh__nav a {
+  position: relative; display: block;
+  color: var(--ink-78); text-decoration: none;
+  font-size: 13.5px; letter-spacing: .01em; line-height: 1;
+  padding: .58rem .85rem;
+  border-radius: 999px;
+  transition: color .18s var(--ease), background-color .18s var(--ease),
+              box-shadow .18s var(--ease);
+  white-space: nowrap;
+}
+.mh__nav a:hover,
+.mh__nav a:focus-visible,
+.mh__nav a[aria-current="page"] {
+  color: var(--ink);
+  background: rgba(0, 236, 255, .10);
+  box-shadow: inset 0 0 0 1px rgba(0, 236, 255, .28);
+}
+
+/* the number is reachable but ranked below the action */
+.mh__act { display: flex; align-items: center; gap: clamp(.875rem, 1.5vw, 1.5rem); }
+.mh__tel {
+  color: var(--ink-78); text-decoration: none;
+  font-size: 13px; letter-spacing: .01em; white-space: nowrap;
+  transition: color .18s var(--ease);
+}
+.mh__tel:hover { color: var(--cyan); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 38px; padding: 0 1.15rem;
+  font-size: 13px; letter-spacing: .02em;
+  color: var(--ink); text-decoration: none;
+  border: 1px solid rgba(0, 236, 255, .55); border-radius: 10px;
+  background: rgba(0, 236, 255, .06);
+  transition: background .18s var(--ease), border-color .18s var(--ease);
+}
+.btn:hover { background: rgba(0, 236, 255, .15); border-color: var(--cyan); }
+
+/* the trigger lives inside the same bar, so the bar is never broken up */
+.burger {
+  display: none; width: 38px; height: 38px; padding: 0;
+  background: none; border: 1px solid rgba(255,255,255,.14); border-radius: 10px;
+  cursor: pointer;
+  place-items: center; gap: 5px;
+}
+.burger span { display: block; width: 16px; height: 1.5px; background: var(--ink); }
+.burger:hover { border-color: rgba(0,236,255,.5); }
+
+/* =========================================================================
+   COMPACT — once the reader has left the top, the bar contracts to what is
+   still needed: the mark, the number, the action, and the menu behind a
+   trigger on the right. Nothing is removed, only folded.
+   ====================================================================== */
+.mh[data-compact] { min-height: 58px; top: 14px; background: rgba(7, 13, 27, .74); }
+.mh[data-compact] .mh__nav {
+  position: absolute; top: calc(100% + 10px); right: 0;
+  min-width: 232px;
+  display: none;
+  padding: .5rem;
+  border-radius: 16px;
+  background: rgba(7, 13, 27, .82);
+  -webkit-backdrop-filter: blur(18px) saturate(125%);
+  backdrop-filter: blur(18px) saturate(125%);
+  border: 1px solid rgba(255,255,255,.09);
+  box-shadow: 0 18px 44px -18px rgba(0,0,0,.72);
+}
+.mh[data-compact] .mh__nav[data-open="true"] { display: block; }
+.mh[data-compact] .mh__nav ul { flex-direction: column; gap: .15rem; align-items: stretch; }
+.mh[data-compact] .burger { display: grid; }
+
+/* Placed AFTER the compact rules on purpose: it was written above them, and
+   at equal specificity the later rule wins — which is why the desktop bar
+   was still folding into a trigger at 1920. Above 1100px, compact changes
+   the bar's size and nothing else. */
+@media (min-width: 1100px) {
+  .mh[data-compact] .mh__nav {
+    position: static; display: block; padding: 0; min-width: 0;
+    background: none; border: 0; box-shadow: none;
+  }
+  .mh[data-compact] .mh__nav ul {
+    flex-direction: row; gap: clamp(1.25rem, 2vw, 2.25rem); align-items: center;
+  }
+  .mh[data-compact] .burger { display: none; }
+}
+
+/* =========================================================================
+   HERO — the plate fills the screen.
+   ====================================================================== */
+.hero-track { position: relative; }
+.hero {
+  position: relative;
+  height: 100svh;
+  min-height: 34rem;
+  overflow: clip;
+  isolation: isolate;
+  /* the ground behind the scene matches the darkest edge of the plates, so
+     any moment a layer does not reach is invisible rather than a navy hole */
+  background: var(--bg);
+}
+/* The seam was the boundary between two different grounds: the hero sits on
+   var(--bg) and the next section sat on #0B0F1E, and the foreground's baked-in
+   gradient fades to transparent exactly there. One colour under the whole
+   transition removes the line without a gradient, a mask or a cover block.
+
+   The overlap is also deepened: at pin release only 21px of foreground still
+   covered the join, which put the boundary inside the viewport. −34vh keeps
+   the incoming section under the outgoing one until the join is well clear. */
+.after {
+  margin-top: -7.3vh;   /* .after starts at the foreground's real bottom edge */
+  position: relative;
+  z-index: 1;              /* BEHIND the hero — it was 2, which painted the
+                              next section's opaque ground over the rocks and
+                              produced the straight horizontal cut */
+  background: var(--bg);
+}
+/* the pinned scene stays above the section it overlaps, for the whole pin */
+.hero-track, .hero { position: relative; z-index: 2; }
+.pin-spacer { position: relative; z-index: 2; }
+
+/* =========================================================================
+   THE SCENE — overscan.
+
+   Every decorative plane is drawn LARGER than the window and clipped by the
+   scene, so no plate's own boundary can ever enter the frame. The margin is
+   not guessed: it is the sum of what each plane is allowed to move.
+
+     foreground   pointer ±24px X, ±14px Y   scroll −26%   scale 1.10
+     mountain     pointer ±12px X, ±7px Y                  scale 1.06
+     sky          pointer ±5px X,  ±3px Y                  scale 1.04
+
+   8vw either side is 115px at 1440 and 275px at 3440 — an order of magnitude
+   more than the 24px the nearest plane can travel, at every width tested.
+   ====================================================================== */
+.hero__plate {
+  position: absolute; inset: 0; z-index: -1;
+  overflow: clip;
+}
+
+/* Each plane is a wrapper (scroll) around an inner element (pointer). The
+   wrapper is a plain box so ScrollTrigger owns its transform outright. */
+/* each plane gets its own clipping wrapper, bled past every edge */
+/* deeper overscan now that the planes also scale: 1.10 on the mountain and
+   1.16 on the near ground consume margin the earlier −6vh could not cover */
+.pw {
+  position: absolute;
+  inset: -14vh -12vw;
+  overflow: clip;
+  will-change: transform;
+}
+
+/* Each plane is its own element so each can move at its own rate. They share
+   a width, so they stay in register no matter what any one of them does.
+   The base scales exist so the pointer travel never exposes an edge. */
+/* Sized to fill its wrapper, never by a percentage of the window: a
+   percentage width opens the sides the moment the plate's aspect and the
+   window's disagree, which is exactly how the hard edges appeared. */
+.pl {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  min-width: 100%; min-height: 100%;
+  object-fit: cover;
+  will-change: transform;
+}
+.pl--sky { object-position: 50% 62%; margin: 0; }
+.pl--mtn { object-position: 50% 100%; }
+/* .marks-in measured 530x0 — it had no height, because its only child is an
+   absolutely positioned SVG. Every callout's `top: N%` therefore resolved
+   against zero and both landed on the same line, 10px apart. It has to fill
+   its parent for the percentages to mean anything. */
+.marks-in { position: absolute; inset: 0; }
+.marks-in, .fg-in { will-change: transform; }
+/* The sky sits low and is barely enlarged: at 138% and centred it was cropped
+   so hard that lifting it on scroll brought its own top edge into frame as a
+   cut band. Anchored to the foot instead, so there is no edge above it to
+   arrive, and the plate is not zoomed into. */
+/* The sky is the ground of the whole view, so it is fitted to the box rather
+   than sized by its own width — a percentage width leaves the sides open the
+   moment the plate's aspect and the window's disagree, which is where those
+   gaps came from. It is oversized only enough to give the pointer parallax
+   room to travel without ever exposing an edge. */
+.pl--sky {
+  left: 0; top: 0; bottom: auto;
+  width: 108%; height: 108%;
+  object-fit: cover; object-position: 50% 62%;
+  margin: -4% 0 0 -4%;
+  transform: translate3d(var(--sx, 0px), var(--sy, 0px), 0);
+}
+.pl--mtn { bottom: -6%; }
+/* the scrim: directional, because the lit mass sits right and the type sits
+   left. Solved against the brightest pixel actually behind each run, not the
+   average — the average here is L 45 and would have passed while the snow at
+   L 209 failed. */
+.hero__plate::after {
+  content: ""; position: absolute; inset: 0;
+  background:
+    /* the walls left this plate for their own layer, so the lit flank now
+       reaches the text columns: measured worst pixel behind the lead went to
+       L 146 and white ink fell to 2.85:1. Raised only until every run clears
+       its threshold, so the mountain stays a mountain. */
+    /* This plate's snow measures L 240 behind the headline — white ink would
+       be 1.14:1 unscrimmed, against 209 on the previous frame. The summit is
+       also centred, so the lit mass sits in the type's column rather than
+       beside it and there is no reposition available to spend instead. The
+       scrim therefore carries the whole load, and it is heavier than any
+       before it: that is what the frame costs, and it is stated rather than
+       hidden. */
+    linear-gradient(to right,
+      rgba(11,15,30,.985) 0%, rgba(11,15,30,.975) 34%,
+      rgba(11,15,30,.90) 50%, rgba(11,15,30,.58) 64%, rgba(11,15,30,.40) 80%,
+      rgba(11,15,30,.62) 100%),
+    linear-gradient(to bottom,
+      rgba(11,15,30,.72) 0%, rgba(11,15,30,.12) 22%,
+      rgba(11,15,30,.10) 62%, rgba(11,15,30,.86) 92%, var(--bg) 100%);
+}
+
+.hero__in {
+  position: relative; height: 100%;
+  width: var(--col); margin-inline: auto;
+  /* the copy sits high in the frame: the near ground occupies the foot, and
+     four lines of display need the room above it */
+  display: grid; align-content: start;
+  padding-block: clamp(10rem, 26vh, 17rem) clamp(3rem, 8vh, 6rem);
+}
+.hero__say { max-width: 44rem; }
+
+.h-display {
+  margin: 0;
+  font-weight: 800;
+  font-size: var(--t-display);
+  line-height: .94;
+  letter-spacing: -.035em;      /* large type tightens as it grows */
+  text-wrap: balance;
+}
+.h-display em { font-style: normal; color: var(--orange); }
+.h-sub { margin: var(--s4) 0 0; font-size: var(--t-sub); font-weight: 400; line-height: 1.2; }
+.body { margin: var(--s6) 0 0; max-width: 56ch; color: var(--ink-78); text-wrap: pretty; }
+.rule-o { display: block; margin-top: var(--s6); width: clamp(10rem,16vw,15rem);
+  height: 3px; background: var(--orange); }
+
+/* ---- the drawn layer -------------------------------------------------- */
+/* =========================================================================
+   WEATHER — drawn, not filmed. Three banks, no image, no library.
+
+   They live in the sky to the right of the reading column: a perpetual loop
+   behind body text is forbidden outright (DM9), and "quiet enough" is not an
+   exemption. They are band 4 — atmosphere — so they are slower and fainter
+   than the route that is the page's primary temporal idea, and they sit under
+   the near ground so the ridge passes in front of them.
+   ====================================================================== */
+/* No clipping: a hard edge on a cloud is the one thing that cannot happen.
+   The band dissolves at its borders with a mask instead, so a cloud fades out
+   where it leaves rather than being cut off. */
+/* Full width: the weather crosses the whole screen rather than starting at
+   the middle. The mask still thins it over the reading column on the left —
+   perpetual motion may not compete with body text — so the banks travel the
+   entire frame while staying below notice where the paragraph is. */
+.hero__sky {
+  position: absolute; inset: 0 0 26% 0;
+  z-index: 0; pointer-events: none;
+  -webkit-mask-image:
+    linear-gradient(to right, rgba(0,0,0,.22) 0, rgba(0,0,0,.30) 26%, #000 46%,
+                    #000 90%, transparent 100%),
+    linear-gradient(to bottom, transparent 0, #000 10%, #000 76%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, rgba(0,0,0,.22) 0, rgba(0,0,0,.30) 26%, #000 46%,
+                    #000 90%, transparent 100%),
+    linear-gradient(to bottom, transparent 0, #000 10%, #000 76%, transparent 100%);
+  mask-composite: intersect;
+}
+
+/* Torn, not even: each bank is several offset patches of different size and
+   density rather than one ellipse. A single smooth oval reads as a shape;
+   overlapping unequal ones read as weather. */
+.cloud {
+  position: absolute;
+  filter: blur(26px);
+  will-change: transform;
+  background:
+    radial-gradient(38% 62% at 22% 44%, rgba(205,225,250,.34), rgba(205,225,250,0) 72%),
+    radial-gradient(26% 88% at 44% 62%, rgba(196,218,246,.26), rgba(196,218,246,0) 70%),
+    radial-gradient(46% 46% at 63% 38%, rgba(210,228,252,.30), rgba(210,228,252,0) 74%),
+    radial-gradient(20% 70% at 79% 58%, rgba(186,210,240,.22), rgba(186,210,240,0) 68%),
+    radial-gradient(30% 40% at 92% 40%, rgba(200,222,248,.16), rgba(200,222,248,0) 76%);
+}
+/* Different sizes, heights and rates: one speed for all three would read as a
+   single sheet sliding, which is not weather. The first pass ran at 128-168s
+   and was indistinguishable from stillness over any span anyone actually
+   watches — a movement too slow to be seen is a decision not taken. */
+.cloud--1 { width: 46%; height: 26%; top: 8%;  left: -50%; animation: drift 44s linear infinite; }
+.cloud--2 { width: 32%; height: 17%; top: 26%; left: -38%; animation: drift 31s linear infinite;
+            animation-delay: -11s; opacity: .85; }
+.cloud--3 { width: 62%; height: 14%; top: 44%; left: -66%; animation: drift 58s linear infinite;
+            animation-delay: -24s; opacity: .6; }
+
+@keyframes drift {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(260%, 0, 0); }
+}
+
+/* the near ground sits above the route and below the copy: it occludes the
+   line, it never occludes reading matter */
+/* The layer runs well past every edge of the screen: its own frame boundary
+   is a straight line, and a straight line is exactly what must never be seen
+   in a landform. Only the ridge — the edge between the shape and its own
+   transparency — is allowed to show. */
+/* The near ground bleeds furthest, because it is the plane that moves most:
+   8vw either side plus a deep foot, and never narrower than 116vw. */
+/* Anchored to the CENTRE of the window, not to the edges of the text column
+   it happens to live in: `left: -8vw` was being resolved against `--col`,
+   which is capped at 1560px and centred, so on a 3440px display the layer
+   started 734px inside the frame. Centre plus a negative half-width has no
+   such dependency, and it needs no transform — the scroll owns that. */
+/* THE single source of the foreground's base position. Nothing else — no
+   other rule, no GSAP set — may place it, so it can only be in one place.
+   Dropped 104px from where it sat, and the extra depth is paid for by a
+   taller image so the foot still cannot show. */
+/* THE single source of the foreground's base position and size.
+
+   Its HEIGHT is what is declared, not its width. Width was being set to
+   116vw, and with the plate's own 2292/1107 aspect that resolved to a 1076px
+   tall element on a 1080px screen — a full-height wall. Nothing could be
+   fixed by lowering it, because it was not misplaced, it was oversized.
+   Width now exists only to buy side overscan. */
+/* THE single source of the foreground's base position.
+
+   Full size, natural aspect — the artwork was never too big, it was too
+   high. Constraining its height turned recognisable rock formations into a
+   dark strip, which was the wrong correction. The whole composition is
+   lowered instead, from the outer wrapper only. */
+.hero__fg {
+  position: absolute;
+  left: 50%; margin-left: -58vw; right: auto;
+  bottom: calc(-4% - 520px);   /* base, a further 220px down so no rock meets the copy */
+  width: 116vw; min-width: 116vw;
+  height: auto;
+  transform-origin: 50% 100%;
+  z-index: 1; pointer-events: none;
+}
+/* the scroll rise lives here and nowhere else, so it can never overwrite the
+   base position stored on .hero__fg */
+.fg-scroll { display: block; width: 100%; will-change: transform; }
+.fg-in { display: block; width: 100%; }
+.hero__fg img {
+  display: block;
+  width: 100%; height: auto;        /* natural aspect, never cropped */
+}
+
+@media (min-aspect-ratio: 2/1) {
+  .hero__fg { margin-left: -56vw; width: 112vw; min-width: 112vw; }
+}
+/* The copy sits BEHIND the near ground: as the ridge rises it takes the
+   headline with it, line by line, instead of the type floating over a
+   landscape it is supposed to be standing in. The controls stay above —
+   the means of the task are never occluded by scenery (C14). */
+.hero__say { position: relative; z-index: 0; }
+.offer, .summit-note { position: relative; z-index: 2; }
+
+/* the box now spans from the summit down across the near ground on the left,
+   so the route has foreground to pass behind rather than a clean flank */
+.hero__marks { position: absolute; left: 34%; top: 18%; width: 34%; height: 78%;
+  pointer-events: none; }
+.route { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.route__p { fill: none; stroke: url(#routeFade); stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; }
+
+/* =========================================================================
+   CALLOUTS — annotations that grow out of the route, not labels laid over a
+   picture. The leader and its anchor live in the route's own viewBox, so no
+   amount of parallax, scaling or scroll can separate them from it.
+   ====================================================================== */
+.lead__l {
+  fill: none;
+  stroke: var(--cyan); stroke-width: .85; opacity: .72;
+  stroke-linecap: square; stroke-linejoin: miter;
+  vector-effect: non-scaling-stroke;   /* stays 1px however the group scales */
+  filter: none;
+}
+.lead__a {
+  fill: var(--cyan);
+  filter: drop-shadow(0 0 3px rgba(0,236,255,.55));
+}
+
+/* positions are percentages of the SAME box the viewBox describes:
+   x% = vbX / 300, y% = vbY / 600 */
+.callout { position: absolute; }
+/* separated down the route rather than clustered at the top: the first sits
+   upper-middle and branches right, the second far lower and branches left */
+.callout--1 { left: 97.33%;  top: 29.67%; }                    /* 292 / 178 */
+/* the lower event now branches RIGHT, into the open corridor, where the near
+   rocks cannot reach it */
+.callout--2 { left: 98.67%; top: 62%; }                        /* 296 / 372 */
+.callout--2 .callout__in { transform-origin: 0 50%; left: .9rem; right: auto; }
+.callout--1 .callout__in { transform-origin: 0 50%; }
+
+/* The inner block carries the inverse of the group's scroll scale, so the
+   type never inherits the mountain's stretch while its position still
+   tracks the anchor exactly. */
+.callout__in {
+  position: absolute; top: 50%;
+  width: max-content; max-width: 22ch;
+  translate: 0 -50%;
+  will-change: transform, opacity, filter;
+}
+.callout--1 .callout__in { left: .9rem; }
+.callout--2 .callout__in { right: .9rem; }
+
+
+/* ---- callout marks ----------------------------------------------------
+   One geometry language across all three: 12px box, 1px stroke, no fill, no
+   disc behind them. They are cartographic marks beside a label, not buttons,
+   so they sit on the type's baseline rhythm and take the label's colour.
+   They inherit the callout's own fade and blur — no separate treatment. */
+.ico {
+  width: 11px; height: 11px; flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor; stroke-width: 1;
+  stroke-linecap: round; stroke-linejoin: round;
+  opacity: .82;
+}
+.callout__k { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+
+/* the summit leader is the quietest of the three */
+.lead--0 .lead__l { opacity: .66; }
+.callout__k {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--t-xs);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: var(--cyan);
+}
+.callout__s {
+  margin: .4em 0 0;
+  font-size: var(--t-xs);
+  line-height: 1.45;
+  color: var(--ink-78);
+}
+
+/* a concentric target, not a dot: core, ring, and the pulse that leaves it */
+.pin { --pin: 9px; position: absolute; left: 50%; top: 0;
+  width: var(--pin); height: var(--pin); margin: calc(var(--pin) / -2);
+  border-radius: 50%; background: var(--cyan);
+  box-shadow: 0 0 0 5px rgba(11,15,30,.9), 0 0 0 7px var(--cyan),
+              0 0 22px 5px rgba(0,236,255,.45); }
+.pin::after { content: ""; position: absolute; inset: -14px; border-radius: 50%;
+  border: 2px solid var(--cyan); animation: ring 2.6s var(--ease) infinite; }
+@keyframes ring {
+  0% { transform: scale(.5); opacity: 1; }
+  70%, 100% { transform: scale(1.6); opacity: 0; }
+}
+
+/* the claim reads out of the marker, at the point the route starts */
+.summit-note {
+  /* lifted clear of the snowline: cyan on lit snow measured 2.45:1, and the
+     first rung of the ladder is to move the run into a quiet region, not to
+     put a scrim under it */
+  /* A readout, not a caption: it belongs to the marker, so it sits against it
+     rather than floating in the sky, and it is set as instrument type — mono,
+     tracked, uppercase, on the 14px floor because every line of it carries
+     information. */
+  position: absolute;
+  /* Same system as the other two readings: the anchor IS the leader's own
+     endpoint in the route's coordinates (292 / -10 of the 300x600 viewBox),
+     then the identical .9rem gap and vertical centring. It now lives inside
+     .marks-in, so it travels with the route instead of floating beside it. */
+  left: 97.33%; top: -1.67%;
+  margin: 0 0 0 .9rem;
+  translate: 0 -50%;
+  display: grid; gap: .35em;
+  font-family: var(--mono);
+  font-size: var(--t-xs);
+  line-height: 1.25;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.summit-note b {
+  font-weight: 400;
+  color: var(--cyan);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.summit-note span { color: var(--ink-78); }
+
+/* ---- the readings unfold ------------------------------------------------
+   Each reading is a thin plane hinged on the edge its leader actually reaches,
+   so it opens away from the route instead of fading in place. The perspective
+   lives on the container; the hinge lives on the lines themselves. Restrained:
+   the unfold is the only rotation, and it happens once, on entrance. */
+/* The whole reading is ONE plane. It hinges on the edge its leader reaches and
+   swings toward the reader; the lines inside do not rotate on their own. The
+   perspective is applied per-element by GSAP (transformPerspective), so no
+   ancestor has to become a 3D context. */
+.callout__in, .summit-note {
+  transform-origin: left center;
+  backface-visibility: hidden;
+  --srf: 0;      /* surface presence, driven by the timeline */
+  --sheen: -60%; /* the reflection's travel across it */
+}
+
+/* The temporary surface: a thin cartographic projection that exists only while
+   the plane is turning. It is a cue, not a card — at rest --srf is 0 and every
+   trace of it is gone, leaving the accepted unboxed text. */
+.callout__in::before, .summit-note::before {
+  content: '';
+  position: absolute;
+  inset: -.55em -.9em;
+  pointer-events: none;
+  opacity: var(--srf);
+  border: 1px solid rgba(0, 235, 255, .16);
+  border-left-color: rgba(0, 235, 255, .65);
+  background:
+    linear-gradient(90deg, rgba(0,235,255,0), rgba(0,235,255,.22) 50%, rgba(0,235,255,0))
+      var(--sheen) 0 / 45% 100% no-repeat,
+    linear-gradient(90deg, rgba(0,235,255,.10), rgba(10,30,48,.18) 35%, rgba(10,20,35,.04));
+}
+
+/* the pit stop sits ON the route, at the point the second segment reaches —
+   the marks box is 26% wide starting at 55%, and the segment ends near x 206
+   of its 300-unit viewBox, so the stop is placed against that, not eyeballed */
+.offer { position: absolute; left: calc(55% + 26% * (206 / 300)); top: 56%;
+  display: flex; align-items: center; gap: clamp(1.5rem,3.5vw,3rem); }
+.offer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s4); }
+.offer li { font-size: var(--t-sm); color: var(--ink); }
+
+/* the reference sets an orange plus here and white copy beside it; the white
+   cross belongs to the pricing block further down the page */
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);
+  white-space: nowrap; }
+
+.plus { --p: 40px; position: relative; width: var(--p); height: var(--p); flex: 0 0 auto;
+  padding: 0; border: 0; background: none; cursor: pointer;
+  transition: transform .45s var(--ease); }
+.plus:focus-visible { outline: 2px solid var(--cyan); outline-offset: 8px; }
+
+/* Where there is a real pointer the lines wait behind the marker and step out
+   on hover. Where there is not — touch, keyboard, reduced motion — they are
+   simply there: hover is never the only route to this (per-category rule on
+   hover and focus states). */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .offer li { opacity: 0; }
+}
+.plus::before, .plus::after { content: ""; position: absolute; background: var(--orange); }
+.plus::before { left: 50%; top: 0; bottom: 0; width: 3px; transform: translateX(-50%); }
+.plus::after { top: 50%; left: 0; right: 0; height: 3px; transform: translateY(-50%); }
+.offer:hover .plus, .offer:focus-within .plus { transform: rotate(90deg); }
+
+/* a stub so the hero has something to leave for; its ground is set with the
+   transition rule above and must stay identical to the hero's */
+.after { height: 140vh; }
+
+/* narrower desktops: close the gaps before touching the type size */
+@media (max-width: 78rem) {
+  .mh { gap: 1rem; padding-inline: 1rem; }
+  .mh__nav ul { gap: 1.1rem; }
+  .mh__tel { display: none; }
+}
+
+@media (max-width: 62rem) {
+  /* the desktop row is replaced by a trigger inside the same glass bar; the
+     logo and the trigger are what stay */
+  .mh {
+    grid-template-columns: auto 1fr auto;
+    min-height: 62px; top: 16px;
+  }
+  .mh__nav {
+    grid-column: 1 / -1; grid-row: 2;
+    display: none; padding-bottom: 1rem;
+  }
+  .mh__nav[data-open="true"] { display: block; }
+  .mh__nav ul { flex-direction: column; gap: .25rem; }
+  .mh__act { grid-column: 2; justify-self: end; }
+  .burger { display: grid; grid-column: 3; }
+  /* At one column the type sits over the lit mass instead of beside it, so
+     the horizontal scrim has nothing to work with. Measured: the worst pixel
+     behind the lead was L 130 and white ink came out at 3.06:1. The fix is at
+     the background layer, and the amount is solved rather than dialled — the
+     mountain must stay visible, so the floor rises only until every run
+     clears 4.5:1. */
+  .hero__plate::after {
+    background:
+      linear-gradient(to bottom,
+        rgba(11,15,30,.80) 0%, rgba(11,15,30,.58) 22%,
+        rgba(11,15,30,.86) 52%, rgba(11,15,30,.94) 82%, var(--bg) 100%);
+  }
+  .hero__plate img { object-position: 68% 32%; }
+  /* one column has no room for a route beside the type, so the marks go and
+     the two runs that carried meaning return to the flow rather than being
+     left pinned over a region nobody composed for them */
+  /* one column: the leaders shorten and the readings sit under them rather
+     than beside, so nothing reaches the viewport edge and nothing can land
+     on the headline */
+  .callout__in { max-width: 17ch; }
+  .callout--1 .callout__in { left: .5rem; }
+  .callout--2 .callout__in { right: .5rem; }
+  .callout__s { display: none; }
+
+  .hero__marks { display: none; }
+  .summit-note { position: static; margin-top: var(--s6); max-width: none; }
+  .offer { position: static; margin-top: var(--s6); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  .pin::after { display: none; }
+  /* the sky holds still; the clouds are still there, they simply stop */
+  .cloud { animation: none !important; }
+  .cloud--1 { left: 14%; } .cloud--2 { left: 40%; } .cloud--3 { left: 2%; }
+}

@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Alexander Sigoff — Selected Work (variant D)</title>
+<meta name="description" content="Each case opens as a 3D moment, then unrolls sideways as a filmstrip." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+/* ===========================================================================
+   VARIANT D — the canon page, and a sideways unroll.
+
+   Rhythm, per case, six times:
+       3D moment  ->  horizontal filmstrip with text  ->  next 3D  ->  ...
+   The vertical scroll drives both. The page itself NEVER scrolls sideways
+   (anti-patterns U6): the strip is a transform inside a bounded container.
+
+   GRID — the Van de Graaf canon, chosen deliberately.
+   academic-composition warns: "never apply the golden ratio, rule of thirds,
+   symmetry, asymmetry, or any preferred proportion AUTOMATICALLY... if you find
+   yourself reaching for a ratio to justify a decision, you have replaced
+   judgement with arithmetic." That warning is about using a ratio as an alibi.
+   Here the canon is the construction system itself, named up front and applied
+   consistently: margins of 1/9 and 2/9, a block of 6/9. Alex asked for it by
+   name, so it is a stated position rather than a borrowed justification.
+
+   Design Read
+     Reading this as a spatial-then-editorial variant of the same
+     hiring-decision portfolio, for the same audience.
+     Dialect: brief-derived / no stored dialect — a golden-canon page, with
+     depth as the opening register of each case.
+
+   Invariants and where they bite:
+     U6         no horizontal PAGE scroll at any width; the strip is bounded
+     U7         every image and every fact exists in the DOM; the strip is a
+                natively scrollable container when scripting is off
+     motion I1  no JS, no WebGL, or reduced motion all leave a composed page
+     motion I4  transforms only; the pinning is ScrollTrigger's, not layout
+     color I4   captions carry their own scrim; the worst case moves, so the
+                scrim moves with the text
+   ======================================================================== */
+:root{
+  /* THE CANON. One unit = a ninth of the page. Every margin on this page is
+     an integer number of units — there are no arbitrary insets. */
+  --u: calc(100vw / 9);
+  --canon-left:  var(--u);            /* 1/9 */
+  --canon-right: calc(var(--u) * 2);  /* 2/9 */
+  --canon-top:   calc(100svh / 9);
+  --canon-bot:   calc(100svh / 9 * 2);
+
+  --space-2:.5rem; --space-3:.75rem; --space-4:1rem; --space-5:1.5rem;
+  --space-6:2rem;  --space-7:3rem;   --space-8:4rem; --space-9:6rem;
+  --space-10:8rem; --space-11:12rem;
+
+  --text-xs:.6875rem;
+  --text-sm:clamp(.8125rem,.8vw + .7rem,.9375rem);
+  --text-body:clamp(1rem,.35vw + .95rem,1.125rem);
+  --text-h2:clamp(1.75rem,2.4vw + 1.1rem,2.75rem);
+  --text-display:clamp(2.5rem,6vw + 1rem,5.5rem);
+
+  --bg:#0a0b0d;
+  --bg-raised:#14161a;
+  --ink:#f2f1ee;
+  --ink-70:rgba(242,241,238,.72);
+  --ink-58:rgba(242,241,238,.58);
+  --rule:rgba(242,241,238,.14);
+  --rule-strong:rgba(242,241,238,.38);
+
+  --dur-1:.15s; --dur-2:.25s; --dur-3:.4s; --dur-4:1.2s;
+  --ease-out:cubic-bezier(.22,1,.36,1);
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{overflow-x:clip}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Inter Tight",system-ui,sans-serif;font-size:var(--text-body);
+  line-height:1.6;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%;height:auto}
+.label{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:var(--text-xs);
+  text-transform:uppercase;letter-spacing:.14em;font-weight:500;line-height:1.2;
+  color:var(--ink-70);margin:0}
+.num{font-variant-numeric:tabular-nums}
+:where(a,button,[tabindex]):focus-visible{outline:2px solid var(--ink);outline-offset:3px;
+  box-shadow:0 0 0 5px var(--bg);border-radius:1px}
+.skip{position:absolute;left:-9999px;top:var(--space-4);z-index:60}
+.skip:focus{left:var(--canon-left)}
+.open{display:inline-block;text-decoration:none;color:var(--ink);
+  border-block-end:1px solid var(--rule-strong);padding-block-end:var(--space-2);
+  transition:border-color var(--dur-2) var(--ease-out)}
+.open:hover{border-color:var(--ink)}
+
+header{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;
+  justify-content:space-between;align-items:baseline;
+  padding:var(--space-5) var(--canon-left);pointer-events:none}
+header a{pointer-events:auto;color:var(--ink);text-decoration:none}
+
+/* -- the canon block, drawn once so the system is visible in the work ------ */
+.canon-marks{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.5}
+.canon-marks span{position:absolute;background:var(--rule)}
+.canon-marks .v{top:0;bottom:0;width:1px}
+.canon-marks .h{left:0;right:0;height:1px}
+
+/* ===========================================================================
+   ACT ONE OF EACH PAIR — the 3D moment
+   ======================================================================== */
+#gl{position:fixed;inset:0;z-index:1;display:none}
+.gl-on #gl{display:block}
+/* Must out-rank the canvas. `position: sticky` on .still creates a stacking
+   context at z-index auto, so the fixed canvas at z-index 1 was painting over
+   the caption AND its scrim — which is why deepening the scrim changed nothing
+   until this line existed. */
+.act3d{position:relative;height:220svh;z-index:3}
+.act3d .still{position:sticky;top:0;height:100svh;display:grid;
+  grid-template-rows:1fr auto;overflow:hidden}
+.gl-on .act3d .still figure{opacity:0}         /* the canvas is showing it instead */
+.act3d .still figure{margin:0;position:absolute;inset:0;background:var(--bg-raised)}
+.act3d .still figure img{width:100%;height:100%;object-fit:cover}
+
+.caption{position:relative;z-index:3;align-self:end;
+  padding:0 var(--canon-right) var(--canon-bot) var(--canon-left)}
+/* Measured at 1.09:1 over the Ferrari frame, whose lower half is a bright
+   studio sweep. The scrim was both too short and too shallow. Bound to the
+   caption so a light frame keeps its brightness everywhere the type is not
+   (color-taste I4). */
+/* Bound tightly to the type. At -140% the scrim covered half the viewport and
+   swallowed the frame it was supposed to be protecting; measured contrast had
+   16.9:1 of headroom, so the darkening was spent on nothing. */
+.caption::before{content:"";position:absolute;left:0;right:0;bottom:0;top:-45%;z-index:-1;
+  background:linear-gradient(to top,rgba(10,11,13,.97) 0%,rgba(10,11,13,.94) 46%,
+             rgba(10,11,13,.72) 74%,rgba(10,11,13,0) 100%)}
+.caption h2{font-size:var(--text-display);font-weight:600;letter-spacing:-.035em;
+  line-height:.94;margin:var(--space-4) 0 0;max-width:14ch}
+.caption .row{display:flex;flex-wrap:wrap;gap:var(--space-3) var(--space-6);
+  align-items:baseline;margin-block-start:var(--space-5)}
+
+/* ===========================================================================
+   ACT TWO — the filmstrip. Bounded, so the page never moves sideways.
+   ======================================================================== */
+/* The strip band lets the atmosphere read faintly through it. Kept at .86 so
+   the drift is felt rather than watched — ambient tier, never competing. */
+.actstrip{position:relative;background:var(--bg);z-index:4}
+.gl-on .actstrip{background:rgba(10,11,13,.86)}
+.gl-on footer{background:rgba(10,11,13,.86)}
+
+/* ===========================================================================
+   SECTION TRANSITIONS — the boundary is an event, not a seam.
+   The job (motion-taste I5 will not accept one without): it marks the chapter
+   hand-off, which academic-composition C11 requires a section to have. It is
+   also the "spectacle separated by silence" beat — a short black moment
+   between a spatial act and an editorial one.
+   Pure transform, scaleY from the top edge: no layout is touched.
+   ======================================================================== */
+.wipe{position:absolute;left:0;right:0;top:0;height:100%;z-index:9;
+  background:var(--bg);transform-origin:top center;pointer-events:none;
+  transform:scaleY(0)}
+.wipe .wipe-num{position:absolute;left:var(--canon-left);bottom:var(--canon-bot);
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:var(--text-xs);
+  letter-spacing:.14em;color:var(--ink-58);opacity:0}
+@media (prefers-reduced-motion:reduce){ .wipe{display:none} }
+.strip-pin{height:100svh;display:grid;grid-template-rows:auto 1fr;
+  padding-block:var(--canon-top) var(--space-6);overflow:hidden}
+.strip-head{padding-inline:var(--canon-left) var(--canon-right);
+  display:flex;flex-wrap:wrap;gap:var(--space-3) var(--space-6);align-items:baseline}
+.strip-head .note{max-width:52ch;color:var(--ink-70);font-size:var(--text-sm)}
+.track{display:flex;gap:var(--space-6);align-items:center;height:100%;
+  padding-inline:var(--canon-left) var(--canon-right);
+  will-change:transform}
+/* Without scripting this is simply a scrollable row — content parity, not a
+   degraded experience (anti-patterns U7). */
+.no-pin .track{overflow-x:auto;scroll-snap-type:x mandatory}
+.no-pin .strip-pin{height:auto}
+.shot{flex:0 0 auto;height:64svh;position:relative;scroll-snap-align:center}
+.shot img{height:100%;width:auto;max-width:none;background:var(--bg-raised)}
+.shot figcaption{position:absolute;left:0;bottom:0;right:0;padding:var(--space-4);
+  background:linear-gradient(to top,rgba(10,11,13,.95),rgba(10,11,13,0));}
+
+.rail{position:fixed;right:calc(var(--u) / 2);top:50%;transform:translate(50%,-50%);
+  z-index:40;display:flex;flex-direction:column;gap:var(--space-3)}
+.rail a{display:flex;align-items:center;gap:var(--space-3);justify-content:flex-end;
+  text-decoration:none;color:var(--ink-58);font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:var(--text-xs);letter-spacing:.12em;transition:color var(--dur-2) var(--ease-out)}
+.rail .tick{display:block;width:1.5rem;height:1px;background:currentColor;
+  transform-origin:right center;transform:scaleX(.4);
+  transition:transform var(--dur-2) var(--ease-out)}
+.rail a[aria-current="true"]{color:var(--ink)}
+.rail a[aria-current="true"] .tick{transform:scaleX(1)}
+.rail a:hover{color:var(--ink)} .rail a:hover .tick{transform:scaleX(1)}
+@media (max-width:63.99rem){ .rail,.canon-marks{display:none} }
+
+@media (max-width:47.99rem){
+  :root{ --u: calc(100vw / 9); --canon-right: calc(var(--u) * 1.4); }
+  .caption h2{max-width:none}
+  .shot{height:48svh}
+}
+
+@media (prefers-reduced-motion:reduce){
+  #gl{display:none!important}
+  .act3d{height:auto}
+  .act3d .still{position:static;height:auto}
+  .act3d .still figure{position:relative;aspect-ratio:16/10}
+  .gl-on .act3d .still figure{opacity:1}
+  .caption{padding-block:var(--space-6) var(--space-8)}
+  .strip-pin{height:auto}
+  .track{overflow-x:auto}
+}
+</style>
+</head>
+
+<body class="no-pin">
+<a href="#work" class="skip label">Skip to the work</a>
+
+<header>
+  <a class="label" href="#top" style="color:var(--ink)">Alexander Sigoff</a>
+  <p class="label">Variant D &nbsp;/&nbsp;
+    <a href="index1.html" style="color:inherit">A</a>
+    <a href="index2.html" style="color:inherit">B</a>
+    <a href="index3.html" style="color:inherit">C</a></p>
+</header>
+
+<canvas id="gl" aria-hidden="true"></canvas>
+
+<!-- the canon made visible: 1/9 and 2/9 verticals, 1/9 and 2/9 horizontals -->
+<div class="canon-marks" aria-hidden="true">
+  <span class="v" style="left:calc(var(--u)*1)"></span>
+  <span class="v" style="left:calc(var(--u)*7)"></span>
+  <span class="h" style="top:calc(100svh/9)"></span>
+  <span class="h" style="top:calc(100svh/9*7)"></span>
+</div>
+
+<nav class="rail" aria-label="Cases">
+  <a href="#c1"><span>Ferrari</span><span class="tick"></span></a>
+  <a href="#c2"><span>Prestige</span><span class="tick"></span></a>
+  <a href="#c3"><span>Pagani</span><span class="tick"></span></a>
+  <a href="#c4"><span>Dimamid</span><span class="tick"></span></a>
+  <a href="#c5"><span>MODA</span><span class="tick"></span></a>
+  <a href="#c6"><span>Porsche</span><span class="tick"></span></a>
+</nav>
+
+<main id="top">
+<div id="work">
+
+<section class="act3d" id="c1" aria-labelledby="h01" data-case="0">
+  <div class="still">
+    <figure><img src="assets/cases/case-01-frame.webp" width="1800" height="1125"
+                 alt="Cauley Ferrari — opening frame." /></figure>
+    <div class="caption">
+      <p class="label">01 &nbsp;/&nbsp; Marque dealer</p>
+      <h2 id="h01">Cauley Ferrari</h2>
+      <div class="row">
+        <span class="label num" style="color:var(--ink)">2025</span>
+        <span class="label" style="color:var(--ink)">Multi-page product</span>
+        <a class="open label" href="https://www.cauleyferrari.com/" rel="noopener">Open the site &nbsp;&rarr;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="actstrip" data-strip="0" aria-label="Cauley Ferrari — frames">
+  <div class="strip-pin">
+    <div class="strip-head">
+      <p class="label">01 &nbsp;/&nbsp; frames</p>
+      <p class="note">[Two or three sentences on this case, 180&ndash;260 characters.]</p>
+    </div>
+    <div class="track">
+      <figure class="shot" style="aspect-ratio:1280/800">
+        <img src="assets/strip/case-01-a.webp" width="1280" height="800" loading="lazy"
+             alt="Cauley Ferrari — frame A." />
+      </figure>
+      <figure class="shot" style="aspect-ratio:1280/800">
+        <img src="assets/strip/case-01-b.webp" width="1280" height="800" loading="lazy"
+             alt="Cauley Ferrari — frame B." />
+      </figure>
+      <figure class="shot" style="aspect-ratio:1280/800">
+        <img src="assets/strip/case-01-c.webp" width="1280" height="800" loading="lazy"
+             alt="Cauley Ferrari — frame C." />
+      </figure>
+      <figure class="shot" style="aspect-ratio:1280/800">
+        <img src="assets/strip/case-01-d.webp" width="1280" height="800" loading="lazy"
+             alt="Cauley Ferrari — frame D." />
+      </figure>
+      <figure class="shot" style="aspect-ratio:370/800">
+        <img src="assets/strip/case-01-e.webp" width="370" height="800" loading="lazy"
+             alt="Cauley Ferrari — frame E." />
+      </figure>
+    </div>
+  </div>
+</section>
+
+
+<section class="act3d" id="c2" aria-labelledby="h02" data-case="1">
+  <div class="still">
+    <figure><img src="assets/cases/case-02-frame.webp" width="1800" height="1125" loading="lazy"
+                 alt="Prestige Imports — opening frame." /></figure>
+    <div class="caption">
+      <p class="label">02 &nbsp;/&nbsp; Dealer group, service</p>
+      <h2 id="h02">Prestige Imports</h2>
+      <div class="row">
+        <span class="label num" style="color:var(--ink)">2026</span>
+        <span class="label" style="color:var(--ink)">Light system</span>
+        <a class="open label" href="https://sigovs.github.io/prestige-website/index_6.html" rel="noopener">Open the site &nbsp;&rarr;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="actstrip" data-strip="1" aria-label="Prestige Imports — frames">
+  <div class="strip-pin">
+    <div class="strip-head">
+      <p class="label">02 &nbsp;/&nbsp; frames</p>
+      <p class="note">[Two or three sentences on this case, 180&ndash;260 characters.]</p>
+    </div>
+    <div class="track">
+      <figure class="shot" style="aspect-ratio:1280/800">
+        <img src="assets/strip/case-02-a.webp" width="1280" height="800" loading="lazy"
+             alt="Prestige Imports — frame A." />
+      </figure>
+      <figure class="shot" style="aspect-ratio:1280/800">
+        <img src="assets/strip/case-02-b.webp" width="1280" height="800" loading="lazy"
+             alt="Prestige Imports — frame B." />
+      </figure>
+      <figure class="shot" style="aspect-ratio:1280/800">
+        <img src="assets/strip/case-02-c.webp" width="1280" height="800" loading="lazy"
+             alt="Prestige Imports — frame C." />
+      </figure>
+      <figure class="shot" style="aspect-ratio:1280/800">
+        <img src="assets/strip/case-02-d.webp" width="1280" height="800" loading="lazy"
+             alt="Prestige Imports — frame D." />
+      </figure>
+      <figure class="shot" style="aspect-ratio:370/800">
+        <img src="assets/strip/case-02-e.webp" width="370" height="800" loading="lazy"
+             alt="Prestige Imports — frame E." />
+      </figure>
+    </div>
+  </div>
+</section>
+
+
+<section class="act3d" id="c3" aria-labelledby="h03" data-case="2">
+  <div class="still">
+    <figure><img src="assets/cases/case-03-frame.webp" width="1800" height="1125" loading="lazy"
+                 alt="Pagani of Chicago — opening frame." /></figure>
+    <div class="caption">
+      <p class="label">03 &nbsp;/&nbsp; Marque dealer</p>
+      <h2 id="h03">Pagani of Chicago</h2>
+      <div class="row">
+        <span class="label num" style="color:var(--ink)">2025</span>
+        <span class="label" style="color:var(--ink)">Model pages</span>
+        <a class="open label" href="https://www.paganiofchicago.com/" rel="noopener">Open the site &nbsp;&rarr;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="actstrip" data-strip="2" aria-label="Pagani of Chicago — frames">
+  <div class="strip-pin">
+    <div class="strip-head">
+      <p class="label">03 &nbsp;/&nbsp; frames</p>
+      <p class="note">[Two or three sentences on this case, 180&ndash;260 characters.]</p>
+    </div>
+    <div class="track">
+      <figure class="shot" style="aspect-ratio:1280/800">
+        <img src="assets/strip/case-03-a.webp" width="1280" height="800" loading="lazy"
+             alt="Pagani of Chicago — frame A." />
+      </figure>
+      <figure class="shot" style="aspect-ratio:1280/800">
+        <img src="assets/strip/case-03-b.webp" width="1280" height="800" loading="lazy"
+             alt="Pagani of Chicago — frame B." />
+      </figure>
+      <figure class="shot" style="aspect-ratio:1280/800">
+        <img src="assets/strip/case-03-c.webp" width="1280" height="800" loading="lazy"
+             alt="Pagani of Chicago — frame C." />
+      </figure>
+      <figure class="shot" style="aspect-ratio:1280/800">
+        <img src="assets/strip/case-03-d.webp" width="1280" height="800" loading="lazy"
+             alt="Pagani of Chicago — frame D." />
+      </figure>
+      <figure class="shot" style="aspect-ratio:370/800">
+        <img src="assets/strip/case-03-e.webp" width="370" height="800" loading="lazy"
+             alt="Pagani of Chicago — frame E." />
+      </figure>
+    </div>
+  </div>
+</section>
+
+
+<section class="act3d" id="c4" aria-labelledby="h04" data-case="3">
+  <div class="still">
+    <figure><img src="assets/cases/case-04-frame.webp" width="1800" height="771" loading="lazy"
+                 alt="Dimamid — opening frame." /></figure>
+    <div class="caption">
+      <p class="label">04 &nbsp;/&nbsp; Music project</p>
+      <h2 id="h04">Dimamid</h2>
+      <div class="row">
+        <span class="label num" style="color:var(--ink)">2025</span>
+        <span class="label" style="color:var(--ink)">Authored world</span>
+        <a class="open label" href="https://sigovs.github.io/dimamid/" rel="noopener">Open the site &nbsp;&rarr;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="actstrip" data-strip="3" aria-label="Dimamid — frames">
+  <div class="strip-pin">
+    <div class="strip-head">
+      <p class="label">04 &nbsp;/&nbsp; frames</p>
+      <p class="note">[Two or three sentences on this case, 180&ndash;260 characters.]</p>
+    </div>
+    <div class="track">
+      <figure class="shot" style="aspect-ratio:1280/800">
+        <img src="assets/strip/case-04-a.webp" width="1280" height="800" loading="lazy"
+             alt="Dimamid — frame A." />
+      </figure>
+      <figure class="shot" style="aspect-ratio:1280/800">
+        <img src="assets/strip/case-04-b.webp" width="1280" height="800" loading="lazy"
+             alt="Dimamid — frame B." />
+      </figure>
+      <figure class="shot" style="aspect-ratio:1280/800">
+        <img src="assets/strip/case-04-c.webp" width="1280" height="800" loading="lazy"
+             alt="Dimamid — frame C." />
+      </figure>
+      <figure class="shot" style="aspect-ratio:1280/800">
+        <img src="assets/strip/case-04-d.webp" width="1280" height="800" loading="lazy"
+             alt="Dimamid — frame D." />
+      </figure>
+      <figure class="shot" style="aspect-ratio:370/800">
+        <img src="assets/strip/case-04-e.webp" width="370" height="800" loading="lazy"
+             alt="Dimamid — frame E." />
+      </figure>
+    </div>
+  </div>
+</section>
+
+
+<section class="act3d" id="c5" aria-labelledby="h05" data-case="4">
+  <div class="still">
+    <figure><img src="assets/cases/case-05-frame.webp" width="1364" height="853" loading="lazy"
+                 alt="MODA Miami / Sotheby’s — opening frame." /></figure>
+    <div class="caption">
+      <p class="label">05 &nbsp;/&nbsp; Concours &amp; auction</p>
+      <h2 id="h05">MODA Miami / Sotheby&rsquo;s</h2>
+      <div class="row">
+        <span class="label num" style="color:var(--ink)">2023</span>
+        <span class="label" style="color:var(--ink)">Event platform</span>
+        <a class="open label" href="https://www.behance.net/gallery/179848061/MODA-MIAMI-Sothebys" rel="noopener">View the case &nbsp;&rarr;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="actstrip" data-strip="4" aria-label="MODA Miami / Sotheby’s — frames">
+  <div class="strip-pin">
+    <div class="strip-head">
+      <p class="label">05 &nbsp;/&nbsp; frames</p>
+      <p class="note">[Two or three sentences on this case, 180&ndash;260 characters.]</p>
+    </div>
+    <div class="track">
+      <figure class="shot" style="aspect-ratio:1920/800">
+        <img src="assets/strip/case-05-a.webp" width="1920" height="800" loading="lazy"
+             alt="MODA Miami / Sotheby’s — frame A." />
+      </figure>
+      <figure class="shot" style="aspect-ratio:1920/800">
+        <img src="assets/strip/case-05-b.webp" width="1920" height="800" loading="lazy"
+             alt="MODA Miami / Sotheby’s — frame B." />
+      </figure>
+      <figure class="shot" style="aspect-ratio:789/800">
+        <img src="assets/strip/case-05-c.webp" width="789" height="800" loading="lazy"
+             alt="MODA Miami / Sotheby’s — frame C." />
+      </figure>
+      <figure class="shot" style="aspect-ratio:756/800">
+        <img src="assets/strip/case-05-d.webp" width="756" height="800" loading="lazy"
+             alt="MODA Miami / Sotheby’s — frame D." />
+      </figure>
+      <figure class="shot" style="aspect-ratio:324/800">
+        <img src="assets/strip/case-05-e.webp" width="324" height="800" loading="lazy"
+             alt="MODA Miami / Sotheby’s — frame E." />
+      </figure>
+    </div>
+  </div>
+</section>
+
+
+<section class="act3d" id="c6" aria-labelledby="h06" data-case="5">
+  <div class="still">
+    <figure><img src="assets/cases/case-06-frame.webp" width="1728" height="1080" loading="lazy"
+                 alt="Porsche Restoration Services — opening frame." /></figure>
+    <div class="caption">
+      <p class="label">06 &nbsp;/&nbsp; Restoration service</p>
+      <h2 id="h06">Porsche Restoration Services</h2>
+      <div class="row">
+        <span class="label num" style="color:var(--ink)">2021</span>
+        <span class="label" style="color:var(--ink)">Service site</span>
+        <a class="open label" href="https://www.behance.net/gallery/130127865/Porsche-Restoration-Services" rel="noopener">View the case &nbsp;&rarr;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="actstrip" data-strip="5" aria-label="Porsche Restoration Services — frames">
+  <div class="strip-pin">
+    <div class="strip-head">
+      <p class="label">06 &nbsp;/&nbsp; frames</p>
+      <p class="note">[Two or three sentences on this case, 180&ndash;260 characters.]</p>
+    </div>
+    <div class="track">
+      <figure class="shot" style="aspect-ratio:1422/800">
+        <img src="assets/strip/case-06-a.webp" width="1422" height="800" loading="lazy"
+             alt="Porsche Restoration Services — frame A." />
+      </figure>
+      <figure class="shot" style="aspect-ratio:1422/800">
+        <img src="assets/strip/case-06-b.webp" width="1422" height="800" loading="lazy"
+             alt="Porsche Restoration Services — frame B." />
+      </figure>
+    </div>
+  </div>
+</section>
+</div>
+</main>
+
+<footer style="padding:var(--space-6) var(--canon-left);border-top:1px solid var(--rule);
+               display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--space-3);
+               position:relative;z-index:5;background:var(--bg)">
+  <p class="label">Variant D &mdash; canon page, 3D then filmstrip</p>
+  <p class="label">Alexander Sigoff &nbsp;&middot;&nbsp; <span class="num">&copy; 2026</span></p>
+</footer>
+
+<script type="importmap">
+{"imports":{"three":"https://unpkg.com/three@0.169.0/build/three.module.js"}}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+
+<script type="module">
+import * as THREE from 'three';
+
+const CASES=[
+ {id:'c1',n:'01',name:'Cauley Ferrari',sector:'Marque dealer',year:'2025',scope:'Multi-page product',
+  href:'https://www.cauleyferrari.com/',tex:'assets/gl/case-01-frame.webp',
+  hero:'assets/cases/case-01-frame.webp',hw:1800,hh:1125,
+  note:'[Two or three sentences on this case, 180-260 characters.]',
+  shots:[['a',1280],['b',1280],['c',1280],['d',1280],['e',370]]},
+ {id:'c2',n:'02',name:'Prestige Imports',sector:'Dealer group, service',year:'2026',scope:'Light system',
+  href:'https://sigovs.github.io/prestige-website/index_6.html',tex:'assets/gl/case-02-frame.webp',
+  hero:'assets/cases/case-02-frame.webp',hw:1800,hh:1125,
+  note:'[Two or three sentences on this case, 180-260 characters.]',
+  shots:[['a',1280],['b',1280],['c',1280],['d',1280],['e',370]]},
+ {id:'c3',n:'03',name:'Pagani of Chicago',sector:'Marque dealer',year:'2025',scope:'Model pages',
+  href:'https://www.paganiofchicago.com/',tex:'assets/gl/case-03-frame.webp',
+  hero:'assets/cases/case-03-frame.webp',hw:1800,hh:1125,
+  note:'[Two or three sentences on this case, 180-260 characters.]',
+  shots:[['a',1280],['b',1280],['c',1280],['d',1280],['e',370]]},
+ {id:'c4',n:'04',name:'Dimamid',sector:'Music project',year:'2025',scope:'Authored world',
+  href:'https://sigovs.github.io/dimamid/',tex:'assets/gl/case-04-frame.webp',
+  hero:'assets/cases/case-04-frame.webp',hw:1800,hh:771,
+  note:'[Two or three sentences on this case, 180-260 characters.]',
+  shots:[['a',1280],['b',1280],['c',1280],['d',1280],['e',370]]},
+ {id:'c5',n:'05',name:'MODA Miami / Sotheby’s',sector:'Concours & auction',year:'2023',scope:'Event platform',
+  href:'https://www.behance.net/gallery/179848061/MODA-MIAMI-Sothebys',tex:'assets/gl/case-05-frame.webp',
+  hero:'assets/cases/case-05-frame.webp',hw:1364,hh:853,
+  note:'[Two or three sentences on this case, 180-260 characters.]',
+  shots:[['a',1920],['b',1920],['c',789],['d',756],['e',324]]},
+ {id:'c6',n:'06',name:'Porsche Restoration Services',sector:'Restoration service',year:'2021',scope:'Service site',
+  href:'https://www.behance.net/gallery/130127865/Porsche-Restoration-Services',tex:'assets/gl/case-06-frame.webp',
+  hero:'assets/cases/case-06-frame.webp',hw:1728,hh:1080,
+  // the thinnest set in the portfolio: no live site, two source images
+  note:'[Two or three sentences on this case, 180-260 characters.]',
+  shots:[['a',1422],['b',1422]]},
+];
+
+/* The six cases are STATIC MARKUP above. This array is only the data the GL
+   layer and the rail need — it does not build the page. An earlier version
+   rendered the whole body from here, which left the page blank with scripting
+   off while the comments claimed it was DOM-first. */
+
+/* ---------------------------------------------------------------------------
+   Enhancement layer. Everything above is the page; nothing below is required
+   for it to be complete.
+   ------------------------------------------------------------------------ */
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const haveGSAP = !!(window.gsap && window.ScrollTrigger);
+function webglOK(){ try{ const c=document.createElement('canvas');
+  return !!(window.WebGL2RenderingContext && c.getContext('webgl2')); }catch(e){ return false; } }
+
+if (!reduce && haveGSAP) { pinStrips(); if (webglOK()) startGL(); }
+else console.info('[variant D] document only: ' + (reduce?'reduced motion':'GSAP unavailable'));
+
+/* ACT TWO — vertical scroll drives a horizontal transform inside a pinned
+   container. The document's own scrollWidth never changes (U6). */
+function pinStrips(){
+  gsap.registerPlugin(ScrollTrigger);
+  document.body.classList.remove('no-pin');
+  document.querySelectorAll('.actstrip').forEach(sec=>{
+    const track = sec.querySelector('.track');
+    const dist = () => Math.max(0, track.scrollWidth - innerWidth);
+    ScrollTrigger.create({
+      trigger: sec, start:'top top', end: () => '+=' + dist(),
+      pin: sec.querySelector('.strip-pin'), scrub: 0.5, invalidateOnRefresh: true,
+      onUpdate: self => { track.style.transform =
+        'translate3d(' + (-self.progress * dist()).toFixed(1) + 'px,0,0)'; }
+    });
+  });
+
+  /* The wipe. One per boundary: it closes over the outgoing act and opens off
+     the incoming one, so a chapter ends rather than merely stopping. The case
+     number rides inside it, which is what makes the black moment informative
+     instead of decorative. */
+  document.querySelectorAll('.act3d').forEach((sec,i)=>{
+    const w=document.createElement('div');
+    w.className='wipe';
+    w.innerHTML='<span class="wipe-num">'+String(i+1).padStart(2,'0')+' / 06</span>';
+    w.setAttribute('aria-hidden','true');
+    sec.appendChild(w);
+    const num=w.querySelector('.wipe-num');
+    ScrollTrigger.create({
+      trigger:sec, start:'top bottom', end:'top top', scrub:0.4,
+      onUpdate:self=>{
+        // closes to full over the first half of the approach, then opens away
+        const p=self.progress;
+        const cover = p<0.5 ? p*2 : (1-p)*2;
+        w.style.transform='scaleY('+cover.toFixed(3)+')';
+        num.style.opacity=(cover>0.75?(cover-0.75)*4:0).toFixed(2);
+      }
+    });
+  });
+
+  // rail follows whichever case owns the viewport
+  const links=[...document.querySelectorAll('.rail a')];
+  document.querySelectorAll('.act3d').forEach((sec,i)=>{
+    ScrollTrigger.create({trigger:sec, start:'top center', end:()=>'+='+(sec.offsetHeight+innerHeight*2),
+      onToggle:self=>{ if(self.isActive) links.forEach((a,k)=>
+        a.setAttribute('aria-current', k===i?'true':'false')); }});
+  });
+}
+
+/* ACT ONE — the 3D moment. One plane per case, pushed toward the camera across
+   its own act. Same colour discipline as variant C: sRGB in and out, no tone
+   mapping, unlit material, so the client's work is not relit. */
+function startGL(){
+  const canvas=document.getElementById('gl');
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
+  renderer.outputColorSpace=THREE.SRGBColorSpace;
+  renderer.toneMapping=THREE.NoToneMapping;
+  renderer.setClearColor(0x0a0b0d,1);
+  const scene=new THREE.Scene();
+  scene.fog=new THREE.Fog(0x0a0b0d,7,26);
+  const camera=new THREE.PerspectiveCamera(40,1,0.1,100);
+
+  /* ===== ATMOSPHERE — the ambient tier, and the rules it lives under =========
+     motion-taste I5 removes motion with no communicative job, and a decorative
+     background has none. What legitimises this is the ambient tier in the
+     effect hierarchy: "the scene breathing — continuous, LOW AMPLITUDE, never
+     competing", plus immersive-authored-world P7, atmosphere as the air of the
+     scene rather than a filter laid over it.
+
+     So it is built to those constraints rather than to taste:
+       - ACHROMATIC. Colour on this page belongs to the work; a coloured sky
+         would install a brand hue by the back door.
+       - LOW AMPLITUDE. Roughly +/-5% luminance around the ground, so it is felt
+         and not watched, and so text over it keeps its contrast.
+       - NO BLOOM. anti-patterns D1 bans glow standing in for depth; depth here
+         comes from parallax between two noise layers, not from a glare pass.
+       - It costs one fullscreen quad. Octaves drop on small viewports and the
+         existing frame guard lowers resolution before it lowers frame rate.
+     ========================================================================= */
+  const atmoScene=new THREE.Scene();
+  const atmoCam=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+  const OCTAVES = innerWidth < 900 ? 3 : 5;
+  const atmoMat=new THREE.ShaderMaterial({
+    uniforms:{ uTime:{value:0}, uAspect:{value:1} },
+    vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position.xy,0.0,1.0); }`,
+    fragmentShader:`
+      precision highp float;
+      varying vec2 vUv; uniform float uTime; uniform float uAspect;
+      float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+      float noise(vec2 p){
+        vec2 i=floor(p), f=fract(p);
+        vec2 u=f*f*(3.0-2.0*f);
+        return mix(mix(hash(i),hash(i+vec2(1,0)),u.x),
+                   mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y);
+      }
+      float fbm(vec2 p){
+        float v=0.0, a=0.5;
+        for(int i=0;i<${OCTAVES};i++){ v+=a*noise(p); p*=2.02; a*=0.5; }
+        return v;
+      }
+      void main(){
+        vec2 p=vec2(vUv.x*uAspect,vUv.y)*2.4;
+        // two layers drifting at different rates: depth from parallax, not glow
+        // Measured: at 0.012/s the field moved 0.1 luminance points over seven
+        // seconds — a frozen texture, not weather. Fast enough now to read as
+        // continuous, still far below anything that would pull the eye.
+        float a=fbm(p+vec2(uTime*0.075,uTime*0.032));
+        float b=fbm(p*1.7-vec2(uTime*0.120,uTime*0.048));
+        float m=mix(a,b,0.45);
+        m=smoothstep(0.30,0.95,m);
+        vec3 ground=vec3(0.039,0.043,0.051);          // #0a0b0d
+        // amplitude cap: the lift never exceeds ~5% luminance
+        gl_FragColor=vec4(ground+vec3(m*0.052),1.0);
+      }`,
+    depthWrite:false, depthTest:false,
+  });
+  atmoScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2), atmoMat));
+
+  let failed=0;
+  function toDocument(why){
+    console.warn('[variant D] '+why+' — the document stands');
+    document.documentElement.classList.remove('gl-on');
+    canvas.style.display='none';
+  }
+
+  const loader=new THREE.TextureLoader();
+  const planes=[];
+  CASES.forEach((c,i)=>{
+    const mesh=new THREE.Mesh(new THREE.PlaneGeometry(7,7*0.625),
+      new THREE.MeshBasicMaterial({toneMapped:false,transparent:true,opacity:0}));
+    loader.load(c.tex, t=>{
+      t.colorSpace=THREE.SRGBColorSpace;
+      t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+      mesh.material.map=t; mesh.material.needsUpdate=true;
+      const ar=t.image.width/t.image.height;
+      mesh.geometry.dispose(); mesh.geometry=new THREE.PlaneGeometry(7,7/ar);
+    }, undefined, ()=>{ if(!failed++) toDocument('textures blocked (serve over http, not file://)'); });
+    mesh.position.set(0,0,0); mesh.visible=false;
+    scene.add(mesh); planes.push(mesh);
+  });
+
+  function resize(){
+    renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+    renderer.setSize(innerWidth,innerHeight,false);
+    camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+    atmoMat.uniforms.uAspect.value=innerWidth/innerHeight;
+  }
+  addEventListener('resize',resize); resize();
+  document.documentElement.classList.add('gl-on');
+
+  document.querySelectorAll('.act3d').forEach((sec,i)=>{
+    ScrollTrigger.create({
+      trigger:sec, start:'top bottom', end:'bottom top', scrub:true,
+      onUpdate:self=>{
+        planes.forEach((m,k)=>m.visible = k===i);
+        const m=planes[i]; if(!m) return;
+        m.material.opacity = Math.min(1, self.progress*4, (1-self.progress)*4);
+        // a slow push-in across the act: depth is the opening register
+        camera.position.set(0,0, 13 - self.progress*5.5);
+        camera.lookAt(0,0,0);
+      },
+      onLeave:()=>{ planes[i].visible=false; },
+      onLeaveBack:()=>{ planes[i].visible=false; },
+    });
+  });
+
+  let last=performance.now(),acc=0,frames=0,ratio=Math.min(devicePixelRatio,2);
+  (function tick(now){
+    const dt=now-last; last=now; acc+=dt; frames++;
+    if(acc>1000){ const fps=frames*1000/acc; acc=0; frames=0;
+      if(fps<45&&ratio>1){ ratio=Math.max(1,ratio-0.25); renderer.setPixelRatio(ratio); } }
+    atmoMat.uniforms.uTime.value = now * 0.001;
+    renderer.autoClear = true;
+    renderer.render(atmoScene, atmoCam);     // the air, drawn first
+    renderer.autoClear = false;
+    renderer.render(scene, camera);          // then whatever the act is showing
+    requestAnimationFrame(tick);
+  })(performance.now());
+
+  canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();toDocument('context lost');});
+}
+</script>
+</body>
+</html>

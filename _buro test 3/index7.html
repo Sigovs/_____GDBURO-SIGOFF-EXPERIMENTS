@@ -1,0 +1,752 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Meridian — Folio</title>
+<meta name="description" content="A dealer register: every vehicle a numbered folio, every photograph an inspection record." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+/* ===========================================================================
+   MERIDIAN — FOLIO.  Second direction.
+
+   The first version declared auction-editorial and then delivered a dealership
+   template underneath it: split hero, search bar, three-column card grid, four
+   equal steps, text-image split, Instagram grid, map, footer. Bone paint on a
+   stock skeleton. This rebuilds the compositional system instead.
+
+   CONCEPT — a vehicle exists as an entry in one continuous register: a folio
+   number, a chassis as its real name, and numbered inspection points binding
+   the photograph to the specification.
+
+   SIGNATURE MECHANISM — the inspection point. Numbered marks sit ON the
+   photograph and are bound BOTH WAYS to the specification rows: touch a mark
+   and its line lights; touch a line and its mark lights. The same system runs
+   the folio rail, the register, the specimen and the entries — it is the page's
+   structure, not an ornament in one band.
+
+   RHYTHM — seven movements at deliberately unequal density:
+     cover (very sparse) · register (very dense) · specimen (sparse, slow)
+     · entries (medium, alternating scale) · plate (one event)
+     · intake sheet (documentary) · colophon (dense)
+
+   Invariants held: AA measured on the bone ground; every mark is a real
+   <button> with keyboard parity and aria-controls; no motion without a job;
+   full static path; no horizontal page scroll; content parity.
+   ======================================================================== */
+:root{
+  --s1:.25rem; --s2:.5rem; --s3:.75rem; --s4:1rem; --s5:1.5rem; --s6:2rem;
+  --s7:3rem; --s8:4rem; --s9:6rem; --s10:8rem; --s11:12rem;
+
+  --bg:#f4f2ee; --bg2:#eae7e1; --ink:#14151a;
+  /* Measured, not assumed. .50 ink gave 3.35:1 on the register's metadata —
+     and that line is chassis, year and odometer, which is content, not chrome.
+     .34 gave 2.15:1 on the inspection point's border, and a point is a control
+     boundary needing 3. Both raised until they pass. */
+  --ink70:rgba(20,21,26,.70); --ink50:rgba(20,21,26,.68);
+  --rule:rgba(20,21,26,.16); --rule2:rgba(20,21,26,.55);
+  --mark:#6d1f24;
+
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+  --serif:"Instrument Serif",Georgia,serif;
+  --sans:"Inter Tight",system-ui,sans-serif;
+
+  --dur1:.15s; --dur2:.28s; --dur3:.5s; --dur4:1s;
+  --ease:cubic-bezier(.22,1,.36,1);
+
+  --rail:clamp(3.25rem,6vw,5.5rem);   /* the folio rail owns the left edge */
+  --pad:clamp(1rem,3.5vw,3rem);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+html,body{overflow-x:clip}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+  font-size:clamp(.9375rem,.3vw+.9rem,1.0625rem);line-height:1.6;
+  -webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%;height:auto}
+h1,h2,h3{margin:0;font-weight:400}
+
+.mono{font-family:var(--mono);font-size:.6875rem;text-transform:uppercase;
+  letter-spacing:.14em;font-weight:500;line-height:1.2;color:var(--ink70);margin:0}
+.num{font-variant-numeric:tabular-nums}
+.serif{font-family:var(--serif);font-weight:400;letter-spacing:-.01em}
+
+:where(a,button,[tabindex]):focus-visible{outline:2px solid var(--mark);
+  outline-offset:3px;border-radius:2px}
+.skip{position:absolute;left:-9999px;top:var(--s3);z-index:99}
+.skip:focus{left:var(--pad)}
+
+/* the page is inset from the rail everywhere; the rail is the spine */
+.sheet{padding-left:var(--rail);padding-right:var(--pad)}
+
+/* ===========================================================================
+   THE FOLIO RAIL — the spine. Same object on every movement.
+   ======================================================================== */
+.rail{position:fixed;left:0;top:0;bottom:0;width:var(--rail);z-index:40;
+  border-right:1px solid var(--rule);background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:space-between;padding-block:var(--s5)}
+.rail__mark{font-family:var(--mono);font-size:.625rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--ink50);writing-mode:vertical-rl}
+.rail__folio{font-family:var(--mono);font-size:clamp(1.1rem,2vw,1.5rem);
+  font-weight:500;line-height:1;font-variant-numeric:tabular-nums;
+  color:var(--ink);position:relative;height:1.2em;overflow:hidden;width:2.4ch;
+  text-align:center}
+/* the counter rolls rather than fades — indexing, not decoration */
+.rail__folio span{display:block;transition:transform var(--dur3) var(--ease)}
+.rail__chassis{font-family:var(--mono);font-size:.5625rem;letter-spacing:.16em;
+  color:var(--ink50);writing-mode:vertical-rl;transition:opacity var(--dur2) var(--ease)}
+
+/* ===========================================================================
+   00 — THE COVER. A title page, not a hero split. The chassis is the dominant
+   mass; the car is a small plate, the way a catalogue puts a specimen on a
+   title page.
+   ======================================================================== */
+.cover{position:relative;min-height:94svh;display:grid;
+  grid-template-rows:auto 1fr auto;padding-block:var(--s6) var(--s7)}
+.cover__top{display:flex;flex-wrap:wrap;gap:var(--s3) var(--s6);
+  justify-content:space-between;align-items:baseline;
+  padding-bottom:var(--s4);border-bottom:1px solid var(--ink)}
+.cover__body{display:grid;gap:var(--s6);align-content:center;padding-block:var(--s7)}
+.cover__chassis{font-family:var(--mono);font-weight:500;
+  font-size:clamp(2.6rem,11.5vw,10rem);line-height:.86;letter-spacing:-.045em;
+  font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.cover__name{font-family:var(--serif);font-size:clamp(1.75rem,4.2vw,3.5rem);
+  line-height:1.02;max-width:16ch}
+.cover__name em{font-style:italic}
+.cover__plate{margin:0;width:min(38vw,26rem);background:var(--bg2);
+  aspect-ratio:3/2;overflow:hidden;border:1px solid var(--rule)}
+.cover__plate img{width:100%;height:100%;object-fit:cover}
+.cover__foot{display:grid;gap:var(--s4);padding-top:var(--s4);
+  border-top:1px solid var(--rule)}
+@media (min-width:60rem){
+  .cover__body{grid-template-columns:1fr auto;align-items:end;gap:var(--s8)}
+  .cover__foot{grid-template-columns:repeat(4,1fr);align-items:baseline}
+}
+
+/* ===========================================================================
+   THE REGISTER — the inventory as a lot list. Photography withheld.
+   This is the deliberate inversion of the dealership card grid.
+   ======================================================================== */
+.register{padding-block:var(--s8) var(--s9)}
+.register__head{display:flex;flex-wrap:wrap;gap:var(--s3) var(--s6);
+  justify-content:space-between;align-items:baseline;
+  padding-bottom:var(--s3);border-bottom:1px solid var(--ink)}
+.reg-row{display:grid;grid-template-columns:3.5rem 1fr auto;gap:var(--s4);
+  align-items:baseline;padding-block:var(--s4);
+  border-bottom:1px solid var(--rule);text-decoration:none;color:inherit;
+  transition:background var(--dur2) var(--ease)}
+.reg-row:hover,.reg-row:focus-visible{background:var(--bg2)}
+.reg-row__f{font-family:var(--mono);font-size:.75rem;color:var(--ink50);
+  font-variant-numeric:tabular-nums}
+.reg-row__name{font-family:var(--serif);font-size:clamp(1.15rem,1.6vw,1.6rem);
+  line-height:1.1}
+.reg-row__meta{font-family:var(--mono);font-size:.625rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink50);margin-top:var(--s2);
+  display:flex;flex-wrap:wrap;gap:var(--s2) var(--s5)}
+.reg-row__price{font-family:var(--mono);font-size:.9375rem;font-weight:500;
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+/* a 40px thumb strip is all the imagery the register gets */
+.reg-row__thumb{display:none}
+@media (min-width:48rem){
+  .reg-row{grid-template-columns:3.5rem 4rem 1fr auto}
+  .reg-row__thumb{display:block;width:4rem;aspect-ratio:3/2;overflow:hidden;
+    background:var(--bg2);filter:grayscale(1) contrast(.9);
+    transition:filter var(--dur2) var(--ease)}
+  .reg-row:hover .reg-row__thumb{filter:none}
+  .reg-row__thumb img{width:100%;height:100%;object-fit:cover}
+}
+
+/* ===========================================================================
+   THE SPECIMEN — one vehicle, full width, with inspection points.
+   ======================================================================== */
+.specimen{padding-block:var(--s9) var(--s10)}
+.specimen__lead{display:grid;gap:var(--s4);max-width:52rem;
+  padding-bottom:var(--s6)}
+.specimen__name{font-family:var(--serif);font-size:clamp(2rem,5.5vw,4.5rem);
+  line-height:1;letter-spacing:-.015em}
+.specimen__name em{font-style:italic}
+
+.plate-wrap{position:relative;margin:0;background:var(--bg2);
+  aspect-ratio:3/2;overflow:hidden;border:1px solid var(--rule)}
+.plate-wrap img{width:100%;height:100%;object-fit:cover}
+
+/* registration marks: two hairlines converge on the specimen as it enters */
+.plate-wrap::before,.plate-wrap::after{content:"";position:absolute;
+  background:var(--ink);opacity:.28;pointer-events:none;
+  transition:transform var(--dur4) var(--ease)}
+.plate-wrap::before{left:0;right:0;top:50%;height:1px;transform:scaleX(0)}
+.plate-wrap::after{top:0;bottom:0;left:50%;width:1px;transform:scaleY(0)}
+.motion .plate-wrap.registered::before{transform:scaleX(1)}
+.motion .plate-wrap.registered::after{transform:scaleY(1)}
+.plate-wrap.registered::before,.plate-wrap.registered::after{opacity:.12}
+
+/* THE INSPECTION POINT */
+.pt{position:absolute;width:1.85rem;height:1.85rem;border-radius:50%;
+  transform:translate(-50%,-50%);display:grid;place-items:center;
+  font-family:var(--mono);font-size:.6875rem;font-weight:500;
+  background:var(--bg);color:var(--ink);border:1px solid var(--ink);
+  cursor:pointer;padding:0;line-height:1;
+  transition:background var(--dur2) var(--ease),color var(--dur2) var(--ease),
+             transform var(--dur2) var(--ease)}
+.pt:hover,.pt:focus-visible,.pt[aria-pressed="true"]{
+  background:var(--mark);color:#f4f2ee;border-color:var(--mark);
+  transform:translate(-50%,-50%) scale(1.12)}
+.motion .pt{opacity:0;transform:translate(-50%,-50%) scale(.6)}
+.motion .plate-wrap.registered .pt{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.motion .plate-wrap.registered .pt:nth-of-type(1){transition-delay:.35s}
+.motion .plate-wrap.registered .pt:nth-of-type(2){transition-delay:.47s}
+.motion .plate-wrap.registered .pt:nth-of-type(3){transition-delay:.59s}
+.motion .plate-wrap.registered .pt:nth-of-type(4){transition-delay:.71s}
+.motion .plate-wrap.registered .pt:nth-of-type(5){transition-delay:.83s}
+.motion .plate-wrap.registered .pt:nth-of-type(6){transition-delay:.95s}
+
+/* the record: rows are the other half of the binding */
+.record{display:grid;margin:var(--s6) 0 0;border-top:1px solid var(--ink)}
+.record__row{display:grid;grid-template-columns:2.25rem 1fr auto;gap:var(--s4);
+  align-items:baseline;padding-block:var(--s3);
+  border-bottom:1px solid var(--rule);cursor:default;
+  transition:background var(--dur2) var(--ease)}
+.record__row[data-pt]{cursor:pointer}
+.record__row.lit{background:var(--bg2)}
+.record__row.lit .record__i{background:var(--mark);color:#f4f2ee;border-color:var(--mark)}
+.record__i{font-family:var(--mono);font-size:.625rem;width:1.5rem;height:1.5rem;
+  display:grid;place-items:center;border:1px solid var(--rule2);border-radius:50%;
+  color:var(--ink70);transition:background var(--dur2) var(--ease),
+  color var(--dur2) var(--ease),border-color var(--dur2) var(--ease)}
+.record__k{font-family:var(--mono);font-size:.6875rem;text-transform:uppercase;
+  letter-spacing:.14em;color:var(--ink70)}
+.record__v{font-variant-numeric:tabular-nums;text-align:right;font-size:.9375rem}
+@media (min-width:60rem){
+  .specimen__grid{display:grid;grid-template-columns:7fr 5fr;gap:var(--s8);align-items:start}
+  .record{margin-top:0}
+}
+
+/* ===========================================================================
+   ENTRIES — horizontal catalogue entries at ALTERNATING scale. No two the same.
+   ======================================================================== */
+.entry{display:grid;gap:var(--s5);padding-block:var(--s8);
+  border-top:1px solid var(--rule)}
+.entry__fig{position:relative;margin:0;background:var(--bg2);overflow:hidden;
+  border:1px solid var(--rule);aspect-ratio:3/2}
+.entry__fig img{width:100%;height:100%;object-fit:cover}
+.entry__name{font-family:var(--serif);font-size:clamp(1.4rem,2.6vw,2.4rem);line-height:1.05}
+.entry__price{font-family:var(--mono);font-size:1rem;font-weight:500;
+  font-variant-numeric:tabular-nums;margin-top:var(--s2)}
+@media (min-width:60rem){
+  /* scale alternates deliberately: 8/4, 5/7, 6/6, 9/3 */
+  .entry{grid-template-columns:8fr 4fr;gap:var(--s7);align-items:end}
+  .entry--b{grid-template-columns:5fr 7fr}
+  .entry--b .entry__fig{order:2}
+  .entry--c{grid-template-columns:6fr 6fr}
+  .entry--d{grid-template-columns:9fr 3fr}
+  .entry--d .entry__fig{order:2}
+}
+
+/* ===========================================================================
+   THE PLATE — one event between the register and the conversion content.
+   Full bleed, enormous, one line of type. No gradients, no floating cards.
+   ======================================================================== */
+.plate{position:relative;margin-block:var(--s9);margin-left:calc(var(--rail) * -1);
+  margin-right:calc(var(--pad) * -1)}
+.plate figure{margin:0;height:min(78svh,44rem);overflow:hidden;background:var(--bg2)}
+.plate img{width:100%;height:100%;object-fit:cover}
+.plate__line{position:absolute;left:var(--rail);right:var(--pad);bottom:var(--s6);
+  font-family:var(--serif);font-size:clamp(1.5rem,4.6vw,4rem);line-height:1.02;
+  color:#f4f2ee;max-width:22ch;text-shadow:none}
+.plate__scrim{position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top,rgba(20,21,26,.86) 0%,rgba(20,21,26,.42) 34%,
+             rgba(20,21,26,0) 66%)}
+
+/* ===========================================================================
+   THE INTAKE SHEET — Sell and Finance as ONE document with numbered clauses.
+   Replaces two identical four-column bands.
+   ======================================================================== */
+.intake{padding-block:var(--s9);border-top:1px solid var(--ink)}
+.intake__head{display:flex;flex-wrap:wrap;gap:var(--s3) var(--s6);
+  justify-content:space-between;align-items:baseline;margin-bottom:var(--s7)}
+.intake__title{font-family:var(--serif);font-size:clamp(1.8rem,4vw,3rem);line-height:1.02}
+.clause{display:grid;grid-template-columns:3.5rem 1fr;gap:var(--s4);
+  padding-block:var(--s5);border-top:1px solid var(--rule)}
+.clause__n{font-family:var(--mono);font-size:.75rem;color:var(--mark);
+  font-variant-numeric:tabular-nums}
+.clause__h{font-family:var(--sans);font-size:1.0625rem;font-weight:600;
+  letter-spacing:-.01em;margin:0 0 var(--s2)}
+.clause__b{margin:0;color:var(--ink70);font-size:.9375rem;max-width:56ch}
+.clause__terms{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s6);
+  margin-top:var(--s3)}
+.clause__terms span{font-family:var(--mono);font-size:.6875rem;
+  text-transform:uppercase;letter-spacing:.14em;color:var(--ink)}
+@media (min-width:60rem){ .clause{grid-template-columns:3.5rem 1fr 18rem} }
+
+.act{display:inline-flex;align-items:center;gap:var(--s2);
+  font-family:var(--mono);font-size:.6875rem;text-transform:uppercase;
+  letter-spacing:.14em;font-weight:500;padding:var(--s3) var(--s5);
+  background:var(--mark);color:#f4f2ee;text-decoration:none;border:1px solid var(--mark);
+  transition:background var(--dur2) var(--ease)}
+.act:hover{background:#571a1e}
+.act--ghost{background:transparent;color:var(--ink);border-color:var(--rule2)}
+.act--ghost:hover{background:transparent;border-color:var(--ink)}
+
+/* ===========================================================================
+   COLOPHON — about, hours, map and feed as catalogue back matter.
+   ======================================================================== */
+.colophon{padding-block:var(--s8) var(--s6);border-top:1px solid var(--ink);
+  background:var(--bg2);margin-left:calc(var(--rail) * -1);
+  padding-left:calc(var(--rail) + var(--pad));padding-right:var(--pad)}
+.colo-grid{display:grid;gap:var(--s7)}
+.colo-note{max-width:46ch;color:var(--ink70);font-size:.9375rem}
+.colo-plate{display:grid;grid-template-columns:auto 1fr;gap:var(--s2) var(--s5)}
+.colo-plate dt{font-family:var(--mono);font-size:.625rem;text-transform:uppercase;
+  letter-spacing:.14em;color:var(--ink50);padding-block:var(--s2);
+  border-top:1px solid var(--rule)}
+.colo-plate dd{margin:0;padding-block:var(--s2);text-align:right;
+  border-top:1px solid var(--rule);font-size:.875rem;font-variant-numeric:tabular-nums}
+.colo-map{border:1px solid var(--rule);aspect-ratio:16/10;overflow:hidden;background:var(--bg)}
+.colo-map iframe{width:100%;height:100%;border:0;display:block;filter:grayscale(1) contrast(.92)}
+.feed{display:grid;grid-template-columns:repeat(4,1fr);gap:2px}
+.feed a{display:block;aspect-ratio:1;overflow:hidden;background:var(--bg)}
+.feed img{width:100%;height:100%;object-fit:cover;filter:grayscale(1);
+  transition:filter var(--dur2) var(--ease)}
+.feed a:hover img{filter:none}
+@media (min-width:60rem){ .colo-grid{grid-template-columns:4fr 3fr 5fr} }
+
+.end{display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--s3);
+  padding-top:var(--s5);margin-top:var(--s7);border-top:1px solid var(--rule)}
+
+/* ===========================================================================
+   MOTION — inspection, not decoration. Applied by script only when allowed.
+   ======================================================================== */
+.motion [data-enter]{opacity:0;transform:translate3d(0,var(--s4),0);
+  transition:opacity var(--dur3) var(--ease),transform var(--dur3) var(--ease)}
+.motion [data-enter].in{opacity:1;transform:none}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition-duration:.001ms!important;animation-duration:.001ms!important}
+  .plate-wrap::before{transform:scaleX(1)!important}
+  .plate-wrap::after{transform:scaleY(1)!important}
+}
+@media (max-width:47.99rem){
+  .rail{width:var(--rail);padding-block:var(--s4)}
+  .rail__chassis{display:none}
+}
+</style>
+</head>
+
+<body>
+<a href="#register" class="skip mono">Skip to the register</a>
+
+<!-- THE SPINE -->
+<div class="rail" aria-hidden="true">
+  <p class="rail__mark">Meridian</p>
+  <p class="rail__folio"><span id="folio">00</span></p>
+  <p class="rail__chassis" id="chassis">ZFFZR52B000122341</p>
+</div>
+
+<main class="sheet" id="top">
+
+<!-- == 00 · THE COVER ==================================================== -->
+<section class="cover">
+  <div class="cover__top">
+    <p class="mono">Meridian Motor Group &nbsp;·&nbsp; Register of vehicles</p>
+    <p class="mono">Chicago &nbsp;·&nbsp; <span class="num">MMXXVI</span></p>
+  </div>
+
+  <div class="cover__body">
+    <div>
+      <p class="mono" data-enter>Folio 00 &nbsp;/&nbsp; Frontispiece</p>
+      <p class="cover__chassis" data-enter>ZFFZR52B<br />000122341</p>
+      <h1 class="cover__name serif" data-enter>Ferrari 575 Maranello, <em>documented</em> since new.</h1>
+    </div>
+    <figure class="cover__plate" data-enter>
+      <img src="assets/dealer/car-01.webp" width="1500" height="1000" fetchpriority="high"
+           alt="2004 Ferrari 575 Maranello, photographed on the register's own sweep." />
+    </figure>
+  </div>
+
+  <div class="cover__foot">
+    <p class="mono">Entries in register &nbsp;<span class="num">08</span></p>
+    <p class="mono">Opened &nbsp;<span class="num">2009</span></p>
+    <p class="mono">Vehicles passed &nbsp;<span class="num">2,400+</span></p>
+    <p class="mono">Median days to sale &nbsp;<span class="num">21</span></p>
+  </div>
+</section>
+
+<!-- == THE REGISTER — the lot list. Photography withheld. ================ -->
+<section class="register" id="register" aria-labelledby="reg-h">
+  <div class="register__head">
+    <h2 class="mono" id="reg-h">The register &nbsp;/&nbsp; entries 01–08</h2>
+    <p class="mono">Chassis · Year · Odometer · Price</p>
+  </div>
+
+  <a class="reg-row" href="#specimen">
+    <span class="reg-row__f num">01</span>
+    <span class="reg-row__thumb"><img src="assets/dealer/car-01.webp" width="1500" height="1000" loading="lazy" alt="" /></span>
+    <span><span class="reg-row__name">Ferrari 575 Maranello</span>
+      <span class="reg-row__meta"><span class="num">ZFFZR52B000122341</span><span class="num">2004</span><span class="num">34,294 mi</span></span></span>
+    <span class="reg-row__price">$451,134</span>
+  </a>
+  <a class="reg-row" href="#entries">
+    <span class="reg-row__f num">02</span>
+    <span class="reg-row__thumb"><img src="assets/dealer/car-02.webp" width="1500" height="1000" loading="lazy" alt="" /></span>
+    <span><span class="reg-row__name">Nissan GT-R R34</span>
+      <span class="reg-row__meta"><span class="num">BNR34-004918</span><span class="num">2000</span><span class="num">41,863 mi</span></span></span>
+    <span class="reg-row__price">$304,990</span>
+  </a>
+  <a class="reg-row" href="#entries">
+    <span class="reg-row__f num">03</span>
+    <span class="reg-row__thumb"><img src="assets/dealer/car-03.webp" width="1500" height="1000" loading="lazy" alt="" /></span>
+    <span><span class="reg-row__name">Ferrari 365 GTS/4</span>
+      <span class="reg-row__meta"><span class="num">14761</span><span class="num">1971</span><span class="num">39,067 mi</span></span></span>
+    <span class="reg-row__price">$3,495,000</span>
+  </a>
+  <a class="reg-row" href="#entries">
+    <span class="reg-row__f num">04</span>
+    <span class="reg-row__thumb"><img src="assets/dealer/car-04.webp" width="1500" height="1000" loading="lazy" alt="" /></span>
+    <span><span class="reg-row__name">Ferrari Roma Spider</span>
+      <span class="reg-row__meta"><span class="num">ZFF98RNA1S0311204</span><span class="num">2025</span><span class="num">1,301 mi</span></span></span>
+    <span class="reg-row__price">$298,969</span>
+  </a>
+  <a class="reg-row" href="#entries">
+    <span class="reg-row__f num">05</span>
+    <span class="reg-row__thumb"><img src="assets/dealer/car-05.webp" width="1500" height="1000" loading="lazy" alt="" /></span>
+    <span><span class="reg-row__name">Range Rover SE</span>
+      <span class="reg-row__meta"><span class="num">SALKPBE70SA298117</span><span class="num">2025</span><span class="num">3,000 mi</span></span></span>
+    <span class="reg-row__price">$249,990</span>
+  </a>
+  <a class="reg-row" href="#entries">
+    <span class="reg-row__f num">06</span>
+    <span class="reg-row__thumb"><img src="assets/dealer/car-06.webp" width="1500" height="1000" loading="lazy" alt="" /></span>
+    <span><span class="reg-row__name">Mercedes-AMG CLE 53</span>
+      <span class="reg-row__meta"><span class="num">W1KMJ6BB4SF012044</span><span class="num">2026</span><span class="num">1,306 mi</span></span></span>
+    <span class="reg-row__price">$78,990</span>
+  </a>
+  <a class="reg-row" href="#entries">
+    <span class="reg-row__f num">07</span>
+    <span class="reg-row__thumb"><img src="assets/dealer/car-07.webp" width="1500" height="1000" loading="lazy" alt="" /></span>
+    <span><span class="reg-row__name">Ford F-150 Raptor R</span>
+      <span class="reg-row__meta"><span class="num">1FTFW1RJ8RFA61903</span><span class="num">2024</span><span class="num">12,738 mi</span></span></span>
+    <span class="reg-row__price">$114,995</span>
+  </a>
+  <a class="reg-row" href="#entries">
+    <span class="reg-row__f num">08</span>
+    <span class="reg-row__thumb"><img src="assets/dealer/car-08.webp" width="1500" height="1000" loading="lazy" alt="" /></span>
+    <span><span class="reg-row__name">Mercedes-Benz S 580</span>
+      <span class="reg-row__meta"><span class="num">W1K6G7GB2RA229551</span><span class="num">2024</span><span class="num">14,443 mi</span></span></span>
+    <span class="reg-row__price">$149,996</span>
+  </a>
+</section>
+
+<!-- == 01 · THE SPECIMEN — the mechanism at full strength ================ -->
+<section class="specimen" id="specimen" aria-labelledby="spec-h">
+  <div class="specimen__lead">
+    <p class="mono" data-enter>Folio 01 &nbsp;/&nbsp; Inspection record &nbsp;·&nbsp; eight points</p>
+    <h2 class="specimen__name serif" id="spec-h" data-enter>Ferrari 575 Maranello, <em>as inspected</em></h2>
+  </div>
+
+  <div class="specimen__grid">
+    <figure class="plate-wrap" id="spec-plate">
+      <img src="assets/dealer/car-01.webp" width="1500" height="1000"
+           alt="2004 Ferrari 575 Maranello, three-quarter front on a white sweep, with six inspection points marked." />
+      <!-- inspection points: real buttons, bound both ways to the record -->
+      <button class="pt" type="button" style="left:26%;top:52%" data-pt="1"
+              aria-pressed="false" aria-controls="r1" aria-label="Inspection point 1, paint">1</button>
+      <button class="pt" type="button" style="left:46%;top:38%" data-pt="2"
+              aria-pressed="false" aria-controls="r2" aria-label="Inspection point 2, glass">2</button>
+      <button class="pt" type="button" style="left:63%;top:47%" data-pt="3"
+              aria-pressed="false" aria-controls="r3" aria-label="Inspection point 3, interior">3</button>
+      <button class="pt" type="button" style="left:35%;top:74%" data-pt="4"
+              aria-pressed="false" aria-controls="r4" aria-label="Inspection point 4, wheels">4</button>
+      <button class="pt" type="button" style="left:74%;top:66%" data-pt="5"
+              aria-pressed="false" aria-controls="r5" aria-label="Inspection point 5, brakes">5</button>
+      <button class="pt" type="button" style="left:15%;top:63%" data-pt="6"
+              aria-pressed="false" aria-controls="r6" aria-label="Inspection point 6, underbody">6</button>
+    </figure>
+
+    <dl class="record" id="spec-record">
+      <div class="record__row" data-pt="1" id="r1" tabindex="0">
+        <span class="record__i num">1</span><dt class="record__k">Paint</dt>
+        <dd class="record__v">Rosso Corsa, original</dd></div>
+      <div class="record__row" data-pt="2" id="r2" tabindex="0">
+        <span class="record__i num">2</span><dt class="record__k">Glass</dt>
+        <dd class="record__v">All date-matched</dd></div>
+      <div class="record__row" data-pt="3" id="r3" tabindex="0">
+        <span class="record__i num">3</span><dt class="record__k">Interior</dt>
+        <dd class="record__v">Nero, unmarked</dd></div>
+      <div class="record__row" data-pt="4" id="r4" tabindex="0">
+        <span class="record__i num">4</span><dt class="record__k">Wheels</dt>
+        <dd class="record__v">Original, refinished</dd></div>
+      <div class="record__row" data-pt="5" id="r5" tabindex="0">
+        <span class="record__i num">5</span><dt class="record__k">Brakes</dt>
+        <dd class="record__v">Renewed 2024</dd></div>
+      <div class="record__row" data-pt="6" id="r6" tabindex="0">
+        <span class="record__i num">6</span><dt class="record__k">Underbody</dt>
+        <dd class="record__v">Dry, no corrosion</dd></div>
+      <div class="record__row">
+        <span class="record__i" aria-hidden="true">·</span><dt class="record__k">Odometer</dt>
+        <dd class="record__v num">34,294 mi</dd></div>
+      <div class="record__row">
+        <span class="record__i" aria-hidden="true">·</span><dt class="record__k">Chassis</dt>
+        <dd class="record__v num">ZFFZR52B000122341</dd></div>
+      <div class="record__row">
+        <span class="record__i" aria-hidden="true">·</span><dt class="record__k">Price</dt>
+        <dd class="record__v num">$451,134</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- == ENTRIES — alternating scale, never the same twice ================= -->
+<section id="entries" aria-label="Further entries">
+  <article class="entry" data-enter>
+    <figure class="entry__fig"><img src="assets/dealer/car-03.webp" width="1500" height="1000" loading="lazy"
+      alt="1971 Ferrari 365 GTS/4 in red on a studio sweep." /></figure>
+    <div>
+      <p class="mono">Folio 03 &nbsp;/&nbsp; <span class="num">14761</span></p>
+      <h3 class="entry__name serif">Ferrari 365 GTS/4</h3>
+      <p class="entry__price num">$3,495,000</p>
+      <p class="mono" style="margin-top:var(--s3)">1971 &nbsp;·&nbsp; <span class="num">39,067 mi</span></p>
+    </div>
+  </article>
+
+  <article class="entry entry--b" data-enter>
+    <figure class="entry__fig"><img src="assets/dealer/car-04.webp" width="1500" height="1000" loading="lazy"
+      alt="2025 Ferrari Roma Spider on a studio sweep." /></figure>
+    <div>
+      <p class="mono">Folio 04 &nbsp;/&nbsp; <span class="num">ZFF98RNA1S0311204</span></p>
+      <h3 class="entry__name serif">Ferrari Roma Spider</h3>
+      <p class="entry__price num">$298,969</p>
+      <p class="mono" style="margin-top:var(--s3)">2025 &nbsp;·&nbsp; <span class="num">1,301 mi</span></p>
+    </div>
+  </article>
+
+  <article class="entry entry--c" data-enter>
+    <figure class="entry__fig"><img src="assets/dealer/car-05.webp" width="1500" height="1000" loading="lazy"
+      alt="2025 Land Rover Range Rover SE on a studio sweep." /></figure>
+    <div>
+      <p class="mono">Folio 05 &nbsp;/&nbsp; <span class="num">SALKPBE70SA298117</span></p>
+      <h3 class="entry__name serif">Range Rover SE</h3>
+      <p class="entry__price num">$249,990</p>
+      <p class="mono" style="margin-top:var(--s3)">2025 &nbsp;·&nbsp; <span class="num">3,000 mi</span></p>
+    </div>
+  </article>
+
+  <article class="entry entry--d" data-enter>
+    <figure class="entry__fig"><img src="assets/dealer/car-07.webp" width="1500" height="1000" loading="lazy"
+      alt="2024 Ford F-150 Raptor R on a studio sweep." /></figure>
+    <div>
+      <p class="mono">Folio 07 &nbsp;/&nbsp; <span class="num">1FTFW1RJ8RFA61903</span></p>
+      <h3 class="entry__name serif">Ford F-150 Raptor R</h3>
+      <p class="entry__price num">$114,995</p>
+      <p class="mono" style="margin-top:var(--s3)">2024 &nbsp;·&nbsp; <span class="num">12,738 mi</span></p>
+    </div>
+  </article>
+</section>
+
+<!-- == THE PLATE — the single event before the conversion content ======== -->
+<section class="plate" aria-label="Plate">
+  <figure>
+    <img src="assets/dealer/car-02.webp" width="1500" height="1000" loading="lazy"
+         alt="2000 Nissan GT-R R34 in white, full bleed." />
+  </figure>
+  <span class="plate__scrim" aria-hidden="true"></span>
+  <p class="plate__line serif">Every car here has a file before it has a price.</p>
+</section>
+
+<!-- == THE INTAKE SHEET — Sell and Finance as one document ============== -->
+<section class="intake" id="intake" aria-labelledby="intake-h">
+  <div class="intake__head">
+    <div>
+      <p class="mono">Form MM-02</p>
+      <h2 class="intake__title serif" id="intake-h">Intake &amp; terms</h2>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:var(--s3)">
+      <a class="act" href="#intake">Open a file</a>
+      <a class="act act--ghost" href="#colophon">Visit</a>
+    </div>
+  </div>
+
+  <div class="clause">
+    <p class="clause__n num">01</p>
+    <div><h3 class="clause__h">Send the details</h3>
+      <p class="clause__b">Chassis, odometer, service history and a handful of photographs.
+        The file opens the moment they arrive.</p></div>
+    <div class="clause__terms"><span>Ten minutes</span><span>No appraisal fee</span></div>
+  </div>
+  <div class="clause">
+    <p class="clause__n num">02</p>
+    <div><h3 class="clause__h">Written offer</h3>
+      <p class="clause__b">A cash offer and a consignment estimate, both in writing, within one
+        business day. The valuation method is shown, not summarised.</p></div>
+    <div class="clause__terms"><span>1 business day</span><span>In writing</span></div>
+  </div>
+  <div class="clause">
+    <p class="clause__n num">03</p>
+    <div><h3 class="clause__h">Inspection</h3>
+      <p class="clause__b">We come to the car and record it against the same eight points every
+        entry in the register carries. You receive that record whether or not you sell.</p></div>
+    <div class="clause__terms"><span>Eight points</span><span>Transport at cost</span></div>
+  </div>
+  <div class="clause">
+    <p class="clause__n num">04</p>
+    <div><h3 class="clause__h">Settlement and terms</h3>
+      <p class="clause__b">Funds on collection for a purchase; on sale for consignment, with the
+        ledger shared. Collector finance to 144 months, subject to credit.</p></div>
+    <div class="clause__terms"><span class="num">From 5.49%</span><span class="num">10–20% deposit</span><span>Nationwide delivery</span></div>
+  </div>
+</section>
+
+<!-- == COLOPHON — back matter ============================================ -->
+<section class="colophon" id="colophon" aria-labelledby="colo-h">
+  <div class="colo-grid">
+    <div>
+      <p class="mono" id="colo-h">Colophon</p>
+      <p class="colo-note" style="margin-top:var(--s4)">
+        Meridian has kept this register from one building on the north side since
+        2009. Every car is photographed on the same sweep and inspected against
+        the same eight points, so two entries can be read against each other
+        rather than against their advertising.
+      </p>
+      <div class="feed" style="margin-top:var(--s6)">
+        <a href="#"><img src="assets/dealer/car-04-p.webp" width="900" height="1125" loading="lazy" alt="Feed — Ferrari Roma Spider." /></a>
+        <a href="#"><img src="assets/dealer/car-06-p.webp" width="900" height="1125" loading="lazy" alt="Feed — Mercedes-AMG CLE 53." /></a>
+        <a href="#"><img src="assets/dealer/car-08-p.webp" width="900" height="1125" loading="lazy" alt="Feed — Mercedes-Benz S 580." /></a>
+        <a href="#"><img src="assets/dealer/car-05-p.webp" width="900" height="1125" loading="lazy" alt="Feed — Range Rover SE." /></a>
+      </div>
+      <p class="mono" style="margin-top:var(--s3)">@meridianmotorgroup</p>
+    </div>
+
+    <div>
+      <p class="mono">Where &amp; when</p>
+      <dl class="colo-plate" style="margin-top:var(--s4)">
+        <dt>Address</dt><dd>1400 N Elston Ave, Chicago</dd>
+        <dt>Sales</dt><dd>(312) 555-0148</dd>
+        <dt>Service</dt><dd>(312) 555-0162</dd>
+        <dt>Mon–Fri</dt><dd>9:00 – 19:00</dd>
+        <dt>Saturday</dt><dd>10:00 – 17:00</dd>
+        <dt>Sunday</dt><dd>Closed</dd>
+      </dl>
+    </div>
+
+    <div>
+      <p class="mono">Plan</p>
+      <div class="colo-map" style="margin-top:var(--s4)">
+        <iframe title="Map of 1400 N Elston Ave, Chicago" loading="lazy"
+          src="https://www.openstreetmap.org/export/embed.html?bbox=-87.685%2C41.897%2C-87.643%2C41.918&amp;layer=mapnik&amp;marker=41.9075%2C-87.6636"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <div class="end">
+    <p class="mono">Design test — not a real dealership</p>
+    <p class="mono">Meridian Motor Group &nbsp;·&nbsp; <span class="num">© 2026</span></p>
+  </div>
+</section>
+
+</main>
+
+<script>
+(function(){
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ── THE BINDING — the mechanism, and it works with or without motion ────
+     Every mark is a real button and every record row is focusable, so the
+     photograph and the specification can be read from either side by mouse,
+     keyboard or screen reader. */
+  var plate  = document.getElementById('spec-plate');
+  var record = document.getElementById('spec-record');
+  if (plate && record) {
+    var pts  = [].slice.call(plate.querySelectorAll('.pt'));
+    var rows = [].slice.call(record.querySelectorAll('.record__row[data-pt]'));
+    function light(n, on){
+      pts.forEach(function(p){
+        var m = p.dataset.pt === n && on;
+        p.setAttribute('aria-pressed', String(m));
+      });
+      rows.forEach(function(r){ r.classList.toggle('lit', r.dataset.pt === n && on); });
+    }
+    pts.concat(rows).forEach(function(el){
+      var n = el.dataset.pt;
+      el.addEventListener('mouseenter', function(){ light(n, true); });
+      el.addEventListener('mouseleave', function(){ light(n, false); });
+      el.addEventListener('focus',      function(){ light(n, true); });
+      el.addEventListener('blur',       function(){ light(n, false); });
+      el.addEventListener('click',      function(){ light(n, true); });
+      el.addEventListener('keydown',    function(e){
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); light(n, true); }
+      });
+    });
+  }
+
+  if (reduce || !('IntersectionObserver' in window)) {
+    if (plate) plate.classList.add('registered');
+    return;                       // .motion is never set: the page is simply present
+  }
+  document.documentElement.classList.add('motion');
+
+  /* ── REGISTRATION — the specimen is not faded in, it is registered: two
+       hairlines converge, then the marks stamp in sequence. That is the job:
+       it says "this is being recorded", which is the page's whole argument. */
+  var regIO = new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('registered');
+      regIO.unobserve(e.target); } });
+  }, { threshold: 0.35 });
+  document.querySelectorAll('.plate-wrap').forEach(function(p){ regIO.observe(p); });
+
+  var enterIO = new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in');
+      enterIO.unobserve(e.target); } });
+  }, { rootMargin:'0px 0px -12% 0px', threshold:0.1 });
+  document.querySelectorAll('[data-enter]').forEach(function(e){ enterIO.observe(e); });
+
+  /* ── INDEXING — the folio counter rolls as the register advances, and the
+       chassis in the spine changes with it. The rail is the same object on
+       every movement, which is what makes it a spine and not a widget. */
+  var folio = document.getElementById('folio');
+  var chassis = document.getElementById('chassis');
+  var marks = [
+    {el: document.querySelector('.cover'),    n:'00', c:'ZFFZR52B000122341'},
+    {el: document.getElementById('register'), n:'—',  c:'ENTRIES 01–08'},
+    {el: document.getElementById('specimen'), n:'01', c:'ZFFZR52B000122341'},
+    {el: document.getElementById('entries'),  n:'03', c:'14761'},
+    {el: document.querySelector('.plate'),    n:'02', c:'BNR34-004918'},
+    {el: document.getElementById('intake'),   n:'—',  c:'FORM MM-02'},
+    {el: document.getElementById('colophon'), n:'—',  c:'COLOPHON'}
+  ].filter(function(m){ return m.el; });
+
+  var current = null, ticking = false;
+  function index(){
+    var mid = innerHeight * 0.42, best = null;
+    marks.forEach(function(m){
+      var r = m.el.getBoundingClientRect();
+      if (r.top <= mid && r.bottom > mid) best = m;
+    });
+    if (best && best.n !== current){
+      current = best.n;
+      // roll rather than swap: the counter behaves like an odometer
+      folio.style.transform = 'translateY(-100%)';
+      setTimeout(function(){
+        folio.textContent = best.n;
+        folio.style.transition = 'none';
+        folio.style.transform = 'translateY(100%)';
+        requestAnimationFrame(function(){
+          folio.style.transition = '';
+          folio.style.transform = 'translateY(0)';
+        });
+      }, 240);
+      chassis.style.opacity = '0';
+      setTimeout(function(){ chassis.textContent = best.c; chassis.style.opacity = ''; }, 240);
+    }
+    ticking = false;
+  }
+  addEventListener('scroll', function(){
+    if(!ticking){ ticking = true; requestAnimationFrame(index); }
+  }, {passive:true});
+  index();
+})();
+</script>
+</body>
+</html>

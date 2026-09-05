@@ -1,0 +1,651 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Meridian Motor Group — Sport &amp; Exotic, Chicago</title>
+<meta name="description" content="Sport and exotic inventory, consignment and finance. Chicago." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="preload" as="image" href="assets/night/car-01-wide.webp" fetchpriority="high" />
+
+<style>
+/* ===========================================================================
+   MERIDIAN — NIGHT DRIVE.
+
+   Direction A. Graphite ground, one warm light, cinematic cropping, confident
+   modern type, controlled asymmetry, two-up inventory, one restrained
+   signature interaction.
+
+   No archival language anywhere: no chassis numbers as architecture, no folio
+   marks, no register, no inspection diagram, no vertical rail, no beige, no
+   serif display, no mono metadata. The car is the subject; everything else is
+   there to help someone find one, see it, compare a few and get in touch.
+
+   ONE THING ABOUT THE PHOTOGRAPHY, stated rather than hidden: all eight source
+   images are bright studio shots. I tried cutting the cars off their sweeps
+   and it failed — the "sweeps" are not uniform (tiled floors, grey rooms), so
+   a border flood fill both left floor behind and ate into bodywork. The answer
+   is the one this direction already called for: crop tight enough that the car
+   fills the frame. The frames are then kept LARGE and treated as the light in
+   the page, because many small bright cards on graphite would glare.
+   Location photography would take this further; it is not faked here.
+   ======================================================================== */
+:root{
+  --s1:.25rem; --s2:.5rem; --s3:.75rem; --s4:1rem; --s5:1.5rem; --s6:2rem;
+  --s7:3rem; --s8:4rem; --s9:6rem; --s10:8rem; --s11:12rem;
+
+  --bg:#101114;            /* graphite, never #000 */
+  --bg2:#191a1f;
+  --ink:#f2f2f0;           /* near-white, never #fff */
+  --ink72:rgba(242,242,240,.72);
+  --ink58:rgba(242,242,240,.58);
+  --rule:rgba(242,242,240,.16);
+  --rule2:rgba(242,242,240,.38);
+  --warm:#d69b4e;          /* the one light: amber. actions and nothing else */
+
+  --d1:.15s; --d2:.28s; --d3:.5s; --d4:1s;
+  --e:cubic-bezier(.22,1,.36,1);
+  --pad:clamp(1.25rem,5vw,5rem);
+  --max:96rem;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+html,body{overflow-x:clip}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Inter Tight",system-ui,sans-serif;
+  font-size:clamp(.9375rem,.3vw+.9rem,1.0625rem);line-height:1.6;
+  -webkit-font-smoothing:antialiased;padding-bottom:4.5rem}
+img{display:block;max-width:100%;height:auto}
+h1,h2,h3{margin:0;font-weight:600;letter-spacing:-.035em;line-height:1}
+a{color:inherit}
+
+.wrap{max-width:var(--max);margin-inline:auto;padding-inline:var(--pad)}
+.kicker{font-size:.75rem;font-weight:600;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink58);margin:0}
+.h-xl{font-size:clamp(2.5rem,7vw,6.5rem)}
+.h-lg{font-size:clamp(2rem,4.4vw,3.75rem)}
+.h-md{font-size:clamp(1.5rem,2.4vw,2.25rem)}
+.num{font-variant-numeric:tabular-nums}
+.measure{max-width:54ch;color:var(--ink72)}
+
+:where(a,button,select,input,[tabindex]):focus-visible{
+  outline:2px solid var(--warm);outline-offset:3px;border-radius:2px}
+.skip{position:absolute;left:-9999px;top:var(--s3);z-index:99}
+.skip:focus{left:var(--pad)}
+
+/* ── actions: solid warm, or ink with a rule. No gradients, no shadows. ──── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--s2);
+  font-size:.8125rem;font-weight:600;letter-spacing:.04em;
+  padding:.85rem 1.5rem;text-decoration:none;border:1px solid transparent;
+  cursor:pointer;transition:background var(--d2) var(--e),color var(--d2) var(--e),
+  border-color var(--d2) var(--e)}
+.btn--warm{background:var(--warm);color:#141414}
+.btn--warm:hover{background:#e6ae63}
+.btn--line{background:transparent;color:var(--ink);border-color:var(--rule2)}
+.btn--line:hover{border-color:var(--ink)}
+.btn--sm{padding:.6rem 1.1rem;font-size:.75rem}
+
+/* ── nav ────────────────────────────────────────────────────────────────── */
+.nav{position:sticky;top:0;z-index:50;background:rgba(16,17,20,.92);
+  backdrop-filter:blur(8px);border-bottom:1px solid var(--rule)}
+.nav__in{display:flex;align-items:center;justify-content:space-between;
+  gap:var(--s5);padding-block:var(--s4)}
+.brand{font-weight:700;letter-spacing:-.03em;font-size:1.0625rem;text-decoration:none}
+.brand span{display:block;font-size:.625rem;font-weight:600;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--ink58);margin-top:2px}
+.nav ul{display:flex;gap:var(--s6);list-style:none;margin:0;padding:0}
+.nav ul a{font-size:.8125rem;font-weight:500;text-decoration:none;color:var(--ink72);
+  transition:color var(--d2) var(--e)}
+.nav ul a:hover{color:var(--ink)}
+@media (max-width:63.99rem){ .nav ul{display:none} }
+
+/* ===========================================================================
+   HERO — cinematic, full bleed, 21:9. The car runs off both edges.
+   ======================================================================== */
+.hero{position:relative}
+.hero__frame{position:relative;overflow:hidden;height:min(88svh,52rem);
+  background:var(--bg2)}
+.hero__frame img{width:100%;height:100%;object-fit:cover;
+  object-position:50% 50%;transform:scale(1.14)}
+/* the frames are the light in the page: melt their edges into the ground so a
+   bright studio background never reads as a lit rectangle sitting on black */
+.hero__frame::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(to top,rgba(16,17,20,.96) 0%,rgba(16,17,20,.30) 42%,rgba(16,17,20,0) 68%),
+    linear-gradient(to right,rgba(16,17,20,.88) 0%,rgba(16,17,20,0) 38%),
+    linear-gradient(to left,rgba(16,17,20,.72) 0%,rgba(16,17,20,0) 34%)}
+.hero__copy{position:absolute;left:0;right:0;bottom:0;z-index:2;
+  padding-bottom:clamp(var(--s6),5vw,var(--s9))}
+.hero__copy h1{max-width:14ch}
+.hero__row{display:flex;flex-wrap:wrap;gap:var(--s4);align-items:center;
+  margin-top:var(--s6)}
+.hero__price{font-size:clamp(1.1rem,1.8vw,1.5rem);font-weight:600;
+  font-variant-numeric:tabular-nums}
+
+/* ===========================================================================
+   FILTER + INVENTORY — two-up, generous, asymmetric.
+   ======================================================================== */
+.inv{padding-block:var(--s9)}
+.inv__head{display:flex;flex-wrap:wrap;gap:var(--s4) var(--s6);
+  align-items:end;justify-content:space-between;margin-bottom:var(--s6)}
+.chips{display:flex;flex-wrap:wrap;gap:var(--s2);margin:var(--s5) 0 0;padding:0;list-style:none}
+.chip{font-size:.75rem;font-weight:600;letter-spacing:.04em;padding:.5rem 1rem;
+  background:transparent;color:var(--ink72);border:1px solid var(--rule2);
+  cursor:pointer;transition:all var(--d2) var(--e)}
+.chip:hover{color:var(--ink);border-color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);color:#141414;border-color:var(--ink)}
+
+.grid{display:grid;gap:var(--s8) var(--s6)}
+@media (min-width:60rem){
+  .grid{grid-template-columns:1fr 1fr}
+  /* controlled asymmetry: the lead car takes the full width, then pairs,
+     and the side that carries the copy alternates */
+  .car--lead{grid-column:1 / -1}
+}
+.car{position:relative}
+.car__frame{position:relative;overflow:hidden;background:var(--bg2);aspect-ratio:4/3}
+.car--lead .car__frame{aspect-ratio:21/9}
+.car__frame img{width:100%;height:100%;object-fit:cover;transform:scale(1.06);
+  transition:transform var(--d4) var(--e)}
+.car__frame::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top,rgba(16,17,20,.72) 0%,rgba(16,17,20,.06) 46%,
+             rgba(16,17,20,0) 70%)}
+.car:hover .car__frame img,.car:focus-within .car__frame img{transform:scale(1.10)}
+.car__body{display:flex;flex-wrap:wrap;gap:var(--s3) var(--s5);
+  align-items:baseline;justify-content:space-between;margin-top:var(--s4)}
+.car__name{font-size:clamp(1.1rem,1.5vw,1.5rem);font-weight:600;letter-spacing:-.025em}
+.car__name a{text-decoration:none}
+.car__name a::after{content:"";position:absolute;inset:0}   /* whole-card target */
+.car__price{font-size:clamp(1rem,1.3vw,1.25rem);font-weight:600;
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.car__facts{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s4);
+  font-size:.8125rem;color:var(--ink58);margin-top:var(--s2);width:100%}
+.car__acts{display:flex;gap:var(--s2);margin-top:var(--s4);position:relative;z-index:2}
+
+/* ===========================================================================
+   THE STRIP — a 3:1 cut between browsing and deciding.
+   ======================================================================== */
+.strip{position:relative;overflow:hidden;height:min(56svh,30rem);
+  background:var(--bg2);margin-block:var(--s9)}
+.strip img{width:100%;height:100%;object-fit:cover;transform:scale(1.16)}
+.strip::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to right,rgba(16,17,20,.94) 0%,rgba(16,17,20,.35) 46%,
+             rgba(16,17,20,.1) 100%)}
+.strip__copy{position:absolute;inset:0;z-index:2;display:flex;align-items:center}
+
+/* ===========================================================================
+   SELL / FINANCE — one band, asymmetric, not four equal columns.
+   ======================================================================== */
+.deal{padding-block:var(--s9);border-top:1px solid var(--rule)}
+.deal__grid{display:grid;gap:var(--s7)}
+@media (min-width:60rem){ .deal__grid{grid-template-columns:5fr 7fr;gap:var(--s9)} }
+.deal__list{display:grid;gap:var(--s5);margin:0;padding:0;list-style:none}
+.deal__item{display:grid;grid-template-columns:auto 1fr;gap:var(--s5);
+  padding-top:var(--s5);border-top:1px solid var(--rule)}
+.deal__k{font-size:.8125rem;font-weight:600;color:var(--warm);
+  font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.deal__t{font-size:1.0625rem;font-weight:600;letter-spacing:-.015em;margin:0 0 var(--s2)}
+.deal__d{margin:0;color:var(--ink72);font-size:.9375rem}
+
+/* ===========================================================================
+   TRUST + CONTACT
+   ======================================================================== */
+.trust{padding-block:var(--s9);border-top:1px solid var(--rule)}
+.trust__grid{display:grid;gap:var(--s7)}
+@media (min-width:60rem){ .trust__grid{grid-template-columns:7fr 5fr;gap:var(--s9);align-items:center} }
+.stats{display:flex;flex-wrap:wrap;gap:var(--s5) var(--s8);margin-top:var(--s7)}
+.stat b{display:block;font-size:clamp(1.6rem,2.6vw,2.5rem);font-weight:700;
+  letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.stat span{font-size:.8125rem;color:var(--ink58)}
+.trust__fig{margin:0;overflow:hidden;background:var(--bg2);aspect-ratio:4/5;position:relative}
+.trust__fig img{width:100%;height:100%;object-fit:cover;transform:scale(1.05)}
+.trust__fig::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top,rgba(16,17,20,.7),rgba(16,17,20,0) 55%)}
+
+.visit{padding-block:var(--s9);border-top:1px solid var(--rule)}
+.visit__grid{display:grid;gap:var(--s7)}
+@media (min-width:60rem){ .visit__grid{grid-template-columns:5fr 7fr;gap:var(--s9)} }
+.hours{display:grid;grid-template-columns:auto 1fr;gap:var(--s2) var(--s5);margin:var(--s6) 0 0}
+.hours dt{font-size:.8125rem;color:var(--ink58);padding-block:var(--s2);
+  border-top:1px solid var(--rule)}
+.hours dd{margin:0;padding-block:var(--s2);text-align:right;font-size:.9375rem;
+  border-top:1px solid var(--rule);font-variant-numeric:tabular-nums}
+.map{overflow:hidden;background:var(--bg2);aspect-ratio:16/10;border:1px solid var(--rule)}
+.map iframe{width:100%;height:100%;border:0;display:block;
+  filter:grayscale(1) invert(.92) contrast(.85) brightness(.95)}
+
+footer{border-top:1px solid var(--rule);padding-block:var(--s8) var(--s6)}
+.fgrid{display:grid;gap:var(--s6)}
+@media (min-width:48rem){ .fgrid{grid-template-columns:2fr 1fr 1fr 1fr} }
+footer a{display:block;color:var(--ink72);text-decoration:none;padding-block:3px;font-size:.9375rem}
+footer a:hover{color:var(--ink)}
+
+/* ===========================================================================
+   THE ENQUIRY BAR — the commercial action is never off screen.
+   ======================================================================== */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:60;
+  background:rgba(16,17,20,.94);backdrop-filter:blur(8px);
+  border-top:1px solid var(--rule)}
+.bar__in{display:flex;align-items:center;justify-content:space-between;
+  gap:var(--s4);padding-block:var(--s3)}
+.bar__what{min-width:0}
+.bar__name{font-size:.9375rem;font-weight:600;letter-spacing:-.015em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar__price{font-size:.8125rem;color:var(--ink72);font-variant-numeric:tabular-nums}
+.bar__acts{display:flex;gap:var(--s2);flex:0 0 auto}
+@media (max-width:35rem){ .bar__price{display:none} }
+
+/* ===========================================================================
+   THE ONE SIGNATURE INTERACTION — the pass.
+   A slow horizontal drift inside a fixed frame, driven by scroll position, so
+   the car appears to pass the viewer. It is the only scroll effect on the page.
+   Transform only. Applied by script, so no-JS and reduced motion are complete.
+   ======================================================================== */
+.motion [data-pass]{will-change:transform}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition-duration:.001ms!important;animation-duration:.001ms!important}
+  [data-pass]{transform:scale(1.08)!important}
+}
+</style>
+</head>
+
+<body>
+<a href="#inventory" class="skip btn btn--line">Skip to inventory</a>
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="#top">Meridian<span>Sport &amp; Exotic · Chicago</span></a>
+    <nav aria-label="Main">
+      <ul>
+        <li><a href="#inventory">Inventory</a></li>
+        <li><a href="#sell">Sell &amp; finance</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#visit">Visit</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn--warm btn--sm" href="#visit">Book a viewing</a>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- == HERO ============================================================== -->
+<section class="hero">
+  <div class="hero__frame">
+    <img src="assets/night/car-01-wide.webp" width="1230" height="527" data-pass="14"
+         fetchpriority="high"
+         alt="Ferrari 575 Maranello in red, cropped close on the front three-quarter." />
+  </div>
+  <div class="hero__copy">
+    <div class="wrap">
+      <p class="kicker">In stock · Chicago</p>
+      <h1 class="h-xl" style="margin-top:var(--s4)">Ferrari 575 Maranello</h1>
+      <div class="hero__row">
+        <span class="hero__price num">$451,134</span>
+        <span style="color:var(--ink58)">2004 · <span class="num">34,294</span> mi</span>
+        <a class="btn btn--warm" href="#enquire">Enquire</a>
+        <a class="btn btn--line" href="#inventory">See all 8 cars</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- == INVENTORY ========================================================= -->
+<section class="inv wrap" id="inventory" aria-labelledby="inv-h">
+  <div class="inv__head">
+    <div>
+      <p class="kicker">Inventory</p>
+      <h2 class="h-lg" id="inv-h" style="margin-top:var(--s3)">Eight cars, all in one building.</h2>
+      <ul class="chips" role="group" aria-label="Filter by price">
+        <li><button class="chip" type="button" aria-pressed="true" data-max="99999999">All</button></li>
+        <li><button class="chip" type="button" aria-pressed="false" data-max="100000">Under $100k</button></li>
+        <li><button class="chip" type="button" aria-pressed="false" data-max="250000">Under $250k</button></li>
+        <li><button class="chip" type="button" aria-pressed="false" data-max="500000">Under $500k</button></li>
+        <li><button class="chip" type="button" aria-pressed="false" data-max="99999999" data-make="Ferrari">Ferrari</button></li>
+      </ul>
+    </div>
+    <p class="kicker" id="inv-count"><span class="num">8</span> shown</p>
+  </div>
+
+  <div class="grid" id="grid">
+
+    <article class="car car--lead" data-price="3495000" data-make="Ferrari">
+      <div class="car__frame">
+        <img src="assets/night/car-03-wide.webp" width="1230" height="527" data-pass="10" loading="lazy"
+             alt="Ferrari 365 GTS/4 in red, cropped close on the nose." />
+      </div>
+      <div class="car__body">
+        <h3 class="car__name"><a href="#enquire">1971 Ferrari 365 GTS/4</a></h3>
+        <span class="car__price num">$3,495,000</span>
+        <span class="car__facts"><span class="num">39,067</span> mi · Rosso · Matching numbers</span>
+      </div>
+      <div class="car__acts">
+        <a class="btn btn--warm btn--sm" href="#enquire">Enquire</a>
+        <a class="btn btn--line btn--sm" href="#enquire">Reserve</a>
+      </div>
+    </article>
+
+    <article class="car" data-price="304990" data-make="Nissan">
+      <div class="car__frame">
+        <img src="assets/night/car-02-card.webp" width="990" height="743" loading="lazy"
+             alt="Nissan GT-R R34 in white, cropped on the front wheel and arch." />
+      </div>
+      <div class="car__body">
+        <h3 class="car__name"><a href="#enquire">2000 Nissan GT-R R34</a></h3>
+        <span class="car__price num">$304,990</span>
+        <span class="car__facts"><span class="num">41,863</span> mi · Bayside Blue interior</span>
+      </div>
+      <div class="car__acts">
+        <a class="btn btn--warm btn--sm" href="#enquire">Enquire</a>
+        <a class="btn btn--line btn--sm" href="#enquire">Reserve</a>
+      </div>
+    </article>
+
+    <article class="car" data-price="298969" data-make="Ferrari">
+      <div class="car__frame">
+        <img src="assets/night/car-04-card.webp" width="990" height="743" loading="lazy"
+             alt="Ferrari Roma Spider, cropped on the grille and front wing." />
+      </div>
+      <div class="car__body">
+        <h3 class="car__name"><a href="#enquire">2025 Ferrari Roma Spider</a></h3>
+        <span class="car__price num">$298,969</span>
+        <span class="car__facts"><span class="num">1,301</span> mi · Delivery miles</span>
+      </div>
+      <div class="car__acts">
+        <a class="btn btn--warm btn--sm" href="#enquire">Enquire</a>
+        <a class="btn btn--line btn--sm" href="#enquire">Reserve</a>
+      </div>
+    </article>
+
+    <article class="car" data-price="249990" data-make="Land Rover">
+      <div class="car__frame">
+        <img src="assets/night/car-05-card.webp" width="990" height="743" loading="lazy"
+             alt="Range Rover SE in white, cropped on the grille and front wheel." />
+      </div>
+      <div class="car__body">
+        <h3 class="car__name"><a href="#enquire">2025 Range Rover SE</a></h3>
+        <span class="car__price num">$249,990</span>
+        <span class="car__facts"><span class="num">3,000</span> mi · Overfinch</span>
+      </div>
+      <div class="car__acts">
+        <a class="btn btn--warm btn--sm" href="#enquire">Enquire</a>
+        <a class="btn btn--line btn--sm" href="#enquire">Reserve</a>
+      </div>
+    </article>
+
+    <article class="car" data-price="149996" data-make="Mercedes-Benz">
+      <div class="car__frame">
+        <img src="assets/night/car-08-card.webp" width="990" height="743" loading="lazy"
+             alt="Mercedes-Benz S 580 in white, cropped on the headlight and wheel." />
+      </div>
+      <div class="car__body">
+        <h3 class="car__name"><a href="#enquire">2024 Mercedes-Benz S 580</a></h3>
+        <span class="car__price num">$149,996</span>
+        <span class="car__facts"><span class="num">14,443</span> mi · 4MATIC</span>
+      </div>
+      <div class="car__acts">
+        <a class="btn btn--warm btn--sm" href="#enquire">Enquire</a>
+        <a class="btn btn--line btn--sm" href="#enquire">Reserve</a>
+      </div>
+    </article>
+
+    <article class="car" data-price="114995" data-make="Ford">
+      <div class="car__frame">
+        <img src="assets/night/car-07-card.webp" width="990" height="743" loading="lazy"
+             alt="Ford F-150 Raptor R in blue, cropped on the grille." />
+      </div>
+      <div class="car__body">
+        <h3 class="car__name"><a href="#enquire">2024 Ford F-150 Raptor R</a></h3>
+        <span class="car__price num">$114,995</span>
+        <span class="car__facts"><span class="num">12,738</span> mi · Supercharged</span>
+      </div>
+      <div class="car__acts">
+        <a class="btn btn--warm btn--sm" href="#enquire">Enquire</a>
+        <a class="btn btn--line btn--sm" href="#enquire">Reserve</a>
+      </div>
+    </article>
+
+    <article class="car" data-price="78990" data-make="Mercedes-Benz">
+      <div class="car__frame">
+        <img src="assets/night/car-06-card.webp" width="990" height="743" loading="lazy"
+             alt="Mercedes-AMG CLE 53 in black, cropped on the grille and wheel." />
+      </div>
+      <div class="car__body">
+        <h3 class="car__name"><a href="#enquire">2026 Mercedes-AMG CLE 53</a></h3>
+        <span class="car__price num">$78,990</span>
+        <span class="car__facts"><span class="num">1,306</span> mi · Night package</span>
+      </div>
+      <div class="car__acts">
+        <a class="btn btn--warm btn--sm" href="#enquire">Enquire</a>
+        <a class="btn btn--line btn--sm" href="#enquire">Reserve</a>
+      </div>
+    </article>
+
+    <article class="car" data-price="451134" data-make="Ferrari">
+      <div class="car__frame">
+        <img src="assets/night/car-01-card.webp" width="990" height="743" loading="lazy"
+             alt="Ferrari 575 Maranello in red, cropped on the front wing." />
+      </div>
+      <div class="car__body">
+        <h3 class="car__name"><a href="#enquire">2004 Ferrari 575 Maranello</a></h3>
+        <span class="car__price num">$451,134</span>
+        <span class="car__facts"><span class="num">34,294</span> mi · Manual</span>
+      </div>
+      <div class="car__acts">
+        <a class="btn btn--warm btn--sm" href="#enquire">Enquire</a>
+        <a class="btn btn--line btn--sm" href="#enquire">Reserve</a>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<!-- == THE STRIP ========================================================= -->
+<section class="strip" aria-label="Meridian">
+  <img src="assets/night/car-05-wide.webp" width="1230" height="527" data-pass="16" loading="lazy"
+       alt="Range Rover SE, cropped wide across the front." />
+  <div class="strip__copy">
+    <div class="wrap">
+      <h2 class="h-lg" style="max-width:13ch">We buy the ones we would keep.</h2>
+      <p class="measure" style="margin-top:var(--s5)">
+        A small floor on purpose. Every car is driven, photographed and priced
+        by the same three people, and the one who answers the phone has sat in it.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- == SELL & FINANCE — one band, asymmetric ============================= -->
+<section class="deal wrap" id="sell" aria-labelledby="sell-h">
+  <div class="deal__grid">
+    <div>
+      <p class="kicker">Sell &amp; finance</p>
+      <h2 class="h-lg" id="sell-h" style="margin-top:var(--s3)">Sell it, or fund the next one.</h2>
+      <p class="measure" style="margin-top:var(--s5)">
+        Outright purchase, consignment, or finance on a car you have already
+        found. Send the details and you get real numbers the same week.
+      </p>
+      <div style="display:flex;flex-wrap:wrap;gap:var(--s3);margin-top:var(--s6)">
+        <a class="btn btn--warm" href="#enquire">Value my car</a>
+        <a class="btn btn--line" href="#enquire">Finance options</a>
+      </div>
+    </div>
+
+    <ul class="deal__list">
+      <li class="deal__item"><span class="deal__k num">01</span>
+        <div><p class="deal__t">Send the details</p>
+          <p class="deal__d">Mileage, history, a few photographs. Ten minutes, no appraisal fee.</p></div></li>
+      <li class="deal__item"><span class="deal__k num">02</span>
+        <div><p class="deal__t">Offer in writing</p>
+          <p class="deal__d">A cash figure and a consignment estimate within one business day.</p></div></li>
+      <li class="deal__item"><span class="deal__k num">03</span>
+        <div><p class="deal__t">We come to the car</p>
+          <p class="deal__d">Inspection at your address, or enclosed transport at our cost.</p></div></li>
+      <li class="deal__item"><span class="deal__k num">04</span>
+        <div><p class="deal__t">Finance, if you want it</p>
+          <p class="deal__d">From <span class="num">5.49%</span> to 144 months, subject to credit. Deposits from <span class="num">10%</span>.</p></div></li>
+    </ul>
+  </div>
+</section>
+
+<!-- == ABOUT / TRUST ===================================================== -->
+<section class="trust wrap" id="about" aria-labelledby="about-h">
+  <div class="trust__grid">
+    <div>
+      <p class="kicker">About</p>
+      <h2 class="h-lg" id="about-h" style="margin-top:var(--s3);max-width:15ch">
+        Sixteen years on the same corner.</h2>
+      <p class="measure" style="margin-top:var(--s5)">
+        Meridian has bought and sold sport and exotic cars from one building on
+        the north side since 2009. We hold eight to twelve at a time, we photograph
+        every one ourselves, and we would rather lose a sale than talk someone
+        into the wrong car.
+      </p>
+      <div class="stats">
+        <span class="stat"><b class="num">2,400+</b><span>cars sold</span></span>
+        <span class="stat"><b class="num">21</b><span>median days to sale</span></span>
+        <span class="stat"><b class="num">2009</b><span>on this corner</span></span>
+      </div>
+    </div>
+    <figure class="trust__fig">
+      <img src="assets/night/car-06-tall.webp" width="630" height="788" loading="lazy"
+           alt="Mercedes-AMG CLE 53 on the showroom floor." />
+    </figure>
+  </div>
+</section>
+
+<!-- == VISIT ============================================================= -->
+<section class="visit wrap" id="visit" aria-labelledby="visit-h">
+  <div class="visit__grid">
+    <div>
+      <p class="kicker">Visit</p>
+      <h2 class="h-md" id="visit-h" style="margin-top:var(--s3)">1400 N Elston Ave, Chicago</h2>
+      <dl class="hours">
+        <dt>Sales</dt><dd>(312) 555-0148</dd>
+        <dt>Service</dt><dd>(312) 555-0162</dd>
+        <dt>Mon–Fri</dt><dd>9:00 – 19:00</dd>
+        <dt>Saturday</dt><dd>10:00 – 17:00</dd>
+        <dt>Sunday</dt><dd>Closed</dd>
+      </dl>
+      <div id="enquire" style="display:flex;flex-wrap:wrap;gap:var(--s3);margin-top:var(--s6)">
+        <a class="btn btn--warm" href="mailto:hello@example.com">Book a viewing</a>
+        <a class="btn btn--line" href="tel:+13125550148">Call the floor</a>
+      </div>
+    </div>
+    <div class="map">
+      <iframe title="Map of 1400 N Elston Ave, Chicago" loading="lazy"
+        src="https://www.openstreetmap.org/export/embed.html?bbox=-87.685%2C41.897%2C-87.643%2C41.918&amp;layer=mapnik&amp;marker=41.9075%2C-87.6636"></iframe>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="fgrid">
+      <div>
+        <a class="brand" href="#top">Meridian<span>Sport &amp; Exotic · Chicago</span></a>
+        <p style="color:var(--ink58);font-size:.9375rem;margin-top:var(--s4)">
+          1400 N Elston Ave, Chicago, IL 60642</p>
+      </div>
+      <div><p class="kicker" style="margin-bottom:var(--s3)">Inventory</p>
+        <a href="#inventory">All cars</a><a href="#inventory">Recently sold</a><a href="#inventory">Arriving</a></div>
+      <div><p class="kicker" style="margin-bottom:var(--s3)">Services</p>
+        <a href="#sell">Sell or consign</a><a href="#sell">Finance</a><a href="#sell">Transport</a></div>
+      <div><p class="kicker" style="margin-bottom:var(--s3)">Company</p>
+        <a href="#about">About</a><a href="#visit">Visit</a><a href="#">Careers</a></div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--s3);
+                margin-top:var(--s8);padding-top:var(--s5);border-top:1px solid var(--rule)">
+      <p class="kicker">Design test — not a real dealership</p>
+      <p class="kicker">© <span class="num">2026</span> Meridian Motor Group</p>
+    </div>
+  </div>
+</footer>
+
+<!-- the commercial action is never off screen -->
+<div class="bar" role="region" aria-label="Enquire about the selected car">
+  <div class="wrap bar__in">
+    <div class="bar__what">
+      <p class="bar__name" id="bar-name">Ferrari 575 Maranello</p>
+      <p class="bar__price num" id="bar-price">$451,134 · 34,294 mi</p>
+    </div>
+    <div class="bar__acts">
+      <a class="btn btn--line btn--sm" href="tel:+13125550148">Call</a>
+      <a class="btn btn--warm btn--sm" href="#enquire">Enquire</a>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  /* ── FILTER — inventory discovery, and it works on the real prices ────── */
+  var grid=document.getElementById('grid');
+  var chips=[].slice.call(document.querySelectorAll('.chip'));
+  var cars=[].slice.call(grid.querySelectorAll('.car'));
+  var count=document.getElementById('inv-count');
+  chips.forEach(function(c){
+    c.addEventListener('click',function(){
+      chips.forEach(function(o){ o.setAttribute('aria-pressed','false'); });
+      c.setAttribute('aria-pressed','true');
+      var max=+c.dataset.max, make=c.dataset.make||null, n=0;
+      cars.forEach(function(car){
+        var ok=(+car.dataset.price<=max)&&(!make||car.dataset.make===make);
+        car.hidden=!ok; if(ok)n++;
+      });
+      count.innerHTML='<span class="num">'+n+'</span> shown';
+    });
+  });
+
+  /* ── THE ENQUIRY BAR follows whichever car you are looking at ─────────── */
+  var barN=document.getElementById('bar-name'), barP=document.getElementById('bar-price');
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(!e.isIntersecting) return;
+        var n=e.target.querySelector('.car__name'), p=e.target.querySelector('.car__price'),
+            f=e.target.querySelector('.car__facts');
+        if(n&&p){ barN.textContent=n.textContent.trim();
+          barP.textContent=p.textContent.trim()+' · '+(f?f.textContent.trim():''); }
+      });
+    },{rootMargin:'-45% 0px -45% 0px'});
+    cars.forEach(function(c){ io.observe(c); });
+  }
+
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  document.documentElement.classList.add('motion');
+
+  /* ── THE ONE SIGNATURE INTERACTION — the pass ─────────────────────────────
+     The image drifts horizontally inside its fixed frame as the frame crosses
+     the viewport, so the car reads as passing rather than as a picture being
+     scrolled. Its job: it gives a still photograph the sense of a car in
+     motion, which is the whole promise of the page. Transform only, one effect,
+     nothing else animates on scroll. */
+  var passes=[].slice.call(document.querySelectorAll('[data-pass]')).map(function(img){
+    return {img:img, host:img.parentElement, amp:parseFloat(img.dataset.pass)||12};
+  });
+  var ticking=false;
+  function pass(){
+    var vh=innerHeight;
+    passes.forEach(function(o){
+      var r=o.host.getBoundingClientRect();
+      if(r.bottom<0||r.top>vh) return;
+      var p=(r.top+r.height/2-vh/2)/vh;          // -1 .. 1
+      var scale=o.img.classList.contains('lead')?1.14:1.14;
+      o.img.style.transform='scale(1.14) translate3d('+(p*-o.amp/1.14).toFixed(2)+'%,0,0)';
+    });
+    ticking=false;
+  }
+  addEventListener('scroll',function(){ if(!ticking){ticking=true;requestAnimationFrame(pass);} },{passive:true});
+  addEventListener('resize',pass,{passive:true});
+  pass();
+})();
+</script>
+</body>
+</html>

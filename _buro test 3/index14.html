@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Overview — we didn't invent this colour</title>
+<meta name="description" content="A fictional campaign for an architectural paint brand whose entire range is sampled from orbit. Photography: NASA, public domain." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+/* ===========================================================================
+   OVERVIEW — a fictional campaign for an architectural paint brand whose whole
+   range is sampled from orbit. Not a real company.
+
+   PHOTOGRAPHY
+     NASA, public domain. The hero is the potash evaporation ponds at Lop Nur,
+     Xinjiang (Landsat, NASA/GSFC). The four chips are the Lena Delta, the
+     Betsiboka estuary, a phytoplankton bloom in the Barents Sea, and the Great
+     Salt Lake. Credited at the foot of the sheet.
+
+   THE IDEA
+     Paint brands say they invented a colour. This one says the opposite: it
+     already existed, forty kilometres across, and they went and got it. The
+     photograph has to carry that alone, so it is cropped past the point where
+     it reads as geography and starts reading as a painted surface. Nobody is
+     told it is a satellite frame until the chip gives coordinates and altitude.
+     The joke is in the picture, not in the copy.
+
+   TYPE AND IMAGE, measured before decided
+     Sand ink on the turquoise pond is 1.51:1 — unreadable — so the sand colour
+     carries no type at all. Near-black holds 9.63:1 on the pond and 6.38:1 on
+     the sand, which is why the headline is set across the boundary between
+     them: one ink, two fields, both legible, and the line physically straddles
+     an edge inside the photograph instead of sitting in a safe corner of it.
+     Measured again on the live sheet: 13.37:1 against the brightest 5% of what
+     actually sits behind it.
+
+   COLOUR
+     Nothing chosen. Every value is sampled out of the frames — pond #1ED4D3,
+     sand #B99568, green pan #3A8042 — and each chip carries its own mean. The
+     brand has no palette of its own, which is the point.
+
+   LAYOUT
+     The sheet is a grid laid over the photograph. An earlier pass positioned
+     each block absolutely and the headline promptly ran across the fine print,
+     the swatches and the mark. Declared areas cannot collide by accident.
+   ======================================================================== */
+:root{
+  --pond:#1ed4d3;      /* sampled */
+  --sand:#b99568;      /* sampled */
+  --ink:#1a1814;       /* 9.63:1 on the pond, 6.38:1 on the sand */
+  --card:#f4f0e8;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+  --sans:Archivo,system-ui,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%;margin:0;background:#0d0c0a;overflow:hidden}
+body{display:grid;place-items:center;font-family:var(--sans);-webkit-font-smoothing:antialiased}
+
+.sheet{position:relative;aspect-ratio:3/2;width:min(97vw,calc(97svh * 3 / 2));
+  overflow:hidden;background:var(--sand);
+  box-shadow:0 2vh 7vh rgba(0,0,0,.7);container-type:inline-size}
+
+/* the photograph is the sheet, not a background behind a layout */
+.shot{position:absolute;inset:0}
+.shot img{width:100%;height:100%;object-fit:cover;object-position:38% 50%;display:block}
+
+/* declared areas over the photograph */
+.lay{position:absolute;inset:0;z-index:2;display:grid;padding:4.4cqi;
+  grid-template-columns:minmax(0,1fr) auto;
+  grid-template-rows:auto minmax(0,1fr) auto;
+  column-gap:3cqi;row-gap:2.4cqi;align-items:start}
+
+.say{grid-column:1;grid-row:1;max-width:52cqi}
+.kick{margin:0;font-family:var(--mono);font-size:1.35cqi;letter-spacing:.34em;
+  text-transform:uppercase;color:var(--ink);opacity:.85}
+.head{margin:1.5cqi 0 0;font-variation-settings:'wdth' 86,'wght' 800;
+  font-size:6.1cqi;line-height:.9;letter-spacing:-.035em;text-transform:uppercase;
+  color:var(--ink)}
+.head em{font-style:normal;font-variation-settings:'wdth' 112,'wght' 800}
+
+/* the chip: a physical card laid on a wet surface */
+.chip{grid-column:2;grid-row:1;width:22cqi;background:var(--card);
+  box-shadow:0 1.4cqi 3cqi rgba(0,0,0,.34);transform:rotate(-1.4deg)}
+.chip__c{height:13cqi;background:var(--pond)}
+.chip__b{padding:1.4cqi 1.5cqi 1.7cqi}
+.chip__n{margin:0;font-variation-settings:'wdth' 90,'wght' 700;font-size:2.3cqi;
+  line-height:1.02;letter-spacing:-.02em;text-transform:uppercase;color:var(--ink)}
+.chip__m{margin:.9cqi 0 0;font-family:var(--mono);font-size:1.08cqi;line-height:1.55;
+  letter-spacing:.06em;color:#5a5348}
+.chip__m b{color:var(--ink);font-weight:500}
+
+.fine{grid-column:1;grid-row:2;align-self:end;max-width:32cqi;margin:0;
+  font-family:var(--mono);font-size:1.05cqi;line-height:1.62;letter-spacing:.04em;
+  color:#332e26}
+.mark{grid-column:2;grid-row:2;align-self:end;text-align:right}
+.mark b{display:block;font-variation-settings:'wdth' 118,'wght' 800;font-size:4.2cqi;
+  letter-spacing:.02em;text-transform:uppercase;color:var(--ink);line-height:1}
+.mark span{display:block;font-family:var(--mono);font-size:1.05cqi;letter-spacing:.24em;
+  text-transform:uppercase;color:var(--ink);opacity:.8;margin-top:.5cqi}
+
+.range{grid-column:1 / -1;grid-row:3;display:flex;align-items:flex-end;gap:1.6cqi}
+.range__lead{flex:0 0 auto;max-width:21cqi;margin-right:auto}
+.range__lead p{margin:0;font-variation-settings:'wdth' 92,'wght' 700;font-size:2.3cqi;
+  line-height:1.12;letter-spacing:-.015em;color:var(--ink)}
+.range__lead span{display:block;margin-top:.9cqi;font-family:var(--mono);font-size:1.02cqi;
+  line-height:1.55;letter-spacing:.05em;color:#3d372e}
+.sw{flex:0 0 auto;width:12.6cqi;background:var(--card);
+  box-shadow:0 .9cqi 2.2cqi rgba(0,0,0,.3)}
+.sw img{display:block;width:100%;height:8.2cqi;object-fit:cover}
+.sw p{margin:0;padding:.8cqi .95cqi 1cqi;font-family:var(--mono);font-size:.96cqi;
+  line-height:1.45;letter-spacing:.05em;color:#5a5348}
+.sw b{display:block;font-variation-settings:'wdth' 90,'wght' 700;font-size:1.3cqi;
+  letter-spacing:-.01em;text-transform:uppercase;color:var(--ink);margin-bottom:.3cqi}
+
+.credit{position:absolute;left:4.4cqi;bottom:1.2cqi;z-index:4;max-width:62cqi;margin:0;
+  font-family:var(--mono);font-size:1.02cqi;line-height:1.5;letter-spacing:.04em;
+  color:#332e26}
+
+/* printed, not displayed */
+.tooth{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;opacity:.1;
+  background-image:repeating-linear-gradient(45deg,rgba(0,0,0,.5) 0 .09cqi,transparent .09cqi .26cqi)}
+
+/* =========================================================================
+   RECOMPOSED, not scaled. Portrait re-crops the photograph so the pond edge
+   still runs under the headline, and the range becomes two rows of two.
+   ====================================================================== */
+@media (max-aspect-ratio: 1/1){
+  .sheet{aspect-ratio:2/3;width:min(97vw,calc(97svh * 2 / 3))}
+  .shot img{object-position:46% 46%}
+  /* portrait has no room for a spacer row: every band sizes to its content and
+     the sheet distributes what is left, so nothing is pushed past the edge */
+  .lay{padding:4.6cqi 4.6cqi 6.5cqi;grid-template-columns:minmax(0,1fr);
+    grid-template-rows:auto auto auto auto;row-gap:0;align-content:space-between}
+  .say{grid-row:1;max-width:100%}
+  .kick{font-size:2.1cqi}
+  .head{font-size:8.2cqi;line-height:.88}
+  .chip{grid-column:1;grid-row:2;width:37cqi;justify-self:end}
+  .chip__c{height:14cqi}
+  .chip__n{font-size:3.1cqi}
+  .chip__m{font-size:1.6cqi}
+  .fine{display:none}
+  .mark{grid-column:1;grid-row:3;align-self:end;text-align:left;
+    display:flex;align-items:baseline;gap:2.4cqi;flex-wrap:wrap}
+  .mark b{font-size:5cqi}
+  .mark span{font-size:1.55cqi;margin-top:0}
+  .range{grid-column:1;grid-row:4;flex-wrap:wrap;gap:1.6cqi}
+  .range__lead{flex:1 1 100%;max-width:100%;margin-right:0;order:-1}
+  .range__lead p{font-size:2.9cqi}
+  .range__lead span{font-size:1.55cqi}
+  .sw{flex:1 1 calc(50% - .8cqi);width:auto}
+  .sw img{height:10cqi}
+  .sw p{font-size:1.35cqi;padding:.7cqi .8cqi .8cqi}
+  .sw b{font-size:1.8cqi}
+  .credit{font-size:1.35cqi;max-width:90cqi;bottom:1.4cqi;left:4.6cqi}
+}
+</style>
+</head>
+<body>
+
+<div class="sheet" role="img"
+  aria-label="Advertisement. A satellite photograph of turquoise potash evaporation ponds meeting desert sand, cropped so closely it reads as a painted surface. Headline: we didn't invent this colour, we went and got it.">
+
+  <div class="shot">
+    <img src="assets14/hero.jpg" width="2600" height="1761"
+      alt="Potash evaporation ponds at Lop Nur, Xinjiang, seen from orbit: hard-edged turquoise and green rectangles cutting into pale desert." />
+  </div>
+
+  <div class="lay">
+    <div class="say">
+      <p class="kick">Overview &middot; Architectural colour</p>
+      <h1 class="head">We didn't invent<br />this colour.<br /><em>We went and got it.</em></h1>
+    </div>
+
+    <div class="chip">
+      <div class="chip__c"></div>
+      <div class="chip__b">
+        <p class="chip__n">OV&#8209;114<br />Lop Nur Turquoise</p>
+        <p class="chip__m">
+          <b>40.4&deg;N &middot; 90.6&deg;E</b><br />
+          Potash pans, Xinjiang<br />
+          Sampled at <b>705 km</b><br />
+          Matt &middot; eggshell &middot; exterior
+        </p>
+      </div>
+    </div>
+
+    <p class="fine">Every colour in the range is matched from a photograph nobody
+      took for us. We have never mixed a new one and we do not intend to.
+      Delivery to the Xinjiang region is not offered, for reasons of distance.</p>
+
+    <div class="mark">
+      <b>Overview</b>
+      <span>Paint, found not made</span>
+    </div>
+
+    <div class="range">
+      <div class="range__lead">
+        <p>Four more. None of them mixed.</p>
+        <span>The range is a list of places. It grows when somebody flies over
+          something better.</span>
+      </div>
+
+      <div class="sw">
+        <img src="assets14/chip-1.jpg" width="800" height="800"
+          alt="Extreme crop of the Lena Delta: acid green channels on violet." />
+        <p><b>OV&#8209;207 Delta Green</b>72.4&deg;N 126.7&deg;E<br />Lena Delta, Siberia</p>
+      </div>
+      <div class="sw">
+        <img src="assets14/chip-2.jpg" width="800" height="795"
+          alt="Extreme crop of the Betsiboka estuary: iron-red silt bleeding into rust." />
+        <p><b>OV&#8209;031 Betsiboka</b>15.9&deg;S 46.3&deg;E<br />Estuary, Madagascar</p>
+      </div>
+      <div class="sw">
+        <img src="assets14/chip-3.jpg" width="800" height="807"
+          alt="Extreme crop of a phytoplankton bloom: deep teal marbling." />
+        <p><b>OV&#8209;088 Bloom Teal</b>74.2&deg;N 36.1&deg;E<br />Barents Sea</p>
+      </div>
+      <div class="sw">
+        <img src="assets14/chip-4.jpg" width="800" height="802"
+          alt="Extreme crop of the Great Salt Lake in winter: pale blue-white." />
+        <p><b>OV&#8209;002 Salt White</b>41.0&deg;N 112.3&deg;W<br />Great Salt Lake, Utah</p>
+      </div>
+    </div>
+  </div>
+
+  <p class="credit">Photography: NASA / GSFC / JSC, public domain. Landsat and ISS
+    crew Earth observations. Overview is a fictional brand; this is not an
+    advertisement for anything you can buy.</p>
+
+  <div class="tooth"></div>
+</div>
+
+</body>
+</html>

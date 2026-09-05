@@ -1,0 +1,140 @@
+// ============================================================================
+//  _aan-theme-kit.scss  —  THE master theme kit  (the ONE file a dev edits per dealer)
+// ----------------------------------------------------------------------------
+//  Edit the values in BLOCKS 1–5 to match the dealer's Figma / design kit, then run
+//  `npm run build`. The whole theme re-skins from here: Bootstrap 4 (via
+//  abstracts/_kit-bridge.scss) + base typography & buttons (base/_kit-base.scss) +,
+//  as components are migrated, every AAN module.
+//
+//  Sass-only (compile-time): these are plain Sass variables/maps — they are the
+//  single source of truth and MUST be defined BEFORE `@import "bootstrap"` so BS4
+//  themes itself from them (see imports.scss order).
+//
+//  Model: Elementor Global Settings — 4 global colors + up to 4 global fonts + a
+//  type ramp + 4 buttons + surfaces. Defaults below are a LIGHT, Prestige-leaning
+//  base that keeps the dealer's real brand navy as the primary, so the first
+//  compile is recognizable. To go VEGAS-style dark: flip BLOCK 2c + swap the fonts.
+//
+//  Reference kits: https://sigovs.github.io/prestige-final-dev/design.html
+//                  https://sigovs.github.io/VEGAS/styles.html
+//  Spec & rationale: theme-style-kit-rebase.md
+// ============================================================================
+
+// 
+// PREVIEW THEMEKIT HERE https://siteurl.com/themekit/
+// 
+
+// ─── 1. FONTS ───────────────────────────────────────────────────────────────
+//  Declare ONLY the families this dealer uses. 2 is typical; slots 3–4 are
+//  optional (default them to display/body to "turn off").
+//  ⚠ LOADING: these are just NAMES. The actual font FILES load via @font-face in
+//  fonts.scss (self-hosted .woff2) — add/swap a face there when you change a family.
+//  (Or use an Adobe Fonts/Typekit embed in header.php and just name it here.)
+//  A name with no loaded face/embed = system fallback.
+$font-display : ('Plus Jakarta Sans', 'Arial', sans-serif) !default;  // headings, hero, prices
+$font-body    : ('Inter', 'Arial', sans-serif)             !default;  // body, UI, forms
+$font-accent  : $font-display !default;   // optional 3rd: eyebrows / kickers / condensed labels
+$font-mono    : ('ui-monospace', 'SFMono-Regular', 'Menlo', monospace) !default; // optional 4th: specs/stamps
+
+$fw-light    : 300 !default;
+$fw-regular  : 400 !default;
+$fw-medium   : 500 !default;
+$fw-semibold : 600 !default;
+$fw-bold     : 700 !default;
+
+
+// ─── 2. COLORS ──────────────────────────────────────────────────────────────
+// 2a. The four globals (Elementor model)
+$color-primary   : #0C376A !default;   // brand / primary CTA  (the dealer's de-facto navy)
+$color-secondary : #111418 !default;   // dark UI / secondary CTA
+$color-accent    : #C8102E !default;   // the "pop": sale price, badges, links (unifies the legacy reds)
+$color-accent-2  : #2D8989 !default;   // SECONDARY accent (teal) — VDP call-us/schedule, header (= legacy $aqua-blue)
+$color-text      : #1C1C1C !default;   // default body text
+
+// 2b. Derived text roles
+$color-heading    : #111418 !default;
+$color-muted      : #707074 !default;  // ≈ legacy $light-grey
+$color-ink-700    : #3B3B3B !default;  // strong neutral — VDP tabs, .dark-text (= legacy $dark-grey)
+$color-link       : $color-primary !default;
+$color-link-hover : #082A52 !default;  // explicit darker navy (Sass-only; no runtime calc needed)
+
+// 2c. Surfaces  —  FLIP THIS BLOCK for a dark base
+//     (e.g. page #0B0F14, text #F5F5F5, surface #131820, footer #0B0F14)
+$bg-page      : #FFFFFF !default;   // page background
+$bg-row       : #F5F6F7 !default;   // default section / row background
+$bg-row-alt   : #EDEFF1 !default;   // alternating row background
+$bg-invert    : #111418 !default;   // dark feature row (text goes light on it)
+$surface-dark : #1D2D3F !default;   // dark navy surface — VDP detail panel, header inner-page, trending (= legacy $dark-blue)
+$surface-card : #FFFFFF !default;   // vehicle cards, panels, popups
+$bg-header    : #FFFFFF !default;   // header bar
+$bg-footer    : #111418 !default;   // footer
+
+// 2d. Lines & states
+$color-border   : #E2E5E9 !default;   // default divider / border
+$color-border-2 : #C6C6C6 !default;   // stronger border (outline buttons, inputs)
+$border-width   : 1px !default;
+$color-success  : #1E8E3E !default;
+$color-danger   : $color-accent !default;   // drives BS4 $danger; form errors reuse the accent red
+$color-warning  : #B8860B !default;
+
+
+// ─── 3. TYPE RAMP ─────────────────────────────────────────────────────────────
+//  Base text size. Browser default is 16px; this is the "modern" base.
+//  (Set 14px to match the legacy site exactly.)
+$text-base-size : 16px !default;
+$line-height-base : 1.6 !default;
+
+//  Each ramp entry: (family / size / weight / lh / ls / tt[text-transform]).
+//  Sizes use clamp() so flagship hero type scales fluidly — tune min/max per design.
+$type: (
+  display: (family: $font-display, size: clamp(40px, 6vw, 72px),   weight: $fw-bold,     lh: 1.05, ls: -0.02em,  tt: none),
+  h1:      (family: $font-display, size: clamp(32px, 4.4vw, 48px), weight: $fw-bold,     lh: 1.10, ls: -0.01em,  tt: none),
+  h2:      (family: $font-display, size: clamp(26px, 3.2vw, 36px), weight: $fw-bold,     lh: 1.15, ls: -0.005em, tt: none),
+  h3:      (family: $font-display, size: clamp(21px, 2.4vw, 28px), weight: $fw-semibold, lh: 1.20, ls: 0,        tt: none),
+  h4:      (family: $font-display, size: 20px,                     weight: $fw-semibold, lh: 1.25, ls: 0,        tt: none),
+  h5:      (family: $font-display, size: 17px,                     weight: $fw-semibold, lh: 1.30, ls: 0,        tt: none),
+  h6:      (family: $font-accent,  size: 13px,                     weight: $fw-semibold, lh: 1.35, ls: 0.08em,   tt: uppercase),
+  subheading: (family: $font-display, size: clamp(18px, 2vw, 22px), weight: $fw-medium, lh: 1.30, ls: 0,        tt: none),
+  lead:    (family: $font-body,    size: 18px,                     weight: $fw-regular,  lh: 1.55, ls: 0,        tt: none),
+  body:    (family: $font-body,    size: $text-base-size,          weight: $fw-regular,  lh: $line-height-base, ls: 0, tt: none),
+  small:   (family: $font-body,    size: 13px,                     weight: $fw-regular,  lh: 1.50, ls: 0,        tt: none),
+  caption: (family: $font-body,    size: 12px,                     weight: $fw-medium,   lh: 1.40, ls: 0.02em,   tt: none),
+  eyebrow: (family: $font-accent,  size: 12px,                     weight: $fw-semibold, lh: 1.20, ls: 0.18em,   tt: uppercase),
+) !default;
+
+
+// ─── 4. BUTTONS (1–4) ─────────────────────────────────────────────────────────
+$btn-radius         : 4px      !default;   // 0 = squared (Prestige) · 4px (VEGAS) · 999px = pill
+$btn-padding        : 14px 28px !default;
+$btn-font           : $font-body !default;
+$btn-font-size      : 14px      !default;
+$btn-font-weight    : $fw-semibold !default;
+$btn-text-transform : uppercase !default;  // `none` for sentence-case brands (iLusso / Superior)
+$btn-letter-spacing : 0.04em    !default;
+
+//  bg / color / border / hover-bg / hover-color  (hover values explicit — Sass-only)
+$buttons: (
+  1: (bg: $color-primary,   color: #fff,        border: transparent,     hbg: $color-link-hover, hcolor: #fff),  // primary
+  2: (bg: $color-secondary, color: #fff,        border: transparent,     hbg: #2A2F36,           hcolor: #fff),  // secondary / dark
+  3: (bg: transparent,      color: $color-text, border: $color-border-2, hbg: $color-text,       hcolor: #fff),  // outline / ghost
+  4: (bg: $color-accent,    color: #fff,        border: transparent,     hbg: #A50D26,           hcolor: #fff),  // accent
+) !default;
+
+
+// ─── 5. SURFACES & RHYTHM ───────────────────────────────────────────────────
+$radius-sm : 4px   !default;
+$radius-md : 8px   !default;
+$radius-lg : 14px  !default;
+$radius-pill : 999px !default;
+
+$shadow-card : 0 3px 10px rgba(17, 20, 24, .10) !default;
+$shadow-pop  : 0 16px 40px -12px rgba(17, 20, 24, .28) !default;
+
+//  4px-based spacing scale (use these instead of magic px margins/paddings)
+$space: (1: 4px, 2: 8px, 3: 12px, 4: 16px, 5: 24px, 6: 32px, 7: 48px, 8: 64px,
+         9: 80px, 10: 112px, 11: 140px, 12: 180px) !default;
+
+$container-max : 1325px !default;   // current theme value (1440 = Prestige)
+
+//  Per-dealer SRP photo aspect ratio (preserved from the old variabels.scss).
+$srp-card-image-ratio : 3 / 2 !default;   // 3:2 default · 4:3 dealers set 4 / 3

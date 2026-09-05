@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Visitor Nexus — Audience is Everything</title>
+<meta name="description" content="Visitor Nexus identifies over 600 data points on your website visitors from a single page view. A design study, not affiliated with Visitor Nexus.">
+<meta name="theme-color" content="#0B0F1E">
+<link rel="stylesheet" href="assets20/css/main.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="mh">
+  <a class="mark" href="#main" aria-label="Visitor Nexus — home">
+    VI<i class="mark__dot" aria-hidden="true"></i>SITOR NEXUS
+  </a>
+
+  <nav class="mh__nav" id="mh-nav" aria-label="Primary">
+    <ul>
+      <li><a href="#main">Products &amp; Services</a></li>
+      <li><a href="#main">Grow your Business</a></li>
+      <li><a href="#main">Compliance</a></li>
+      <li><a href="#main">Contact</a></li>
+    </ul>
+  </nav>
+
+  <div class="mh__act">
+    <a class="mh__tel" href="tel:+18665917555">(866)&nbsp;591-7555</a>
+    <a class="btn" href="#main">Log in</a>
+  </div>
+
+  <button class="burger" type="button" aria-expanded="false" aria-controls="mh-nav" aria-label="Menu">
+    <span></span><span></span>
+  </button>
+</header>
+
+<main id="main">
+
+  <!-- ===================================================================
+       HERO — the peak.
+
+       Everything drawn on this screen is markup: the summit marker, the
+       route down to the offer, the cross. The only bitmap is the plate.
+       The route is an SVG path that is DRAWN as the reader scrolls, not a
+       dashed line that was always there.
+       ================================================================ -->
+  <div class="hero-track">
+    <section class="hero" aria-labelledby="hero-h">
+
+      <!-- three planes, one camera: sky furthest, mountain between, near
+           ground in front. All three are the same width, so they register
+           without fitting. -->
+      <!-- Every plane is a wrapper plus an inner element. The WRAPPER carries
+           scroll (ScrollTrigger writes to it); the INNER carries the pointer.
+           Two transforms, two owners, so neither overwrites the other. -->
+      <div class="hero__plate" aria-hidden="true">
+        <div class="pw pw--sky">
+          <img class="pl pl--sky" src="assets20/img/sky.png" width="2292" height="1415"
+               alt="" fetchpriority="high">
+        </div>
+        <div class="pw pw--mtn">
+          <img class="pl pl--mtn" src="assets20/img/mountain.png" width="2292" height="1325"
+               alt="" fetchpriority="high">
+        </div>
+      </div>
+
+      <!-- weather, drawn: three banks of cloud drifting across the sky at
+           different rates. They are kept to the sky right of the reading
+           column, because nothing may loop perpetually behind text. -->
+      <div class="hero__sky" aria-hidden="true">
+        <span class="cloud cloud--1"></span>
+        <span class="cloud cloud--2"></span>
+        <span class="cloud cloud--3"></span>
+      </div>
+
+      <div class="hero__in">
+        <div class="hero__say">
+          <h1 class="h-display" id="hero-h">The deeper<br>you go,<br>the more you<br><em>know.</em></h1>
+          <p class="body">From a single page view we identify 300+ data points on your visitors —
+            name, phone, email, address, income, home value, credit, existing loans, social links.
+            You also see which pages they looked at, and when.</p>
+          <span class="rule-o" aria-hidden="true"></span>
+        </div>
+
+        <!-- the route: summit marker, the line it draws, and what it reaches.
+             The signal and its readout belong to the mountain, so they take
+             the mountain's pointer offset, not their own. -->
+        <div class="hero__marks" aria-hidden="true">
+        <div class="marks-in">
+          <!-- Three segments, not one line. The gaps are where the terrain is
+               in front of the route: it goes behind a ridge and comes out
+               further along. That break is the depth cue — a continuous line
+               would sit flat on the photograph instead of in it. -->
+          <!-- one continuous descent from the summit, down the flank and out
+               across the near ground on the left; the breaks are cut into it
+               afterwards, at the places the plate is measured to be in front -->
+          <svg class="route" viewBox="0 0 300 600" fill="none" focusable="false">
+            <defs>
+              <!-- the route does not stop, it stops being visible: the stroke
+                   itself runs out into transparency at the foot, which is
+                   where the next scene takes over -->
+              <linearGradient id="routeFade" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0"    stop-color="#fff" stop-opacity="0"/><stop offset=".07" stop-color="#fff" stop-opacity=".62"/>
+                <stop offset=".86" stop-color="#fff" stop-opacity=".62"/>
+                <stop offset=".95" stop-color="#fff" stop-opacity=".22"/>
+                <stop offset="1"   stop-color="#fff" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path class="route__p" d="M196 10 C 206 68, 176 96, 190 140
+                     C 204 186, 244 206, 236 254 C 229 296, 186 306, 170 340
+                     C 152 378, 158 410, 132 442 C 104 476, 62 486, 44 524
+                     C 30 554, 34 578, 26 598"/>
+
+            <!-- Leaders branch FROM the route, in the route's own coordinates,
+                 so they cannot drift from it. A short diagonal, then a run to
+                 the text. Angular, never curved. -->
+            <!-- the anchors are the route's own points, read off the path at
+                 30% and 58% of its length, not placed by eye -->
+            <!-- SIGNAL 001 now has a real leader off the summit marker, in the
+                 route's own coordinates, instead of a rule parked beside the
+                 label. Two segments, shorter and quieter than the others. -->
+            <g class="lead lead--0">
+              <path class="lead__l" d="M196 10 L228 -10 L292 -10"/>
+              <circle class="lead__a" cx="196" cy="10" r="2.6"/>
+            </g>
+            <g class="lead lead--1">
+              <path class="lead__l" d="M224.6 201.7 L252 178 L292 178"/>
+              <circle class="lead__a" cx="224.6" cy="201.7" r="2.6"/>
+            </g>
+            <g class="lead lead--2">
+              <!-- moved up the route to 62% of its length: at 80% the anchor
+                   sat on a stretch that the near rocks cover, so the event
+                   could never be seen. Geometry of the route is unchanged. -->
+              <path class="lead__l" d="M155.1 388.6 L188 372 L296 372"/>
+              <circle class="lead__a" cx="155.1" cy="388.6" r="2.6"/>
+            </g>
+          </svg>
+
+          <!-- the readings are HTML, so they stay real horizontal text -->
+          <div class="callout callout--1">
+            <div class="callout__in">
+              <p class="callout__k"><svg class="ico" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M1 3.4V1.6h1.9M10.4 3.4V1.6H8.5M1 8.6v1.8h1.9M10.4 8.6v1.8H8.5"/><path d="M1 6h9.4"/><circle cx="5.7" cy="6" r="1.5"/></svg>Signal detected</p>
+              <p class="callout__s">Every visit begins with a trace.</p>
+            </div>
+          </div>
+          <div class="callout callout--2">
+            <div class="callout__in">
+              <p class="callout__k"><svg class="ico" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="2.2" cy="9.4" r="1.4"/><circle cx="6" cy="4" r="1.4"/><circle cx="9.8" cy="8.2" r="1.4"/><path d="M3.3 8.5 4.9 5M7.1 4.8 8.9 7.2"/></svg>Behavior identified</p>
+              <p class="callout__s">Anonymous activity becomes actionable insight.</p>
+            </div>
+          </div>
+
+        </div>
+
+          <!-- the summit reading belongs to the route like the other two:
+               same group, same coordinate space, so it travels with them -->
+          <p class="summit-note">
+            <b><svg class="ico" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><ellipse cx="6" cy="2.6" rx="4.2" ry="1.7"/><path d="M1.8 2.6v3.1c0 .94 1.88 1.7 4.2 1.7s4.2-.76 4.2-1.7V2.6"/><path d="M1.8 5.9v3.1c0 .94 1.88 1.7 4.2 1.7s4.2-.76 4.2-1.7V5.9"/></svg>Signal 001</b>
+            <span>600M+ Consumer Profiles</span>
+            <span>Updated Daily</span>
+          </p>
+        </div>
+
+        
+        <!-- the pit stop: the route reaches it and it opens. A real button, so
+             the three lines are reachable by keyboard and are simply present
+             where there is no pointer to hover with. -->
+        <!-- the near ground: its own layer, above the route. The camera holds
+             still and this rises, because the reader is descending into the
+             valley — near things climb, the distant mountain barely moves.
+             The route passing behind it is the depth, not a drawn break. -->
+        <!-- one wrapper, one job:
+             .hero__fg    the permanent base position, CSS only
+             .fg-scroll   the scroll rise, GSAP only
+             .fg-in       the pointer, GSAP only
+             img          size and natural aspect only -->
+        <div class="hero__fg" aria-hidden="true">
+          <div class="fg-scroll">
+            <div class="fg-in">
+              <img src="assets20/img/overlay.png" width="2292" height="1107" alt="" loading="eager">
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+  </div>
+
+  <!-- a stub, only so the hero has something to leave for -->
+  <section class="after" aria-hidden="true"></section>
+
+</main>
+
+<script src="assets20/vendor/gsap.min.js"></script>
+<script src="assets20/vendor/ScrollTrigger.min.js"></script>
+<script src="assets20/vendor/SplitText.min.js"></script>
+<script src="assets20/vendor/DrawSVGPlugin.min.js"></script>
+<script src="assets20/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fovea — The detail was never the problem</title>
+<meta name="description" content="An advertisement for Fovea Optical. The hero plate is neither a photograph nor a generation: a printed page imaged through two loupes by tracing 224 million photons through a Seidel aberration model of each element.">
+
+<style>
+/* ===========================================================================
+   FOVEA · F3.4 — one advertisement.
+
+   The argument is inside the picture, and the picture is a measurement.
+   A page was set and rendered at 6800x4400, then imaged through two loupes by
+   forward photon transport: every photon carries a wavelength, and its landing
+   point is displaced by that element's spherical aberration, coma, field
+   curvature, axial colour and lateral colour. Element A is a moulded singlet.
+   Element B is an aspheric achromat, and it was given the LARGER aperture of
+   the two, which is the harder case for it.
+
+   The word under element B is the brand name. It is legible through one lens
+   and not through the other, and that is the whole of the claim.
+
+   Two live zones only, both measured against the render rather than assumed:
+     on the plate   the clear stock below the setting, x 5-55%, y 63-93%
+     under it      a typographic band, because the right half of the plate is
+                   glass and shadow down to 82% and will not carry type.
+   ======================================================================== */
+
+@font-face{font-family:'Inter Tight';font-weight:400;font-style:normal;font-display:swap;
+  src:url(assets15/fonts/inter-tight-400.woff2) format('woff2')}
+@font-face{font-family:'Inter Tight';font-weight:500;font-style:normal;font-display:swap;
+  src:url(assets15/fonts/inter-tight-500.woff2) format('woff2')}
+@font-face{font-family:'Inter Tight';font-weight:600;font-style:normal;font-display:swap;
+  src:url(assets15/fonts/inter-tight-600.woff2) format('woff2')}
+@font-face{font-family:'Inter Tight';font-weight:800;font-style:normal;font-display:swap;
+  src:url(assets15/fonts/inter-tight-800.woff2) format('woff2')}
+@font-face{font-family:'Plex Mono';font-weight:400;font-style:normal;font-display:swap;
+  src:url(assets15/fonts/plex-mono-400.woff2) format('woff2')}
+@font-face{font-family:'Plex Mono';font-weight:500;font-style:normal;font-display:swap;
+  src:url(assets15/fonts/plex-mono-500.woff2) format('woff2')}
+
+:root{
+  /* ---- ground: the stock the plate is printed on, sampled off the render */
+  --stock:#e9e4d9;
+  --stock-lo:#dcd6c8;
+
+  /* ---- ink: measured against rgb(233,228,217) --------------------------- */
+  --ink:#17140e;      /* 14.49:1 */
+  --ink-2:#4a4640;    /*  7.39:1 */
+  --ink-3:#6b675e;    /*  4.44:1 */
+  --rule:rgba(23,20,14,.20);
+  --rule-2:rgba(23,20,14,.46);
+
+  /* ---- the accent, derived ----------------------------------------------
+     A saturation-weighted hue census of the finished plate: 98.2% of every
+     saturated pixel in the picture sits in 30-49deg, which is the stock plus
+     the warm half of the fringing that element A lays over the type. The
+     emptiest 60deg window in the whole image is 250-309deg, holding 0.00%.
+     The accent takes the centre of that window, 280deg, and is then SOLVED
+     rather than picked: the lightest tone at that hue clearing 7:1 on the
+     stock is hsl(280 77% 36%) = #7315a2, measuring 7.02:1 on stock and
+     8.10:1 on glass. It cannot be misread as evidence, because the
+     photograph owns no part of that hue.                                    */
+  --accent:#7315a2;
+
+  --s1:.25rem; --s2:.5rem;  --s3:.75rem; --s4:1rem;  --s5:1.5rem;
+  --s6:2rem;   --s7:3rem;   --s8:4rem;   --s9:6rem;
+  --maxw:110rem;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--stock-lo);color:var(--ink);
+  font-family:'Inter Tight',system-ui,sans-serif;
+  font-synthesis-weight:none;-webkit-font-smoothing:antialiased;
+  display:flex;justify-content:center;
+  padding:clamp(0px,2.4vw,var(--s8)) clamp(0px,2.4vw,var(--s8)) clamp(var(--s6),6vw,var(--s9))}
+
+.sheet{width:100%;max-width:var(--maxw);background:var(--stock);
+  box-shadow:0 .1rem .2rem rgba(23,20,14,.10), 0 1.6rem 4rem rgba(23,20,14,.18)}
+
+/* ---- the plate ---------------------------------------------------------- */
+.stage{position:relative;container-type:inline-size;aspect-ratio:2600/1682}
+.stage img{display:block;width:100%;height:100%;object-fit:cover}
+.at{position:absolute}
+
+/* the two elements, called out on the paper and never on the glass */
+.callout{display:flex;align-items:center;gap:.75cqi;
+  font-family:'Plex Mono',ui-monospace,monospace;font-weight:500;
+  font-size:1.2cqi;letter-spacing:.2em;color:var(--ink);white-space:nowrap}
+.callout i{display:block;height:1px;background:var(--rule-2)}
+.callout--a{left:2.9%;top:37.4%;transform:translateY(-50%)}
+.callout--a i{width:10.2cqi}
+.callout--b{right:2.9%;top:53.6%;transform:translateY(-50%);flex-direction:row-reverse}
+.callout--b i{width:5.0cqi}
+
+/* the argument, in the clear stock the setting leaves free */
+/* The setting on the page stops at 62.4% of the plate; the mount and shadow of
+   element B hold the right half down to 82%. Three authored lines and a
+   40cqi measure are what fits the clear stock that is left, measured. */
+.say{left:5.2%;top:63%;width:50%}
+.say h1{font-weight:800;font-size:4.9cqi;line-height:.885;letter-spacing:-.033em;
+  text-transform:uppercase}
+.say p{margin-top:1.9cqi;max-width:40cqi;
+  font-weight:400;font-size:1.42cqi;line-height:1.42;color:var(--ink-2)}
+.say p b{font-weight:600;color:var(--ink)}
+
+/* ---- the band under the plate ------------------------------------------- */
+.band{display:grid;grid-template-columns:minmax(0,15rem) minmax(0,1fr) minmax(0,20rem);
+  column-gap:clamp(var(--s5),3.4vw,var(--s7));
+  padding:clamp(var(--s5),2.6vw,var(--s6)) clamp(var(--s5),3.2vw,var(--s7))
+          clamp(var(--s6),3.4vw,var(--s7));
+  border-top:1px solid var(--rule-2)}
+
+.mk{font-weight:600;font-size:clamp(1.15rem,1.8vw,1.6rem);letter-spacing:.34em;
+  text-indent:.34em;text-transform:uppercase;line-height:1}
+.mk span{display:block;margin-top:var(--s3);font-family:'Plex Mono',ui-monospace,monospace;
+  font-weight:400;font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;
+  text-indent:0;color:var(--ink-3)}
+
+.spec{font-family:'Plex Mono',ui-monospace,monospace;font-size:.75rem;line-height:1.5}
+.spec dl{display:grid;grid-template-columns:1.5rem minmax(0,1fr) auto;
+  column-gap:var(--s4);padding:var(--s3) 0;border-bottom:1px solid var(--rule);
+  align-items:baseline}
+.spec dl:first-child{border-top:1px solid var(--rule)}
+.spec dt{font-weight:500;letter-spacing:.2em;color:var(--ink)}
+.spec dd{color:var(--ink-2)}
+.spec dd.n{font-variant-numeric:tabular-nums;text-align:right;color:var(--ink);white-space:nowrap}
+.spec .sum{display:block;margin-top:var(--s3);color:var(--accent);font-weight:500;
+  letter-spacing:.02em}
+
+/* the fine print, which is where an optics firm keeps its honesty */
+.fine{font-family:'Plex Mono',ui-monospace,monospace;font-size:.66rem;line-height:1.68;
+  color:var(--ink-3)}
+.fine b{font-weight:400;color:var(--ink-2)}
+
+/* ---- narrow: the plate keeps its geometry, the argument moves off it ----- */
+.below{display:none}
+
+@media (max-width:900px){
+  body{padding:0 0 var(--s6)}
+  .sheet{box-shadow:none}
+  .say{display:none}
+  .callout{font-size:2.3cqi;gap:1.2cqi}
+  .callout--a i{width:9.4cqi}
+  .callout--b i{width:4.4cqi}
+
+  .below{display:block;padding:var(--s6) var(--s5) 0}
+  .below h1{font-weight:800;font-size:clamp(2.05rem,9.6vw,3.6rem);line-height:.9;
+    letter-spacing:-.032em;text-transform:uppercase}
+  .below p{margin-top:var(--s4);font-size:clamp(.95rem,4vw,1.15rem);line-height:1.45;
+    color:var(--ink-2);max-width:36ch}
+  .below p b{font-weight:600;color:var(--ink)}
+
+  .band{grid-template-columns:minmax(0,1fr);row-gap:var(--s5);
+    padding:var(--s6) var(--s5) var(--s6);margin-top:var(--s6)}
+  .spec dl{grid-template-columns:1.4rem minmax(0,1fr)}
+  .spec dd.n{grid-column:2;text-align:left;margin-top:var(--s1)}
+}
+
+@media print{ body{background:#fff;padding:0} .sheet{box-shadow:none} }
+</style>
+</head>
+
+<body>
+<main class="sheet">
+
+  <figure class="stage">
+    <img src="assets15/plate.webp" width="2600" height="1682" decoding="async"
+      alt="A printed page from a book on vision with two loupes lying on it. Under the smaller
+           loupe on the left the word watermark is smeared into a warm and blue-fringed blur
+           with comet-shaped tails leaning outward. Under the larger loupe on the right the
+           line 'called it the fovea, and the word has been sitting quietly in the textbooks
+           ever since' is completely sharp. Each loupe throws a ring-shaped shadow with a core
+           of gathered light inside it: the core under the left loupe is wide and dim, the one
+           under the right is small and bright.">
+
+    <p class="at callout callout--a"><span>A</span><i></i></p>
+    <p class="at callout callout--b"><span>B</span><i></i></p>
+
+    <div class="at say">
+      <h1>The detail<br>was never<br>the problem.</h1>
+      <p>Same page. Same lamp. Same eye. <b>A</b> is the glass in almost every loupe
+        ever sold. <b>B</b> is a Fovea. Read the word under it.</p>
+    </div>
+  </figure>
+
+  <!-- the same argument, for a sheet too narrow to carry type on the plate -->
+  <div class="below">
+    <h1>The detail was never the problem.</h1>
+    <p>Same page. Same lamp. Same eye. <b>A</b> is a moulded singlet &mdash; the glass in
+      almost every loupe ever sold. <b>B</b> is a Fovea. Read the word under it.</p>
+    <!-- the plate carries the shorter cut; a narrow sheet has room for the full one -->
+  </div>
+
+  <footer class="band">
+    <p class="mk">Fovea<span>Optical instruments &middot; est. 1974</span></p>
+
+    <div class="spec">
+      <dl><dt>A</dt><dd>Moulded singlet, 3.4&times; &mdash; 26&nbsp;mm clear aperture</dd>
+        <dd class="n">RMS spot 27.8&nbsp;px</dd></dl>
+      <dl><dt>B</dt><dd>Fovea F3.4 aspheric achromat &mdash; 34&nbsp;mm clear aperture</dd>
+        <dd class="n">RMS spot 2.2&nbsp;px</dd></dl>
+      <b class="sum">12.6&times; finer, at the same magnification, on the larger aperture.</b>
+    </div>
+
+    <p class="fine">Plate computed, not photographed. <b>224 million photons</b> were traced
+      through a Seidel aberration model of each element &mdash; spherical, coma, field
+      curvature, axial and lateral colour &mdash; onto a page rendered at 6800&times;4400.
+      Spot radii measured at 62% of field. Fovea is a fiction. The optics are not.</p>
+  </footer>
+
+</main>
+</body>
+</html>

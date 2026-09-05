@@ -1,0 +1,865 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Meridian Motor Group — Sport &amp; Exotic, Chicago</title>
+<meta name="description" content="Eight sport and exotic cars in stock. Consignment, finance and enclosed delivery. Chicago." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter+Tight:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="preload" as="image" href="assets/night/car-01-wide.webp" fetchpriority="high" />
+
+<style>
+/* ===========================================================================
+   MERIDIAN — index9.
+
+   DESIGN READ
+     Reading this as a sport-and-exotic dealer homepage for a buyer comparing a
+     six-figure purchase, leaning commerce-editorial.
+     Dialect: auction-editorial.
+     Dimensionality: SUPPORT — one scroll-linked pass gives still photography a
+     sense of movement; the page is complete and legible with it switched off.
+     Vault: 5 relevant references, 3 unusable for missing notes.
+
+   WHAT THE VAULT DECIDED, rather than taste
+     vault/ruadh-com (2, in) — a commerce grid "repeatedly interrupted by
+     paired, full-bleed editorial imagery", whose identity comes from image
+     sequencing rather than interface invention. That is this page's structure.
+     vault/kinncollective-co-uk — note is empty, so tags only, and the tags are
+     the vocabulary: rhythm-variation, scale-exchange, curated-sequencing.
+     vault/rmsothebys-com (1, out) — the automotive anti-reference. Its fault is
+     the whole set: card grid AND mechanical 50/50 bands AND metronomic cadence
+     AND passive negative space. An earlier pass here read that as "no cards",
+     which threw away the pattern the buyer needs — identical blocks, so price
+     compares to price and mileage to mileage down a column. Cards are back; the
+     cadence is answered where it belongs, with one wide card and full-bleed
+     interruptions between grids.
+     vault/ciridae-com (3, in) — the highest-rated confirmed entry, and the one
+     an earlier pass queried and then ignored: large editorial serif, restrained
+     sans metadata, numbered structures, fine rules. That decision now drives the
+     three-voice type system and the figures-on-hairlines in About and Sell.
+
+   DIMENSIONALITY — declared before technique (dimensionality role ladder)
+     Role: SUPPORT.
+     DM3 budget, written before building: 60fps on integrated graphics, 30fps
+       floor on a mid-range phone; page imagery ceiling 1.2 MB; transform only,
+       no layout animation.
+     DM4 the reduced-motion path is an AUTHORED still — each frame resolves to a
+       chosen offset that composes, not to "the animation, stopped".
+     DM5 no body copy sits over a moving layer anywhere on this page, which
+       removes the per-frame contrast problem at the source instead of scrimming
+       around it.
+     DM6 one depth idea: horizontal pass inside a fixed frame. Nothing else.
+     DM9 the pass runs only on imagery-only plates. Reading zones are still.
+     DM10 mobile is authored: the pass is off on coarse pointers and the scale
+       exchange becomes vertical.
+   ======================================================================== */
+:root{
+  --s1:.25rem; --s2:.5rem; --s3:.75rem; --s4:1rem; --s5:1.5rem; --s6:2rem;
+  --s7:3rem; --s8:4rem; --s9:6rem; --s10:8rem; --s11:12rem;
+
+  /* GROUND — measured, not chosen. rgb(16,18,19) is the mean shadow tone across
+     all eight photographs (69,114 pixels below L 0.14), so the page ground is
+     the imagery's own darkness rather than a generic graphite. */
+  --bg:#101213; --bg2:#191c1e; --ink:#f2f2f0;
+  --ink72:rgba(242,242,240,.72); --ink58:rgba(242,242,240,.58);
+  --rule:rgba(242,242,240,.16); --rule2:rgba(242,242,240,.38);
+  /* ACCENT — derived from a hue census of the inventory. 89.4% of every
+     saturated pixel in the eight cars is red (0-19deg and 350-359deg), so red is
+     the one hue an action must never take. The 170-209deg petrol band holds
+     1.72% — a gap, so a petrol action cannot compete with any bodywork.
+     Two roles, because one value cannot serve both: */
+  --accent:#1a7c87;      /* solid fill, white label  — 3.83:1 block, 4.91:1 label */
+  --accent-lt:#3fb0bc;   /* accent as text on ground — 7.29:1 */
+
+  /* THREE VOICES (typography D1). Not the table's example: Playfair is
+     exhausted and a true didone reads fashion, which is wrong for machinery.
+     Newsreader is an editorial serif drawn for screen with a real italic cut,
+     carrying ciridae-com's recorded decision — large editorial serif,
+     restrained sans metadata, numbered structures, fine rules. */
+  --font-display:"Newsreader",Georgia,serif;
+  --font-body:"Inter Tight",system-ui,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,monospace;
+
+  --d1:.15s; --d2:.28s; --d3:.5s; --e:cubic-bezier(.22,1,.36,1);
+  --pad:clamp(1.25rem,5vw,5rem); --max:96rem;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+html,body{overflow-x:clip}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--font-body);
+  font-size:clamp(.9375rem,.3vw+.9rem,1.0625rem);line-height:1.6;
+  -webkit-font-smoothing:antialiased;padding-bottom:4.5rem}
+img{display:block;max-width:100%;height:auto}
+h1,h2,h3{margin:0;font-family:var(--font-display);font-weight:400;
+  letter-spacing:-.015em;line-height:1.02;text-wrap:balance}
+p{text-wrap:pretty}
+em{font-style:italic}                      /* D2 — the italic IS the emphasis */
+.h-xl,.h-lg{line-height:.98;letter-spacing:-.025em}
+/* mono is the machine register: labels, keys, actions (D3) */
+.kicker,.card__tag,.card__stock,.card__specs dt,.btn,.hours dt{font-family:var(--font-mono)}
+a{color:inherit}
+.wrap{max-width:var(--max);margin-inline:auto;padding-inline:var(--pad)}
+.kicker{font-size:.6875rem;font-weight:500;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink58);margin:0}
+.h-xl{font-size:clamp(2.5rem,7vw,6.5rem)}
+.h-lg{font-size:clamp(2rem,4.4vw,3.75rem)}
+.h-md{font-size:clamp(1.5rem,2.4vw,2.25rem)}
+.num{font-variant-numeric:tabular-nums}
+.measure{max-width:54ch;color:var(--ink72)}
+:where(a,button,select,[tabindex]):focus-visible{
+  outline:2px solid var(--accent-lt);outline-offset:3px;border-radius:2px}
+.skip{position:absolute;left:-9999px;top:var(--s3);z-index:99}
+.skip:focus{left:var(--pad)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--s2);
+  font-size:.75rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;
+  padding:.85rem 1.5rem;
+  text-decoration:none;border:1px solid transparent;cursor:pointer;
+  transition:background var(--d2) var(--e),border-color var(--d2) var(--e)}
+.btn--warm{background:var(--accent);color:#fff}
+.btn--warm:hover{background:#22909d}
+.btn--line{background:transparent;color:var(--ink);border-color:var(--rule2)}
+.btn--line:hover{border-color:var(--ink)}
+.btn--sm{padding:.6rem 1.1rem;font-size:.75rem}
+
+.nav{position:sticky;top:0;z-index:50;background:rgba(16,18,19,.92);
+  backdrop-filter:blur(8px);border-bottom:1px solid var(--rule)}
+.nav__in{display:flex;align-items:center;justify-content:space-between;
+  gap:var(--s5);padding-block:var(--s4)}
+.brand{font-weight:700;letter-spacing:-.03em;font-size:1.0625rem;text-decoration:none}
+.brand span{display:block;font-size:.625rem;font-weight:600;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--ink58);margin-top:2px}
+.nav ul{display:flex;gap:var(--s6);list-style:none;margin:0;padding:0}
+.nav ul a{font-size:.8125rem;font-weight:500;text-decoration:none;color:var(--ink72)}
+.nav ul a:hover{color:var(--ink)}
+@media (max-width:63.99rem){ .nav ul{display:none} }
+
+/* ===========================================================================
+   THE PLATE — full bleed, imagery only. No body copy ever sits on a moving
+   layer (DM5, DM9). Headlines beside plates, never over a drifting one.
+   ======================================================================== */
+.plate{position:relative;overflow:hidden;background:var(--bg2)}
+.plate img{width:100%;height:100%;object-fit:cover}
+.plate::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top,rgba(16,18,19,.92) 0%,rgba(16,18,19,.18) 46%,
+             rgba(16,18,19,0) 74%),
+             linear-gradient(to right,rgba(16,18,19,.62) 0%,rgba(16,18,19,0) 42%)}
+.plate--hero{height:min(88svh,52rem)}
+.plate--cut{height:min(46svh,26rem);margin-block:var(--s9)}
+.plate__copy{position:absolute;left:0;right:0;bottom:0;z-index:2;
+  padding-bottom:clamp(var(--s6),4vw,var(--s8))}
+.plate__row{display:flex;flex-wrap:wrap;gap:var(--s4);align-items:center;
+  margin-top:var(--s5)}
+.plate__price{font-size:clamp(1.1rem,1.8vw,1.5rem);font-weight:600;
+  font-variant-numeric:tabular-nums}
+
+/* ===========================================================================
+   THE GRID — scale exchange. No two adjacent entries the same size, and the
+   sequence is interrupted rather than repeated (vault/ruadh-com).
+   ======================================================================== */
+.inv{padding-block:var(--s9) var(--s7)}
+.inv__head{display:flex;flex-wrap:wrap;gap:var(--s4) var(--s6);
+  align-items:end;justify-content:space-between;margin-bottom:var(--s7)}
+.chips{display:flex;flex-wrap:wrap;gap:var(--s2);margin:var(--s5) 0 0;padding:0;list-style:none}
+.chip{font-size:.75rem;font-weight:600;letter-spacing:.04em;padding:.5rem 1rem;
+  background:transparent;color:var(--ink72);border:1px solid var(--rule2);
+  cursor:pointer;transition:color var(--d2) var(--e),border-color var(--d2) var(--e),
+  background var(--d2) var(--e)}
+.chip:hover{color:var(--ink);border-color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);color:#141414;border-color:var(--ink)}
+
+/* CARDS. The earlier build refused them because vault/rmsothebys-com is filed
+   OUT partly for "repetitive card grids" — but that entry's fault is the whole
+   set: card grid AND mechanical 50/50 bands AND metronomic cadence AND passive
+   negative space. Banning the card itself threw away the pattern this buyer
+   actually needs: identical blocks, so price compares to price and mileage to
+   mileage down a column. The cadence is answered where it belongs instead —
+   one wide card, and one full-bleed interruption between two grids. */
+.grid{display:grid;gap:var(--s6) var(--s5);grid-template-columns:1fr}
+@media (min-width:40rem){ .grid{grid-template-columns:repeat(2,1fr)} }
+@media (min-width:64rem){ .grid{grid-template-columns:repeat(3,1fr)} }
+
+.card{position:relative;display:flex;flex-direction:column;background:var(--bg2);
+  border:1px solid var(--rule);transition:border-color var(--d2) var(--e)}
+.card:hover,.card:focus-within{border-color:var(--rule2)}
+.card__media{position:relative;overflow:hidden;aspect-ratio:4/3;background:#0d0f10}
+.card__media img{width:100%;height:100%;object-fit:cover;
+  transition:transform var(--d3) var(--e)}
+.card:hover .card__media img{transform:scale(1.04)}
+/* The tonal test failed on the first build: five of the eight cars sit on bright
+   studio sweeps, so a small white tile pulled as hard as a large one and rank
+   was carried by luminance instead of scale. This seats every frame in the
+   ground — weaker than the full-bleed plates, enough that scale wins again. */
+.card__media::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top,rgba(16,18,19,.62) 0%,rgba(16,18,19,.12) 30%,
+             rgba(16,18,19,0) 56%)}
+.card__tag{position:absolute;left:var(--s3);top:var(--s3);z-index:2;
+  font-size:.6875rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  padding:.35rem .6rem;background:rgba(16,18,19,.88);color:var(--ink);
+  border:1px solid var(--rule2)}
+.card__tag--new{background:var(--accent);color:#fff;border-color:var(--accent)}
+.card__body{display:flex;flex-direction:column;gap:var(--s3);padding:var(--s5);flex:1}
+.card__top{display:flex;gap:var(--s3);align-items:baseline;justify-content:space-between}
+.card__name{font-size:1.0625rem;font-weight:600;letter-spacing:-.02em;line-height:1.25}
+.card__name a{text-decoration:none}
+.card__name a::after{content:"";position:absolute;inset:0}
+.card__price{font-size:1.0625rem;font-weight:700;white-space:nowrap;
+  font-variant-numeric:tabular-nums}
+.card__specs{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3) var(--s4);
+  margin:0;padding-top:var(--s4);border-top:1px solid var(--rule)}
+.card__specs dt{font-size:.6875rem;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink58)}
+.card__specs dd{margin:2px 0 0;font-size:.875rem;font-variant-numeric:tabular-nums}
+.card__stock{font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink58);font-variant-numeric:tabular-nums}
+.card__acts{display:flex;gap:var(--s2);margin-top:auto;padding-top:var(--s4);
+  position:relative;z-index:2}
+.card__acts .btn{flex:1}
+
+/* The one departure from the grid's cadence: the most valuable car gets two
+   columns and turns horizontal, so the row is not four identical beats. */
+@media (min-width:64rem){
+  .card--feat{grid-column:span 2;flex-direction:row}
+  .card--feat .card__media{aspect-ratio:auto;flex:0 0 55%}
+  .card--feat .card__body{justify-content:center;padding:var(--s6)}
+  /* side by side, the long name wrapped against the price and broke mid-model.
+     The wide card has the height to stack them, so it does. */
+  .card--feat .card__top{display:block}
+  .card--feat .card__name{font-size:clamp(1.25rem,1.7vw,1.75rem);
+    letter-spacing:-.03em;max-width:16ch}
+  .card--feat .card__price{display:block;margin-top:var(--s3);
+    font-size:clamp(1.25rem,1.7vw,1.75rem)}
+  .card--feat .card__acts{flex:0 0 auto;margin-top:var(--s5)}
+  .card--feat .card__acts .btn{flex:0 0 auto}
+}
+
+/* ===========================================================================
+   READING ZONES — always still. Nothing behind them moves (DM9).
+   ======================================================================== */
+.band{padding-block:var(--s8) var(--s10);border-top:1px solid var(--rule)}
+.band__grid{display:grid;gap:var(--s7)}
+@media (min-width:60rem){
+  .band--sell .band__grid{grid-template-columns:5fr 7fr;gap:var(--s9)}
+  .band--about .band__grid{grid-template-columns:6fr 5fr;gap:var(--s9);align-items:end}
+  .band--visit .band__grid{grid-template-columns:5fr 7fr;gap:var(--s9)}
+}
+.steps{display:grid;gap:var(--s5);margin:0;padding:0;list-style:none}
+.step{display:grid;grid-template-columns:auto 1fr;gap:var(--s5);
+  padding-top:var(--s5);border-top:1px solid var(--rule)}
+.step__k{font-family:var(--font-mono);font-size:.6875rem;font-weight:500;
+  color:var(--accent-lt);font-variant-numeric:tabular-nums;letter-spacing:.12em}
+.step__t{font-size:1.0625rem;font-weight:600;letter-spacing:-.015em;margin:0 0 var(--s2)}
+.step__d{margin:0;color:var(--ink72);font-size:.9375rem}
+/* THE FIGURES ARE THE DOMINANT (C1). Both dead sections had a headline, a
+   paragraph and a list all at one rank, so neither had an entry point. Here the
+   numbers carry the argument, set at display scale on hairlines — the decision
+   recorded in vault/ciridae-com (3, in): numbered structures and fine rules,
+   not a stat widget. */
+.figures{display:grid;grid-template-columns:repeat(2,1fr);
+  border-top:1px solid var(--rule2);margin-top:var(--s7)}
+@media (min-width:52rem){ .figures{grid-template-columns:repeat(4,1fr)} }
+.fig{padding:var(--s6) var(--s5) var(--s7) 0;border-bottom:1px solid var(--rule)}
+@media (min-width:52rem){ .fig{border-bottom:0;border-right:1px solid var(--rule)}
+  .fig:last-child{border-right:0} }
+.fig b{display:block;font-family:var(--font-display);font-weight:400;
+  font-size:clamp(2.75rem,6vw,5rem);line-height:.9;letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums}
+.fig span{display:block;margin-top:var(--s4);font-family:var(--font-mono);
+  font-size:.6875rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink58)}
+
+/* THE PAYMENT IS THE DOMINANT of the sell band — by scale, and by being the one
+   number the visitor actually came to find out. */
+.calc{background:var(--bg2);border:1px solid var(--rule);padding:var(--s6)}
+.calc__out{padding-bottom:var(--s5);border-bottom:1px solid var(--rule)}
+.calc__out span{display:block;font-family:var(--font-mono);font-size:.6875rem;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--ink58)}
+.calc__out b{display:block;margin-top:var(--s3);font-family:var(--font-display);
+  font-weight:400;font-size:clamp(3rem,7vw,5.5rem);line-height:.9;
+  letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.calc__out i{display:block;margin-top:var(--s3);font-style:normal;
+  font-size:.875rem;color:var(--ink72)}
+.calc__row{padding-top:var(--s5)}
+.calc__row label{display:flex;justify-content:space-between;gap:var(--s4);
+  font-family:var(--font-mono);font-size:.6875rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink58)}
+.calc__row output{color:var(--ink);font-variant-numeric:tabular-nums}
+.calc input[type=range]{-webkit-appearance:none;appearance:none;width:100%;
+  height:2px;background:var(--rule2);margin:var(--s4) 0 0;cursor:pointer}
+.calc input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;
+  width:18px;height:18px;background:var(--accent-lt);border:0;border-radius:50%}
+.calc input[type=range]::-moz-range-thumb{width:18px;height:18px;
+  background:var(--accent-lt);border:0;border-radius:50%}
+.calc__note{margin:var(--s5) 0 0;font-size:.8125rem;color:var(--ink58)}
+
+/* the consignment steps drop to a spec plate (typography D4): mono keys,
+   hairline rules, no box — so they read as record, not as a second dominant */
+.plate-steps{display:grid;grid-template-columns:auto 1fr;column-gap:var(--s5);
+  row-gap:0;margin:var(--s6) 0 0}
+.plate-steps dt{padding-block:var(--s4);border-top:1px solid var(--rule);
+  font-family:var(--font-mono);font-size:.6875rem;letter-spacing:.12em;
+  color:var(--accent-lt);font-variant-numeric:tabular-nums}
+.plate-steps dd{margin:0;padding-block:var(--s4);border-top:1px solid var(--rule)}
+.plate-steps dd b{display:block;font-weight:600;font-size:.9375rem}
+.plate-steps dd span{display:block;margin-top:2px;font-size:.875rem;color:var(--ink72)}
+.still{margin:0;overflow:hidden;background:var(--bg2);aspect-ratio:4/5;position:relative}
+.still img{width:100%;height:100%;object-fit:cover}
+.hours{display:grid;grid-template-columns:auto 1fr;gap:var(--s2) var(--s5);margin:var(--s6) 0 0}
+.hours dt{font-size:.8125rem;color:var(--ink58);padding-block:var(--s2);
+  border-top:1px solid var(--rule)}
+.hours dd{margin:0;padding-block:var(--s2);text-align:right;font-size:.9375rem;
+  border-top:1px solid var(--rule);font-variant-numeric:tabular-nums}
+.map{overflow:hidden;background:var(--bg2);aspect-ratio:16/10;border:1px solid var(--rule)}
+.map iframe{width:100%;height:100%;border:0;display:block;
+  filter:grayscale(1) invert(.92) contrast(.85) brightness(.95)}
+
+footer{border-top:1px solid var(--rule);padding-block:var(--s8) var(--s6)}
+.fgrid{display:grid;gap:var(--s6)}
+@media (min-width:48rem){ .fgrid{grid-template-columns:2fr 1fr 1fr 1fr} }
+footer a{display:block;color:var(--ink72);text-decoration:none;padding-block:3px;font-size:.9375rem}
+footer a:hover{color:var(--ink)}
+
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:60;
+  background:rgba(16,18,19,.94);backdrop-filter:blur(8px);
+  border-top:1px solid var(--rule)}
+.bar__in{display:flex;align-items:center;justify-content:space-between;
+  gap:var(--s4);padding-block:var(--s3)}
+.bar__name{font-size:.9375rem;font-weight:600;letter-spacing:-.015em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar__price{font-size:.8125rem;color:var(--ink72);font-variant-numeric:tabular-nums}
+.bar__acts{display:flex;gap:var(--s2);flex:0 0 auto}
+@media (max-width:35rem){ .bar__price{display:none} }
+
+/* ===========================================================================
+   DM4 — the authored still. Reduced motion does not stop the pass, it lands it
+   on a composed offset chosen per plate. Same rule for no-JS.
+   ======================================================================== */
+[data-pass]{transform:scale(1.12) translate3d(var(--rest,-2%),0,0)}
+.motion [data-pass]{will-change:transform}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition-duration:.001ms!important;animation-duration:.001ms!important}
+}
+</style>
+</head>
+
+<body>
+<a href="#inventory" class="skip btn btn--line">Skip to inventory</a>
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="#top">Meridian<span>Sport &amp; Exotic · Chicago</span></a>
+    <nav aria-label="Main">
+      <ul>
+        <li><a href="#inventory">Inventory</a></li>
+        <li><a href="#sell">Sell &amp; finance</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#visit">Visit</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn--warm btn--sm" href="#visit">Book a viewing</a>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- == LEAD PLATE ======================================================== -->
+<section class="plate plate--hero">
+  <img src="assets/night/car-01-wide.webp" width="1230" height="527"
+       data-pass="14" style="--rest:-3%" fetchpriority="high"
+       alt="Ferrari 575 Maranello in red, cropped close on the front three-quarter." />
+  <div class="plate__copy">
+    <div class="wrap">
+      <p class="kicker">In stock · Chicago</p>
+      <h1 class="h-xl" style="margin-top:var(--s4)">Ferrari 575 Maranello</h1>
+      <div class="plate__row">
+        <span class="plate__price num">$451,134</span>
+        <span style="color:var(--ink58)">2004 · <span class="num">34,294</span> mi · Manual</span>
+        <a class="btn btn--warm" href="#visit">Enquire</a>
+        <a class="btn btn--line" href="#inventory">See all eight</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- == INVENTORY — runs of unequal scale, interrupted three times ========= -->
+<section class="inv wrap" id="inventory" aria-labelledby="inv-h">
+  <div class="inv__head">
+    <div>
+      <p class="kicker">Inventory</p>
+      <h2 class="h-lg" id="inv-h" style="margin-top:var(--s3)">Eight cars, all in one building.</h2>
+      <ul class="chips" role="group" aria-label="Filter inventory">
+        <li><button class="chip" type="button" aria-pressed="true" data-max="99999999">All</button></li>
+        <li><button class="chip" type="button" aria-pressed="false" data-max="100000">Under $100k</button></li>
+        <li><button class="chip" type="button" aria-pressed="false" data-max="250000">Under $250k</button></li>
+        <li><button class="chip" type="button" aria-pressed="false" data-max="500000">Under $500k</button></li>
+        <li><button class="chip" type="button" aria-pressed="false" data-max="99999999" data-make="Ferrari">Ferrari</button></li>
+      </ul>
+    </div>
+    <p class="kicker" id="inv-count"><span class="num">8</span> shown</p>
+  </div>
+
+  <!-- Grid one. Identical cards so specs compare down a column; the most
+       valuable car takes two columns so the row is not four identical beats. -->
+  <div class="grid">
+    <article class="card card--feat" data-price="3495000" data-make="Ferrari">
+      <div class="card__media">
+        <img src="assets/night/car-03-tall.webp" width="630" height="788" loading="lazy"
+             alt="Ferrari 365 GTS/4 in red, seen along the front wing and wheel." />
+        <span class="card__tag">Concours</span>
+      </div>
+      <div class="card__body">
+        <div class="card__top">
+          <h3 class="card__name"><a href="#visit">1971 Ferrari 365 GTS/4</a></h3>
+          <span class="card__price">$3,495,000</span>
+        </div>
+        <dl class="card__specs">
+          <div><dt>Mileage</dt><dd>39,067 mi</dd></div>
+          <div><dt>Gearbox</dt><dd>5-speed manual</dd></div>
+          <div><dt>Engine</dt><dd>4.4L V12</dd></div>
+          <div><dt>Exterior</dt><dd>Rosso Corsa</dd></div>
+        </dl>
+        <p class="card__stock">Stock MM-1971-04</p>
+        <div class="card__acts">
+          <a class="btn btn--warm btn--sm" href="#visit">Enquire</a>
+          <a class="btn btn--line btn--sm" href="#visit">Reserve</a>
+        </div>
+      </div>
+    </article>
+    <article class="card" data-price="304990" data-make="Nissan">
+      <div class="card__media">
+        <img src="assets/night/car-02-card.webp" width="990" height="743" loading="lazy"
+             alt="Nissan GT-R R34 in white, cropped on the front wheel." />
+        <span class="card__tag">Import</span>
+      </div>
+      <div class="card__body">
+        <div class="card__top">
+          <h3 class="card__name"><a href="#visit">2000 Nissan GT-R R34</a></h3>
+          <span class="card__price">$304,990</span>
+        </div>
+        <dl class="card__specs">
+          <div><dt>Mileage</dt><dd>41,863 mi</dd></div>
+          <div><dt>Gearbox</dt><dd>6-speed manual</dd></div>
+          <div><dt>Engine</dt><dd>2.6L twin-turbo I6</dd></div>
+          <div><dt>Exterior</dt><dd>Pearl White</dd></div>
+        </dl>
+        <p class="card__stock">Stock MM-2000-11</p>
+        <div class="card__acts">
+          <a class="btn btn--warm btn--sm" href="#visit">Enquire</a>
+          <a class="btn btn--line btn--sm" href="#visit">Reserve</a>
+        </div>
+      </div>
+    </article>
+    <article class="card" data-price="298969" data-make="Ferrari">
+      <div class="card__media">
+        <img src="assets/night/car-04-card.webp" width="990" height="743" loading="lazy"
+             alt="Ferrari Roma Spider in white, cropped on the front wing." />
+        <span class="card__tag card__tag--new">New arrival</span>
+      </div>
+      <div class="card__body">
+        <div class="card__top">
+          <h3 class="card__name"><a href="#visit">2025 Ferrari Roma Spider</a></h3>
+          <span class="card__price">$298,969</span>
+        </div>
+        <dl class="card__specs">
+          <div><dt>Mileage</dt><dd>1,301 mi</dd></div>
+          <div><dt>Gearbox</dt><dd>8-speed DCT</dd></div>
+          <div><dt>Engine</dt><dd>3.9L twin-turbo V8</dd></div>
+          <div><dt>Exterior</dt><dd>Bianco Cervino</dd></div>
+        </dl>
+        <p class="card__stock">Stock MM-2025-02</p>
+        <div class="card__acts">
+          <a class="btn btn--warm btn--sm" href="#visit">Enquire</a>
+          <a class="btn btn--line btn--sm" href="#visit">Reserve</a>
+        </div>
+      </div>
+    </article>
+    <article class="card" data-price="249990" data-make="Land Rover">
+      <div class="card__media">
+        <img src="assets/night/car-05-card.webp" width="990" height="743" loading="lazy"
+             alt="Range Rover SE in white, cropped across the front." />
+        <span class="card__tag">Overfinch</span>
+      </div>
+      <div class="card__body">
+        <div class="card__top">
+          <h3 class="card__name"><a href="#visit">2025 Range Rover SE</a></h3>
+          <span class="card__price">$249,990</span>
+        </div>
+        <dl class="card__specs">
+          <div><dt>Mileage</dt><dd>3,000 mi</dd></div>
+          <div><dt>Gearbox</dt><dd>8-speed automatic</dd></div>
+          <div><dt>Engine</dt><dd>3.0L I6 MHEV</dd></div>
+          <div><dt>Exterior</dt><dd>Fuji White</dd></div>
+        </dl>
+        <p class="card__stock">Stock MM-2025-07</p>
+        <div class="card__acts">
+          <a class="btn btn--warm btn--sm" href="#visit">Enquire</a>
+          <a class="btn btn--line btn--sm" href="#visit">Reserve</a>
+        </div>
+      </div>
+    </article>
+    <article class="card" data-price="149996" data-make="Mercedes-Benz">
+      <div class="card__media">
+        <img src="assets/night/car-08-card.webp" width="990" height="743" loading="lazy"
+             alt="Mercedes-Benz S 580 in white, cropped on the headlight and wheel." />
+        <span class="card__tag">4MATIC</span>
+      </div>
+      <div class="card__body">
+        <div class="card__top">
+          <h3 class="card__name"><a href="#visit">2024 Mercedes-Benz S 580</a></h3>
+          <span class="card__price">$149,996</span>
+        </div>
+        <dl class="card__specs">
+          <div><dt>Mileage</dt><dd>14,443 mi</dd></div>
+          <div><dt>Gearbox</dt><dd>9-speed automatic</dd></div>
+          <div><dt>Engine</dt><dd>4.0L V8</dd></div>
+          <div><dt>Exterior</dt><dd>Polar White</dd></div>
+        </dl>
+        <p class="card__stock">Stock MM-2024-19</p>
+        <div class="card__acts">
+          <a class="btn btn--warm btn--sm" href="#visit">Enquire</a>
+          <a class="btn btn--line btn--sm" href="#visit">Reserve</a>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- The interruption (vault/ruadh-com). Imagery only — no copy sits on a moving
+     layer, which removes the per-frame contrast problem at the source. -->
+<section class="plate plate--cut" aria-hidden="true">
+  <img src="assets/night/car-04-wide.webp" width="1230" height="527" data-pass="18"
+       style="--rest:2%" loading="lazy" alt="" />
+</section>
+
+<section class="wrap" style="padding-bottom:var(--s7)">
+  <div class="grid">
+    <article class="card" data-price="114995" data-make="Ford">
+      <div class="card__media">
+        <img src="assets/night/car-07-card.webp" width="990" height="743" loading="lazy"
+             alt="Ford F-150 Raptor R in blue, cropped on the grille." />
+        <span class="card__tag">Supercharged</span>
+      </div>
+      <div class="card__body">
+        <div class="card__top">
+          <h3 class="card__name"><a href="#visit">2024 Ford F-150 Raptor R</a></h3>
+          <span class="card__price">$114,995</span>
+        </div>
+        <dl class="card__specs">
+          <div><dt>Mileage</dt><dd>12,738 mi</dd></div>
+          <div><dt>Gearbox</dt><dd>10-speed automatic</dd></div>
+          <div><dt>Engine</dt><dd>5.2L supercharged V8</dd></div>
+          <div><dt>Exterior</dt><dd>Antimatter Blue</dd></div>
+        </dl>
+        <p class="card__stock">Stock MM-2024-31</p>
+        <div class="card__acts">
+          <a class="btn btn--warm btn--sm" href="#visit">Enquire</a>
+          <a class="btn btn--line btn--sm" href="#visit">Reserve</a>
+        </div>
+      </div>
+    </article>
+    <article class="card" data-price="78990" data-make="Mercedes-Benz">
+      <div class="card__media">
+        <img src="assets/night/car-06-card.webp" width="990" height="743" loading="lazy"
+             alt="Mercedes-AMG CLE 53 in black, cropped on the front wing." />
+        <span class="card__tag card__tag--new">New arrival</span>
+      </div>
+      <div class="card__body">
+        <div class="card__top">
+          <h3 class="card__name"><a href="#visit">2026 Mercedes-AMG CLE 53</a></h3>
+          <span class="card__price">$78,990</span>
+        </div>
+        <dl class="card__specs">
+          <div><dt>Mileage</dt><dd>1,306 mi</dd></div>
+          <div><dt>Gearbox</dt><dd>9-speed automatic</dd></div>
+          <div><dt>Engine</dt><dd>3.0L I6 turbo</dd></div>
+          <div><dt>Exterior</dt><dd>Obsidian Black</dd></div>
+        </dl>
+        <p class="card__stock">Stock MM-2026-01</p>
+        <div class="card__acts">
+          <a class="btn btn--warm btn--sm" href="#visit">Enquire</a>
+          <a class="btn btn--line btn--sm" href="#visit">Reserve</a>
+        </div>
+      </div>
+    </article>
+    <article class="card" data-price="451134" data-make="Ferrari">
+      <div class="card__media">
+        <img src="assets/night/car-01-card.webp" width="990" height="743" loading="lazy"
+             alt="Ferrari 575 Maranello in red, cropped on the front wing." />
+        <span class="card__tag">Manual</span>
+      </div>
+      <div class="card__body">
+        <div class="card__top">
+          <h3 class="card__name"><a href="#visit">2004 Ferrari 575 Maranello</a></h3>
+          <span class="card__price">$451,134</span>
+        </div>
+        <dl class="card__specs">
+          <div><dt>Mileage</dt><dd>34,294 mi</dd></div>
+          <div><dt>Gearbox</dt><dd>6-speed manual</dd></div>
+          <div><dt>Engine</dt><dd>5.7L V12</dd></div>
+          <div><dt>Exterior</dt><dd>Rosso Corsa</dd></div>
+        </dl>
+        <p class="card__stock">Stock MM-2004-06</p>
+        <div class="card__acts">
+          <a class="btn btn--warm btn--sm" href="#visit">Enquire</a>
+          <a class="btn btn--line btn--sm" href="#visit">Reserve</a>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
+
+<!-- == SELL & FINANCE — a reading zone, so nothing behind it moves ======== -->
+<!-- == SELL & FINANCE ====================================================
+     Dominant: the monthly payment, by scale and by being the one number the
+     visitor came to find out. The consignment steps drop to a spec plate so
+     they support rather than compete (C2). Reading zone — nothing moves. -->
+<section class="band band--sell wrap" id="sell" aria-labelledby="sell-h">
+  <div class="band__grid">
+    <div>
+      <p class="kicker">Sell &amp; finance</p>
+      <h2 class="h-lg" id="sell-h" style="margin-top:var(--s4)">
+        Sell it, or <em>fund</em> the next one.</h2>
+      <p class="measure" style="margin-top:var(--s5)">
+        Outright purchase, consignment, or finance on a car you have already
+        found. Send the details and you get real numbers the same week.
+      </p>
+      <dl class="plate-steps">
+        <dt>01</dt><dd><b>Send the details</b>
+          <span>Mileage, history, a few photographs. Ten minutes, no appraisal fee.</span></dd>
+        <dt>02</dt><dd><b>Offer in writing</b>
+          <span>A cash figure and a consignment estimate within one business day.</span></dd>
+        <dt>03</dt><dd><b>We come to the car</b>
+          <span>We visit at your address, or arrange enclosed transport at our cost.</span></dd>
+        <dt>04</dt><dd><b>Finance, if you want it</b>
+          <span>From 5.49% to 144 months, subject to credit.</span></dd>
+      </dl>
+    </div>
+
+    <form class="calc" id="calc" aria-labelledby="calc-h">
+      <div class="calc__out">
+        <span id="calc-h">Estimated monthly payment</span>
+        <b id="calc-pay">$2,431</b>
+        <i id="calc-sum">$149,996 &middot; 20% down &middot; 60 months &middot; 5.49% APR</i>
+      </div>
+      <div class="calc__row">
+        <label for="c-price">Vehicle price <output id="o-price" for="c-price">$149,996</output></label>
+        <input type="range" id="c-price" min="50000" max="500000" step="1000" value="149996" />
+      </div>
+      <div class="calc__row">
+        <label for="c-down">Deposit <output id="o-down" for="c-down">20%</output></label>
+        <input type="range" id="c-down" min="0" max="50" step="1" value="20" />
+      </div>
+      <div class="calc__row">
+        <label for="c-term">Term <output id="o-term" for="c-term">60 months</output></label>
+        <input type="range" id="c-term" min="24" max="144" step="12" value="60" />
+      </div>
+      <div class="calc__row">
+        <label for="c-apr">APR <output id="o-apr" for="c-apr">5.49%</output></label>
+        <input type="range" id="c-apr" min="349" max="1200" step="10" value="549" />
+      </div>
+      <p class="calc__note">Illustration only. Subject to credit approval; taxes,
+        title and registration are not included.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:var(--s3);margin-top:var(--s5)">
+        <a class="btn btn--warm" href="#visit">Apply for finance</a>
+        <a class="btn btn--line" href="#visit">Value my car</a>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- == ABOUT ==============================================================
+     Dominant: the figures at display scale on hairlines — the facts ARE the
+     argument, which is vault/ciridae-com's recorded decision (numbered
+     structures, fine rules). The photograph bleeds to one edge as the
+     counterweight instead of sitting inset on both sides (C9). -->
+<section class="band band--about" id="about" aria-labelledby="about-h">
+  <div class="wrap">
+    <div class="band__grid">
+      <div>
+        <p class="kicker">About</p>
+        <h2 class="h-lg" id="about-h" style="margin-top:var(--s4);max-width:14ch">
+          Sixteen years on the <em>same</em> corner.</h2>
+      </div>
+      <p class="measure">
+        Meridian has bought and sold sport and exotic cars from one building on
+        the north side since 2009. We hold eight to twelve at a time, we
+        photograph every one ourselves, and we would rather lose a sale than
+        talk someone into the wrong car.
+      </p>
+    </div>
+    <div class="figures">
+      <div class="fig"><b>2,400+</b><span>cars sold</span></div>
+      <div class="fig"><b>21</b><span>median days to sale</span></div>
+      <div class="fig"><b>8&ndash;12</b><span>held at a time</span></div>
+      <div class="fig"><b>2009</b><span>on this corner</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- the counterweight: one photograph, committed to a full bleed -->
+<section class="plate plate--cut" aria-hidden="true">
+  <img src="assets/night/car-06-wide.webp" width="1230" height="527" data-pass="14"
+       style="--rest:-3%" loading="lazy" alt="" />
+</section>
+
+<section class="band band--visit wrap" id="visit" aria-labelledby="visit-h">
+  <div class="band__grid">
+    <div>
+      <p class="kicker">Visit</p>
+      <h2 class="h-md" id="visit-h" style="margin-top:var(--s3)">1400 N Elston Ave, Chicago</h2>
+      <dl class="hours">
+        <dt>Sales</dt><dd>(312) 555-0148</dd>
+        <dt>Service</dt><dd>(312) 555-0162</dd>
+        <dt>Mon–Fri</dt><dd>9:00 – 19:00</dd>
+        <dt>Saturday</dt><dd>10:00 – 17:00</dd>
+        <dt>Sunday</dt><dd>Closed</dd>
+      </dl>
+      <div style="display:flex;flex-wrap:wrap;gap:var(--s3);margin-top:var(--s6)">
+        <a class="btn btn--warm" href="mailto:hello@example.com">Book a viewing</a>
+        <a class="btn btn--line" href="tel:+13125550148">Call the floor</a>
+      </div>
+    </div>
+    <div class="map">
+      <iframe title="Map of 1400 N Elston Ave, Chicago" loading="lazy"
+        src="https://www.openstreetmap.org/export/embed.html?bbox=-87.685%2C41.897%2C-87.643%2C41.918&amp;layer=mapnik&amp;marker=41.9075%2C-87.6636"></iframe>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="fgrid">
+      <div><a class="brand" href="#top">Meridian<span>Sport &amp; Exotic · Chicago</span></a>
+        <p style="color:var(--ink58);font-size:.9375rem;margin-top:var(--s4)">
+          1400 N Elston Ave, Chicago, IL 60642</p></div>
+      <div><p class="kicker" style="margin-bottom:var(--s3)">Inventory</p>
+        <a href="#inventory">All cars</a><a href="#inventory">Recently sold</a><a href="#inventory">Arriving</a></div>
+      <div><p class="kicker" style="margin-bottom:var(--s3)">Services</p>
+        <a href="#sell">Sell or consign</a><a href="#sell">Finance</a><a href="#sell">Transport</a></div>
+      <div><p class="kicker" style="margin-bottom:var(--s3)">Company</p>
+        <a href="#about">About</a><a href="#visit">Visit</a><a href="#">Careers</a></div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--s3);
+                margin-top:var(--s8);padding-top:var(--s5);border-top:1px solid var(--rule)">
+      <p class="kicker">Design test — not a real dealership</p>
+      <p class="kicker">© <span class="num">2026</span> Meridian Motor Group</p>
+    </div>
+  </div>
+</footer>
+
+<div class="bar" role="region" aria-label="Enquire about the car in view">
+  <div class="wrap bar__in">
+    <div style="min-width:0">
+      <p class="bar__name" id="bar-name">Ferrari 575 Maranello</p>
+      <p class="bar__price num" id="bar-price">$451,134 · 34,294 mi</p>
+    </div>
+    <div class="bar__acts">
+      <a class="btn btn--line btn--sm" href="tel:+13125550148">Call</a>
+      <a class="btn btn--warm btn--sm" href="#visit">Enquire</a>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var cars=[].slice.call(document.querySelectorAll('.card'));
+  var chips=[].slice.call(document.querySelectorAll('.chip'));
+  var count=document.getElementById('inv-count');
+
+  /* find within a budget */
+  chips.forEach(function(c){
+    c.addEventListener('click',function(){
+      chips.forEach(function(o){o.setAttribute('aria-pressed','false');});
+      c.setAttribute('aria-pressed','true');
+      var max=+c.dataset.max, make=c.dataset.make||null, n=0;
+      cars.forEach(function(car){
+        var ok=(+car.dataset.price<=max)&&(!make||car.dataset.make===make);
+        car.hidden=!ok; if(ok)n++;
+      });
+      count.innerHTML='<span class="num">'+n+'</span> shown';
+    });
+  });
+
+  /* the enquiry bar follows the car in view */
+  var bn=document.getElementById('bar-name'), bp=document.getElementById('bar-price');
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(!e.isIntersecting||e.target.hidden) return;
+        var n=e.target.querySelector('.card__name'), p=e.target.querySelector('.card__price'),
+            f=e.target.querySelector('.card__specs dd');
+        if(n&&p){ bn.textContent=n.textContent.trim();
+          bp.textContent=p.textContent.trim()+(f?' · '+f.textContent.trim():''); }
+      });
+    },{rootMargin:'-45% 0px -45% 0px'});
+    cars.forEach(function(c){io.observe(c);});
+  }
+
+  /* The finance calculator. It is the sell band's dominant, so it has to be
+     real — a decorative one would be a lie about the only number the visitor
+     came for. Standard amortisation; zero-APR handled separately or it divides
+     by zero. This is a reading/interaction zone, so nothing here moves (DM9). */
+  var cal=document.getElementById('calc');
+  if(cal){
+    var $=function(i){return document.getElementById(i);};
+    var money=function(n){return '$'+Math.round(n).toLocaleString('en-US');};
+    var calc=function(){
+      var price=+$('c-price').value, down=+$('c-down').value,
+          term=+$('c-term').value, apr=+$('c-apr').value/100;
+      var principal=price*(1-down/100), r=apr/100/12;
+      var pay=r===0 ? principal/term
+                    : principal*r/(1-Math.pow(1+r,-term));
+      $('o-price').textContent=money(price);
+      $('o-down').textContent=down+'%';
+      $('o-term').textContent=term+' months';
+      $('o-apr').textContent=apr.toFixed(2)+'%';
+      $('calc-pay').textContent=money(pay);
+      $('calc-sum').textContent=money(price)+' · '+down+'% down · '+
+        term+' months · '+apr.toFixed(2)+'% APR';
+    };
+    ['c-price','c-down','c-term','c-apr'].forEach(function(i){
+      $(i).addEventListener('input',calc);
+    });
+    calc();
+    cal.addEventListener('submit',function(e){e.preventDefault();});
+  }
+
+  /* DM10 — mobile is authored: the pass does not exist on a coarse pointer.
+     DM4 — with motion off, every plate stays on its authored --rest offset. */
+  var coarse=matchMedia('(pointer: coarse)').matches;
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches||coarse) return;
+  document.documentElement.classList.add('motion');
+
+  /* THE ONE DEPTH IDEA (DM6) — the pass. Subject: the car, moving past the
+     viewer. It runs only on imagery-only plates, never behind copy (DM9). */
+  var passes=[].slice.call(document.querySelectorAll('[data-pass]')).map(function(img){
+    return {img:img,host:img.parentElement,amp:parseFloat(img.dataset.pass)||12,
+            rest:parseFloat(img.style.getPropertyValue('--rest'))||0};
+  });
+  var ticking=false;
+  function pass(){
+    var vh=innerHeight;
+    passes.forEach(function(o){
+      var r=o.host.getBoundingClientRect();
+      if(r.bottom<0||r.top>vh) return;
+      var p=(r.top+r.height/2-vh/2)/vh;
+      o.img.style.transform='scale(1.12) translate3d('+
+        (o.rest + p*-o.amp/1.12).toFixed(2)+'%,0,0)';
+    });
+    ticking=false;
+  }
+  addEventListener('scroll',function(){if(!ticking){ticking=true;requestAnimationFrame(pass);}},{passive:true});
+  addEventListener('resize',pass,{passive:true});
+  pass();
+})();
+</script>
+</body>
+</html>

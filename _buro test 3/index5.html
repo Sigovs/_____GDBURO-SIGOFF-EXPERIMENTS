@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Meridian Motor Group — Sport &amp; Exotic Inventory</title>
+<meta name="description" content="Curated sport and exotic inventory, consignment and acquisition. A design test." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+/* ===========================================================================
+   A DEALERSHIP — design test.
+
+   Design Read
+     Reading this as a sport-and-exotic dealer site for buyers comparing a
+     six-figure purchase, leaning auction-catalog editorial.
+     Dialect: auction-editorial.
+
+   Why the dialect genuinely fits this brief rather than being reached for:
+   the content IS a record. Year, make, model, price, mileage, VIN, stock
+   number — that is metadata as the primary content, which is what P3 exists
+   for, and it is how this buyer actually reads a listing.
+
+   DIALECT YIELD, stated: color-taste D1 says build dark first. Set aside under
+   its own `yields when:` — "the content needs a light reading surface". Every
+   photograph here is a white studio sweep. On a dark ground each car becomes a
+   glaring rectangle floating in a void; on a bone ground the cars sit IN the
+   page. The off-black / off-white rule outlives the direction, so this is bone
+   and near-black, never #fff and never #000.
+
+   Invariants held:
+     typography I5  every figure column is tabular
+     color I1       AA measured on the light ground, including the accent
+     spacing I1/I2  one 4px scale, internal gaps smaller than external
+     anti-patterns  no card grid for the sake of it — the inventory is a record
+                    with hairlines; no gradient CTAs; no decorative shadows
+   ======================================================================== */
+:root{
+  --space-1:.25rem; --space-2:.5rem;  --space-3:.75rem; --space-4:1rem;
+  --space-5:1.5rem; --space-6:2rem;   --space-7:3rem;   --space-8:4rem;
+  --space-9:6rem;   --space-10:8rem;  --space-11:12rem;
+
+  --text-xs:.6875rem;
+  --text-sm:clamp(.8125rem,.8vw + .7rem,.9375rem);
+  --text-body:clamp(1rem,.35vw + .95rem,1.0625rem);
+  --text-lead:clamp(1.125rem,.9vw + 1rem,1.5rem);
+  --text-h3:clamp(1.25rem,1.2vw + 1rem,1.6rem);
+  --text-h2:clamp(1.75rem,2.6vw + 1.1rem,3rem);
+  --text-display:clamp(2.5rem,5.5vw + 1rem,5rem);
+
+  /* bone ground, near-black ink — never #fff, never #000 */
+  --bg:#f4f2ee;
+  --bg-raised:#eae7e1;
+  --ink:#14151a;
+  /* Measured on the bone ground, not carried over from the dark pages. A light
+     surface is less forgiving: .52 ink gave 3.57:1 on an 11px plate key and
+     .42 gave 2.67:1 on a form border, which is a control boundary and needs 3. */
+  --ink-70:rgba(20,21,26,.70);
+  --ink-52:rgba(20,21,26,.66);
+  --rule:rgba(20,21,26,.16);
+  --rule-strong:rgba(20,21,26,.55);
+  /* one accent, three named roles: primary action, active filter, focus ring.
+     Oxblood — a material, not a hue name (P7). Under ~5% of pixels. */
+  --accent:#6d1f24;
+  --accent-ink:#f4f2ee;
+
+  --dur-1:.15s; --dur-2:.25s; --dur-3:.4s;
+  --ease-out:cubic-bezier(.22,1,.36,1);
+  --gutter:clamp(1.25rem,4vw,4.5rem);
+  --maxw:96rem;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+html,body{overflow-x:clip}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Inter Tight",system-ui,sans-serif;font-size:var(--text-body);
+  line-height:1.6;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%;height:auto}
+.wrap{max-width:var(--maxw);margin-inline:auto;padding-inline:var(--gutter)}
+.label{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:var(--text-xs);
+  text-transform:uppercase;letter-spacing:.12em;font-weight:500;line-height:1.2;
+  color:var(--ink-70);margin:0}
+.num{font-variant-numeric:tabular-nums}
+.h2{font-size:var(--text-h2);font-weight:600;letter-spacing:-.025em;line-height:1.03;
+  margin:0;text-wrap:balance}
+.measure{max-width:60ch}
+:where(a,button,input,select,[tabindex]):focus-visible{
+  outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+.skip{position:absolute;left:-9999px;top:var(--space-3);z-index:99}
+.skip:focus{left:var(--gutter)}
+section{scroll-margin-top:6rem}
+
+/* buttons: solid accent or ink-on-transparent with a rule. No gradients,
+   no shadows (anti-patterns D2, D3). One primary per view (D6). */
+.btn{display:inline-flex;align-items:center;gap:var(--space-2);
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:var(--text-xs);
+  text-transform:uppercase;letter-spacing:.12em;font-weight:500;
+  padding:var(--space-3) var(--space-5);text-decoration:none;border:1px solid transparent;
+  transition:background var(--dur-2) var(--ease-out),color var(--dur-2) var(--ease-out),
+             border-color var(--dur-2) var(--ease-out);cursor:pointer}
+.btn-primary{background:var(--accent);color:var(--accent-ink)}
+.btn-primary:hover{background:#571a1e}
+.btn-ghost{background:none;color:var(--ink);border-color:var(--rule-strong)}
+.btn-ghost:hover{border-color:var(--ink)}
+
+/* == top bar + nav ======================================================= */
+.util{border-bottom:1px solid var(--rule);background:var(--bg-raised)}
+.util .wrap{display:flex;flex-wrap:wrap;gap:var(--space-3) var(--space-6);
+  justify-content:space-between;padding-block:var(--space-2)}
+.nav{position:sticky;top:0;z-index:60;background:var(--bg);
+  border-bottom:1px solid var(--rule)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;
+  gap:var(--space-5);padding-block:var(--space-4)}
+.brand{font-weight:600;letter-spacing:-.02em;font-size:1.0625rem;text-decoration:none;color:var(--ink)}
+.brand span{display:block;font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:.5625rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-52);
+  font-weight:500;margin-block-start:2px}
+.nav ul{display:flex;gap:var(--space-6);list-style:none;margin:0;padding:0}
+.nav a.navlink{text-decoration:none;color:var(--ink-70);
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:var(--text-xs);
+  text-transform:uppercase;letter-spacing:.12em;font-weight:500;
+  padding-block:var(--space-2);border-bottom:1px solid transparent;
+  transition:color var(--dur-2) var(--ease-out),border-color var(--dur-2) var(--ease-out)}
+.nav a.navlink:hover{color:var(--ink);border-color:var(--rule-strong)}
+.nav-toggle{display:none}
+@media (max-width:63.99rem){
+  .nav ul{display:none}
+  .nav-toggle{display:inline-flex}
+  .nav.open ul{display:flex;flex-direction:column;gap:var(--space-4);
+    position:absolute;left:0;right:0;top:100%;background:var(--bg);
+    border-bottom:1px solid var(--rule);padding:var(--space-5) var(--gutter)}
+}
+
+/* == hero ================================================================ */
+.hero{padding-block:var(--space-8) var(--space-9);border-bottom:1px solid var(--rule)}
+.hero-grid{display:grid;gap:var(--space-7)}
+.hero h1{font-size:var(--text-display);font-weight:600;letter-spacing:-.035em;
+  line-height:.96;margin:var(--space-4) 0 0;max-width:15ch;text-wrap:balance}
+.hero figure{margin:0;background:var(--bg-raised);aspect-ratio:3/2;overflow:hidden}
+.hero figure img{width:100%;height:100%;object-fit:cover}
+.hero-facts{display:flex;flex-wrap:wrap;gap:var(--space-3) var(--space-7);
+  margin-block-start:var(--space-6);padding-block-start:var(--space-5);
+  border-top:1px solid var(--rule)}
+@media (min-width:64rem){ .hero-grid{grid-template-columns:5fr 7fr;align-items:center} }
+
+/* == search strip ======================================================== */
+.search{background:var(--bg-raised);border-bottom:1px solid var(--rule)}
+.search form{display:grid;gap:var(--space-3);padding-block:var(--space-5)}
+.field{display:grid;gap:var(--space-2)}
+.field select,.field input{
+  font:inherit;font-size:var(--text-sm);padding:var(--space-3);
+  background:var(--bg);color:var(--ink);border:1px solid var(--rule-strong);border-radius:0}
+@media (min-width:48rem){ .search form{grid-template-columns:repeat(4,1fr) auto;align-items:end} }
+
+/* == inventory: a record, not a card grid ================================ */
+.inv{display:grid;gap:var(--space-8)}
+@media (min-width:48rem){ .inv{grid-template-columns:repeat(2,1fr);gap:var(--space-8) var(--space-7)} }
+@media (min-width:75rem){ .inv{grid-template-columns:repeat(3,1fr)} }
+.car{display:grid;gap:var(--space-4);text-decoration:none;color:inherit}
+.car figure{margin:0;background:var(--bg-raised);aspect-ratio:3/2;overflow:hidden}
+.car figure img{width:100%;height:100%;object-fit:cover;
+  transition:transform var(--dur-3) var(--ease-out)}
+.car:hover figure img{transform:scale(1.02)}      /* 2%, nothing more (motion D2) */
+.car h3{font-size:var(--text-h3);font-weight:600;letter-spacing:-.02em;margin:0;line-height:1.15}
+.plate{display:grid;grid-template-columns:auto 1fr;column-gap:var(--space-5);row-gap:0;margin:0}
+.plate dt{padding-block:var(--space-2);border-top:1px solid var(--rule);
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:var(--text-xs);
+  text-transform:uppercase;letter-spacing:.12em;color:var(--ink-52)}
+.plate dd{margin:0;padding-block:var(--space-2);border-top:1px solid var(--rule);
+  font-size:var(--text-sm);font-variant-numeric:tabular-nums;text-align:right}
+.price{font-size:var(--text-h3);font-weight:600;font-variant-numeric:tabular-nums;
+  letter-spacing:-.02em}
+
+/* == steps =============================================================== */
+.steps{display:grid;gap:var(--space-6);counter-reset:step}
+@media (min-width:48rem){ .steps{grid-template-columns:repeat(4,1fr);gap:var(--space-6)} }
+.step{border-top:1px solid var(--rule-strong);padding-block-start:var(--space-4)}
+.step .n{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:var(--text-xs);
+  letter-spacing:.14em;color:var(--accent)}
+.step h3{font-size:var(--text-h3);font-weight:600;letter-spacing:-.02em;
+  margin:var(--space-3) 0 var(--space-3);line-height:1.15}
+.step p{margin:0;color:var(--ink-70);font-size:var(--text-sm)}
+
+/* == instagram =========================================================== */
+.ig{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--space-2)}
+@media (min-width:48rem){ .ig{grid-template-columns:repeat(4,1fr)} }
+.ig a{display:block;position:relative;aspect-ratio:1;overflow:hidden;background:var(--bg-raised)}
+.ig img{width:100%;height:100%;object-fit:cover;transition:transform var(--dur-3) var(--ease-out)}
+.ig a:hover img{transform:scale(1.03)}
+
+/* == map / visit ========================================================= */
+.visit{display:grid;gap:var(--space-7)}
+@media (min-width:64rem){ .visit{grid-template-columns:5fr 7fr;align-items:start} }
+.map{border:1px solid var(--rule);background:var(--bg-raised);aspect-ratio:16/10;overflow:hidden}
+.map iframe{width:100%;height:100%;border:0;display:block;filter:grayscale(1) contrast(.92)}
+
+footer{border-top:1px solid var(--rule);background:var(--bg-raised);
+  padding-block:var(--space-8) var(--space-6);margin-block-start:var(--space-9)}
+.fgrid{display:grid;gap:var(--space-6)}
+@media (min-width:48rem){ .fgrid{grid-template-columns:2fr 1fr 1fr 1fr} }
+footer a{color:var(--ink-70);text-decoration:none;display:block;padding-block:var(--space-1)}
+footer a:hover{color:var(--ink)}
+
+.sec{padding-block:var(--space-9)}
+.sec-head{display:flex;flex-wrap:wrap;gap:var(--space-3) var(--space-6);
+  align-items:baseline;justify-content:space-between;margin-block-end:var(--space-7)}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition-duration:.001ms!important;animation-duration:.001ms!important}
+}
+</style>
+</head>
+
+<body>
+<a href="#inventory" class="skip label">Skip to inventory</a>
+
+<div class="util">
+  <div class="wrap">
+    <p class="label">Sales <span class="num">(312) 555‑0148</span> &nbsp;·&nbsp; Service <span class="num">(312) 555‑0162</span></p>
+    <p class="label">Mon–Fri <span class="num">9–7</span> &nbsp;·&nbsp; Sat <span class="num">10–5</span> &nbsp;·&nbsp; Sun closed</p>
+  </div>
+</div>
+
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="brand" href="#top">Meridian Motor Group<span>Sport &amp; Exotic · Chicago</span></a>
+    <nav aria-label="Main">
+      <ul>
+        <li><a class="navlink" href="#inventory">Inventory</a></li>
+        <li><a class="navlink" href="#sell">Sell your car</a></li>
+        <li><a class="navlink" href="#finance">Finance</a></li>
+        <li><a class="navlink" href="#about">About</a></li>
+        <li><a class="navlink" href="#visit">Visit</a></li>
+      </ul>
+    </nav>
+    <button class="btn btn-ghost nav-toggle" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- == HERO ============================================================== -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <p class="label">In stock now &nbsp;/&nbsp; <span class="num">08</span> vehicles</p>
+      <h1>The record comes with the car.</h1>
+      <p class="measure" style="margin-block-start:var(--space-5);color:var(--ink-70)">
+        Every vehicle photographed on our own sweep, documented to the same
+        specification sheet, and offered with its service history in the listing.
+      </p>
+      <div style="display:flex;flex-wrap:wrap;gap:var(--space-3);margin-block-start:var(--space-6)">
+        <!-- Both ghost here on purpose: these two scroll the page, they do not
+             convert. anti-patterns D6 wants one primary per view, and spending
+             the filled treatment on an anchor link devalues it further down. -->
+        <a class="btn btn-ghost" href="#inventory">View inventory</a>
+        <a class="btn btn-ghost" href="#sell">Sell or consign</a>
+      </div>
+      <div class="hero-facts">
+        <span class="label">Est. <span class="num">2009</span></span>
+        <span class="label">Sold <span class="num">2,400+</span></span>
+        <span class="label">Avg. days to sale <span class="num">21</span></span>
+      </div>
+    </div>
+    <figure>
+      <img src="assets/dealer/car-01.webp" width="1500" height="1000" fetchpriority="high"
+           alt="2004 Ferrari 575 in red, photographed on a white studio sweep." />
+    </figure>
+  </div>
+</section>
+
+<!-- == SEARCH =========================================================== -->
+<section class="search" aria-label="Search inventory">
+  <div class="wrap">
+    <form onsubmit="return false">
+      <div class="field"><label class="label" for="f-make">Make</label>
+        <select id="f-make"><option>All makes</option><option>Ferrari</option>
+        <option>Mercedes-Benz</option><option>Land Rover</option><option>Ford</option>
+        <option>Nissan</option></select></div>
+      <div class="field"><label class="label" for="f-model">Model</label>
+        <select id="f-model"><option>All models</option></select></div>
+      <div class="field"><label class="label" for="f-price">Price up to</label>
+        <select id="f-price"><option>Any</option><option>$100,000</option>
+        <option>$250,000</option><option>$500,000</option><option>$1,000,000+</option></select></div>
+      <div class="field"><label class="label" for="f-miles">Mileage up to</label>
+        <select id="f-miles"><option>Any</option><option>5,000</option>
+        <option>15,000</option><option>40,000</option></select></div>
+      <button class="btn btn-primary" type="submit">Search</button>
+    </form>
+  </div>
+</section>
+
+<!-- == INVENTORY ======================================================== -->
+<section class="sec" id="inventory">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <p class="label">Inventory</p>
+        <h2 class="h2" style="margin-block-start:var(--space-3)">Available now</h2>
+      </div>
+      <p class="label"><span class="num">08</span> of <span class="num">08</span> shown</p>
+    </div>
+
+    <div class="inv" id="inv-grid"></div>
+  </div>
+</section>
+
+<!-- == SELL YOUR CAR ==================================================== -->
+<section class="sec" id="sell" style="background:var(--bg-raised);
+        border-block:1px solid var(--rule)">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <p class="label">Sell or consign</p>
+        <h2 class="h2" style="margin-block-start:var(--space-3);max-width:18ch">
+          Four steps, and you keep the paperwork.</h2>
+      </div>
+      <a class="btn btn-primary" href="#valuation">Start a valuation</a>
+    </div>
+
+    <div class="steps">
+      <div class="step"><p class="n">01</p><h3>Send the details</h3>
+        <p>VIN, mileage, service history and a handful of photographs. Ten minutes.</p></div>
+      <div class="step"><p class="n">02</p><h3>Written offer</h3>
+        <p>A cash offer and a consignment estimate within one business day, both in writing.</p></div>
+      <div class="step"><p class="n">03</p><h3>Inspection</h3>
+        <p>We come to the car, or arrange enclosed transport at our cost.</p></div>
+      <div class="step"><p class="n">04</p><h3>Settlement</h3>
+        <p>Funds on collection for a purchase; on sale for consignment, with the ledger shared.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- == FINANCE ========================================================== -->
+<section class="sec" id="finance">
+  <div class="wrap" style="display:grid;gap:var(--space-7)">
+    <div class="sec-head" style="margin:0">
+      <div><p class="label">Finance &amp; trade</p>
+        <h2 class="h2" style="margin-block-start:var(--space-3)">Terms before paperwork.</h2></div>
+    </div>
+    <div class="steps" id="valuation">
+      <div class="step"><p class="n">Rates from</p><h3 class="num">5.49%</h3>
+        <p>Collector and exotic terms to 144 months, subject to credit.</p></div>
+      <div class="step"><p class="n">Typical deposit</p><h3 class="num">10–20%</h3>
+        <p>Lower on late-model vehicles with documented history.</p></div>
+      <div class="step"><p class="n">Trade appraisal</p><h3>Same day</h3>
+        <p>Bring the car in, or send the VIN and we will start without it.</p></div>
+      <div class="step"><p class="n">Delivery</p><h3>Nationwide</h3>
+        <p>Enclosed transport quoted at cost, insured door to door.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- == ABOUT ============================================================ -->
+<section class="sec" id="about" style="background:var(--bg-raised);
+        border-block:1px solid var(--rule)">
+  <div class="wrap" style="display:grid;gap:var(--space-7)">
+    <div style="display:grid;gap:var(--space-7)" class="visit">
+      <div>
+        <p class="label">About us</p>
+        <h2 class="h2" style="margin-block-start:var(--space-3);max-width:16ch">
+          A showroom that reads like a catalogue.</h2>
+        <p class="measure" style="margin-block-start:var(--space-5);color:var(--ink-70)">
+          Meridian has bought and sold sport and exotic cars from one building on
+          the north side since 2009. Every car is photographed on the same sweep,
+          measured against the same specification sheet, and listed with its
+          history attached rather than summarised.
+        </p>
+        <p class="measure" style="margin-block-start:var(--space-4);color:var(--ink-70)">
+          We keep a small inventory on purpose. If a car is here, someone on the
+          floor has driven it.
+        </p>
+        <dl class="plate" style="margin-block-start:var(--space-6);max-width:34rem">
+          <dt>Founded</dt>       <dd class="num">2009</dd>
+          <dt>Vehicles sold</dt> <dd class="num">2,400+</dd>
+          <dt>Marques</dt>       <dd>Ferrari · Mercedes-Benz · Porsche · Land Rover</dd>
+          <dt>Services</dt>      <dd>Sales · Consignment · Acquisition · Transport</dd>
+        </dl>
+      </div>
+      <figure style="margin:0;background:var(--bg);aspect-ratio:3/2;overflow:hidden">
+        <img src="assets/dealer/car-05.webp" width="1500" height="1000" loading="lazy"
+             alt="A Range Rover on the showroom sweep." style="width:100%;height:100%;object-fit:cover" />
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- == INSTAGRAM ======================================================== -->
+<section class="sec" aria-labelledby="ig-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><p class="label">Instagram</p>
+        <h2 class="h2" id="ig-h" style="margin-block-start:var(--space-3)">@meridianmotorgroup</h2></div>
+      <a class="btn btn-ghost" href="#" rel="noopener">Follow</a>
+    </div>
+    <div class="ig" id="ig-grid"></div>
+    <p class="label" style="margin-block-start:var(--space-4)">
+      Feed shown with inventory photography — connect the Instagram Basic Display API to go live.
+    </p>
+  </div>
+</section>
+
+<!-- == VISIT / MAP ====================================================== -->
+<section class="sec" id="visit" style="background:var(--bg-raised);
+        border-block:1px solid var(--rule)">
+  <div class="wrap visit">
+    <div>
+      <p class="label">Visit</p>
+      <h2 class="h2" style="margin-block-start:var(--space-3)">1400 N Elston Ave</h2>
+      <dl class="plate" style="margin-block-start:var(--space-6)">
+        <dt>Address</dt>  <dd>1400 N Elston Ave, Chicago, IL 60642</dd>
+        <dt>Sales</dt>    <dd class="num">(312) 555‑0148</dd>
+        <dt>Service</dt>  <dd class="num">(312) 555‑0162</dd>
+        <dt>Mon–Fri</dt>  <dd class="num">9:00 – 19:00</dd>
+        <dt>Saturday</dt> <dd class="num">10:00 – 17:00</dd>
+        <dt>Sunday</dt>   <dd>Closed</dd>
+      </dl>
+      <div style="display:flex;flex-wrap:wrap;gap:var(--space-3);margin-block-start:var(--space-6)">
+        <a class="btn btn-primary" href="#">Book an appointment</a>
+        <a class="btn btn-ghost" href="https://www.openstreetmap.org/?mlat=41.9075&amp;mlon=-87.6636#map=15/41.9075/-87.6636"
+           rel="noopener">Directions</a>
+      </div>
+    </div>
+    <div class="map">
+      <iframe title="Map of 1400 N Elston Ave, Chicago" loading="lazy"
+        src="https://www.openstreetmap.org/export/embed.html?bbox=-87.685%2C41.897%2C-87.643%2C41.918&amp;layer=mapnik&amp;marker=41.9075%2C-87.6636"></iframe>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="fgrid">
+      <div>
+        <a class="brand" href="#top" style="display:inline-block">Meridian Motor Group<span>Sport &amp; Exotic · Chicago</span></a>
+        <p class="measure" style="margin-block-start:var(--space-4);color:var(--ink-70);font-size:var(--text-sm)">
+          1400 N Elston Ave, Chicago, IL 60642
+        </p>
+      </div>
+      <div><p class="label" style="margin-block-end:var(--space-3)">Inventory</p>
+        <a href="#inventory">All vehicles</a><a href="#inventory">Recently sold</a><a href="#inventory">Arriving soon</a></div>
+      <div><p class="label" style="margin-block-end:var(--space-3)">Services</p>
+        <a href="#sell">Sell or consign</a><a href="#finance">Finance</a><a href="#finance">Transport</a></div>
+      <div><p class="label" style="margin-block-end:var(--space-3)">Company</p>
+        <a href="#about">About</a><a href="#visit">Visit</a><a href="#">Careers</a></div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--space-3);
+                margin-block-start:var(--space-8);padding-block-start:var(--space-5);
+                border-top:1px solid var(--rule)">
+      <p class="label">Design test — not a real dealership</p>
+      <p class="label">&copy; <span class="num">2026</span> Meridian Motor Group</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* Inventory is data-driven so the spec plate cannot drift between cards, but
+   it is written into the DOM immediately on parse — with scripting off the
+   grid would be empty, so a <noscript> note tells the reader where to go.
+   Real prices and mileage: these are live listings, used here as a test. */
+const CARS=[
+ {f:'car-01',t:'2004 Ferrari 575 Maranello',p:'$451,134',m:'34,294',y:'2004',b:'Ferrari',s:'MM-1041'},
+ {f:'car-02',t:'2000 Nissan GT-R R34',      p:'$304,990',m:'41,863',y:'2000',b:'Nissan',s:'MM-1042'},
+ {f:'car-03',t:'1971 Ferrari 365 GTS/4',    p:'$3,495,000',m:'39,067',y:'1971',b:'Ferrari',s:'MM-1043'},
+ {f:'car-04',t:'2025 Ferrari Roma Spider',  p:'$298,969',m:'1,301', y:'2025',b:'Ferrari',s:'MM-1044'},
+ {f:'car-05',t:'2025 Range Rover SE',       p:'$249,990',m:'3,000', y:'2025',b:'Land Rover',s:'MM-1045'},
+ {f:'car-06',t:'2026 Mercedes-AMG CLE 53',  p:'$78,990', m:'1,306', y:'2026',b:'Mercedes-Benz',s:'MM-1046'},
+ {f:'car-07',t:'2024 Ford F-150 Raptor R',  p:'$114,995',m:'12,738',y:'2024',b:'Ford',s:'MM-1047'},
+ {f:'car-08',t:'2024 Mercedes-Benz S 580',  p:'$149,996',m:'14,443',y:'2024',b:'Mercedes-Benz',s:'MM-1048'},
+];
+document.getElementById('inv-grid').innerHTML = CARS.map((c,i)=>`
+  <a class="car" href="#" aria-label="${c.t}, ${c.p}">
+    <figure><img src="assets/dealer/${c.f}.webp" width="1500" height="1000"
+      ${i>2?'loading="lazy"':''} alt="${c.t} on a white studio sweep." /></figure>
+    <h3>${c.t}</h3>
+    <p class="price">${c.p}</p>
+    <dl class="plate">
+      <dt>Year</dt>    <dd class="num">${c.y}</dd>
+      <dt>Mileage</dt> <dd class="num">${c.m} mi</dd>
+      <dt>Make</dt>    <dd>${c.b}</dd>
+      <dt>Stock</dt>   <dd class="num">${c.s}</dd>
+    </dl>
+  </a>`).join('');
+
+document.getElementById('ig-grid').innerHTML =
+  ['car-04','car-06','car-02','car-07','car-01','car-08','car-05','car-03']
+  .map(f=>`<a href="#" rel="noopener"><img src="assets/dealer/${f}-p.webp" width="900" height="1125"
+       loading="lazy" alt="Instagram post — inventory photograph." /></a>`).join('');
+
+// mobile nav
+const nav=document.getElementById('nav'), tog=document.querySelector('.nav-toggle');
+tog.addEventListener('click',()=>{
+  const open=nav.classList.toggle('open');
+  tog.setAttribute('aria-expanded',String(open));
+});
+</script>
+<noscript><p class="wrap label" style="padding-block:var(--space-6)">
+  Inventory requires JavaScript. Call <span class="num">(312) 555‑0148</span> for the current list.
+</p></noscript>
+</body>
+</html>

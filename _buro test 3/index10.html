@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>440 — one object, two authorities</title>
+<meta name="description" content="A single-screen study: a tuning fork described at once by metrology and by a collector's register, meeting at the only fact they share." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+/* ===========================================================================
+   440 — a free-topic single-screen study.
+
+   DESIGN READ
+     Reading this as a single-screen study in which two mutually hostile
+     documentary systems describe one object.
+     Dialect: auction-editorial — selected, not defaulted: the content IS
+     metadata as primary content, which is what P3 exists for.
+     Dimensionality: ABSENT. Depth would soften exactly the collision the piece
+     exists to hold; density contrast and one overlap carry it instead.
+     Vault: 4 relevant references, 2 unusable for missing notes.
+
+   THE OBJECT
+     A tuning fork. Metrology describes it in cents of deviation and a
+     temperature coefficient. A collector's register describes the same object
+     while refusing numerals altogether. Both are authorities and both are
+     right. The only fact they share is the number, so the number is the seam.
+
+   WHAT THE VAULT DECIDED
+     ciridae-com (3, in) carries serif-sans-tension and overlay-interference in
+     its tags — this seam is that pair taken literally. Its recorded weakness is
+     that repeated headline-and-explanation compositions become predictable, so
+     the seam happens ONCE.
+     rmsothebys-com (1, out) is filed for mechanical 50/50 bands, which is why
+     the seam sits at 41.8% and not at the centre.
+     thegentlewoman-co-uk (1, out) supplies air as status; its weakness — one
+     idea and then nothing develops — cannot apply where there is no "then".
+
+   PALETTE — derived by arithmetic (color-taste I5)
+     A440 raised forty octaves lands in visible light: 440 x 2^40 = 483.79 THz,
+     wavelength 619.7 nm. Converted through the CIE 1931 observer to sRGB it is
+     out of gamut and clips to #FF0000. Every step is checkable.
+
+     Then judged where it lands, which is the half of I5 that bites: the
+     spectral value fails as text on BOTH grounds — 3.21:1 on paper, 4.35:1 on
+     the field — and no single darkening passes both, because darkening it for
+     paper kills it on the field. So it carries no text at all. It is the seam
+     line and one tick, where the 3:1 graphic threshold applies and it clears
+     both grounds. The number itself is ink.
+
+   ONE SCREEN
+     100svh, no scroll, at every width. The page cannot resolve by continuing,
+     so it resolves by both halves meeting at the number and stopping.
+   ======================================================================== */
+:root{
+  --s1:.25rem; --s2:.5rem; --s3:.75rem; --s4:1rem; --s5:1.5rem;
+  --s6:2rem;   --s7:3rem;  --s8:4rem;
+
+  --paper:#e8e6e1;                    /* the register's ground              */
+  --field:#1a1a1a;                    /* the metrology ground               */
+  --ink:#141414;                      /* 14.77:1 on paper                   */
+  --ink-on-field:#e8e6e1;             /* 14.34:1 on the field               */
+  --ink70:rgba(20,20,20,.70);
+  --ink55:rgba(20,20,20,.61);   /* solved: 4.60:1 on paper */
+  --pale70:rgba(232,230,225,.70);
+  --pale55:rgba(232,230,225,.55);
+  --rule:rgba(20,20,20,.20);
+  --rule-field:rgba(232,230,225,.22);
+  --spectral:#ff0000;                 /* 619.7 nm. Graphic only, never text. */
+
+  --serif:"Source Serif 4",Georgia,serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+  --sans:Inter,system-ui,sans-serif;
+
+  --seam:41.8%;                       /* not the centre; see the vault note */
+  --pad:clamp(1rem,2.6vw,2.75rem);
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);
+  -webkit-font-smoothing:antialiased}
+p,h1,h2,dl,dd{margin:0}
+dl{display:grid}
+
+.sheet{position:relative;height:100svh;display:grid;
+  grid-template-columns:var(--seam) 1fr;overflow:hidden}
+
+/* --------------------------------------------------- the metrology half -- */
+.metro{background:var(--field);color:var(--ink-on-field);
+  padding:var(--pad);display:flex;flex-direction:column;gap:var(--s5);
+  overflow:hidden}
+.metro__top{display:flex;justify-content:space-between;gap:var(--s4);
+  align-items:baseline}
+.k{font-family:var(--mono);font-size:.625rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--pale55)}
+/* Two pairs per row above 64rem: the plate is then half as tall and the upper
+   band is free, so the figure overlaps air instead of eating the readings. */
+.metro dl{grid-template-columns:auto 1fr;column-gap:var(--s5);row-gap:0;
+  margin-top:auto;align-content:end}
+@media (min-width:64rem){
+  .metro dl{grid-template-columns:auto 1fr auto 1fr;column-gap:var(--s4)}
+  .metro dt:nth-of-type(2n){padding-left:var(--s4)}
+}
+.metro dt{font-family:var(--mono);font-size:.625rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--pale55);
+  padding:.42rem 0;border-top:1px solid var(--rule-field)}
+.metro dd{font-family:var(--mono);font-size:.75rem;font-variant-numeric:tabular-nums;
+  padding:.42rem 0;border-top:1px solid var(--rule-field);text-align:right}
+.metro__note{font-family:var(--mono);font-size:.5625rem;line-height:1.6;
+  letter-spacing:.06em;color:var(--pale55);max-width:44ch}
+
+/* ------------------------------------------------------ the register half - */
+.reg{padding:var(--pad);display:flex;flex-direction:column;
+  justify-content:space-between;overflow:hidden}
+.reg__lot{font-family:var(--serif);font-weight:400;font-style:italic;
+  font-size:clamp(.9375rem,1.1vw,1.125rem);color:var(--ink55)}
+.reg__say{max-width:34ch;margin-left:auto;margin-right:clamp(0rem,4vw,6rem)}
+.reg__say h2{font-family:var(--serif);font-weight:400;
+  font-size:clamp(1.375rem,2.3vw,2.125rem);line-height:1.16;letter-spacing:-.012em}
+.reg__say p{font-family:var(--serif);font-weight:400;
+  font-size:clamp(.9375rem,1vw,1.0625rem);line-height:1.66;color:var(--ink70);
+  margin-top:var(--s5)}
+.reg__foot{font-family:var(--serif);font-style:italic;font-size:.8125rem;
+  color:var(--ink55);max-width:38ch}
+
+/* ============================== THE SEAM =================================
+   The one committed gesture: a single number, set once, standing in both
+   systems at the same time and crossing the rule between them. The rule is the
+   spectral value — graphic, never text.
+   ====================================================================== */
+.seam{position:absolute;left:var(--seam);top:0;bottom:0;width:1px;
+  background:var(--spectral);z-index:2}
+.seam::after{content:"";position:absolute;left:-3px;width:7px;height:1px;
+  top:calc(31% - 3.2rem);background:var(--spectral)}
+.fig{position:absolute;left:var(--seam);top:31%;z-index:3;
+  transform:translate(-50%,-50%);pointer-events:none;
+  font-family:var(--serif);font-weight:600;font-variant-numeric:tabular-nums;
+  font-size:clamp(5rem,15.5vw,15rem);line-height:.8;letter-spacing:-.04em}
+/* the same glyphs, painted twice: ink over paper, pale over the field, split
+   exactly on the seam. One number, two authorities, no blend. */
+.fig span{display:block;position:relative}
+.fig span::before,.fig span::after{content:attr(data-n);position:absolute;
+  top:0;left:0;white-space:pre}
+.fig span::before{color:var(--ink-on-field);clip-path:inset(0 50% 0 0)}
+.fig span::after{color:var(--ink);clip-path:inset(0 0 0 50%)}
+.fig i{visibility:hidden;font-style:normal}
+.fig small{position:absolute;left:50%;top:calc(100% + .35rem);
+  transform:translateX(-50%);font-family:var(--mono);font-size:.5625rem;
+  letter-spacing:.24em;color:var(--ink55);white-space:nowrap}
+
+/* ------------------------------------------------ the page's own audit --- */
+.audit{position:absolute;left:0;right:0;bottom:0;z-index:4;display:flex;
+  flex-wrap:wrap;gap:.2rem var(--s5);padding:.5rem var(--pad);
+  font-family:var(--mono);font-size:.5625rem;letter-spacing:.1em;
+  text-transform:uppercase;pointer-events:none}
+.audit span{color:var(--ink55)}
+.audit span:first-child{color:var(--pale55)}
+
+@media (max-width:47.99rem){
+  /* Authored, not shrunk: stacked, the certificate needs the larger share
+     because twelve readings cannot be dropped (U7), and the register's prose is
+     short enough to hold the remainder. */
+  :root{--seam:60%}
+  .sheet{grid-template-columns:1fr;grid-template-rows:var(--seam) 1fr}
+  .seam{left:0;right:0;top:var(--seam);bottom:auto;width:auto;height:1px}
+  .seam::after{left:calc(50% - 3.2rem);top:-3px;width:1px;height:7px}
+  .fig{left:50%;top:var(--seam)}
+  .fig span::before{clip-path:inset(0 0 50% 0)}
+  .fig span::after{clip-path:inset(50% 0 0 0)}
+  /* stacked: reserve the band the figure sits in, rather than letting it land
+     on the last readings */
+  .metro{padding-bottom:calc(var(--pad) + 2.4rem)}
+  .metro dl{margin-top:var(--s4)}
+  .fig{font-size:clamp(4rem,13vh,7rem)}
+  .metro__note{display:none}
+  /* the register reserves the same band the certificate does, so the figure
+     lands in the gap between them rather than on either one */
+  .reg{padding-top:calc(var(--pad) + 2.4rem)}
+  .reg__say{margin-left:0;margin-right:0}
+  .audit{font-size:.5rem;gap:.15rem var(--s4)}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+
+<main class="sheet">
+
+  <!-- ===================================================== METROLOGY ==== -->
+  <section class="metro" aria-labelledby="m-h">
+    <div class="metro__top">
+      <p class="k" id="m-h">Certificate of calibration</p>
+      <p class="k">Sheet 1 of 1</p>
+    </div>
+
+    <dl>
+      <dt>Nominal frequency</dt><dd>440.000 Hz</dd>
+      <dt>Measured</dt><dd>439.987 Hz</dd>
+      <dt>Deviation</dt><dd>&minus;0.051 cent</dd>
+      <dt>Tolerance</dt><dd>&plusmn;0.500 cent</dd>
+      <dt>Reference temperature</dt><dd>20.0 &deg;C</dd>
+      <dt>Coefficient</dt><dd>&minus;0.11 cent / K</dd>
+      <dt>Material</dt><dd>Cr-V steel, tempered</dd>
+      <dt>Mass</dt><dd>84.6 g</dd>
+      <dt>Tine length</dt><dd>96.4 mm</dd>
+      <dt>Decay to &minus;60 dB</dt><dd>41 s</dd>
+      <dt>Method</dt><dd>Frequency counter, gated 10 s</dd>
+      <dt>Expanded uncertainty</dt><dd>0.03 cent (k = 2)</dd>
+    </dl>
+
+    <p class="metro__note">Values are illustrative and describe a study
+      specimen. The left column is written to be complete; the right column is
+      written to be sufficient. Neither is a summary of the other.</p>
+  </section>
+
+  <!-- ====================================================== REGISTER ==== -->
+  <section class="reg" aria-labelledby="r-h">
+    <p class="reg__lot">Lot forty&#8209;four</p>
+
+    <div class="reg__say">
+      <h2 id="r-h">A fork that holds the note the orchestra has agreed to
+        believe in.</h2>
+      <p>Struck once, it says the same thing it said in the maker's hand, and
+        will keep saying after the certificate opposite has expired. The steel
+        remembers; the paper only records.</p>
+      <p>Offered with its case, its felt worn through where the thumb sat.</p>
+    </div>
+
+    <p class="reg__foot">The register refuses numerals. Everything it will not
+      say is written on the other side of the line.</p>
+  </section>
+
+  <!-- ========================================================= THE SEAM = -->
+  <div class="seam" aria-hidden="true"></div>
+  <p class="fig" aria-hidden="true">
+    <span data-n="440"><i>440</i></span>
+    <small>619.7 nm &middot; 483.79 THz</small>
+  </p>
+  <h1 class="k" style="position:absolute;left:-9999px">440 — one object, two authorities</h1>
+
+  <!-- the page carries its own measurements, because the piece is about what
+       each system is willing to state -->
+  <p class="audit">
+    <span>Field 41.8% &middot; ink 14.34:1</span>
+    <span>Paper 58.2% &middot; ink 14.77:1</span>
+    <span>Seam #FF0000 &middot; 3.21:1 and 4.35:1 &middot; graphic only</span>
+    <span>Register air 84% at 1440</span>
+    <span>Study &middot; illustrative specimen</span>
+  </p>
+
+</main>
+</body>
+</html>

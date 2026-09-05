@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Second Sunrise — Macintosh, 1984</title>
+<meta name="description" content="A fictional 1984 advertising poster. Macintosh rises over the grid, and everything in the frame is lit by its screen." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wdth,wght@75..125,400..700&display=swap" rel="stylesheet" />
+
+<style>
+/* ===========================================================================
+   THE SECOND SUNRISE — a fictional 1984 Macintosh poster.
+   Not affiliated with Apple. Apple, Macintosh and the rainbow mark belong to
+   Apple Inc.; this is a made-up campaign for a machine that stopped being sold
+   forty years ago.
+
+   THE PROMISE, MADE VISIBLE
+     The claim is that the machine is a source of light. So it is not lit BY the
+     scene — the scene is lit by IT. The corona, the sky's warm band, the glow
+     along the grid wires, the rim on the chrome desk in the foreground and the
+     long cast shadow all originate at the screen. Remove the Macintosh and the
+     poster goes dark, which is the argument.
+
+   MEDIUM
+     The machine is drawn as real geometry in SVG — body taper, recessed bezel,
+     floppy slot, vents, the six-stripe mark — because a photograph of a beige
+     box would have brought beige nostalgia with it. The sky, corona, grid and
+     bloom are CSS: gradients and blur do atmosphere better than paths do.
+
+   COLOUR
+     Derived from the machine's own phosphor and the year. The P4 screen white
+     of a 9-inch Mac tube is a slightly green-white, so the light source is
+     #F4FFE9 and everything the light touches carries that cast. The sky runs
+     from the CRT's own afterglow through the magenta a 1984 airbrush reached
+     for, into the sodium orange of a horizon. Beige appears exactly once — in
+     the shadowed right flank, where the machine is out of its own light.
+   ======================================================================== */
+:root{
+  --phos:#f4ffe9;        /* P4 phosphor white — the source of every light here */
+  --glow:#c8ff6a;
+  --magenta:#ff2d95;
+  --violet:#7b2ff7;
+  --deep:#150a2e;
+  --night:#0b0518;
+  --sodium:#ff7a2f;
+  --cyan:#20e5ff;
+  --beige:#e7dcc2;       /* used once, and only where the light does not reach */
+  --ink:#0b0518;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%;margin:0;background:#07030f;overflow:hidden}
+body{display:grid;place-items:center;font-family:Archivo,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased}
+
+/* the poster itself — a fixed sheet, scaled whole to whatever it is shown on */
+.poster{position:relative;aspect-ratio:2/3;width:min(96vw,calc(96svh * 2 / 3));
+  overflow:hidden;background:var(--night);
+  box-shadow:0 3vh 9vh rgba(0,0,0,.75),0 0 0 1px rgba(255,255,255,.07);
+  container-type:inline-size}
+
+/* ---------------------------------------------------------------- the sky */
+/* the horizon sits at 63% and the light bands stack onto it, so there is a
+   line for the machine to rise over */
+.sky{position:absolute;inset:0;
+  background:
+    radial-gradient(86% 40% at 63% 63%, rgba(255,214,120,.95) 0%,
+      rgba(255,122,47,.72) 22%, rgba(255,45,149,.42) 42%,
+      rgba(123,47,247,.18) 62%, rgba(11,5,24,0) 82%),
+    linear-gradient(180deg, #06030e 0%, #150a2e 18%, #35114f 34%,
+      #6b1560 46%, #b81f66 54%, #ff3d6e 59%, #ff8a3d 62.4%,
+      #ffd36a 63%, #ff6a2f 63.6%, #7a1a52 66%, #2a0b3f 72%, #0b0518 100%)}
+/* the horizon line itself, hot where the machine sits on it */
+.horizon{position:absolute;left:0;right:0;top:63%;height:.5cqi;
+  background:linear-gradient(90deg, transparent, rgba(255,214,120,.5) 30%,
+    #fff6d8 63%, rgba(255,214,120,.5) 88%, transparent);
+  filter:blur(.18cqi)}
+
+/* the corona — the machine's own screen bleeding into the air behind it */
+.corona{position:absolute;left:63%;top:44%;width:126%;aspect-ratio:1;
+  transform:translate(-50%,-50%);border-radius:50%;
+  background:radial-gradient(circle,
+    rgba(244,255,233,.85) 0%, rgba(200,255,106,.42) 9%,
+    rgba(255,122,47,.30) 18%, rgba(255,45,149,.16) 30%,
+    rgba(123,47,247,.06) 44%, rgba(11,5,24,0) 62%);
+  filter:blur(.4cqi);animation:breathe 7s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:.92;transform:translate(-50%,-50%) scale(1)}
+  50%{opacity:1;transform:translate(-50%,-50%) scale(1.035)}}
+
+/* rays, struck from the screen and cut by the sheet */
+.rays{position:absolute;left:63%;top:44%;width:190%;aspect-ratio:1;
+  transform:translate(-50%,-50%);opacity:.5;mix-blend-mode:screen;
+  background:repeating-conic-gradient(from 0deg at 50% 50%,
+    rgba(244,255,233,.30) 0deg 2.2deg, rgba(244,255,233,0) 2.2deg 11deg);
+  -webkit-mask-image:radial-gradient(circle, #000 6%, rgba(0,0,0,.5) 22%, transparent 46%);
+  mask-image:radial-gradient(circle, #000 6%, rgba(0,0,0,.5) 22%, transparent 46%);
+  animation:turn 120s linear infinite}
+@keyframes turn{to{transform:translate(-50%,-50%) rotate(360deg)}}
+
+/* --------------------------------------------------------------- the grid */
+.floor{position:absolute;left:-40%;right:-40%;top:63%;bottom:-2%;
+  perspective:34cqi;perspective-origin:50% 0%;overflow:hidden}
+.floor__g{position:absolute;inset:0 -6% -34%;
+  transform:rotateX(79deg);transform-origin:50% 0%;
+  background:
+    repeating-linear-gradient(90deg, rgba(32,229,255,.85) 0 .26cqi, transparent .26cqi 5.2cqi),
+    repeating-linear-gradient(0deg,  rgba(255,45,149,.75) 0 .26cqi, transparent .26cqi 5.2cqi);
+  animation:run 6s linear infinite}
+@keyframes run{to{background-position:0 5.2cqi, 0 5.2cqi}}
+/* the grid is lit by the machine: hot at the horizon, cooling toward the reader */
+.floor::after{content:"";position:absolute;inset:0;
+  background:radial-gradient(70% 120% at 63% 0%, rgba(255,214,120,.34) 0%,
+    rgba(255,45,149,.12) 34%, rgba(11,5,24,.55) 74%, rgba(11,5,24,.9) 100%)}
+
+/* the cast shadow the machine throws down the grid, toward the reader */
+.cast{position:absolute;left:63%;top:63%;width:32%;height:37%;
+  transform:translateX(-50%);
+  background:linear-gradient(180deg, rgba(11,5,24,.8) 0%, rgba(11,5,24,.5) 30%,
+    rgba(11,5,24,0) 82%);
+  -webkit-mask-image:linear-gradient(180deg,#000,transparent);
+  mask-image:linear-gradient(180deg,#000,transparent);
+  filter:blur(.8cqi)}
+
+/* ================================================================ THE MAC */
+.mac{position:absolute;left:63%;top:63%;width:58%;
+  transform:translate(-50%,-88%);
+  filter:drop-shadow(0 1.4cqi 4cqi rgba(255,45,149,.55))
+         drop-shadow(0 0 9cqi rgba(255,214,120,.35))}
+.mac svg{display:block;width:100%;height:auto}
+
+/* the desk and chair, tiny, purely so the machine has a scale to be huge against */
+.scale{position:absolute;left:8%;top:67.5%;width:15%;opacity:.95;
+  filter:drop-shadow(0 .3cqi .6cqi rgba(0,0,0,.5))}
+.scale--b{left:auto;right:6%;top:73%;width:22%;opacity:.9}
+.scale svg{display:block;width:100%;height:auto}
+
+/* --------------------------------------------------------------- the type */
+.type{position:absolute;inset:0;padding:5.2cqi;display:flex;
+  flex-direction:column;justify-content:space-between;pointer-events:none;
+  z-index:3}
+.kick{font-family:Archivo,sans-serif;font-weight:700;
+  font-size:1.85cqi;letter-spacing:.42em;text-transform:uppercase;
+  color:var(--phos);text-shadow:0 0 2cqi rgba(200,255,106,.7)}
+.head{font-family:"Archivo Black",Archivo,sans-serif;font-weight:900;
+  font-size:13.2cqi;line-height:.79;max-width:9ch;letter-spacing:-.035em;text-transform:uppercase;
+  margin:0;color:#fff;
+  /* chrome: a 1984 airbrush would have banded it, so it is banded */
+  background:linear-gradient(178deg,#ffffff 0%,#d7f7ff 16%,#7be3ff 30%,
+    #2b6fd6 44%,#0b1d55 51%,#ff2d95 58%,#ff7a2f 70%,#ffd36a 82%,#ffffff 96%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 .35cqi 0 rgba(11,5,24,.85))
+         drop-shadow(0 0 3cqi rgba(255,45,149,.5))}
+.foot{display:flex;flex-direction:column;gap:1.9cqi;align-items:flex-start;
+  /* the copy sits on the grid, so it carries its own shelf of shade */
+  padding:3cqi 3cqi 0;margin:0 -3cqi;
+  background:linear-gradient(0deg, rgba(6,3,14,.86) 0%, rgba(6,3,14,.66) 62%,
+    rgba(6,3,14,0) 100%)}
+.line{font-size:2.55cqi;line-height:1.32;font-weight:500;max-width:30ch;
+  color:#fff;text-shadow:0 .2cqi .8cqi rgba(11,5,24,.9)}
+.line b{font-weight:700;color:var(--glow)}
+.rule{width:100%;height:.28cqi;background:linear-gradient(90deg,
+  var(--phos),var(--glow) 18%,var(--magenta) 52%,var(--sodium) 74%,transparent);
+  opacity:.9}
+.sig{display:flex;align-items:center;gap:2.2cqi;flex-wrap:wrap}
+.sig__mark{width:5.4cqi;height:auto;display:block}
+.sig__w{font-family:"Archivo Black",Archivo,sans-serif;font-size:4.4cqi;
+  letter-spacing:-.02em;color:#fff;text-shadow:0 0 2cqi rgba(244,255,233,.6)}
+.fine{font-size:1.5cqi;line-height:1.5;color:rgba(255,255,255,.66);max-width:44ch}
+
+/* the sheet's own grain and scanlines — a poster, not a screenshot */
+.grain{position:absolute;inset:0;pointer-events:none;mix-blend-mode:overlay;
+  opacity:.24;background-image:
+    repeating-linear-gradient(0deg, rgba(0,0,0,.5) 0 .12cqi, transparent .12cqi .34cqi)}
+.vig{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(120% 78% at 50% 46%, transparent 42%, rgba(7,3,15,.72) 100%)}
+
+@container (max-width: 30rem){
+  .type{padding:4.6cqi}
+  .fine{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .corona,.rays,.floor__g{animation:none}
+}
+</style>
+</head>
+<body>
+
+<div class="poster" role="img"
+     aria-label="Fictional 1984 poster: a colossal Apple Macintosh rises like a sun over a neon perspective grid, its screen lighting the whole scene. Headline, The Second Sunrise.">
+
+  <div class="sky"></div>
+  <div class="horizon"></div>
+  <div class="rays"></div>
+  <div class="corona"></div>
+
+  <div class="floor"><div class="floor__g"></div></div>
+  <div class="cast"></div>
+
+  <!-- ==================================================== THE MACHINE ==== -->
+  <div class="mac">
+  <svg viewBox="0 0 400 560" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- the body is lit from its own screen: hot at the bezel, falling off
+           to the flanks, with the single beige note where light does not reach -->
+      <linearGradient id="face" x1="0" y1="0" x2="1" y2="0.15">
+        <stop offset="0"    stop-color="#ffe9c9"/>
+        <stop offset=".14"  stop-color="#fff6e2"/>
+        <stop offset=".42"  stop-color="#f6e6cd"/>
+        <stop offset=".78"  stop-color="#d9c39c"/>
+        <stop offset="1"    stop-color="#a98d68"/>
+      </linearGradient>
+      <linearGradient id="flank" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0"   stop-color="#8d7454"/>
+        <stop offset=".45" stop-color="#6d5740"/>
+        <stop offset="1"   stop-color="#3d3026"/>
+      </linearGradient>
+      <linearGradient id="rimL" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#ff2d95" stop-opacity=".95"/>
+        <stop offset="1" stop-color="#ff2d95" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="rimR" x1="1" y1="0" x2="0" y2="0">
+        <stop offset="0" stop-color="#20e5ff" stop-opacity=".9"/>
+        <stop offset="1" stop-color="#20e5ff" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="bezel" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0"   stop-color="#3a3128"/>
+        <stop offset=".5"  stop-color="#221c16"/>
+        <stop offset="1"   stop-color="#4a3f33"/>
+      </linearGradient>
+      <radialGradient id="tube" cx=".5" cy=".42" r=".72">
+        <stop offset="0"   stop-color="#ffffff"/>
+        <stop offset=".34" stop-color="#f4ffe9"/>
+        <stop offset=".68" stop-color="#c8ff6a"/>
+        <stop offset="1"   stop-color="#59a827"/>
+      </radialGradient>
+      <linearGradient id="slot" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#0e0c0a"/>
+        <stop offset=".55" stop-color="#2a231b"/>
+        <stop offset="1" stop-color="#0e0c0a"/>
+      </linearGradient>
+      <filter id="soft" x="-40%" y="-40%" width="180%" height="180%">
+        <feGaussianBlur stdDeviation="7"/>
+      </filter>
+      <filter id="tight" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur stdDeviation="2.4"/>
+      </filter>
+    </defs>
+
+    <!-- the right flank, receding: this is what makes it a box and not a card -->
+    <path d="M330 44 L372 78 L372 470 L330 508 Z" fill="url(#flank)"/>
+    <!-- vents on the flank -->
+    <g fill="#241c14" opacity=".85">
+      <path d="M338 96 L366 118 L366 126 L338 104 Z"/>
+      <path d="M338 118 L366 140 L366 148 L338 126 Z"/>
+      <path d="M338 140 L366 162 L366 170 L338 148 Z"/>
+      <path d="M338 162 L366 184 L366 192 L338 170 Z"/>
+      <path d="M338 184 L366 206 L366 214 L338 192 Z"/>
+    </g>
+
+    <!-- the underside sliver, because we are looking up at it -->
+    <path d="M42 500 L330 500 L372 470 L372 486 L330 516 L42 516 Z" fill="#2b2119"/>
+
+    <!-- the front face. Slight taper: wider at the foot, as the real one is -->
+    <path d="M60 40 Q60 22 78 22 L312 22 Q330 22 330 40 L330 486
+             Q330 504 312 504 L78 504 Q60 504 60 486 Z" fill="url(#face)"/>
+
+    <!-- rim lights: the grid on one side, the sky on the other -->
+    <path d="M60 40 Q60 22 78 22 L92 22 L92 504 L78 504 Q60 504 60 486 Z" fill="url(#rimL)" opacity=".8"/>
+    <path d="M300 22 L312 22 Q330 22 330 40 L330 486 Q330 504 312 504 L300 504 Z" fill="url(#rimR)" opacity=".7"/>
+
+    <!-- the recessed bezel -->
+    <rect x="88" y="56" width="214" height="196" rx="12" fill="url(#bezel)"/>
+    <rect x="94" y="62" width="202" height="184" rx="9" fill="#14110d"/>
+
+    <!-- the tube. This is the light source for the entire poster. -->
+    <rect x="104" y="72" width="182" height="164" rx="8" fill="url(#tube)"/>
+    <rect x="104" y="72" width="182" height="164" rx="8" fill="url(#tube)" filter="url(#soft)" opacity=".9"/>
+    <!-- the classic smiling machine, drawn small inside its own screen -->
+    <g transform="translate(163 106) scale(0.30)" opacity=".22">
+      <rect x="0" y="0" width="240" height="330" rx="24" fill="#1d2a10"/>
+      <rect x="26" y="30" width="188" height="150" rx="10" fill="#1d2a10" stroke="#1d2a10" stroke-width="10"/>
+      <circle cx="86" cy="92" r="12" fill="#c8ff6a"/><circle cx="154" cy="92" r="12" fill="#c8ff6a"/>
+      <path d="M74 128 Q120 166 166 128" stroke="#c8ff6a" stroke-width="12" fill="none" stroke-linecap="round"/>
+      <rect x="150" y="228" width="64" height="14" rx="7" fill="#1d2a10"/>
+    </g>
+    <!-- scanlines in the tube -->
+    <g opacity=".16">
+      <rect x="104" y="72" width="182" height="164" rx="8" fill="none"/>
+      <g fill="#2c3d12">
+        <rect x="104" y="78"  width="182" height="2"/><rect x="104" y="90"  width="182" height="2"/>
+        <rect x="104" y="102" width="182" height="2"/><rect x="104" y="114" width="182" height="2"/>
+        <rect x="104" y="126" width="182" height="2"/><rect x="104" y="138" width="182" height="2"/>
+        <rect x="104" y="150" width="182" height="2"/><rect x="104" y="162" width="182" height="2"/>
+        <rect x="104" y="174" width="182" height="2"/><rect x="104" y="186" width="182" height="2"/>
+        <rect x="104" y="198" width="182" height="2"/><rect x="104" y="210" width="182" height="2"/>
+        <rect x="104" y="222" width="182" height="2"/>
+      </g>
+    </g>
+    <!-- specular sweep across the glass -->
+    <path d="M104 72 L286 72 L286 96 L104 148 Z" fill="#ffffff" opacity=".16"/>
+
+    <!-- brightness dial, top right of the bezel, as on the real machine -->
+    <circle cx="311" cy="70" r="6.5" fill="#c9b391"/>
+    <circle cx="311" cy="70" r="6.5" fill="none" stroke="#6f5c42" stroke-width="1.4"/>
+    <rect x="310" y="65" width="2" height="5" rx="1" fill="#5a4a35"/>
+
+    <!-- the six-stripe mark and the wordmark -->
+    <g transform="translate(100 272)">
+      <g>
+        <rect x="0"  y="0" width="26" height="4.4" fill="#5fbf3f"/>
+        <rect x="0"  y="5" width="26" height="4.4" fill="#ffd83d"/>
+        <rect x="0" y="10" width="26" height="4.4" fill="#ff8a1f"/>
+        <rect x="0" y="15" width="26" height="4.4" fill="#e8352e"/>
+        <rect x="0" y="20" width="26" height="4.4" fill="#a63d9c"/>
+        <rect x="0" y="25" width="26" height="4.4" fill="#2f8fd6"/>
+      </g>
+      <text x="36" y="24" font-family="Archivo, sans-serif" font-size="24"
+            font-weight="600" fill="#5c4c36" letter-spacing="-0.4">Macintosh</text>
+    </g>
+
+    <!-- the floppy slot, lower right, with its eject notch -->
+    <rect x="176" y="352" width="126" height="15" rx="3.5" fill="url(#slot)"/>
+    <rect x="176" y="352" width="126" height="3" rx="1.5" fill="#000" opacity=".55"/>
+    <rect x="290" y="374" width="12" height="4" rx="2" fill="#c2ab88"/>
+
+    <!-- the front foot -->
+    <path d="M74 470 L316 470 L316 480 L74 480 Z" fill="#cdb894" opacity=".55"/>
+
+    <!-- the light escaping around the bezel, painted last so it sits on top -->
+    <rect x="88" y="56" width="214" height="196" rx="12" fill="none"
+          stroke="#f4ffe9" stroke-width="3" opacity=".5" filter="url(#tight)"/>
+  </svg>
+  </div>
+
+  <!-- a desk, a chair and a human, tiny — the machine needs something to be
+       enormous against, and the scale is the whole joke -->
+  <div class="scale">
+  <svg viewBox="0 0 300 120" xmlns="http://www.w3.org/2000/svg">
+    <g fill="#0b0518">
+      <rect x="30" y="52" width="150" height="7" rx="2"/>
+      <rect x="36" y="59" width="6" height="46"/><rect x="168" y="59" width="6" height="46"/>
+      <rect x="206" y="40" width="7" height="65"/>
+      <rect x="192" y="34" width="36" height="7" rx="3"/>
+      <rect x="196" y="70" width="30" height="6" rx="3"/>
+      <circle cx="244" cy="36" r="11"/>
+      <path d="M234 50 q10 -6 20 0 l6 34 h-32 z"/>
+      <rect x="60" y="40" width="52" height="12" rx="2"/>
+      <rect x="124" y="44" width="16" height="8" rx="3"/>
+    </g>
+    <!-- everything on this desk is rimmed by the machine's light -->
+    <g fill="#c8ff6a" opacity=".85">
+      <rect x="30" y="52" width="150" height="2" rx="1"/>
+      <rect x="60" y="40" width="52" height="2" rx="1"/>
+      <rect x="192" y="34" width="36" height="2" rx="1"/>
+      <circle cx="244" cy="30" r="4"/>
+    </g>
+  </svg>
+  </div>
+
+  <!-- a second pair further down the grid, larger, so the plane reads as deep -->
+  <div class="scale scale--b">
+  <svg viewBox="0 0 300 120" xmlns="http://www.w3.org/2000/svg">
+    <g fill="#0b0518">
+      <rect x="40" y="56" width="150" height="7" rx="2"/>
+      <rect x="46" y="63" width="6" height="46"/><rect x="178" y="63" width="6" height="46"/>
+      <circle cx="232" cy="34" r="12"/>
+      <path d="M221 49 q11 -7 22 0 l7 60 h-36 z"/>
+      <rect x="70" y="43" width="56" height="13" rx="2"/>
+    </g>
+    <g fill="#ffd36a" opacity=".9">
+      <rect x="40" y="56" width="150" height="2" rx="1"/>
+      <rect x="70" y="43" width="56" height="2" rx="1"/>
+      <circle cx="232" cy="28" r="4"/>
+    </g>
+  </svg>
+  </div>
+
+  <!-- ======================================================== THE COPY === -->
+  <div class="type">
+    <div>
+      <p class="kick">Introducing a second source of daylight</p>
+      <h1 class="head">The<br />Second<br />Sunrise</h1>
+    </div>
+
+    <div class="foot">
+      <div class="rule"></div>
+      <p class="line">Yours comes up at 6:04 and asks nothing of you.
+        <b>This one comes up when you say so</b> — and then asks what you'd
+        like to make.</p>
+      <div class="sig">
+        <svg class="sig__mark" viewBox="0 0 26 30" aria-hidden="true">
+          <rect x="0"  y="0" width="26" height="4.4" fill="#5fbf3f"/>
+          <rect x="0"  y="5" width="26" height="4.4" fill="#ffd83d"/>
+          <rect x="0" y="10" width="26" height="4.4" fill="#ff8a1f"/>
+          <rect x="0" y="15" width="26" height="4.4" fill="#e8352e"/>
+          <rect x="0" y="20" width="26" height="4.4" fill="#a63d9c"/>
+          <rect x="0" y="25" width="26" height="4.4" fill="#2f8fd6"/>
+        </svg>
+        <span class="sig__w">Macintosh</span>
+      </div>
+      <p class="fine">128K. One button. No horizon required. Do not stare
+        directly into the Finder. Sunrise sold separately on the 512K. Requires
+        one (1) desk, one (1) outlet, and a willingness to be early.</p>
+    </div>
+  </div>
+
+  <div class="grain"></div>
+  <div class="vig"></div>
+</div>
+
+</body>
+</html>

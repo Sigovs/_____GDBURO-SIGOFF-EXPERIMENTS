@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Meridian Motor Group — AAN build</title>
+<meta name="description" content="The Meridian dealership design installed on the AAN theme kit and stack." />
+
+<!--
+  ==========================================================================
+  index6 — PHASE 2 of the AAN workflow.
+
+  index5 is the free-form design. This is the same design installed into the
+  ecosystem AAN developers actually build in, per aan-dealer-mockups/SKILL.md.
+  Deliverable format B (HTML + custom.scss + compiled custom.css), chosen
+  because dev handoff is the point: the SCSS drops straight into the theme as
+  components/meridian.scss and into imports.scss.
+
+  What changed from index5, and why:
+    - CSS custom properties removed. Hard rule 3: theming is compile-time Sass,
+      never runtime --vars. The palette now lives in assets/aan/custom.scss as
+      kit token overrides.
+    - Google Fonts link removed. Hard rule 4: no CDN, no font hotlinking. The
+      stacks name Inter Tight and JetBrains Mono; both faces must be added to
+      fonts.scss as self-hosted woff2. Until then this previews on system
+      fallbacks, so the type will look heavier here than in index5.
+    - Bootstrap 4.0.0 grid, jQuery 3.7.1, Owl Carousel 2.3.4 — self-hosted.
+    - Kit classes installed: .eyebrow .display .lead .btn-1 .btn-3 .aan-field
+      .aan-section .car-col .card-badge .tag .text-link.has-arrow.
+    - Structural hooks targeted so it drops into the real templates:
+      #header, .homeSearch, .trending-vehicle-section, .car-col,
+      .inventory-page-section, .prefoot, #footer.
+    - Inventory is STATIC MARKUP. index5 built it from a JS template, which
+      left the page empty with scripting off and is data wiring the theme
+      already owns (hard rule 8: design, don't build).
+
+  Token mapping assumed by this mockup — see the top of custom.scss:
+    $color-primary #6D1F24 (was #0C376A) · $bg-page #F4F2EE (was #FFFFFF)
+    $bg-row-alt #EAE7E1 · $color-text #14151A · $btn-radius 0 (was 4px)
+    $font-display / $font-body Inter Tight · $font-accent JetBrains Mono
+  ==========================================================================
+-->
+
+<link rel="stylesheet" href="assets/aan/vendor/theme-base.css" />
+<link rel="stylesheet" href="assets/aan/vendor/owl.carousel.min.css" />
+<link rel="stylesheet" href="assets/aan/vendor/owl.theme.default.min.css" />
+<link rel="stylesheet" href="assets/aan/custom.css" />
+</head>
+
+<body>
+<a href="#inventory" class="mm-skip eyebrow">Skip to inventory</a>
+
+<!-- utility bar -->
+<div class="mm-util">
+  <div class="container d-flex flex-wrap justify-content-between">
+    <p class="mm-util__line">Sales (312) 555-0148 &nbsp;·&nbsp; Service (312) 555-0162</p>
+    <p class="mm-util__line">Mon–Fri 9–7 &nbsp;·&nbsp; Sat 10–5 &nbsp;·&nbsp; Sun closed</p>
+  </div>
+</div>
+
+<!-- #header is the theme's own hook -->
+<header id="header" class="mm-header">
+  <div class="container">
+    <div class="d-flex align-items-center justify-content-between py-3">
+      <a class="mm-brand" href="#top">Meridian Motor Group
+        <small>Sport &amp; Exotic · Chicago</small></a>
+
+      <nav class="mm-nav d-none d-lg-block" aria-label="Main">
+        <ul class="list-unstyled d-flex mb-0">
+          <li class="mr-4"><a href="#inventory">Inventory</a></li>
+          <li class="mr-4"><a href="#sell">Sell your car</a></li>
+          <li class="mr-4"><a href="#finance">Finance</a></li>
+          <li class="mr-4"><a href="#about">About</a></li>
+          <li><a href="#visit">Visit</a></li>
+        </ul>
+      </nav>
+
+      <!-- BS4 syntax: data-toggle / data-target, never data-bs-* -->
+      <button class="btn-3 d-lg-none" type="button" data-toggle="collapse"
+              data-target="#mmNav" aria-expanded="false" aria-controls="mmNav">Menu</button>
+    </div>
+    <div class="collapse d-lg-none" id="mmNav">
+      <nav class="mm-nav pb-3" aria-label="Main, mobile">
+        <ul class="list-unstyled mb-0">
+          <li><a href="#inventory">Inventory</a></li>
+          <li><a href="#sell">Sell your car</a></li>
+          <li><a href="#finance">Finance</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#visit">Visit</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- == HERO — .banner-section is the theme hook for the home banner ======= -->
+<section class="banner-section mm-hero">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-5">
+        <span class="eyebrow">In stock now / 08 vehicles</span>
+        <h1 class="display">The record comes with the car.</h1>
+        <p class="lead mt-4">
+          Every vehicle photographed on our own sweep, documented to the same
+          specification sheet, and offered with its service history in the listing.
+        </p>
+        <div class="d-flex flex-wrap mt-4">
+          <a class="btn-3 mr-3 mb-2" href="#inventory">View inventory</a>
+          <a class="btn-3 mb-2" href="#sell">Sell or consign</a>
+        </div>
+        <div class="mm-hero__facts">
+          <span>Est. 2009</span><span>Sold 2,400+</span><span>Avg. days to sale 21</span>
+        </div>
+      </div>
+      <div class="col-lg-7 mt-5 mt-lg-0">
+        <figure class="mm-hero__figure">
+          <img src="assets/dealer/car-01.webp" width="1500" height="1000"
+               alt="2004 Ferrari 575 in red, photographed on a white studio sweep." />
+        </figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- == SEARCH — .homeSearch is the theme hook ============================= -->
+<section class="homeSearch mm-search" aria-label="Search inventory">
+  <div class="container">
+    <form onsubmit="return false">
+      <div class="row">
+        <div class="col-md-3 mb-3 mb-md-0">
+          <label for="f-make">Make</label>
+          <select class="aan-field" id="f-make">
+            <option>All makes</option><option>Ferrari</option>
+            <option>Mercedes-Benz</option><option>Land Rover</option>
+            <option>Ford</option><option>Nissan</option>
+          </select>
+        </div>
+        <div class="col-md-3 mb-3 mb-md-0">
+          <label for="f-model">Model</label>
+          <select class="aan-field" id="f-model"><option>All models</option></select>
+        </div>
+        <div class="col-md-2 mb-3 mb-md-0">
+          <label for="f-price">Price up to</label>
+          <select class="aan-field" id="f-price">
+            <option>Any</option><option>$100,000</option><option>$250,000</option>
+            <option>$500,000</option><option>$1,000,000+</option>
+          </select>
+        </div>
+        <div class="col-md-2 mb-3 mb-md-0">
+          <label for="f-miles">Mileage up to</label>
+          <select class="aan-field" id="f-miles">
+            <option>Any</option><option>5,000</option><option>15,000</option><option>40,000</option>
+          </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+          <button class="btn-1 w-100" type="submit">Search</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- == INVENTORY — .inventory-page-section + .car-col are theme hooks ===== -->
+<section class="inventory-page-section aan-section aan-section--page mm-section" id="inventory">
+  <div class="container">
+    <div class="mm-section__head">
+      <div>
+        <span class="eyebrow">Inventory</span>
+        <h2 class="mt-2 mb-0">Available now</h2>
+      </div>
+      <span class="eyebrow">08 of 08 shown</span>
+    </div>
+
+    <div class="row">
+      <!-- 01 -->
+      <div class="col-md-6 col-xl-4">
+        <a class="car-col mm-car" href="#" aria-label="2004 Ferrari 575 Maranello, $451,134">
+          <figure class="mm-car__fig">
+            <span class="card-badge card-badge--cpo">Certified</span>
+            <img src="assets/dealer/car-01.webp" width="1500" height="1000"
+                 alt="2004 Ferrari 575 Maranello on a white studio sweep." />
+          </figure>
+          <h3>2004 Ferrari 575 Maranello</h3>
+          <p class="mm-car__price">$451,134</p>
+          <dl class="mm-plate">
+            <dt>Year</dt><dd>2004</dd>
+            <dt>Mileage</dt><dd>34,294 mi</dd>
+            <dt>Make</dt><dd>Ferrari</dd>
+            <dt>Stock</dt><dd>MM-1041</dd>
+          </dl>
+        </a>
+      </div>
+      <!-- 02 -->
+      <div class="col-md-6 col-xl-4">
+        <a class="car-col mm-car" href="#" aria-label="2000 Nissan GT-R R34, $304,990">
+          <figure class="mm-car__fig">
+            <img src="assets/dealer/car-02.webp" width="1500" height="1000" loading="lazy"
+                 alt="2000 Nissan GT-R R34 in white on a studio sweep." />
+          </figure>
+          <h3>2000 Nissan GT-R R34</h3>
+          <p class="mm-car__price">$304,990</p>
+          <dl class="mm-plate">
+            <dt>Year</dt><dd>2000</dd>
+            <dt>Mileage</dt><dd>41,863 mi</dd>
+            <dt>Make</dt><dd>Nissan</dd>
+            <dt>Stock</dt><dd>MM-1042</dd>
+          </dl>
+        </a>
+      </div>
+      <!-- 03 -->
+      <div class="col-md-6 col-xl-4">
+        <a class="car-col mm-car" href="#" aria-label="1971 Ferrari 365 GTS/4, $3,495,000">
+          <figure class="mm-car__fig">
+            <span class="card-badge card-badge--new">New arrival</span>
+            <img src="assets/dealer/car-03.webp" width="1500" height="1000" loading="lazy"
+                 alt="1971 Ferrari 365 GTS/4 in red on a studio sweep." />
+          </figure>
+          <h3>1971 Ferrari 365 GTS/4</h3>
+          <p class="mm-car__price">$3,495,000</p>
+          <dl class="mm-plate">
+            <dt>Year</dt><dd>1971</dd>
+            <dt>Mileage</dt><dd>39,067 mi</dd>
+            <dt>Make</dt><dd>Ferrari</dd>
+            <dt>Stock</dt><dd>MM-1043</dd>
+          </dl>
+        </a>
+      </div>
+      <!-- 04 -->
+      <div class="col-md-6 col-xl-4">
+        <a class="car-col mm-car" href="#" aria-label="2025 Ferrari Roma Spider, $298,969">
+          <figure class="mm-car__fig">
+            <img src="assets/dealer/car-04.webp" width="1500" height="1000" loading="lazy"
+                 alt="2025 Ferrari Roma Spider on a studio sweep." />
+          </figure>
+          <h3>2025 Ferrari Roma Spider</h3>
+          <p class="mm-car__price">$298,969</p>
+          <dl class="mm-plate">
+            <dt>Year</dt><dd>2025</dd>
+            <dt>Mileage</dt><dd>1,301 mi</dd>
+            <dt>Make</dt><dd>Ferrari</dd>
+            <dt>Stock</dt><dd>MM-1044</dd>
+          </dl>
+        </a>
+      </div>
+      <!-- 05 -->
+      <div class="col-md-6 col-xl-4">
+        <a class="car-col mm-car" href="#" aria-label="2025 Range Rover SE, $249,990">
+          <figure class="mm-car__fig">
+            <img src="assets/dealer/car-05.webp" width="1500" height="1000" loading="lazy"
+                 alt="2025 Land Rover Range Rover SE on a studio sweep." />
+          </figure>
+          <h3>2025 Range Rover SE</h3>
+          <p class="mm-car__price">$249,990</p>
+          <dl class="mm-plate">
+            <dt>Year</dt><dd>2025</dd>
+            <dt>Mileage</dt><dd>3,000 mi</dd>
+            <dt>Make</dt><dd>Land Rover</dd>
+            <dt>Stock</dt><dd>MM-1045</dd>
+          </dl>
+        </a>
+      </div>
+      <!-- 06 -->
+      <div class="col-md-6 col-xl-4">
+        <a class="car-col mm-car" href="#" aria-label="2026 Mercedes-AMG CLE 53, $78,990">
+          <figure class="mm-car__fig">
+            <img src="assets/dealer/car-06.webp" width="1500" height="1000" loading="lazy"
+                 alt="2026 Mercedes-AMG CLE 53 in black on a studio sweep." />
+          </figure>
+          <h3>2026 Mercedes-AMG CLE 53</h3>
+          <p class="mm-car__price">$78,990</p>
+          <dl class="mm-plate">
+            <dt>Year</dt><dd>2026</dd>
+            <dt>Mileage</dt><dd>1,306 mi</dd>
+            <dt>Make</dt><dd>Mercedes-Benz</dd>
+            <dt>Stock</dt><dd>MM-1046</dd>
+          </dl>
+        </a>
+      </div>
+      <!-- 07 -->
+      <div class="col-md-6 col-xl-4">
+        <a class="car-col mm-car" href="#" aria-label="2024 Ford F-150 Raptor R, $114,995">
+          <figure class="mm-car__fig">
+            <img src="assets/dealer/car-07.webp" width="1500" height="1000" loading="lazy"
+                 alt="2024 Ford F-150 Raptor R on a studio sweep." />
+          </figure>
+          <h3>2024 Ford F-150 Raptor R</h3>
+          <p class="mm-car__price">$114,995</p>
+          <dl class="mm-plate">
+            <dt>Year</dt><dd>2024</dd>
+            <dt>Mileage</dt><dd>12,738 mi</dd>
+            <dt>Make</dt><dd>Ford</dd>
+            <dt>Stock</dt><dd>MM-1047</dd>
+          </dl>
+        </a>
+      </div>
+      <!-- 08 -->
+      <div class="col-md-6 col-xl-4">
+        <a class="car-col mm-car" href="#" aria-label="2024 Mercedes-Benz S 580, $149,996">
+          <figure class="mm-car__fig">
+            <img src="assets/dealer/car-08.webp" width="1500" height="1000" loading="lazy"
+                 alt="2024 Mercedes-Benz S 580 in white on a studio sweep." />
+          </figure>
+          <h3>2024 Mercedes-Benz S 580</h3>
+          <p class="mm-car__price">$149,996</p>
+          <dl class="mm-plate">
+            <dt>Year</dt><dd>2024</dd>
+            <dt>Mileage</dt><dd>14,443 mi</dd>
+            <dt>Make</dt><dd>Mercedes-Benz</dd>
+            <dt>Stock</dt><dd>MM-1048</dd>
+          </dl>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- == SELL — the kit's alternating row ================================== -->
+<section class="aan-section aan-section--alt mm-section" id="sell">
+  <div class="container">
+    <div class="mm-section__head">
+      <div>
+        <span class="eyebrow">Sell or consign</span>
+        <h2 class="mt-2 mb-0">Four steps, and you keep the paperwork.</h2>
+      </div>
+      <a class="btn-1" href="#finance">Start a valuation</a>
+    </div>
+    <div class="row">
+      <div class="col-md-6 col-lg-3 mb-4 mb-lg-0"><div class="mm-step">
+        <p class="mm-step__n">01</p><h3>Send the details</h3>
+        <p>VIN, mileage, service history and a handful of photographs. Ten minutes.</p></div></div>
+      <div class="col-md-6 col-lg-3 mb-4 mb-lg-0"><div class="mm-step">
+        <p class="mm-step__n">02</p><h3>Written offer</h3>
+        <p>A cash offer and a consignment estimate within one business day, both in writing.</p></div></div>
+      <div class="col-md-6 col-lg-3 mb-4 mb-md-0"><div class="mm-step">
+        <p class="mm-step__n">03</p><h3>Inspection</h3>
+        <p>We come to the car, or arrange enclosed transport at our cost.</p></div></div>
+      <div class="col-md-6 col-lg-3"><div class="mm-step">
+        <p class="mm-step__n">04</p><h3>Settlement</h3>
+        <p>Funds on collection for a purchase; on sale for consignment, with the ledger shared.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- == FINANCE ========================================================== -->
+<section class="aan-section aan-section--page mm-section" id="finance">
+  <div class="container">
+    <div class="mm-section__head">
+      <div><span class="eyebrow">Finance &amp; trade</span>
+        <h2 class="mt-2 mb-0">Terms before paperwork.</h2></div>
+    </div>
+    <div class="row">
+      <div class="col-md-6 col-lg-3 mb-4 mb-lg-0"><div class="mm-step">
+        <p class="mm-step__n">Rates from</p><h3>5.49%</h3>
+        <p>Collector and exotic terms to 144 months, subject to credit.</p></div></div>
+      <div class="col-md-6 col-lg-3 mb-4 mb-lg-0"><div class="mm-step">
+        <p class="mm-step__n">Typical deposit</p><h3>10–20%</h3>
+        <p>Lower on late-model vehicles with documented history.</p></div></div>
+      <div class="col-md-6 col-lg-3 mb-4 mb-md-0"><div class="mm-step">
+        <p class="mm-step__n">Trade appraisal</p><h3>Same day</h3>
+        <p>Bring the car in, or send the VIN and we will start without it.</p></div></div>
+      <div class="col-md-6 col-lg-3"><div class="mm-step">
+        <p class="mm-step__n">Delivery</p><h3>Nationwide</h3>
+        <p>Enclosed transport quoted at cost, insured door to door.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- == ABOUT ============================================================ -->
+<section class="aan-section aan-section--alt mm-section" id="about">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-5">
+        <span class="eyebrow">About us</span>
+        <h2 class="mt-2">A showroom that reads like a catalogue.</h2>
+        <p class="mt-4">
+          Meridian has bought and sold sport and exotic cars from one building on
+          the north side since 2009. Every car is photographed on the same sweep,
+          measured against the same specification sheet, and listed with its
+          history attached rather than summarised.
+        </p>
+        <p>We keep a small inventory on purpose. If a car is here, someone on the
+          floor has driven it.</p>
+        <dl class="mm-plate mt-4">
+          <dt>Founded</dt><dd>2009</dd>
+          <dt>Vehicles sold</dt><dd>2,400+</dd>
+          <dt>Marques</dt><dd>Ferrari · Mercedes-Benz · Porsche · Land Rover</dd>
+          <dt>Services</dt><dd>Sales · Consignment · Acquisition · Transport</dd>
+        </dl>
+      </div>
+      <div class="col-lg-7 mt-5 mt-lg-0">
+        <figure class="mm-hero__figure">
+          <img src="assets/dealer/car-05.webp" width="1500" height="1000" loading="lazy"
+               alt="A Range Rover on the showroom sweep." />
+        </figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- == INSTAGRAM — Owl Carousel, the only slider library on this stack === -->
+<section class="trending-vehicle-section aan-section aan-section--page mm-section mm-ig"
+         aria-labelledby="ig-h">
+  <div class="container">
+    <div class="mm-section__head">
+      <div><span class="eyebrow">Instagram</span>
+        <h2 class="mt-2 mb-0" id="ig-h">@meridianmotorgroup</h2></div>
+      <a class="text-link has-arrow" href="#">Follow</a>
+    </div>
+    <div class="owl-carousel owl-theme mm-ig-slider">
+      <a class="mm-ig__item" href="#"><img src="assets/dealer/car-04-p.webp" width="900" height="1125" loading="lazy" alt="Instagram post — Ferrari Roma Spider." /></a>
+      <a class="mm-ig__item" href="#"><img src="assets/dealer/car-06-p.webp" width="900" height="1125" loading="lazy" alt="Instagram post — Mercedes-AMG CLE 53." /></a>
+      <a class="mm-ig__item" href="#"><img src="assets/dealer/car-02-p.webp" width="900" height="1125" loading="lazy" alt="Instagram post — Nissan GT-R R34." /></a>
+      <a class="mm-ig__item" href="#"><img src="assets/dealer/car-07-p.webp" width="900" height="1125" loading="lazy" alt="Instagram post — Ford F-150 Raptor R." /></a>
+      <a class="mm-ig__item" href="#"><img src="assets/dealer/car-01-p.webp" width="900" height="1125" loading="lazy" alt="Instagram post — Ferrari 575 Maranello." /></a>
+      <a class="mm-ig__item" href="#"><img src="assets/dealer/car-08-p.webp" width="900" height="1125" loading="lazy" alt="Instagram post — Mercedes-Benz S 580." /></a>
+      <a class="mm-ig__item" href="#"><img src="assets/dealer/car-05-p.webp" width="900" height="1125" loading="lazy" alt="Instagram post — Range Rover SE." /></a>
+      <a class="mm-ig__item" href="#"><img src="assets/dealer/car-03-p.webp" width="900" height="1125" loading="lazy" alt="Instagram post — Ferrari 365 GTS/4." /></a>
+    </div>
+    <p class="caption mt-3">Feed shown with inventory photography — connect the Instagram Basic Display API to go live.</p>
+  </div>
+</section>
+
+<!-- == VISIT — .prefoot is the theme hook ================================ -->
+<section class="prefoot aan-section aan-section--alt mm-section" id="visit">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-5">
+        <span class="eyebrow">Visit</span>
+        <h2 class="mt-2">1400 N Elston Ave</h2>
+        <dl class="mm-plate mt-4">
+          <dt>Address</dt><dd>1400 N Elston Ave, Chicago, IL 60642</dd>
+          <dt>Sales</dt><dd>(312) 555-0148</dd>
+          <dt>Service</dt><dd>(312) 555-0162</dd>
+          <dt>Mon–Fri</dt><dd>9:00 – 19:00</dd>
+          <dt>Saturday</dt><dd>10:00 – 17:00</dd>
+          <dt>Sunday</dt><dd>Closed</dd>
+        </dl>
+        <div class="d-flex flex-wrap mt-4">
+          <a class="btn-1 mr-3 mb-2" href="#">Book an appointment</a>
+          <a class="btn-3 mb-2" href="https://www.openstreetmap.org/?mlat=41.9075&amp;mlon=-87.6636#map=15/41.9075/-87.6636" rel="noopener">Directions</a>
+        </div>
+      </div>
+      <div class="col-lg-7 mt-5 mt-lg-0">
+        <!-- Dev note: a third-party iframe usually will not pass review on the
+             live theme. Expect this to become the theme's own map block. -->
+        <div class="mm-map">
+          <iframe title="Map of 1400 N Elston Ave, Chicago" loading="lazy"
+            src="https://www.openstreetmap.org/export/embed.html?bbox=-87.685%2C41.897%2C-87.643%2C41.918&amp;layer=mapnik&amp;marker=41.9075%2C-87.6636"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer id="footer" class="mm-footer">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6 col-lg-5 mb-4 mb-lg-0">
+        <a class="mm-brand" href="#top">Meridian Motor Group
+          <small>Sport &amp; Exotic · Chicago</small></a>
+        <p class="caption mt-3">1400 N Elston Ave, Chicago, IL 60642</p>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2 mb-4 mb-md-0">
+        <span class="eyebrow">Inventory</span>
+        <a href="#inventory">All vehicles</a><a href="#inventory">Recently sold</a><a href="#inventory">Arriving soon</a>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2 mb-4 mb-md-0">
+        <span class="eyebrow">Services</span>
+        <a href="#sell">Sell or consign</a><a href="#finance">Finance</a><a href="#finance">Transport</a>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2">
+        <span class="eyebrow">Company</span>
+        <a href="#about">About</a><a href="#visit">Visit</a><a href="#">Careers</a>
+      </div>
+    </div>
+    <div class="d-flex flex-wrap justify-content-between mt-5 pt-4"
+         style="border-top:1px solid #DCD8D1">
+      <p class="caption mb-0">AAN build — design test, not a real dealership</p>
+      <p class="caption mb-0">© 2026 Meridian Motor Group</p>
+    </div>
+  </div>
+</footer>
+
+<!-- jQuery → Popper → Bootstrap → Owl, in that order. Self-hosted, no CDN. -->
+<script src="assets/aan/vendor/jquery.min.js"></script>
+<script src="assets/aan/vendor/popper.min.js"></script>
+<script src="assets/aan/vendor/bootstrap.min.js"></script>
+<script src="assets/aan/vendor/owl.carousel.min.js"></script>
+<script>
+/* The live WordPress site runs jQuery in noConflict mode, so custom JS is
+   wrapped rather than relying on a bare global $. */
+jQuery(function ($) {
+  $('.mm-ig-slider').owlCarousel({
+    items: 5, margin: 8, loop: true, nav: true, dots: false,
+    responsive: { 0: { items: 2 }, 576: { items: 3 }, 992: { items: 4 }, 1200: { items: 5 } }
+  });
+});
+</script>
+</body>
+</html>

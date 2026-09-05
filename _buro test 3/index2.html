@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Alexander Sigoff — Selected Work (variant B)</title>
+<meta name="description" content="Motion-led variant. Art direction and interface design for collector-car retail." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="preload" as="image" href="assets/cases/case-01-frame.webp" fetchpriority="high" />
+
+<style>
+/* ===========================================================================
+   VARIANT B — the sequence.
+
+   Variant A is a document you read: a gallery wall, a constant mat, hairlines,
+   stillness. This is not that with animation added. It is a different idea —
+   a sequence you move THROUGH. Each case is a pinned stage; scrolling scrubs
+   the scene rather than translating a page.
+
+   Design Read
+     Reading this as a motion-led alternative of the same hiring-decision
+     portfolio, for the same dealer principals comparing candidates.
+     Dialect: brief-derived / no stored dialect — motion is the deliverable here,
+     so the register is set by the brief, not by the house style.
+
+   auction-editorial is NOT selected. immersive-authored-world is NOT selected:
+   TASTE.md §4 says it is never inferred, only named by Alex. Its EFFECT
+   HIERARCHY is borrowed as a mechanism and credited, which is a different act
+   from adopting the dialect.
+
+   Dialect yield, stated: motion-taste D4 ("motion is not the personality",
+   <=1 ambient moment, <=1.2s total entrance) is set aside under its own
+   `yields when:` — "motion IS the product". D1's 8px travel budget likewise.
+
+   Invariants that do NOT yield, and where they bite:
+     I1  every effect has a designed static path, applied by script only when
+         motion is allowed, so reduced-motion and no-JS both get a complete page
+     I2  keyboard parity: the rail is a real nav, every stage is focusable
+     I3  every duration and easing is a token
+     I4  transform and opacity only — the pinning is `position: sticky`, which
+         costs no per-frame layout, and nothing shifts under the reader
+     I5  no motion without a job. Each effect below names its job in a comment.
+         An effect that could not name one was cut.
+   ======================================================================== */
+:root{
+  --space-1:.25rem; --space-2:.5rem;  --space-3:.75rem; --space-4:1rem;
+  --space-5:1.5rem; --space-6:2rem;   --space-7:3rem;   --space-8:4rem;
+  --space-9:6rem;   --space-10:8rem;  --space-11:12rem;
+
+  --text-xs:.6875rem;
+  --text-sm:clamp(.8125rem,.8vw + .7rem,.9375rem);
+  --text-body:clamp(1rem,.35vw + .95rem,1.125rem);
+  --text-lead:clamp(1.125rem,.9vw + 1rem,1.5rem);
+  --text-h2:clamp(2rem,3vw + 1.2rem,3.25rem);
+  --text-display:clamp(3rem,9vw + 1rem,9rem);
+  --text-numeral:clamp(7rem,26vw,22rem);
+
+  /* Same palette as variant A on purpose: the two must differ by STRUCTURE, not
+     by a repaint. No chromatic accent — colour belongs to the work. */
+  --bg:#0e0f11;
+  --bg-raised:#16181b;
+  --ink:#f2f1ee;
+  --ink-70:rgba(242,241,238,.72);
+  --ink-58:rgba(242,241,238,.58);
+  --ink-20:rgba(242,241,238,.20);
+  --rule:rgba(242,241,238,.14);
+  --rule-strong:rgba(242,241,238,.38);
+
+  --dur-1:.15s; --dur-2:.25s; --dur-3:.4s; --dur-4:1.2s;
+  --ease-out:cubic-bezier(.22,1,.36,1);
+  --ease-in:cubic-bezier(.55,0,1,.45);
+
+  --mat:clamp(1.25rem,4vw,4rem);
+  --scene:320svh;             /* scroll distance one scene occupies */
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+html,body{overflow-x:clip}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Inter Tight",system-ui,sans-serif;
+  font-size:var(--text-body);line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+img{display:block;max-width:100%;height:auto}
+
+.label{
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:var(--text-xs);text-transform:uppercase;
+  letter-spacing:.14em;font-weight:500;line-height:1.2;color:var(--ink-70);
+  margin:0;
+}
+.num{font-variant-numeric:tabular-nums}
+.measure{max-width:60ch}
+
+:where(a,button,[tabindex]):focus-visible{
+  outline:2px solid var(--ink);outline-offset:3px;
+  box-shadow:0 0 0 5px var(--bg);border-radius:1px;
+}
+.skip{position:absolute;left:-9999px;top:var(--space-4);z-index:60}
+.skip:focus{left:var(--mat)}
+
+/* ===========================================================================
+   THE STAGE — one case, pinned, scrubbed.
+   `position: sticky` does the pinning: no scroll-jacking, no transformed
+   container, the document keeps a real height (find-in-page and anchors work).
+   ======================================================================== */
+.scene{position:relative;height:var(--scene)}
+.stage{
+  position:sticky;top:0;height:100svh;overflow:hidden;
+  display:grid;grid-template-rows:1fr auto;
+}
+.plate{position:absolute;inset:0;margin:0;overflow:hidden;background:var(--bg-raised)}
+.plate img{width:100%;height:100%;object-fit:cover;transform-origin:50% 45%}
+
+/* the scrim exists so the HUD stays legible over ANY frame, including the two
+   light chapters — legibility fixed at the background layer (color-taste I4) */
+.plate::after{
+  content:"";position:absolute;inset:0;
+  /* Atmosphere only. Deepening THIS far enough to carry the HUD crushed the
+     light chapters, and on a page whose whole argument is the imagery that is
+     the wrong trade. Legibility is carried by the HUD's own scrim below. */
+  background:linear-gradient(to top,
+    rgba(14,15,17,.55) 0%,
+    rgba(14,15,17,.28) 30%,
+    rgba(14,15,17,.10) 60%,
+    rgba(14,15,17,.10) 82%,
+    rgba(14,15,17,.50) 100%);
+}
+
+/* The directional scrim, sized to the text rather than to the frame — step two
+   of the color-taste I4 ladder. Measured: the first attempt left the HUD at
+   1.87:1 over MODA, the lightest chapter in the set. Bounded to the HUD so a
+   bright frame keeps its brightness everywhere the type is not. */
+.hud::before{
+  content:"";position:absolute;left:0;right:0;bottom:0;top:-14%;z-index:-1;
+  background:linear-gradient(to top,
+    rgba(14,15,17,.97) 0%,
+    rgba(14,15,17,.94) 45%,
+    rgba(14,15,17,.78) 72%,
+    rgba(14,15,17,0) 100%);
+}
+
+/* the oversized numeral IS the progress indicator: it tells you where you are
+   in the sequence, which is the job that earns it a place (motion-taste I5) */
+.numeral{
+  position:absolute;left:var(--mat);bottom:-.14em;z-index:1;
+  font-size:var(--text-numeral);font-weight:700;line-height:.72;
+  letter-spacing:-.05em;color:transparent;
+  -webkit-text-stroke:1px var(--ink-20);
+  user-select:none;pointer-events:none;
+}
+
+.hud{position:relative;z-index:2;align-self:end;padding:var(--mat);width:100%}
+.hud-grid{display:grid;grid-template-columns:1fr;gap:var(--space-5);align-items:end}
+.client{
+  font-size:var(--text-display);font-weight:600;line-height:.92;
+  letter-spacing:-.035em;margin:0;text-wrap:balance;
+}
+.facts{display:flex;flex-wrap:wrap;gap:var(--space-3) var(--space-6);margin:0;padding:0;list-style:none}
+.facts li{display:flex;gap:var(--space-2);align-items:baseline}
+.facts dt{display:contents}
+.open{
+  display:inline-block;margin-block-start:var(--space-4);text-decoration:none;
+  color:var(--ink);border-block-end:1px solid var(--rule-strong);
+  padding-block-end:var(--space-2);transition:border-color var(--dur-2) var(--ease-out);
+}
+.open:hover{border-color:var(--ink)}
+
+@media (min-width:64rem){
+  .hud-grid{grid-template-columns:1.5fr 1fr;gap:var(--space-8)}
+  .facts{justify-content:flex-end}
+}
+
+/* ===========================================================================
+   THE RAIL — persistent, and it is not decoration: this audience is comparing
+   candidates under time pressure, so "how many are left" is real information.
+   ======================================================================== */
+.rail{
+  position:fixed;right:var(--mat);top:50%;transform:translateY(-50%);z-index:40;
+  display:flex;flex-direction:column;gap:var(--space-3);
+}
+.rail a{
+  display:flex;align-items:center;gap:var(--space-3);justify-content:flex-end;
+  text-decoration:none;color:var(--ink-58);
+  transition:color var(--dur-2) var(--ease-out);
+}
+.rail a .tick{
+  display:block;width:1.75rem;height:1px;background:currentColor;
+  transform-origin:right center;transform:scaleX(.45);
+  transition:transform var(--dur-2) var(--ease-out),background var(--dur-2) var(--ease-out);
+}
+.rail a[aria-current="true"]{color:var(--ink)}
+.rail a[aria-current="true"] .tick{transform:scaleX(1)}
+.rail a:hover,.rail a:focus-visible{color:var(--ink)}
+.rail a:hover .tick{transform:scaleX(1)}
+.rail .rlabel{font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:var(--text-xs);letter-spacing:.12em;
+  opacity:0;transform:translateX(var(--space-2));
+  transition:opacity var(--dur-2) var(--ease-out),transform var(--dur-2) var(--ease-out);}
+.rail a:hover .rlabel,.rail a:focus-visible .rlabel,
+.rail a[aria-current="true"] .rlabel{opacity:1;transform:none}
+@media (max-width:47.99rem){ .rail{display:none} }
+
+/* ===========================================================================
+   MOTION STATES — every one of them is applied by SCRIPT via .motion on <html>.
+   Without that class the page is a complete, composed, still document.
+   ======================================================================== */
+.motion .plate img{will-change:transform}
+.motion .hud [data-cue]{
+  opacity:0;transform:translate3d(0,var(--space-5),0);filter:blur(8px);
+  transition:opacity var(--dur-3) var(--ease-out),
+             transform var(--dur-3) var(--ease-out),
+             filter var(--dur-3) var(--ease-out);
+}
+.motion .hud.lit [data-cue]{opacity:1;transform:none;filter:blur(0)}
+.motion .hud.lit [data-cue]:nth-child(1){transition-delay:0ms}
+.motion .hud.lit [data-cue]:nth-child(2){transition-delay:110ms}
+.motion .hud.lit [data-cue]:nth-child(3){transition-delay:220ms}
+.motion .hud.lit [data-cue]:nth-child(4){transition-delay:330ms}
+
+/* the opening title card */
+.motion .overture [data-cue]{transition-duration:var(--dur-4)}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{
+    animation-duration:.001ms!important;animation-iteration-count:1!important;
+    transition-duration:.001ms!important;
+  }
+  /* DESIGNED static path, not a gutted one: the scenes stop being scenes and
+     become a straightforward stacked page, still composed and complete. */
+  .scene{height:auto}
+  .stage{position:static;height:auto;min-height:0}
+  .plate{position:relative;aspect-ratio:16/10}
+  .plate img{transform:none!important}
+  .numeral{position:static;font-size:var(--text-h2);color:var(--ink-58);
+           -webkit-text-stroke:0;margin:var(--mat) var(--mat) 0}
+  .hud [data-cue]{opacity:1!important;transform:none!important;filter:none!important}
+  .rail{display:none}
+}
+</style>
+</head>
+
+<body>
+<a href="#s1" class="skip label">Skip to the work</a>
+
+<header style="position:fixed;top:0;left:0;right:0;z-index:50;
+               padding:var(--space-5) var(--mat);display:flex;
+               justify-content:space-between;align-items:baseline;gap:var(--space-5);
+               mix-blend-mode:difference;pointer-events:none">
+  <a href="#top" class="label" style="color:var(--ink);pointer-events:auto">Alexander Sigoff</a>
+  <p class="label" style="pointer-events:auto">
+    Variant B &nbsp;/&nbsp; <a href="index1.html" style="color:inherit">see variant A</a>
+  </p>
+</header>
+
+<nav class="rail" aria-label="Cases">
+  <a href="#s1"><span class="rlabel">Ferrari</span><span class="tick"></span></a>
+  <a href="#s2"><span class="rlabel">Prestige</span><span class="tick"></span></a>
+  <a href="#s3"><span class="rlabel">Pagani</span><span class="tick"></span></a>
+  <a href="#s4"><span class="rlabel">Dimamid</span><span class="tick"></span></a>
+  <a href="#s5"><span class="rlabel">MODA</span><span class="tick"></span></a>
+  <a href="#s6"><span class="rlabel">Porsche</span><span class="tick"></span></a>
+</nav>
+
+<main id="top">
+
+<!-- == TITLE CARD ======================================================== -->
+<section class="scene" style="--scene:150svh">
+  <div class="stage">
+    <figure class="plate">
+      <img src="assets/cases/case-01-frame.webp" width="1800" height="1125" data-scrub="1.18"
+           fetchpriority="high" alt="Cauley Ferrari — the home page hero." />
+    </figure>
+    <div class="hud overture">
+      <div class="hud-grid">
+        <div>
+          <p class="label" data-cue>Selected work &nbsp;/&nbsp; <span class="num">2021 &mdash; 2026</span></p>
+          <p class="client" data-cue style="margin-block-start:var(--space-4);max-width:14ch">
+            [ONE-LINE POSITIONING STATEMENT]
+          </p>
+        </div>
+        <p class="measure label" data-cue style="line-height:1.7;text-transform:none;letter-spacing:0;font-size:var(--text-sm)">
+          [Two sentences, 140&ndash;180 characters. Yours to write &mdash; no voice has been invented here.]
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- == 01 ================================================================ -->
+<section class="scene" id="s1" aria-labelledby="h1">
+  <div class="stage">
+    <figure class="plate">
+      <img src="assets/cases/case-01-frame.webp" width="1800" height="1125" data-scrub="1.14"
+           alt="Cauley Ferrari — the home page hero." />
+    </figure>
+    <span class="numeral num" data-drift="-14" aria-hidden="true">01</span>
+    <div class="hud">
+      <div class="hud-grid">
+        <div>
+          <p class="label" data-cue>Marque dealer</p>
+          <h2 class="client" id="h1" data-cue style="margin-block-start:var(--space-3)">Cauley Ferrari</h2>
+        </div>
+        <div data-cue>
+          <ul class="facts">
+            <li><span class="label">Year</span><span class="label num" style="color:var(--ink)">2025</span></li>
+            <li><span class="label">Role</span><span class="label" style="color:var(--ink)">Art direction &middot; UI</span></li>
+            <li><span class="label">Scope</span><span class="label" style="color:var(--ink)">Multi-page product</span></li>
+          </ul>
+          <a class="open label" href="https://www.cauleyferrari.com/" rel="noopener">Open the site &nbsp;&rarr;</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- == 02 ================================================================ -->
+<section class="scene" id="s2" aria-labelledby="h2">
+  <div class="stage">
+    <figure class="plate">
+      <img src="assets/cases/case-02-frame.webp" width="1800" height="1125" data-scrub="1.14"
+           alt="Prestige Imports — the services section." />
+    </figure>
+    <span class="numeral num" data-drift="-14" aria-hidden="true">02</span>
+    <div class="hud">
+      <div class="hud-grid">
+        <div>
+          <p class="label" data-cue>Dealer group, service</p>
+          <h2 class="client" id="h2" data-cue style="margin-block-start:var(--space-3)">Prestige Imports</h2>
+        </div>
+        <div data-cue>
+          <ul class="facts">
+            <li><span class="label">Year</span><span class="label num" style="color:var(--ink)">2026</span></li>
+            <li><span class="label">Role</span><span class="label" style="color:var(--ink)">Art direction &middot; UI</span></li>
+            <li><span class="label">Scope</span><span class="label" style="color:var(--ink)">Light system</span></li>
+          </ul>
+          <a class="open label" href="https://sigovs.github.io/prestige-website/index_6.html" rel="noopener">Open the site &nbsp;&rarr;</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- == 03 ================================================================ -->
+<section class="scene" id="s3" aria-labelledby="h3">
+  <div class="stage">
+    <figure class="plate">
+      <img src="assets/cases/case-03-frame.webp" width="1800" height="1125" data-scrub="1.14"
+           alt="Pagani of Chicago — the Zonda model page." />
+    </figure>
+    <span class="numeral num" data-drift="-14" aria-hidden="true">03</span>
+    <div class="hud">
+      <div class="hud-grid">
+        <div>
+          <p class="label" data-cue>Marque dealer</p>
+          <h2 class="client" id="h3" data-cue style="margin-block-start:var(--space-3)">Pagani of Chicago</h2>
+        </div>
+        <div data-cue>
+          <ul class="facts">
+            <li><span class="label">Year</span><span class="label num" style="color:var(--ink)">2025</span></li>
+            <li><span class="label">Role</span><span class="label" style="color:var(--ink)">Art direction &middot; UI</span></li>
+            <li><span class="label">Scope</span><span class="label" style="color:var(--ink)">Model pages</span></li>
+          </ul>
+          <a class="open label" href="https://www.paganiofchicago.com/" rel="noopener">Open the site &nbsp;&rarr;</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- == 04 — THE DISRUPTION ===============================================
+     Still the disruption, still by GENRE. In this variant it also gets the
+     only scene that runs longer and scrubs harder, because it is the only
+     project whose own subject is motion.
+     ==================================================================== -->
+<section class="scene" id="s4" aria-labelledby="h4" style="--scene:420svh">
+  <div class="stage">
+    <figure class="plate">
+      <img src="assets/cases/case-04-frame.webp" width="1800" height="771" data-scrub="1.30"
+           alt="Dimamid — the authored world: a figure adrift in space at a console." />
+    </figure>
+    <span class="numeral num" data-drift="-26" aria-hidden="true">04</span>
+    <div class="hud">
+      <div class="hud-grid">
+        <div>
+          <p class="label" data-cue>Music project</p>
+          <h2 class="client" id="h4" data-cue style="margin-block-start:var(--space-3)">Dimamid</h2>
+        </div>
+        <div data-cue>
+          <ul class="facts">
+            <li><span class="label">Year</span><span class="label num" style="color:var(--ink)">2025</span></li>
+            <li><span class="label">Role</span><span class="label" style="color:var(--ink)">Art direction &middot; UI</span></li>
+            <li><span class="label">Scope</span><span class="label" style="color:var(--ink)">Authored world</span></li>
+          </ul>
+          <a class="open label" href="https://sigovs.github.io/dimamid/" rel="noopener">Open the site &nbsp;&rarr;</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- == 05 ================================================================ -->
+<section class="scene" id="s5" aria-labelledby="h5">
+  <div class="stage">
+    <figure class="plate">
+      <img src="assets/cases/case-05-frame.webp" width="1364" height="853" data-scrub="1.14"
+           alt="MODA Miami for Sotheby's — a classic Ferrari under the Biltmore colonnade." />
+    </figure>
+    <span class="numeral num" data-drift="-14" aria-hidden="true">05</span>
+    <div class="hud">
+      <div class="hud-grid">
+        <div>
+          <p class="label" data-cue>Concours &amp; auction</p>
+          <h2 class="client" id="h5" data-cue style="margin-block-start:var(--space-3)">MODA Miami / Sotheby&rsquo;s</h2>
+        </div>
+        <div data-cue>
+          <ul class="facts">
+            <li><span class="label">Year</span><span class="label num" style="color:var(--ink)">2023</span></li>
+            <li><span class="label">Role</span><span class="label" style="color:var(--ink)">Art direction &middot; UI</span></li>
+            <li><span class="label">Scope</span><span class="label" style="color:var(--ink)">Event platform</span></li>
+          </ul>
+          <a class="open label" href="https://www.behance.net/gallery/179848061/MODA-MIAMI-Sothebys" rel="noopener">View the case &nbsp;&rarr;</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- == 06 ================================================================ -->
+<section class="scene" id="s6" aria-labelledby="h6">
+  <div class="stage">
+    <figure class="plate">
+      <img src="assets/cases/case-06-frame.webp" width="1728" height="1080" data-scrub="1.14"
+           alt="Porsche Restoration Services — home page." />
+    </figure>
+    <span class="numeral num" data-drift="-14" aria-hidden="true">06</span>
+    <div class="hud">
+      <div class="hud-grid">
+        <div>
+          <p class="label" data-cue>Restoration service</p>
+          <h2 class="client" id="h6" data-cue style="margin-block-start:var(--space-3)">Porsche Restoration Services</h2>
+        </div>
+        <div data-cue>
+          <ul class="facts">
+            <li><span class="label">Year</span><span class="label num" style="color:var(--ink)">2021</span></li>
+            <li><span class="label">Role</span><span class="label" style="color:var(--ink)">Art direction &middot; UI</span></li>
+            <li><span class="label">Scope</span><span class="label" style="color:var(--ink)">Service site</span></li>
+          </ul>
+          <a class="open label" href="https://www.behance.net/gallery/130127865/Porsche-Restoration-Services" rel="noopener">View the case &nbsp;&rarr;</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- == CLOSE ============================================================= -->
+<section id="contact" style="padding:var(--space-11) var(--mat) var(--space-9)">
+  <p class="label" data-cue>Contact</p>
+  <p class="client" style="margin:var(--space-5) 0 0;max-width:12ch">[Contact headline]</p>
+  <p style="margin-block-start:var(--space-7)">
+    <a class="open label" href="mailto:[EMAIL]">[EMAIL] &nbsp;&rarr;</a>
+  </p>
+  <p class="label" style="margin-block-start:var(--space-10);color:var(--ink-58)">
+    Six of twelve shipped projects &nbsp;/&nbsp;
+    <a href="index1.html" style="color:var(--ink)">the full index is in variant A</a>
+  </p>
+</section>
+
+</main>
+
+<footer style="padding:var(--space-6) var(--mat);border-top:1px solid var(--rule);
+               display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--space-3)">
+  <p class="label">Variant B &mdash; motion-led</p>
+  <p class="label">Alexander Sigoff &nbsp;&middot;&nbsp; <span class="num">&copy; 2026</span></p>
+</footer>
+
+<script>
+(function(){
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  if (reduce.matches) return;          // the static path is the CSS default
+  document.documentElement.classList.add('motion');
+
+  var scenes = Array.prototype.slice.call(document.querySelectorAll('.scene')).map(function(s){
+    return {
+      el: s,
+      img: s.querySelector('[data-scrub]'),
+      scrub: parseFloat((s.querySelector('[data-scrub]')||{}).dataset ? s.querySelector('[data-scrub]').dataset.scrub : 1) || 1,
+      numeral: s.querySelector('[data-drift]'),
+      drift: s.querySelector('[data-drift]') ? parseFloat(s.querySelector('[data-drift]').dataset.drift) : 0,
+      hud: s.querySelector('.hud'),
+      id: s.id
+    };
+  });
+  var links = Array.prototype.slice.call(document.querySelectorAll('.rail a'));
+
+  /* PRIMARY EVENT — the frame resolves across the scene.
+     Job: a still photograph gets duration, so a hurried eye lands on it instead
+     of skating past. One per scene, never two at once. */
+  /* SUPPORTING — the numeral counter-drifts.
+     Job: it is the position indicator. You always know which of six you are on. */
+  /* AMBIENT — the rail tick lengthens on the active case.
+     Job: how many remain, for an audience that is comparing candidates. */
+  /* INTERACTION — hover and focus on rail and links, never suppressed. */
+
+  var ticking = false, current = null;
+  function frame(){
+    var vh = innerHeight;
+    scenes.forEach(function(s){
+      var r = s.el.getBoundingClientRect();
+      var len = r.height - vh;
+      var p = len > 0 ? Math.min(1, Math.max(0, -r.top / len)) : (r.top < vh/2 ? 1 : 0);
+
+      if (r.bottom > 0 && r.top < vh){
+        if (s.img){
+          var sc = s.scrub + (1 - s.scrub) * p;            // 1.14 -> 1.00
+          s.img.style.transform = 'scale(' + sc.toFixed(4) + ') translate3d(0,' +
+                                  ((p - .5) * -3).toFixed(2) + '%,0)';
+        }
+        if (s.numeral){
+          s.numeral.style.transform = 'translate3d(0,' + (p * s.drift).toFixed(2) + '%,0)';
+        }
+        if (s.hud && p > 0.04) s.hud.classList.add('lit');
+        if (s.id && current !== s.id && r.top <= vh*0.5 && r.bottom >= vh*0.5){
+          current = s.id;
+          links.forEach(function(a){
+            a.setAttribute('aria-current', a.getAttribute('href') === '#'+s.id ? 'true' : 'false');
+          });
+        }
+      }
+    });
+    ticking = false;
+  }
+  function onScroll(){ if(!ticking){ ticking = true; requestAnimationFrame(frame); } }
+  addEventListener('scroll', onScroll, {passive:true});
+  addEventListener('resize', onScroll, {passive:true});
+  frame();
+
+  /* The title card is above the fold and must not wait for a scroll event. */
+  var first = document.querySelector('.hud.overture');
+  if (first) requestAnimationFrame(function(){ first.classList.add('lit'); });
+
+  /* Eased scroll on the NATIVE document — same reasoning as variant A: a
+     transformed scroll container reports scrollHeight 0 and breaks screenshots,
+     find-in-page and anchoring. Wheel only; keyboard, touch and scrollbar stay
+     native. Anchors run through the same glide so they land exactly. */
+  if (!matchMedia('(pointer: coarse)').matches){
+    var target = scrollY, running = false, EASE = 0.085;
+    function max(){ return document.documentElement.scrollHeight - innerHeight; }
+    function glide(){
+      var d = target - scrollY;
+      if (Math.abs(d) < 0.5){ running = false; return; }
+      scrollTo(0, scrollY + d * EASE);
+      requestAnimationFrame(glide);
+    }
+    addEventListener('wheel', function(e){
+      if (e.ctrlKey) return;
+      e.preventDefault();
+      target = Math.max(0, Math.min(max(), target + e.deltaY));
+      if (!running){ running = true; requestAnimationFrame(glide); }
+    }, {passive:false});
+    addEventListener('scroll', function(){ if(!running) target = scrollY; }, {passive:true});
+    addEventListener('resize', function(){ target = scrollY; }, {passive:true});
+    document.querySelectorAll('a[href^="#"]').forEach(function(a){
+      a.addEventListener('click', function(e){
+        var el = document.getElementById(a.getAttribute('href').slice(1));
+        if (!el) return;
+        e.preventDefault();
+        target = Math.max(0, Math.min(max(), el.getBoundingClientRect().top + scrollY));
+        if (!running){ running = true; requestAnimationFrame(glide); }
+        if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex','-1');
+        el.focus({preventScroll:true});
+      });
+    });
+  }
+})();
+</script>
+</body>
+</html>

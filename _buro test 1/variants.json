@@ -1,0 +1,34 @@
+{
+  "_": [
+    "The variant register. This file is the source of truth for the index page at",
+    "the root of the Pages site — `npm run deploy <slug>` reads it, and a slug that",
+    "is not listed here is refused rather than silently published as an untitled",
+    "folder.",
+    "",
+    "Order is presentation order: newest first. `status` is free text and appears",
+    "on the card as written — 'current', 'superseded', 'experiment', a date, or",
+    "nothing at all.",
+    "",
+    "A variant is REMOVED from the site by deleting its entry here and running a",
+    "deploy; the folder goes with it. Nothing is orphaned by hand."
+  ],
+
+  "title": "Machine study 01",
+  "subject": "KUKA KR 700 PA",
+  "repo": "https://github.com/Sigovs/gd_buro_tests",
+  "base": "/gd_buro_tests/",
+
+  "variants": [
+    {
+      "slug": "v01-level-line",
+      "name": "The level line",
+      "note": "Six camera stations around roughly 490° of travel. The datum lives in the room rather than on the glass, so the arm occludes it. Split-flap opening; instrument layer reads real azimuth and distance.",
+      "date": "2026-09-03",
+      "status": "current",
+      "entries": [
+        { "path": "", "label": "The page" },
+        { "path": "lab/rig.html", "label": "Rig bench" }
+      ]
+    }
+  ]
+}

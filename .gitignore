@@ -1,0 +1,14 @@
+﻿**/node_modules/
+**/.cache/
+**/.vite/
+**/dist/
+**/build/
+**/coverage/
+**/.env
+**/.env.*
+!**/.env.example
+*.log
+.DS_Store
+Thumbs.db
+/_buro test 2/
+**/.claude/settings.local.json

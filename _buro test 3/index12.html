@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bath — what the dye pot will give you</title>
+<meta name="description" content="Choose a dyestuff, a mordant and a fibre, and see the bath before you commit cloth to it. Eighty baths, each one computed rather than picked." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+/* ===========================================================================
+   BATH — a natural-dye predictor.
+
+   PURPOSE
+     A dyer has to commit cloth to a pot before they can see what it gives.
+     Madder with alum is not madder with iron; cotton takes barely half of what
+     wool takes. This shows the bath first. Five dyestuffs x four mordants x
+     four fibres = eighty baths, and every one is computed from a stated model
+     rather than picked by hand.
+
+   COLOUR IS THE FUNCTION, NOT THE DECORATION
+     The result floods the page because the result IS the answer. Chrome is the
+     reduced indigo vat — the murky yellow-green a vat actually is before the
+     cloth hits air and turns blue — so the surround is the workshop and the
+     field is the outcome. Nothing here is monochrome and nothing is neutral by
+     default; the only greys on the page are the ones a bath produces.
+
+   THE MODEL, stated so it can be argued with
+     Each dyestuff carries a base hue, saturation and lightness.
+     Mordants transform it the way they do in a pot:
+       none    weak uptake, pale and fugitive
+       alum    brightens and clears
+       iron    "saddens" — pulls toward olive and darkens
+       copper  shifts green and deepens
+     Hue moves TOWARD a target rather than by addition, because a saddened red
+     goes olive and a saddened blue goes teal — they do not both rotate the same
+     way.
+     Fibre sets uptake: protein fibres take far more than cellulose without a
+     tannin step. wool 1.00 · silk 0.90 · cotton 0.60 · linen 0.52.
+     Dips deepen: each further immersion raises saturation and drops lightness.
+     Values are illustrative. The relationships are the point, not the hexes.
+
+   COMPOSITION
+     Dominant   the bath. It is the largest mass, and it is the answer.
+     Path       choose along the rails -> the field floods -> the ladder shows
+                what a second and third dip would add -> the readout names it.
+     Figure     the field is the figure; the rails are the ground it sits in.
+     Tension    a fugitive no-mordant bath sits beside a three-dip iron bath in
+                the same ladder, which is the whole argument of mordanting.
+     Recompose  desktop, rails left and the field right; tablet, rails become a
+                band above a wide field; mobile, THE FIELD BECOMES THE PAGE and
+                the rails become a sheet over it, because on a phone the colour
+                has to be the surface you are looking at, not a panel beside it.
+
+   Type re-solves its own contrast against every one of the eighty baths at
+   runtime — the ink is chosen, then corrected until it clears 4.5:1, and the
+   ratio it reached is printed on the page.
+   ======================================================================== */
+:root{
+  --s1:.25rem; --s2:.5rem; --s3:.75rem; --s4:1rem; --s5:1.5rem;
+  --s6:2rem;   --s7:3rem;  --s8:4rem;
+
+  /* the reduced vat: what an indigo pot looks like before the air gets to it */
+  --vat:#1e2417;
+  --vat-2:#28301d;
+  --vat-line:rgba(233,228,208,.20);
+  --vat-ink:#e9e4d0;
+  --vat-ink-70:rgba(233,228,208,.72);
+  --vat-ink-50:rgba(233,228,208,.56);
+
+  /* written by script; these are only the first paint */
+  --bath:#8f3a2a;
+  --ink:#12100e;
+  --ink-70:rgba(18,16,14,.74);
+
+  --display:Fraunces,Georgia,serif;
+  --sans:"IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+
+  --pad:clamp(1rem,2.6vw,2.5rem);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--vat);color:var(--vat-ink);font-family:var(--sans);
+  font-size:1rem;line-height:1.5;-webkit-font-smoothing:antialiased;
+  min-height:100svh}
+p,h1,h2,h3,dl,dd{margin:0}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.k{font-family:var(--mono);font-size:.625rem;letter-spacing:.18em;
+  text-transform:uppercase}
+.num{font-variant-numeric:tabular-nums}
+:where(button,a,[tabindex]):focus-visible{outline:2px solid currentColor;outline-offset:3px}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* =========================================================================
+   SHELL — rails in the vat, the bath beside them.
+   ====================================================================== */
+.shell{display:grid;min-height:100svh}
+@media (min-width:64rem){ .shell{grid-template-columns:23rem 1fr} }
+
+.rails{padding:var(--pad);display:flex;flex-direction:column;gap:var(--s6);
+  background:var(--vat)}
+.brand{display:flex;align-items:baseline;gap:var(--s3);flex-wrap:wrap}
+.brand h1{font-family:var(--display);font-weight:600;
+  font-size:clamp(1.75rem,2.4vw,2.375rem);line-height:1;letter-spacing:-.02em;
+  font-variation-settings:'SOFT' 40,'WONK' 1}
+.brand p{color:var(--vat-ink-50)}
+
+.rail__h{display:flex;justify-content:space-between;align-items:baseline;
+  gap:var(--s4);color:var(--vat-ink-50);margin-bottom:var(--s3)}
+.opts{display:flex;flex-direction:column;gap:1px;background:var(--vat-line)}
+.opt{display:flex;align-items:center;gap:var(--s4);width:100%;text-align:left;
+  padding:.6rem .75rem;background:var(--vat);
+  transition:background .2s ease,color .2s ease}
+.opt:hover{background:var(--vat-2)}
+.opt[aria-pressed="true"]{background:var(--vat-ink);color:var(--vat)}
+.opt__sw{flex:0 0 auto;width:1.1rem;height:1.1rem;border-radius:50%;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.28)}
+.opt__n{font-size:.9375rem;font-weight:500}
+.opt__t{margin-left:auto;font-family:var(--mono);font-size:.625rem;
+  letter-spacing:.1em;opacity:.62;white-space:nowrap}
+
+/* =========================================================================
+   THE BATH — the dominant. It is the answer, so it is the largest mass.
+   ====================================================================== */
+.bath{position:relative;background:var(--bath);color:var(--ink);
+  display:flex;flex-direction:column;justify-content:space-between;
+  padding:var(--pad);gap:var(--s6);min-height:60svh;
+  transition:background-color .55s cubic-bezier(.22,1,.36,1),color .3s ease}
+.bath__top{display:flex;flex-wrap:wrap;gap:var(--s4) var(--s6);
+  align-items:baseline;justify-content:space-between}
+.bath__name{font-family:var(--display);font-weight:600;
+  font-size:clamp(2.25rem,5.6vw,5rem);line-height:.98;letter-spacing:-.03em;
+  max-width:16ch;font-variation-settings:'SOFT' 60,'WONK' 1}
+.bath__say{font-size:clamp(.9375rem,1.05vw,1.0625rem);line-height:1.6;
+  max-width:44ch;color:var(--ink-70)}
+.bath__hex{font-family:var(--mono);font-size:clamp(1rem,1.5vw,1.375rem);
+  letter-spacing:.12em}
+
+/* the dip ladder — the same bath at one, two and three immersions */
+.ladder{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s3)}
+.dip{border-radius:0;padding:var(--s4);min-height:6.5rem;display:flex;
+  flex-direction:column;justify-content:space-between;gap:var(--s4);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.14);
+  transition:background-color .55s cubic-bezier(.22,1,.36,1),color .3s ease}
+.dip__n{font-family:var(--mono);font-size:.625rem;letter-spacing:.16em;
+  text-transform:uppercase;opacity:.8}
+.dip__v{font-family:var(--mono);font-size:.75rem;letter-spacing:.08em}
+
+/* the two borders met across a gap and read as one broken rule rather than one
+   rule; the gap moves inside the key instead */
+.facts{display:grid;grid-template-columns:1fr auto;column-gap:0}
+.facts dt{padding:.4rem var(--s5) .4rem 0;border-top:1px solid currentColor;
+  font-family:var(--mono);font-size:.625rem;letter-spacing:.14em;
+  text-transform:uppercase;opacity:.66;line-height:1.6}
+.facts dd{padding-block:.4rem;border-top:1px solid currentColor;text-align:right;
+  font-family:var(--mono);font-size:.75rem;font-variant-numeric:tabular-nums;opacity:.9}
+
+.note{color:var(--vat-ink-50);font-size:.75rem;line-height:1.55;max-width:40ch}
+
+/* =========================================================================
+   RECOMPOSITION — not a stack.
+   Tablet: the rails become a band of three columns above a wide field.
+   Mobile: the FIELD BECOMES THE PAGE and the rails become a sheet over it,
+   because on a phone the colour has to be the surface you are looking at.
+   ====================================================================== */
+@media (max-width:63.99rem){
+  .shell{grid-template-rows:auto 1fr}
+  .rails{gap:var(--s5)}
+  .rails__set{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s5)}
+  .bath{min-height:52svh}
+}
+@media (max-width:47.99rem){
+  .shell{display:block;min-height:0}
+  .bath{position:fixed;inset:0;z-index:0;min-height:0;height:100svh;
+    padding:var(--pad) var(--pad) 13.5rem;justify-content:flex-start;gap:var(--s5);
+    overflow-y:auto;overscroll-behavior:contain}
+  .bath__name{font-size:clamp(2rem,10vw,3rem)}
+  .ladder{grid-template-columns:repeat(3,1fr);gap:var(--s2)}
+  .dip{min-height:4.5rem;padding:var(--s3)}
+  .rails{position:fixed;left:0;right:0;bottom:0;z-index:2;gap:var(--s4);
+    padding:var(--s4) var(--pad) var(--s5);
+    background:var(--vat);border-top:1px solid var(--vat-line);
+    box-shadow:0 -18px 40px rgba(0,0,0,.34)}
+  .brand{display:none}
+  .rails__set{display:flex;flex-direction:column;gap:var(--s4)}
+  .rail__h{margin-bottom:var(--s2)}
+  /* the three axes become swipeable rows of chips, not a stacked list */
+  .opts{flex-direction:row;gap:var(--s2);overflow-x:auto;background:none;
+    scroll-snap-type:x proximity;padding-bottom:2px;
+    margin-inline:calc(var(--pad) * -1);padding-inline:var(--pad)}
+  .opt{width:auto;flex:0 0 auto;padding:.45rem .7rem;scroll-snap-align:start;
+    border:1px solid var(--vat-line);gap:var(--s3)}
+  .opt__t{display:none}
+  .note{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .bath,.dip{transition:none}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ================================================== RAILS (the vat) -->
+  <div class="rails">
+    <div class="brand">
+      <h1>Bath</h1>
+      <p class="k">Natural dye, before you commit the cloth</p>
+    </div>
+
+    <div class="rails__set">
+      <section aria-labelledby="r1">
+        <div class="rail__h"><h2 class="k" id="r1">Dyestuff</h2><span class="k">Five</span></div>
+        <div class="opts" id="rail-dye" role="group" aria-label="Dyestuff"></div>
+      </section>
+      <section aria-labelledby="r2">
+        <div class="rail__h"><h2 class="k" id="r2">Mordant</h2><span class="k">Four</span></div>
+        <div class="opts" id="rail-mordant" role="group" aria-label="Mordant"></div>
+      </section>
+      <section aria-labelledby="r3">
+        <div class="rail__h"><h2 class="k" id="r3">Fibre</h2><span class="k">Uptake</span></div>
+        <div class="opts" id="rail-fibre" role="group" aria-label="Fibre"></div>
+      </section>
+    </div>
+
+    <p class="note">Eighty baths, each computed from the model rather than
+      picked. Values are illustrative; the relationships between them are the
+      point. Type on the field re-solves its own contrast against every result.</p>
+  </div>
+
+  <!-- ====================================================== THE BATH ==== -->
+  <main class="bath" id="bath">
+    <div class="bath__top">
+      <div>
+        <p class="k" id="bath-kicker">Madder &middot; alum &middot; wool</p>
+        <h2 class="bath__name" id="bath-name">Turkey red, clear and warm</h2>
+      </div>
+      <p class="bath__hex num" id="bath-hex">#8F3A2A</p>
+    </div>
+
+    <p class="bath__say" id="bath-say"></p>
+
+    <div>
+      <p class="k" style="opacity:.7;margin-bottom:var(--s3)">Immersions</p>
+      <div class="ladder" id="ladder"></div>
+    </div>
+
+    <dl class="facts" id="facts"></dl>
+  </main>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ---- the model ------------------------------------------------------ */
+  var DYES=[
+    {id:'madder',   n:'Madder root', h:8,   s:74, l:42, note:'The old red. Alizarin from the root, and the reason a red coat was ever affordable.'},
+    {id:'cochineal',n:'Cochineal',   h:344, s:64, l:44, note:'Carminic acid, from insects farmed on cactus. The most expensive red in the room.'},
+    {id:'weld',     n:'Weld',        h:47,  s:80, l:52, note:'The clearest yellow in the European palette, and the one that stays clear.'},
+    {id:'indigo',   n:'Indigo',      h:224, s:54, l:34, note:'Not a bath at all in the strict sense — it strikes on air, not on a mordant.'},
+    {id:'walnut',   n:'Walnut hull', h:26,  s:36, l:31, note:'A substantive dye. It grips without help, and it will grip your hands too.'}
+  ];
+  /* mordants pull hue TOWARD a target, because a saddened red goes olive and a
+     saddened blue goes teal — they do not rotate the same way */
+  var MORDANTS=[
+    {id:'none',  n:'No mordant', toward:null, pull:0,    ds:-30, dl:16, t:'fugitive', note:'It will take, and it will wash out. This is the control, not a method.'},
+    {id:'alum',  n:'Alum',       toward:null, pull:0,    ds:10,  dl:3,  t:'clear',    note:'Potassium aluminium sulphate. Brightens and clears without shifting the hue.'},
+    {id:'iron',  n:'Iron',       toward:72,   pull:.20,  ds:-16, dl:-19,t:'saddened', note:'Ferrous sulphate. Dyers call the effect saddening, and that is exactly what it looks like.'},
+    {id:'copper',n:'Copper',     toward:142,  pull:.24,  ds:-4,  dl:-9, t:'greened',  note:'Copper sulphate pushes toward green and deepens the tone a step.'}
+  ];
+  var FIBRES=[
+    {id:'wool',  n:'Wool',   u:1.00, t:'protein',   note:'Protein fibre, scaled surface, the most forgiving thing in the pot.'},
+    {id:'silk',  n:'Silk',   u:0.90, t:'protein',   note:'Protein again, smoother, and it returns the colour with more light in it.'},
+    {id:'cotton',n:'Cotton', u:0.60, t:'cellulose', note:'Cellulose. Without a tannin step it takes little, and this shows the little.'},
+    {id:'linen', n:'Linen',  u:0.52, t:'cellulose', note:'Cellulose and waxier still. The hardest of the four to persuade.'}
+  ];
+
+  var state={dye:'madder',mordant:'alum',fibre:'wool'};
+  var byId=function(list,id){for(var i=0;i<list.length;i++) if(list[i].id===id) return list[i];};
+
+  /* ---- colour ---------------------------------------------------------- */
+  function shortest(a,b){var d=((b-a)%360+540)%360-180;return d;}
+  function bathHSL(dye,mor,fib,dip){
+    var h=dye.h, s=dye.s, l=dye.l;
+    if(mor.toward!==null) h=(h+shortest(h,mor.toward)*mor.pull+360)%360;
+    s+=mor.ds; l+=mor.dl;
+    /* uptake: cellulose returns a paler, weaker bath */
+    var u=fib.u;
+    s=s*(0.46+0.54*u);
+    l=l+(1-u)*20;
+    /* each further immersion deepens */
+    var k=dip-1;
+    s=s+k*7; l=l-k*7.5;
+    return [ (h+360)%360, Math.max(4,Math.min(96,s)), Math.max(7,Math.min(93,l)) ];
+  }
+  function hsl2rgb(h,s,l){
+    s/=100;l/=100;
+    var c=(1-Math.abs(2*l-1))*s, x=c*(1-Math.abs((h/60)%2-1)), m=l-c/2, r,g,b;
+    if(h<60){r=c;g=x;b=0;} else if(h<120){r=x;g=c;b=0;} else if(h<180){r=0;g=c;b=x;}
+    else if(h<240){r=0;g=x;b=c;} else if(h<300){r=x;g=0;b=c;} else {r=c;g=0;b=x;}
+    return [r,g,b].map(function(v){return Math.round((v+m)*255);});
+  }
+  function hex(rgb){return '#'+rgb.map(function(v){
+    return ('0'+Math.max(0,Math.min(255,v)).toString(16)).slice(-2);}).join('').toUpperCase();}
+  function rel(v){v/=255;return v<=0.04045?v/12.92:Math.pow((v+0.055)/1.055,2.4);}
+  function lum(rgb){return 0.2126*rel(rgb[0])+0.7152*rel(rgb[1])+0.0722*rel(rgb[2]);}
+  function ratio(a,b){var x=lum(a),y=lum(b);if(x<y){var t=x;x=y;y=t;}
+    return (x+0.05)/(y+0.05);}
+
+  /* Type must clear 4.5:1 on every one of the eighty baths, so the ink is not
+     a token — it is solved against the field and then reported. */
+  function inkFor(rgb){
+    var dark=[18,16,14], light=[251,247,240];
+    var best=ratio(dark,rgb)>=ratio(light,rgb)?dark.slice():light.slice();
+    var toDark=best[0]<128;
+    var step=0;
+    while(ratio(best,rgb)<4.5 && step<60){
+      for(var i=0;i<3;i++) best[i]=toDark?Math.max(0,best[i]-4):Math.min(255,best[i]+4);
+      step++;
+    }
+    return {rgb:best,cr:ratio(best,rgb)};
+  }
+
+  /* ---- rails ----------------------------------------------------------- */
+  function swatchFor(kind,item){
+    var d=kind==='dye'?item:byId(DYES,state.dye);
+    var m=kind==='mordant'?item:byId(MORDANTS,state.mordant);
+    var f=kind==='fibre'?item:byId(FIBRES,state.fibre);
+    var c=bathHSL(d,m,f,1);
+    return hex(hsl2rgb(c[0],c[1],c[2]));
+  }
+  function buildRail(el,list,kind){
+    el.innerHTML='';
+    list.forEach(function(item){
+      var b=document.createElement('button');
+      b.type='button'; b.className='opt'; b.dataset.kind=kind; b.dataset.id=item.id;
+      b.setAttribute('aria-pressed', state[kind]===item.id?'true':'false');
+      b.innerHTML='<span class="opt__sw" style="background:'+swatchFor(kind,item)+'"></span>'+
+        '<span class="opt__n">'+item.n+'</span>'+
+        '<span class="opt__t">'+(item.t||(item.u!==undefined?item.u.toFixed(2):''))+'</span>';
+      el.appendChild(b);
+    });
+  }
+
+  /* ---- render ---------------------------------------------------------- */
+  var elBath=document.getElementById('bath');
+  function render(){
+    var d=byId(DYES,state.dye), m=byId(MORDANTS,state.mordant), f=byId(FIBRES,state.fibre);
+    var c=bathHSL(d,m,f,1), rgb=hsl2rgb(c[0],c[1],c[2]), h=hex(rgb), ink=inkFor(rgb);
+    var inkHex=hex(ink.rgb);
+
+    var root=document.documentElement.style;
+    root.setProperty('--bath',h);
+    root.setProperty('--ink',inkHex);
+    root.setProperty('--ink-70','rgba('+ink.rgb.join(',')+',.78)');
+
+    document.getElementById('bath-kicker').textContent=
+      d.n+' · '+m.n+' · '+f.n;
+    document.getElementById('bath-hex').textContent=h;
+    document.getElementById('bath-name').textContent=nameFor(c,m,f);
+    document.getElementById('bath-say').textContent=d.note+' '+m.note+' '+f.note;
+
+    /* the ladder: the same bath at one, two and three immersions */
+    var lad=document.getElementById('ladder'); lad.innerHTML='';
+    [1,2,3].forEach(function(n){
+      var cc=bathHSL(d,m,f,n), rr=hsl2rgb(cc[0],cc[1],cc[2]), hh=hex(rr), ii=inkFor(rr);
+      var div=document.createElement('div');
+      div.className='dip';
+      div.style.background=hh; div.style.color=hex(ii.rgb);
+      div.innerHTML='<span class="dip__n">'+(n===1?'One dip':n+' dips')+'</span>'+
+        '<span class="dip__v num">'+hh+'</span>';
+      lad.appendChild(div);
+    });
+
+    var facts=document.getElementById('facts');
+    facts.innerHTML=
+      row('Hue', Math.round(c[0])+'°') +
+      row('Saturation', Math.round(c[1])+'%') +
+      row('Lightness', Math.round(c[2])+'%') +
+      row('Fibre uptake', f.u.toFixed(2)+' of wool') +
+      row('Mordant effect', m.t) +
+      row('Type contrast here', ink.cr.toFixed(2)+':1');
+
+    ['dye','mordant','fibre'].forEach(function(k){
+      buildRail(document.getElementById('rail-'+k),
+        k==='dye'?DYES:k==='mordant'?MORDANTS:FIBRES, k);
+    });
+  }
+  function row(k,v){return '<dt>'+k+'</dt><dd>'+v+'</dd>';}
+
+  /* a plain-language name, because a dyer says "saddened madder", not "hsl" */
+  function nameFor(c,m,f){
+    var h=c[0], l=c[2], s=c[1];
+    var fam = h<18||h>=345 ? 'red'
+            : h<42  ? 'orange'
+            : h<70  ? 'yellow'
+            : h<95  ? 'olive'
+            : h<165 ? 'green'
+            : h<200 ? 'teal'
+            : h<255 ? 'blue'
+            : h<290 ? 'violet' : 'magenta';
+    var depth = l<24 ? 'deep' : l<40 ? 'full' : l<58 ? 'mid' : l<72 ? 'soft' : 'pale';
+    var body  = s<18 ? 'and nearly out of it' : s<34 ? 'and quiet' :
+                s<55 ? 'and even' : 'and strong';
+    var lead  = m.id==='iron' ? 'Saddened' : m.id==='copper' ? 'Greened' :
+                m.id==='none' ? 'Fugitive' : 'Clear';
+    return lead+' '+depth+' '+fam+', '+body;
+  }
+
+  document.addEventListener('click',function(e){
+    var b=e.target.closest('.opt'); if(!b) return;
+    state[b.dataset.kind]=b.dataset.id;
+    render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

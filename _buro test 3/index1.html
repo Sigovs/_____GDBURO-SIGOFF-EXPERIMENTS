@@ -1,0 +1,959 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Alexander Sigoff — Selected Work</title>
+<meta name="description" content="Art direction and interface design for collector-car retail. Cauley Ferrari, Prestige Imports, Pagani of Chicago, MODA Miami for Sotheby's, Porsche Restoration." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="preload" as="image" href="assets/cases/case-01-frame.webp" fetchpriority="high" />
+
+<style>
+/* ===========================================================================
+   TOKENS — the only source of space, type, colour, duration and ratio.
+   Scales taken verbatim from design_dna/skills/*.
+   ======================================================================== */
+:root{
+  /* space — 4px base, 11 steps (spacing-taste I2) */
+  --space-1:.25rem; --space-2:.5rem;  --space-3:.75rem; --space-4:1rem;
+  --space-5:1.5rem; --space-6:2rem;   --space-7:3rem;   --space-8:4rem;
+  --space-9:6rem;   --space-10:8rem;  --space-11:12rem;
+
+  /* type — fluid, correct at every width (typography-taste I3) */
+  --text-xs:.6875rem;
+  --text-sm:clamp(.8125rem,.8vw + .7rem,.9375rem);
+  --text-body:clamp(1rem,.35vw + .95rem,1.125rem);
+  --text-lead:clamp(1.125rem,.9vw + 1rem,1.5rem);
+  --text-h3:clamp(1.5rem,1.6vw + 1.1rem,2rem);
+  --text-h2:clamp(2rem,3vw + 1.2rem,3.25rem);
+  --text-display:clamp(2.75rem,7vw + 1rem,7rem);
+
+  /* colour — ground, ink, rules. NO chromatic accent: every colour event on
+     this page belongs to the work. The ground is a gallery wall. */
+  --bg:#0e0f11;
+  --bg-raised:#16181b;
+  --ink:#f2f1ee;
+  --ink-70:rgba(242,241,238,.72);
+  --ink-58:rgba(242,241,238,.58);
+  --rule:rgba(242,241,238,.14);
+  --rule-strong:rgba(242,241,238,.38);
+
+  /* duration + easing — motion-taste I3. No raw values anywhere. */
+  --dur-1:.15s; --dur-2:.25s; --dur-3:.4s; --dur-4:1.2s;
+  --ease-out:cubic-bezier(.22,1,.36,1);
+  --ease-in:cubic-bezier(.55,0,1,.45);
+
+  /* MOTION TIERS. The loud entrance is reserved for chapter-opening imagery;
+     supporting frames get a quieter one; text arrives from the side, stepped
+     child by child. Exceeds the dialect's 8px travel budget (motion-taste D1)
+     on Alex's direction for a raised register — tokenised so the whole page
+     retunes from four numbers.
+       tier 1  chapter frame     64px rise, 10px blur
+       tier 2  supporting frame  20px rise,  5px blur
+       tier 3  text block        24px from the side, 6px blur, per child */
+  --rise-far:4rem;       /* 64px — tier 1 only */
+  --rise-blur:10px;
+  --rise-near:1.25rem;   /* 20px — tier 2 */
+  --rise-near-blur:5px;
+  --slide-side:1.5rem;   /* 24px — tier 3 */
+  --slide-blur:6px;
+  --rise-step:170ms;     /* gap between neighbours — long enough to READ as
+                            one-after-another rather than as a pair */
+
+  /* ratio tokens — every crop lands on one of these, and the derivation script
+     reads the SAME set, so a frame can never be re-cropped on output */
+  --ar-frame:16/10; --ar-portrait:4/5; --ar-band:21/9; --ar-mobile:9/19.5;
+
+  /* the paspartout — constant mat around every framed case */
+  --mat:clamp(1.5rem,5vw,7rem);
+  --mat-deep:clamp(2.5rem,9vw,12rem);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+html,body{overflow-x:clip}                       /* anti-patterns U6 safety net */
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Inter Tight",system-ui,sans-serif;
+  font-size:var(--text-body);line-height:1.6;font-weight:400;
+  -webkit-font-smoothing:antialiased;
+}
+img{display:block;max-width:100%;height:auto}
+
+/* -- type roles: TWO families. The expressive role belongs to the work. ------
+   No didone: this audience's own sector is saturated with cosmetic luxury
+   serif, and authority here comes from scale and space — the lesson recorded
+   in vault/thegentlewoman-co-uk. */
+.display{font-weight:500;line-height:.95;letter-spacing:-.028em;text-wrap:balance}
+.h2{font-size:var(--text-h2);font-weight:500;line-height:1.02;letter-spacing:-.02em;text-wrap:balance}
+.lead{font-size:var(--text-lead);line-height:1.45;text-wrap:balance}
+p{text-wrap:pretty}
+.label{
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:var(--text-xs);text-transform:uppercase;
+  letter-spacing:.12em;font-weight:500;line-height:1.2;color:var(--ink-70);
+}
+.num{font-variant-numeric:tabular-nums}
+.measure{max-width:66ch}
+
+/* -- spatial hierarchy: every gap decided (spacing-taste I1) --------------- */
+.stack>*+*{margin-block-start:var(--space-4)}
+.stack>.label+*{margin-block-start:var(--space-3)}
+.stack>.display+*,.stack>.h2+*{margin-block-start:var(--space-6)}
+.stack>.lead+*{margin-block-start:var(--space-6)}
+
+.gutter{padding-inline:var(--mat)}
+.chapter{padding-block:var(--space-9) var(--mat-deep)}   /* bottom-heavy */
+.chapter-tight{padding-block:var(--space-7) var(--space-8)}
+
+/* -- focus: survives ANY background, including the light chapter ----------- */
+:where(a,button,[tabindex]):focus-visible{
+  outline:2px solid var(--ink);
+  outline-offset:2px;
+  box-shadow:0 0 0 5px var(--bg);      /* dark halo -> ratio holds over imagery */
+  border-radius:1px;
+}
+
+/* ===========================================================================
+   THE FRAME — three planes per case: mat (ground) / frame (subject) / rail
+   (interface). Depth cues stay truthful: the rail never claims to float
+   (anti-patterns U9). No glassmorphism, no decorative shadow.
+   ======================================================================== */
+.frame{position:relative;overflow:hidden;background:var(--bg-raised);isolation:isolate}
+.frame>img{width:100%;height:100%;object-fit:cover;will-change:transform}
+
+/* PRIMARY EVENT: every image rises from below and resolves out of blur.
+   One image at a time — neighbours in the same chapter are stepped apart by
+   --rise-step so nothing ever enters in pairs.
+   Transform + opacity + filter: none of these force layout (motion-taste I4).
+   The hidden state is added BY SCRIPT, so no-JS and reduced-motion never trap
+   an image at opacity 0. */
+.frame{
+  transition:opacity var(--dur-4) var(--ease-out),
+             transform var(--dur-4) var(--ease-out),
+             filter var(--dur-4) var(--ease-out);
+}
+/* tier 1 — chapter-opening imagery only */
+.frame.armed{
+  opacity:0;
+  transform:translate3d(0,var(--rise-far),0);
+  filter:blur(var(--rise-blur));
+  will-change:transform,opacity,filter;
+}
+/* tier 2 — supporting frames: bands, portraits, the mobile shot. Quieter, so
+   the chapter opening stays the loudest thing in its own chapter. */
+.frame.tier2.armed{
+  transform:translate3d(0,var(--rise-near),0);
+  filter:blur(var(--rise-near-blur));
+}
+/* `armed` is never removed, so the resolved state must out-specify BOTH armed
+   rules. .frame.tier2.armed is (0,3,0); a two-class .frame.revealed loses to it
+   and the supporting frames stay blurred forever. */
+.frame.revealed,
+.frame.armed.revealed,
+.frame.tier2.armed.revealed{opacity:1;transform:none;filter:blur(0);will-change:auto}
+
+/* tier 3 — text blocks arrive from the side, out of blur, one child at a time.
+   The block never moves as a whole: each line is its own event. */
+/* .motion is set on <html> by script ONLY when motion is allowed, so a JS
+   failure or reduced-motion never traps text at opacity 0 (motion-taste I1). */
+.motion [data-step]>*{opacity:0;
+  transform:translate3d(calc(var(--slide-side) * -1),0,0);
+  filter:blur(var(--slide-blur));
+  transition:opacity var(--dur-3) var(--ease-out),
+             transform var(--dur-3) var(--ease-out),
+             filter var(--dur-3) var(--ease-out);
+}
+[data-step].in>*{opacity:1;transform:none;filter:blur(0)}
+[data-step].in>*:nth-child(1){transition-delay:0ms}
+[data-step].in>*:nth-child(2){transition-delay:90ms}
+[data-step].in>*:nth-child(3){transition-delay:180ms}
+[data-step].in>*:nth-child(4){transition-delay:270ms}
+[data-step].in>*:nth-child(5){transition-delay:360ms}
+[data-step].in>*:nth-child(6){transition-delay:450ms}
+[data-step].in>*:nth-child(7){transition-delay:540ms}
+[data-step].in>*:nth-child(8){transition-delay:630ms}
+
+.ar-frame{aspect-ratio:var(--ar-frame)}
+.ar-portrait{aspect-ratio:var(--ar-portrait)}
+.ar-band{aspect-ratio:var(--ar-band)}
+.ar-mobile{aspect-ratio:var(--ar-mobile)}
+
+/* -- the rail: the only furniture. Same place on every case, so the eye
+     learns to ignore it and compare the work. ------------------------------ */
+.rail{display:flex;flex-direction:column;gap:var(--space-4)}
+.idx{color:var(--ink-58)}
+.case-link{text-decoration:none;color:inherit;display:block}
+.case-link .title{font-size:var(--text-h3);font-weight:500;line-height:1.05;letter-spacing:-.015em}
+.case-link .title,
+.case-link .idx{transition:transform var(--dur-2) var(--ease-out),color var(--dur-2) var(--ease-out)}
+.case-link:hover .title,
+.case-link:focus-visible .title{transform:translateX(4px)}   /* interaction tier: quietest */
+.case-link:hover .idx,
+.case-link:focus-visible .idx{color:var(--ink)}
+
+/* -- spec plate: facts as a record, hairlines not boxes (typography D4) ---- */
+.plate{display:grid;grid-template-columns:minmax(6rem,9rem) 1fr;column-gap:var(--space-5);row-gap:0}
+.plate dt{
+  padding-block:var(--space-3);border-block-start:1px solid var(--rule);
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:var(--text-xs);
+  text-transform:uppercase;letter-spacing:.12em;font-weight:500;color:var(--ink-70);
+}
+.plate dd{
+  margin:0;padding-block:var(--space-3);border-block-start:1px solid var(--rule);
+  font-size:var(--text-sm);font-variant-numeric:tabular-nums;
+}
+@media (max-width:40rem){
+  .plate{grid-template-columns:1fr}
+  .plate dt{padding-block-end:0}
+  .plate dd{border-block-start:0;padding-block-start:var(--space-1)}
+}
+
+/* -- the index: the six chapters are the argument, this is the evidence that
+     there is more. An accordion — closed it is a record, hovered it shows the
+     work. Subordinate by construction: hairlines, mono, no boxes. */
+.index-item{border-block-start:1px solid var(--rule);transition:border-color var(--dur-2) var(--ease-out)}
+.index-item:last-of-type{border-block-end:1px solid var(--rule)}
+.index-item:hover,.index-item:focus-within{border-color:var(--rule-strong)}
+.index-row{
+  display:grid;grid-template-columns:1fr auto;gap:var(--space-4);
+  align-items:baseline;padding-block:var(--space-4);
+  text-decoration:none;color:inherit;
+}
+.index-row .name{font-size:var(--text-sm);display:inline-block;
+  transition:transform var(--dur-2) var(--ease-out)}
+.index-item:hover .name,.index-item:focus-within .name{transform:translateX(4px)}
+
+/* Disclosure is by CLICK, and exactly one panel is open at a time, so the
+   section keeps a constant height and never jumps under the pointer.
+   DEFAULT IS OPEN: the script collapses all but the first on load, so with no
+   JavaScript every preview and description is simply present (U7 parity). */
+.index-reveal{display:grid;grid-template-rows:1fr;
+  transition:grid-template-rows var(--dur-3) var(--ease-out)}
+.index-item[data-collapsed] .index-reveal{grid-template-rows:0fr}
+.index-inner{overflow:hidden;min-height:0}
+
+/* the row is a real button: it controls disclosure, so it must announce state */
+button.index-row{
+  width:100%;appearance:none;background:none;border:0;font:inherit;color:inherit;
+  text-align:left;cursor:pointer;
+}
+.index-row .mark{
+  color:var(--ink-58);font-family:"JetBrains Mono",ui-monospace,monospace;
+  transition:transform var(--dur-2) var(--ease-out),color var(--dur-2) var(--ease-out);
+}
+.index-item:not([data-collapsed]) .mark{transform:rotate(45deg);color:var(--ink)}
+.index-link{
+  display:inline-block;margin-block-start:var(--space-4);
+  text-decoration:none;color:var(--ink);
+  border-block-end:1px solid var(--rule-strong);padding-block-end:var(--space-2);
+  transition:border-color var(--dur-2) var(--ease-out);
+}
+.index-link:hover{border-color:var(--ink)}
+
+/* the panel: preview left, description right — the right field was empty air
+   doing no work, and a paragraph is content rather than filler (spacing I3) */
+.index-body{display:grid;grid-template-columns:1fr;gap:var(--space-5);
+            padding-block:0 var(--space-6)}
+.index-thumb{margin:0;background:var(--bg-raised);overflow:hidden}
+.index-thumb img{width:100%;height:100%;object-fit:cover;
+  opacity:.62;transition:opacity var(--dur-3) var(--ease-out)}
+.index-item:hover .index-thumb img,
+.index-item:focus-within .index-thumb img,
+.index-item[data-open] .index-thumb img{opacity:1}
+.index-note{margin:0;color:var(--ink-70);font-size:var(--text-sm);max-width:44ch}
+.index-note + .index-note{margin-block-start:var(--space-3)}
+
+@media (min-width:64rem){ .index-body{grid-template-columns:7fr 5fr;gap:var(--space-7)} }
+
+@media (max-width:63.99rem){
+  /* no hover on touch: every preview is simply present (U7 content parity) */
+  .index-reveal{grid-template-rows:1fr}
+  .index-thumb img{opacity:1}
+}
+
+.action{
+  display:inline-block;text-decoration:none;color:var(--ink);
+  padding-block-end:var(--space-3);border-block-end:1px solid var(--rule-strong);
+  transition:border-color var(--dur-2) var(--ease-out);
+}
+.action:hover{border-color:var(--ink)}
+
+/* -- supporting motion: subordinate to the curtain, never louder ----------- */
+[data-rise]{opacity:0;transform:translateY(8px);
+  transition:opacity var(--dur-3) var(--ease-out),transform var(--dur-3) var(--ease-out)}
+[data-rise].in{opacity:1;transform:none}
+
+/* ===========================================================================
+   REDUCED MOTION — a composed static scene, not a gutted page.
+   Hidden states are applied BY SCRIPT only when motion is allowed, so this
+   media query and a JS failure both leave the page complete.
+   ======================================================================== */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{
+    animation-duration:.001ms!important;animation-iteration-count:1!important;
+    transition-duration:.001ms!important;
+  }
+  .frame,.frame.armed{opacity:1!important;transform:none!important;filter:none!important}
+  [data-rise]{opacity:1!important;transform:none!important}
+  [data-step]>*{opacity:1!important;transform:none!important;filter:none!important;
+                transition-delay:0ms!important}
+  /* The accordion keeps WORKING under reduced motion; only the height
+     transition is removed. Forcing it open here (an earlier hover-era rule)
+     overrode [data-collapsed] and disabled the control entirely. */
+  .index-reveal{transition:none!important}
+}
+
+/* -- layout: the mat system ----------------------------------------------- */
+.case-grid{display:grid;grid-template-columns:1fr;gap:var(--space-6);padding-inline:var(--mat)}
+.case-details{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--space-5);
+              padding-inline:var(--mat);margin-block-start:var(--space-6)}
+.case-details>.ar-band{grid-column:1 / -1}
+.detail-portrait{grid-column:1 / -1}
+.disrupt-rail{display:grid;grid-template-columns:1fr;gap:var(--space-6)}
+
+@media (min-width:64rem){
+  /* rail 3/12, frame bleeds to the RIGHT viewport edge — commit, not inset */
+  .case-grid{grid-template-columns:minmax(14rem,3fr) 9fr;gap:var(--space-8);
+             padding-inline:var(--mat) 0;align-items:start}
+  .case-rail{position:sticky;top:var(--space-9)}
+  .case-details{margin-block-start:var(--space-7)}
+  /* scale contrast: the band spans 8/12, the portrait is small and offset, so
+     the two masses read as roughly 1:0.34 rather than as two equal columns */
+  .case-details>.ar-band{grid-column:1 / span 8}
+  .detail-portrait{grid-column:10 / span 3;align-self:end}
+  /* the disruption: mat collapses, rail runs horizontally under the frame */
+  .disrupt-rail{grid-template-columns:minmax(14rem,3fr) 5fr minmax(9rem,2fr);
+                gap:var(--space-8);align-items:start}
+  .disrupt-mobile{justify-self:end;width:100%;max-width:var(--space-11)}
+  .two-col{display:grid;grid-template-columns:7fr 5fr;gap:var(--space-9)}
+}
+@media (max-width:63.99rem){
+  /* responsive recomposition (C12): dominance moves from horizontal isolation
+     to scale. The frame goes to a portrait crop rather than shrinking the
+     landscape, and NO case is dropped (U7 content parity). */
+  .case-frame{aspect-ratio:var(--ar-portrait)}
+  .case-details>.ar-band{aspect-ratio:var(--ar-frame)}
+}
+</style>
+</head>
+
+<body>
+
+<a href="#work" class="label" style="position:absolute;left:-9999px;top:var(--space-4)"
+   onfocus="this.style.left='var(--mat)'" onblur="this.style.left='-9999px'">Skip to work</a>
+
+<!-- == MASTHEAD ========================================================== -->
+<header class="gutter">
+  <div style="display:flex;align-items:baseline;justify-content:space-between;gap:var(--space-5);
+              padding-block:var(--space-5);border-bottom:1px solid var(--rule)">
+    <a href="#top" class="label" style="color:var(--ink)">Alexander Sigoff</a>
+    <nav aria-label="Sections">
+      <ul style="display:flex;gap:var(--space-5);list-style:none;margin:0;padding:0">
+        <li><a class="label" href="#work">Work</a></li>
+        <li><a class="label" href="#index">Index</a></li>
+        <li><a class="label" href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- == CHAPTER 01 — OVERTURE ==============================================
+     Full bleed, no mat. This establishes the subject BEFORE the mat system
+     starts, so it is not a rhythm departure — it is the establishing shot.
+     ==================================================================== -->
+<section id="work" aria-labelledby="c01-h">
+  <figure class="frame" style="aspect-ratio:var(--ar-frame);min-height:78svh;margin:0">
+    <img src="assets/cases/case-01-frame.webp" width="1800" height="1125" data-parallax
+         fetchpriority="high" alt="Cauley Ferrari — the home page hero." />
+  </figure>
+
+  <div class="gutter" style="padding-block:var(--space-6) var(--mat-deep)">
+    <div class="case-grid" style="padding-inline:0">
+      <div class="case-rail" style="position:static">
+        <a class="case-link" href="https://www.cauleyferrari.com/" rel="noopener" data-rise>
+          <span class="label idx num" style="display:block">01</span>
+          <span class="title" id="c01-h" style="display:block;margin-block-start:var(--space-3)">Cauley Ferrari</span>
+        </a>
+        <dl class="plate" style="margin-block-start:var(--space-6)" data-step>
+          <dt>Sector</dt> <dd>Marque dealer</dd>
+          <dt>Year</dt>   <dd class="num">2025</dd>
+          <dt>Role</dt>   <dd>Art direction &middot; Web design &middot; UI</dd>
+        </dl>
+      </div>
+      <div class="rail" data-step>
+        <p class="label" style="margin:0">Selected work &nbsp;/&nbsp; <span class="num">01 &mdash; 06</span></p>
+        <p class="display" style="margin:0;max-width:18ch;font-size:var(--text-display)">
+          [ONE-LINE POSITIONING STATEMENT, 40&ndash;60 CHARACTERS]
+        </p>
+        <p class="lead measure" style="margin:0;color:var(--ink-70)">
+          [Two sentences, 140&ndash;180 characters. Yours to write &mdash; no voice
+          has been invented here.]
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- The overture keeps a detail row: this is the deepest product in the set
+       and one frame would undersell it. It still reads as the establishing
+       shot because the frame bleeds full width and the rail sits BELOW it
+       rather than beside it — the mat system starts at chapter 02. -->
+  <div class="case-details">
+    <figure class="frame tier2 ar-band" style="margin:0">
+      <img src="assets/cases/case-01-band.webp" width="1900" height="814" loading="lazy"
+           alt="Cauley Ferrari — the model range page." />
+    </figure>
+    <figure class="frame tier2 ar-portrait detail-portrait" style="margin:0">
+      <img src="assets/cases/case-01-portrait.webp" width="1170" height="1463" loading="lazy"
+           alt="Cauley Ferrari on a phone." />
+    </figure>
+  </div>
+</section>
+
+
+<section class="chapter" aria-labelledby="c02-h">
+  <div class="case-grid">
+    <div class="case-rail">
+      <a class="case-link" href="https://sigovs.github.io/prestige-website/index_6.html" rel="noopener" data-rise>
+        <span class="label idx num" style="display:block">02</span>
+        <span class="title" id="c02-h" style="display:block;margin-block-start:var(--space-3)">Prestige Imports</span>
+      </a>
+      <dl class="plate" style="margin-block-start:var(--space-6)" data-step>
+        <dt>Sector</dt> <dd>Dealer group, service</dd>
+        <dt>Year</dt>   <dd class="num">2026</dd>
+        <dt>Role</dt>   <dd>Art direction &middot; Web design &middot; UI</dd>
+      </dl>
+    </div>
+    <figure class="frame ar-frame case-frame" style="margin:0">
+      <img src="assets/cases/case-02-frame.webp" width="1800" height="1125" loading="lazy" data-parallax
+           alt="Prestige Imports — the services section." />
+    </figure>
+  </div>
+  <div class="case-details">
+    <figure class="frame tier2 ar-band" style="margin:0">
+      <img src="assets/cases/case-02-band.webp" width="1900" height="814" loading="lazy"
+           alt="Prestige Imports — inventory band." />
+    </figure>
+    <figure class="frame tier2 ar-portrait detail-portrait" style="margin:0">
+      <img src="assets/cases/case-02-portrait.webp" width="1170" height="1463" loading="lazy"
+           alt="Prestige Imports on a phone." />
+    </figure>
+  </div>
+</section>
+
+
+<section class="chapter" aria-labelledby="c03-h">
+  <div class="case-grid">
+    <div class="case-rail">
+      <a class="case-link" href="https://www.paganiofchicago.com/" rel="noopener" data-rise>
+        <span class="label idx num" style="display:block">03</span>
+        <span class="title" id="c03-h" style="display:block;margin-block-start:var(--space-3)">Pagani of Chicago</span>
+      </a>
+      <dl class="plate" style="margin-block-start:var(--space-6)" data-step>
+        <dt>Sector</dt> <dd>Marque dealer</dd>
+        <dt>Year</dt>   <dd class="num">2025</dd>
+        <dt>Role</dt>   <dd>Art direction &middot; Web design &middot; UI</dd>
+      </dl>
+    </div>
+    <figure class="frame ar-frame case-frame" style="margin:0">
+      <img src="assets/cases/case-03-frame.webp" width="1800" height="1125" loading="lazy" data-parallax
+           alt="Pagani of Chicago — the Zonda model page." />
+    </figure>
+  </div>
+  <div class="case-details">
+    <figure class="frame tier2 ar-band" style="margin:0">
+      <img src="assets/cases/case-03-band.webp" width="1900" height="814" loading="lazy"
+           alt="Pagani of Chicago — home page band." />
+    </figure>
+    <figure class="frame tier2 ar-portrait detail-portrait" style="margin:0">
+      <img src="assets/cases/case-03-portrait.webp" width="1170" height="1463" loading="lazy"
+           alt="Pagani of Chicago on a phone." />
+    </figure>
+  </div>
+</section>
+
+
+<!-- == CHAPTER 04 — THE ONE DISRUPTION ====================================
+     This chapter breaks GENRE, not merely tone: it is the only project that is
+     not automotive at all. Three coordinated departures, so the break reads as
+     one decision rather than three accidents (anti-patterns U8):
+       1. the frame runs 21:9 instead of 16:10;
+       2. the paspartout collapses — the frame bleeds the full width;
+       3. the rail moves beneath the frame and runs horizontally.
+     ==================================================================== -->
+<section class="chapter" aria-labelledby="c04-h">
+  <figure class="frame ar-band" style="margin:0">
+    <img src="assets/cases/case-04-frame.webp" width="1800" height="771" loading="lazy" data-parallax
+         alt="Dimamid — the authored world: a figure adrift in space at a console." />
+  </figure>
+
+  <div class="gutter" style="padding-block-start:var(--space-6)">
+    <div class="disrupt-rail">
+      <a class="case-link" href="https://sigovs.github.io/dimamid/" rel="noopener" data-rise>
+        <span class="label idx num" style="display:block">04</span>
+        <span class="title" id="c04-h" style="display:block;margin-block-start:var(--space-3)">Dimamid</span>
+      </a>
+      <dl class="plate" data-step>
+        <dt>Sector</dt> <dd>Music project</dd>
+        <dt>Year</dt>   <dd class="num">2025</dd>
+        <dt>Role</dt>   <dd>Art direction &middot; Web design &middot; UI</dd>
+      </dl>
+      <figure class="frame tier2 ar-mobile disrupt-mobile" style="margin:0">
+        <img src="assets/cases/case-04-mobile.webp" width="900" height="1950" loading="lazy"
+             alt="Dimamid on a phone." />
+      </figure>
+    </div>
+  </div>
+</section>
+
+
+<section class="chapter" aria-labelledby="c05-h">
+  <div class="case-grid">
+    <div class="case-rail">
+      <a class="case-link" href="https://www.behance.net/gallery/179848061/MODA-MIAMI-Sothebys" rel="noopener" data-rise>
+        <span class="label idx num" style="display:block">05</span>
+        <span class="title" id="c05-h" style="display:block;margin-block-start:var(--space-3)">MODA Miami / Sotheby&rsquo;s</span>
+      </a>
+      <dl class="plate" style="margin-block-start:var(--space-6)" data-step>
+        <dt>Sector</dt> <dd>Concours &amp; auction</dd>
+        <dt>Year</dt>   <dd class="num">2023</dd>
+        <dt>Role</dt>   <dd>Art direction &middot; Web design &middot; UI</dd>
+      </dl>
+    </div>
+    <figure class="frame ar-frame case-frame" style="margin:0">
+      <img src="assets/cases/case-05-frame.webp" width="1800" height="1125" loading="lazy" data-parallax
+           alt="MODA Miami for Sotheby&rsquo;s — a classic Ferrari under the Biltmore colonnade." />
+    </figure>
+  </div>
+  <div class="case-details">
+    <figure class="frame tier2 ar-band" style="margin:0">
+      <img src="assets/cases/case-05-band.webp" width="1900" height="814" loading="lazy"
+           alt="MODA Miami — event band." />
+    </figure>
+    <figure class="frame tier2 ar-portrait detail-portrait" style="margin:0">
+      <img src="assets/cases/case-05-portrait.webp" width="1170" height="1463" loading="lazy"
+           alt="MODA Miami — detail crop." />
+    </figure>
+  </div>
+</section>
+
+
+<section class="chapter" aria-labelledby="c06-h">
+  <div class="case-grid">
+    <div class="case-rail">
+      <a class="case-link" href="https://www.behance.net/gallery/130127865/Porsche-Restoration-Services" rel="noopener" data-rise>
+        <span class="label idx num" style="display:block">06</span>
+        <span class="title" id="c06-h" style="display:block;margin-block-start:var(--space-3)">Porsche Restoration Services</span>
+      </a>
+      <dl class="plate" style="margin-block-start:var(--space-6)" data-step>
+        <dt>Sector</dt> <dd>Restoration service</dd>
+        <dt>Year</dt>   <dd class="num">2021</dd>
+        <dt>Role</dt>   <dd>Art direction &middot; Web design &middot; UI</dd>
+      </dl>
+    </div>
+    <figure class="frame ar-frame case-frame" style="margin:0">
+      <img src="assets/cases/case-06-frame.webp" width="1800" height="1125" loading="lazy" data-parallax
+           alt="Porsche Restoration Services — home page." />
+    </figure>
+  </div>
+  <div class="case-details">
+    <figure class="frame tier2 ar-band" style="margin:0">
+      <img src="assets/cases/case-06-band.webp" width="1900" height="814" loading="lazy"
+           alt="Porsche Restoration — services band." />
+    </figure>
+  </div>
+</section>
+
+
+<!-- == INDEX =============================================================
+     The six chapters are the argument; this is the evidence that there is
+     more, without turning the page into a grid. Subordinate by construction.
+     ==================================================================== -->
+<section id="index" class="gutter chapter-tight" style="border-top:1px solid var(--rule)">
+  <h2 class="label" style="margin:0 0 var(--space-6)">Also shipped</h2>
+  <div class="index-list">
+      <div class="index-item">
+        <button class="index-row" type="button" aria-expanded="true" aria-controls="idx-mclaren">
+          <span class="name">McLaren Orlando</span>
+          <span class="label">Marque dealer <span class="mark" aria-hidden="true">&#43;</span></span>
+        </button>
+        <div class="index-reveal" id="idx-mclaren"><div class="index-inner">
+          <div class="index-body">
+            <figure class="index-thumb ar-band" style="margin:0"><img src="assets/index/mclaren.webp"
+              width="1200" height="514" loading="lazy" alt="McLaren Orlando — page detail." /></figure>
+            <div>
+              <p class="label" style="margin:0 0 var(--space-3)">Marque dealer &nbsp;/&nbsp; <span class="num">2025</span></p>
+              <p class="index-note">[Two or three sentences on this project, 180&ndash;260 characters.]</p>
+              <a class="index-link label" href="https://www.behance.net/gallery/217724607/McLaren-Orlando" rel="noopener">View project &nbsp;&rarr;</a>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="index-item">
+        <button class="index-row" type="button" aria-expanded="true" aria-controls="idx-koenigsegg">
+          <span class="name">Koenigsegg Boston</span>
+          <span class="label">Marque dealer <span class="mark" aria-hidden="true">&#43;</span></span>
+        </button>
+        <div class="index-reveal" id="idx-koenigsegg"><div class="index-inner">
+          <div class="index-body">
+            <figure class="index-thumb ar-band" style="margin:0"><img src="assets/index/koenigsegg.webp"
+              width="1200" height="514" loading="lazy" alt="Koenigsegg Boston — page detail." /></figure>
+            <div>
+              <p class="label" style="margin:0 0 var(--space-3)">Marque dealer &nbsp;/&nbsp; <span class="num">2022</span></p>
+              <p class="index-note">[Two or three sentences on this project, 180&ndash;260 characters.]</p>
+              <a class="index-link label" href="https://www.behance.net/gallery/151306223/Koenigsegg-Boston" rel="noopener">View project &nbsp;&rarr;</a>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="index-item">
+        <button class="index-row" type="button" aria-expanded="true" aria-controls="idx-rescue">
+          <span class="name">Rescue</span>
+          <span class="label">Service <span class="mark" aria-hidden="true">&#43;</span></span>
+        </button>
+        <div class="index-reveal" id="idx-rescue"><div class="index-inner">
+          <div class="index-body">
+            <figure class="index-thumb ar-band" style="margin:0"><img src="assets/index/rescue.webp"
+              width="1200" height="514" loading="lazy" alt="Rescue — page detail." /></figure>
+            <div>
+              <p class="label" style="margin:0 0 var(--space-3)">Service &nbsp;/&nbsp; <span class="num">2026</span></p>
+              <p class="index-note">[Two or three sentences on this project, 180&ndash;260 characters.]</p>
+              <a class="index-link label" href="https://sigovs.github.io/rescue/index.html" rel="noopener">View project &nbsp;&rarr;</a>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="index-item">
+        <button class="index-row" type="button" aria-expanded="true" aria-controls="idx-bhcc">
+          <span class="name">BHCC</span>
+          <span class="label">Dealer group <span class="mark" aria-hidden="true">&#43;</span></span>
+        </button>
+        <div class="index-reveal" id="idx-bhcc"><div class="index-inner">
+          <div class="index-body">
+            <figure class="index-thumb ar-band" style="margin:0"><img src="assets/index/bhcc.webp"
+              width="1200" height="514" loading="lazy" alt="BHCC — page detail." /></figure>
+            <div>
+              <p class="label" style="margin:0 0 var(--space-3)">Dealer group &nbsp;/&nbsp; <span class="num">2026</span></p>
+              <p class="index-note">[Two or three sentences on this project, 180&ndash;260 characters.]</p>
+              <a class="index-link label" href="https://sigovs.github.io/BHCC/index.html" rel="noopener">View project &nbsp;&rarr;</a>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="index-item">
+        <button class="index-row" type="button" aria-expanded="true" aria-controls="idx-miller">
+          <span class="name">Miller Motor Cars Portal</span>
+          <span class="label">Dealer group portal <span class="mark" aria-hidden="true">&#43;</span></span>
+        </button>
+        <div class="index-reveal" id="idx-miller"><div class="index-inner">
+          <div class="index-body">
+            <figure class="index-thumb ar-band" style="margin:0"><img src="assets/index/miller.webp"
+              width="1200" height="514" loading="lazy" alt="Miller Motor Cars Portal — page detail." /></figure>
+            <div>
+              <p class="label" style="margin:0 0 var(--space-3)">Dealer group portal &nbsp;/&nbsp; <span class="num">2025</span></p>
+              <p class="index-note">[Two or three sentences on this project, 180&ndash;260 characters.]</p>
+              <a class="index-link label" href="https://www.behance.net/gallery/218140327/Miller-Motor-Cars-Portal" rel="noopener">View project &nbsp;&rarr;</a>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="index-item">
+        <button class="index-row" type="button" aria-expanded="true" aria-controls="idx-ilusso">
+          <span class="name">iLusso Hypercar Inventory</span>
+          <span class="label">Inventory system <span class="mark" aria-hidden="true">&#43;</span></span>
+        </button>
+        <div class="index-reveal" id="idx-ilusso"><div class="index-inner">
+          <div class="index-body">
+            <figure class="index-thumb ar-band" style="margin:0"><img src="assets/index/ilusso.webp"
+              width="1200" height="514" loading="lazy" alt="iLusso Hypercar Inventory — page detail." /></figure>
+            <div>
+              <p class="label" style="margin:0 0 var(--space-3)">Inventory system &nbsp;/&nbsp; <span class="num">2025</span></p>
+              <p class="index-note">[Two or three sentences on this project, 180&ndash;260 characters.]</p>
+              <a class="index-link label" href="https://www.behance.net/gallery/217165691/iLUSSO-Hypercar-Inventory" rel="noopener">View project &nbsp;&rarr;</a>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="index-item">
+        <button class="index-row" type="button" aria-expanded="true" aria-controls="idx-rimac">
+          <span class="name">Rimac Central Florida</span>
+          <span class="label">Marque dealer <span class="mark" aria-hidden="true">&#43;</span></span>
+        </button>
+        <div class="index-reveal" id="idx-rimac"><div class="index-inner">
+          <div class="index-body">
+            <figure class="index-thumb ar-band" style="margin:0"><img src="assets/index/rimac.webp"
+              width="1200" height="514" loading="lazy" alt="Rimac Central Florida — page detail." /></figure>
+            <div>
+              <p class="label" style="margin:0 0 var(--space-3)">Marque dealer &nbsp;/&nbsp; <span class="num">2021</span></p>
+              <p class="index-note">[Two or three sentences on this project, 180&ndash;260 characters.]</p>
+              <a class="index-link label" href="https://www.behance.net/gallery/125156053/RIMAC-Central-Florida" rel="noopener">View project &nbsp;&rarr;</a>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="index-item">
+        <button class="index-row" type="button" aria-expanded="true" aria-controls="idx-aston">
+          <span class="name">Aston Martin Summit</span>
+          <span class="label">Marque dealer <span class="mark" aria-hidden="true">&#43;</span></span>
+        </button>
+        <div class="index-reveal" id="idx-aston"><div class="index-inner">
+          <div class="index-body">
+            <figure class="index-thumb ar-band" style="margin:0"><img src="assets/index/aston.webp"
+              width="1200" height="514" loading="lazy" alt="Aston Martin Summit — page detail." /></figure>
+            <div>
+              <p class="label" style="margin:0 0 var(--space-3)">Marque dealer &nbsp;/&nbsp; <span class="num">2021</span></p>
+              <p class="index-note">[Two or three sentences on this project, 180&ndash;260 characters.]</p>
+              <a class="index-link label" href="https://www.behance.net/gallery/128908527/Aston-Martin-Summit" rel="noopener">View project &nbsp;&rarr;</a>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="index-item">
+        <button class="index-row" type="button" aria-expanded="true" aria-controls="idx-dallara">
+          <span class="name">Dallara EXP</span>
+          <span class="label">Marque &amp; product <span class="mark" aria-hidden="true">&#43;</span></span>
+        </button>
+        <div class="index-reveal" id="idx-dallara"><div class="index-inner">
+          <div class="index-body">
+            <figure class="index-thumb ar-band" style="margin:0"><img src="assets/index/dallara.webp"
+              width="1200" height="514" loading="lazy" alt="Dallara EXP — page detail." /></figure>
+            <div>
+              <p class="label" style="margin:0 0 var(--space-3)">Marque &amp; product &nbsp;/&nbsp; <span class="num">2025</span></p>
+              <p class="index-note">[Two or three sentences on this project, 180&ndash;260 characters.]</p>
+              <a class="index-link label" href="https://www.behance.net/gallery/217166933/Dallara-EXP" rel="noopener">View project &nbsp;&rarr;</a>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="index-item">
+        <button class="index-row" type="button" aria-expanded="true" aria-controls="idx-czinger">
+          <span class="name">Czinger</span>
+          <span class="label">Marque &amp; product <span class="mark" aria-hidden="true">&#43;</span></span>
+        </button>
+        <div class="index-reveal" id="idx-czinger"><div class="index-inner">
+          <div class="index-body">
+            <figure class="index-thumb ar-band" style="margin:0"><img src="assets/index/czinger.webp"
+              width="1200" height="514" loading="lazy" alt="Czinger — page detail." /></figure>
+            <div>
+              <p class="label" style="margin:0 0 var(--space-3)">Marque &amp; product &nbsp;/&nbsp; <span class="num">2025</span></p>
+              <p class="index-note">[Two or three sentences on this project, 180&ndash;260 characters.]</p>
+              <a class="index-link label" href="https://www.behance.net/gallery/217164785/CZINGER-WEBSITE" rel="noopener">View project &nbsp;&rarr;</a>
+            </div>
+          </div>
+        </div></div>
+      </div>
+  </div>
+</section>
+
+
+<!-- == CAPABILITIES ====================================================== -->
+<section class="gutter" style="padding-block:0 var(--mat-deep)" aria-labelledby="cap-h">
+  <div class="two-col">
+    <div data-rise>
+      <h2 id="cap-h" class="label" style="margin:0 0 var(--space-6)">Capabilities</h2>
+      <dl class="plate" style="margin:0">
+        <dt>Art direction</dt>  <dd>Photography selection, crop, tonal grading, page composition</dd>
+        <dt>Interface</dt>      <dd>Inventory, model pages, vehicle detail, enquiry flows</dd>
+        <dt>Design systems</dt> <dd>Type roles, spacing scales, component records</dd>
+        <dt>Sectors</dt>        <dd>Marque dealers, dealer groups, concours and auction</dd>
+        <dt>Based</dt>          <dd>Vernon Hills, Illinois</dd>
+        <dt>Availability</dt>   <dd class="num">[Availability window]</dd>
+      </dl>
+    </div>
+    <div></div>
+  </div>
+</section>
+
+
+<!-- == CONTACT =========================================================== -->
+<section id="contact" class="gutter chapter" style="border-top:1px solid var(--rule)">
+  <div class="stack" style="max-width:24ch" data-step>
+    <p class="label" style="margin:0">Contact</p>
+    <p class="h2" style="margin:0">[Contact headline, 20&ndash;30 characters]</p>
+    <p style="margin-block-start:var(--space-6)">
+      <a class="action label" href="mailto:[EMAIL]">[EMAIL] &nbsp;&rarr;</a>
+    </p>
+  </div>
+</section>
+
+</main>
+
+<footer class="gutter" style="border-top:1px solid var(--rule)">
+  <div style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;
+              gap:var(--space-3);padding-block:var(--space-6)">
+    <p class="label" style="margin:0">Set in Inter Tight and JetBrains Mono</p>
+    <p class="label" style="margin:0">Alexander Sigoff &nbsp;&middot;&nbsp; <span class="num">&copy; 2026</span></p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var allowMotion = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* "Also shipped" — click to disclose. Exactly one panel open at a time, so
+       the section height never changes. The collapsed state is applied HERE, not
+       in CSS: without JavaScript every panel stays open and nothing is lost. */
+    (function(){
+      var items = Array.prototype.slice.call(document.querySelectorAll('.index-item'));
+      if (!items.length) return;
+      function setOpen(item, open){
+        item.toggleAttribute('data-collapsed', !open);
+        var btn = item.querySelector('.index-row');
+        if (btn) btn.setAttribute('aria-expanded', String(open));
+      }
+      items.forEach(function(it,i){ setOpen(it, i === 0); });
+      items.forEach(function(it){
+        it.querySelector('.index-row').addEventListener('click', function(){
+          var willOpen = it.hasAttribute('data-collapsed');
+          items.forEach(function(other){ setOpen(other, false); });
+          setOpen(it, willOpen);
+        });
+      });
+    })();
+
+
+  /* Hidden states are applied by script ONLY when motion is allowed, so a JS
+     failure or reduced-motion both leave a complete, composed page.
+     (motion-taste I1, and immersive-authored-world INVARIANT COMPLIANCE.) */
+  if (!allowMotion || !('IntersectionObserver' in window)) {
+    document.querySelectorAll('[data-rise],[data-step]').forEach(function(e){ e.classList.add('in'); });
+    return;   // .motion is never set and .frame is never armed: all content present
+  }
+  document.documentElement.classList.add('motion');
+
+
+
+  /* EFFECT HIERARCHY — strict, and in this order:
+     primary event -> supporting motion -> ambient motion -> interaction feedback
+     At most ONE primary event at a time. */
+
+  // primary: each image rises out of blur. ONE AT A TIME — neighbours that
+  // enter the viewport together are stepped apart, so nothing arrives in pairs.
+  var frames = Array.prototype.slice.call(document.querySelectorAll('.frame'));
+  frames.forEach(function(f){ f.classList.add('armed'); });
+
+  var step = parseInt(getComputedStyle(document.documentElement)
+               .getPropertyValue('--rise-step'), 10) || 110;
+  var lastAt = 0;
+
+  var frameIO = new IntersectionObserver(function(entries){
+    // top-down, so the stagger follows the reading order rather than DOM order
+    entries.filter(function(e){ return e.isIntersecting; })
+           .sort(function(a,b){ return a.boundingClientRect.top - b.boundingClientRect.top; })
+           .forEach(function(e){
+      var now = Date.now();
+      var wait = Math.max(0, lastAt + step - now);
+      lastAt = now + wait;
+      setTimeout(function(){ e.target.classList.add('revealed'); }, wait);
+      frameIO.unobserve(e.target);
+    });
+  }, { rootMargin: '0px 0px -12% 0px', threshold: 0.1 });
+  frames.forEach(function(f){ frameIO.observe(f); });
+
+  // supporting + text: arrive after their frame, subordinate to it.
+  // [data-step] blocks step their own children in CSS, so the block itself
+  // needs no stagger here — that is what keeps a plate from moving as a slab.
+  var riseIO = new IntersectionObserver(function(entries){
+    entries.filter(function(e){ return e.isIntersecting; })
+           .sort(function(a,b){ return a.boundingClientRect.top - b.boundingClientRect.top; })
+           .forEach(function(e, i){
+      var el = e.target;
+      setTimeout(function(){ el.classList.add('in'); }, 70 * i);
+      riseIO.unobserve(el);
+    });
+  }, { rootMargin: '0px 0px -12% 0px', threshold: 0.1 });
+  document.querySelectorAll('[data-rise],[data-step]').forEach(function(e){ riseIO.observe(e); });
+
+  /* SLOW SCROLL — wheel damping only, on the NATIVE document scroll.
+     Deliberately not a transformed scroll container: that is what makes a page
+     report scrollHeight 0, breaks screenshots, scroll anchoring and find-in-page
+     (diagnosed on one of Alex's own sites while capturing it).
+     Wheel is the only input intercepted — keyboard, touch, scrollbar dragging
+     and anchor jumps keep native behaviour, so nothing is ever trapped. */
+  (function(){
+    if (matchMedia('(pointer: coarse)').matches) return;   // touch has its own inertia
+    // EASE is the Locomotive-style lerp: lower = heavier glide. 0.085 sits just
+    // under Locomotive's 0.1 default, which is the feel Alex asked for.
+    var target = window.scrollY, running = false, EASE = 0.085;
+    function max(){ return document.documentElement.scrollHeight - innerHeight; }
+    function loop(){
+      var d = target - window.scrollY;
+      if (Math.abs(d) < 0.5) { running = false; return; }
+      window.scrollTo(0, window.scrollY + d * EASE);
+      requestAnimationFrame(loop);
+    }
+    addEventListener('wheel', function(e){
+      if (e.ctrlKey) return;                    // pinch-zoom stays native
+      e.preventDefault();
+      target = Math.max(0, Math.min(max(), target + e.deltaY));
+      if (!running) { running = true; requestAnimationFrame(loop); }
+    }, { passive: false });
+    // any non-wheel scroll (keyboard, scrollbar) resyncs the target
+    addEventListener('scroll', function(){ if (!running) target = window.scrollY; }, { passive: true });
+    addEventListener('resize', function(){ target = window.scrollY; }, { passive: true });
+
+    // In-page anchors go through the same glide. Handled explicitly because a
+    // native jump lands on the pre-lazy-load position and misses by ~280px once
+    // the images above resolve. Focus moves too, so keyboard and screen-reader
+    // users actually arrive rather than just having the page move under them.
+    document.querySelectorAll('a[href^="#"]').forEach(function(a){
+      a.addEventListener('click', function(e){
+        var id = a.getAttribute('href').slice(1);
+        var el = id && document.getElementById(id);
+        if (!el) return;
+        e.preventDefault();
+        target = Math.max(0, Math.min(max(), el.getBoundingClientRect().top + window.scrollY));
+        if (!running) { running = true; requestAnimationFrame(loop); }
+        if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '-1');
+        el.focus({ preventScroll: true });
+      });
+    });
+  })();
+
+  /* AMBIENT: layered depth, Locomotive's data-scroll-speed idea. Layers move at
+     different rates so the page reads as planes rather than one flat sheet.
+     Imagery only — parallaxing text would fight reading (motion-taste I5).
+     Transform on the inner <img> only, so no layout is ever animated. */
+  var parallax = Array.prototype.slice.call(document.querySelectorAll('[data-parallax]'))
+    .map(function(img){
+      var f = img.closest('.frame');
+      // chapter openings sit furthest back and drift most; supporting frames
+      // move about half as much, which is what creates the sense of depth
+      var speed = f && f.classList.contains('tier2') ? 1.5 : 3.0;
+      return { img: img, host: f || img.parentElement, speed: speed };
+    });
+  var ticking = false;
+  function drift(){
+    var vh = window.innerHeight;
+    parallax.forEach(function(o){
+      var r = o.host.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > vh) return;
+      var p = (r.top + r.height / 2 - vh / 2) / vh;   // -1 .. 1
+      o.img.style.transform =
+        'scale(1.08) translate3d(0,' + (p * -o.speed).toFixed(2) + '%,0)';
+    });
+    ticking = false;
+  }
+  addEventListener('scroll', function(){
+    if (!ticking) { ticking = true; requestAnimationFrame(drift); }
+  }, { passive: true });
+  drift();
+})();
+</script>
+</body>
+</html>

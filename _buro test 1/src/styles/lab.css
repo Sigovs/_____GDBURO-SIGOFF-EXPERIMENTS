@@ -1,0 +1,119 @@
+/* The bench, not the site.
+   Deliberately instrument-looking: mono, hairlines, no decoration. It is a tool
+   for judging an asset, so nothing in it should compete with the asset. None of
+   this is a design system — the project's tokens are extracted from the hero
+   once BRIEF.md exists (PROCESS.md 4), not invented here. */
+
+:root {
+  --ink: #e8e8ea;
+  --ink-dim: #8b8b93;
+  --ink-faint: #55555c;
+  --ground: #0b0b0d;
+  --panel: #131316;
+  --line: #26262b;
+  --signal: #d8ff3e;
+  --alarm: #ff6b4a;
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--ground);
+  color: var(--ink);
+  font: 14px/1.5 var(--mono);   /* 14px is the floor, not a choice (I7, DNA14) */
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--ink); text-decoration-color: var(--ink-faint); text-underline-offset: 3px; }
+a:hover { text-decoration-color: var(--signal); }
+:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+
+.stage { position: fixed; inset: 0; display: block; width: 100%; height: 100%; }
+
+/* ── panels ─────────────────────────────────────────────────────────────── */
+.panel {
+  position: fixed;
+  z-index: 2;
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(12px);
+  padding: 14px 16px;
+  min-width: 240px;
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+}
+.panel--left { top: 16px; left: 16px; }
+.panel--right { top: 16px; right: 16px; width: 268px; }
+.panel--bottom { left: 16px; bottom: 16px; right: 16px; min-width: 0; }
+
+.panel h1, .panel h2 {
+  margin: 0 0 10px;
+  font: inherit;
+  font-size: 14px;
+  letter-spacing: 0.12em;   /* uppercase is tracked and short (I4) */
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.panel h2 + * { margin-top: 0; }
+.panel hr { border: 0; border-top: 1px solid var(--line); margin: 14px 0; }
+
+.hint { color: var(--ink-faint); }
+
+/* ── readouts ───────────────────────────────────────────────────────────── */
+table { border-collapse: collapse; width: 100%; }
+th, td { text-align: left; padding: 2px 0; font-weight: 400; vertical-align: baseline; }
+th { color: var(--ink-dim); padding-right: 14px; white-space: nowrap; }
+td { font-variant-numeric: tabular-nums; }   /* aligned figures are tabular (I5) */
+td[data-over="1"] { color: var(--alarm); }
+.lim { color: var(--ink-faint); padding-left: 10px; }
+
+.finding { color: var(--alarm); margin: 6px 0 0; }
+.finding b { font-weight: 400; color: var(--ink); }
+
+/* ── controls ───────────────────────────────────────────────────────────── */
+label.row { display: grid; grid-template-columns: 74px 1fr 44px; gap: 10px; align-items: center; margin: 8px 0; color: var(--ink-dim); }
+label.row output { color: var(--ink); font-variant-numeric: tabular-nums; text-align: right; }
+input[type="range"] { width: 100%; accent-color: var(--signal); }
+button, select {
+  font: inherit; color: var(--ink); background: transparent;
+  border: 1px solid var(--line); padding: 5px 10px; cursor: pointer;
+}
+button:hover, select:hover { border-color: var(--ink-faint); }
+button[aria-pressed="true"] { border-color: var(--signal); color: var(--signal); }
+
+ul.models { list-style: none; margin: 0; padding: 0; }
+ul.models li { margin: 2px 0; }
+ul.models button { width: 100%; text-align: left; border-color: transparent; padding: 4px 6px; }
+ul.models button[aria-current="true"] { border-color: var(--signal); color: var(--signal); }
+
+/* ── drop target ────────────────────────────────────────────────────────── */
+.drop {
+  position: fixed; inset: 0; z-index: 5; display: none;
+  place-items: center; background: color-mix(in srgb, var(--ground) 80%, transparent);
+  border: 1px dashed var(--signal); color: var(--signal);
+}
+body.dragging .drop { display: grid; }
+
+/* ── budget HUD (engine/budget.js) ──────────────────────────────────────── */
+.budget-hud {
+  position: fixed; z-index: 3; right: 16px; bottom: 16px;
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+  border: 1px solid var(--line); padding: 8px 12px; min-width: 150px;
+}
+
+/* ── the scroll bench ───────────────────────────────────────────────────── */
+.scroller { position: relative; z-index: 1; }
+.act {
+  min-height: 100vh; display: flex; align-items: center;
+  padding: 0 6vw; pointer-events: none;
+}
+.act p { max-width: 34ch; color: var(--ink-dim); }
+.act b { display: block; color: var(--ink); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .panel { backdrop-filter: none; }
+}

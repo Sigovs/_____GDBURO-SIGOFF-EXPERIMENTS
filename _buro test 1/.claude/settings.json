@@ -1,0 +1,25 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"C:/____WORK/_____GDBURO SIGOFF/design_dna/hooks/design-dna-gate.mjs\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"C:/____WORK/_____GDBURO SIGOFF/design_dna/hooks/design-dna-gate.mjs\""
+          }
+        ]
+      }
+    ]
+  }
+}

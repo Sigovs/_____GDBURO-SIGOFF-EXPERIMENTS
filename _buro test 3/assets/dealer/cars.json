@@ -1,0 +1,58 @@
+[
+ {
+  "title": "2004 Ferrari 575",
+  "price": "$451,134",
+  "miles": "34,294",
+  "file": "car-01.webp",
+  "portrait": "car-01-p.webp"
+ },
+ {
+  "title": "2000 Nissan GT-R",
+  "price": "$304,990",
+  "miles": "41,863",
+  "file": "car-02.webp",
+  "portrait": "car-02-p.webp"
+ },
+ {
+  "title": "1971 Ferrari 365 GTS4",
+  "price": "$3,495,000",
+  "miles": "39,067",
+  "file": "car-03.webp",
+  "portrait": "car-03-p.webp"
+ },
+ {
+  "title": "2025 Ferrari Roma Spider",
+  "price": "$298,969",
+  "miles": "1,301",
+  "file": "car-04.webp",
+  "portrait": "car-04-p.webp"
+ },
+ {
+  "title": "2025 Land Rover Range Rover SE",
+  "price": "$249,990",
+  "miles": "3,000",
+  "file": "car-05.webp",
+  "portrait": "car-05-p.webp"
+ },
+ {
+  "title": "2026 Mercedes-Benz AMG CLE 53",
+  "price": "$78,990",
+  "miles": "1,306",
+  "file": "car-06.webp",
+  "portrait": "car-06-p.webp"
+ },
+ {
+  "title": "2024 Ford F-150 Raptor R",
+  "price": "$114,995",
+  "miles": "12,738",
+  "file": "car-07.webp",
+  "portrait": "car-07-p.webp"
+ },
+ {
+  "title": "2024 Mercedes-Benz S 580",
+  "price": "$149,996",
+  "miles": "14,443",
+  "file": "car-08.webp",
+  "portrait": "car-08-p.webp"
+ }
+]

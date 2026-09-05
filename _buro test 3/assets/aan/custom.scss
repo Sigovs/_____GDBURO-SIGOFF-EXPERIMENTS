@@ -1,0 +1,294 @@
+@use "sass:map";
+// ============================================================================
+//  meridian.scss — custom layer for the Meridian Motor Group mockup
+// ----------------------------------------------------------------------------
+//  Phase 2 of the AAN workflow: the design was made free-form first (index5),
+//  and this file installs the theme kit into it. It is written to drop straight
+//  into the theme as components/meridian.scss and be added to imports.scss.
+//
+//  Loads AFTER bootstrap and base.scss, so it may override both.
+//
+//  THE PALETTE IS THE NEW TOKEN SET. The kit ships a light navy/red default;
+//  this dealer is bone and oxblood, so those values are declared here BEFORE
+//  the kit is imported — every kit variable carries `!default`, so these win
+//  and the whole kit re-skins from them. Mapping is noted per line for the dev.
+// ============================================================================
+
+// ─── token overrides ────────────────────────────────────────────────────────
+$font-display : ('Inter Tight', 'Helvetica Neue', Arial, sans-serif);
+$font-body    : ('Inter Tight', 'Helvetica Neue', Arial, sans-serif);
+$font-accent  : ('JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace);
+$font-mono    : ('JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace);
+//  ⚠ Both faces must be added to fonts.scss as self-hosted woff2 — no hotlinking
+//    (hard rule 4). Until then the stacks above fall back to system faces.
+
+$color-primary   : #6D1F24;   // oxblood — primary CTA. was #0C376A
+$color-secondary : #14151A;   // near-black UI.          was #111418
+$color-accent    : #6D1F24;   // one accent only on this design, so accent = primary
+$color-accent-2  : #6D1F24;
+$color-text      : #14151A;
+$color-heading   : #14151A;
+$color-muted     : #5C5D63;   // measured: 5.61:1 on the bone ground
+$color-link      : #6D1F24;
+$color-link-hover: #571A1E;
+
+$bg-page      : #F4F2EE;      // bone, never #fff. was #FFFFFF
+$bg-row       : #F4F2EE;
+$bg-row-alt   : #EAE7E1;
+$bg-invert    : #14151A;
+$surface-card : #F4F2EE;
+$bg-header    : #F4F2EE;
+$bg-footer    : #EAE7E1;
+$color-border   : #DCD8D1;
+$color-border-2 : #A9A49B;    // form borders — measured 3.93:1
+
+$btn-radius         : 0;      // squared, Prestige-style
+$btn-padding        : 14px 26px;
+$btn-font           : $font-accent;
+$btn-font-size      : 11px;
+$btn-letter-spacing : .12em;
+
+$container-max : 1325px;
+$srp-card-image-ratio : 3 / 2;
+
+@import "aan-theme-kit";
+
+// ─── local helpers ──────────────────────────────────────────────────────────
+$rule      : $color-border;
+$ink-70    : rgba(20,21,26,.70);
+$ease-out  : cubic-bezier(.22,1,.36,1);
+
+@mixin mono($size: 11px, $ls: .12em) {
+  font-family: $font-accent;
+  font-size: $size;
+  text-transform: uppercase;
+  letter-spacing: $ls;
+  font-weight: $fw-medium;
+  line-height: 1.2;
+}
+
+// ============================================================================
+//  BASE OVERRIDES — the compiled theme ships the kit's light defaults with a
+//  white header and navy buttons. Departing from that must be deliberate and
+//  specificity-matched, which is expected practice, not a hack.
+// ============================================================================
+body {
+  background: $bg-page;
+  color: $color-text;
+  font-family: $font-body;
+  -webkit-font-smoothing: antialiased;
+}
+
+// ID-qualified so it beats the theme's own `#header` rule
+#header.mm-header {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  background: $bg-page;
+  border-bottom: $border-width solid $rule;
+}
+
+// ── RE-SKIN THE PRE-COMPILED BASE ──────────────────────────────────────────
+//  Redefining the tokens above only affects rules emitted in THIS file. The
+//  shipped style.css was already compiled with the kit defaults, so its navy
+//  .btn-1, red .eyebrow and dark .trending-vehicle-section still win. In the
+//  real theme this file is compiled alongside the kit and the problem does not
+//  exist — but a mockup previews against the shipped CSS, so every kit-driven
+//  colour has to be re-emitted here. Values come from the tokens, so a dev who
+//  compiles the theme properly gets identical output and can delete this block.
+.btn-1, .btn-2, .btn-3, .btn-4 {
+  border-radius: $btn-radius;
+  font-family: $btn-font;
+  font-size: $btn-font-size;
+  letter-spacing: $btn-letter-spacing;
+  padding: $btn-padding;
+}
+.btn-1 { background: $color-primary; color: #fff; border-color: transparent;
+  &:hover, &:focus { background: $color-link-hover; color: #fff; border-color: $color-link-hover; } }
+.btn-2 { background: $color-secondary; color: #fff; border-color: transparent;
+  &:hover, &:focus { background: #2A2F36; color: #fff; border-color: #2A2F36; } }
+.btn-4 { background: $color-accent; color: #fff; border-color: transparent;
+  &:hover, &:focus { background: $color-link-hover; color: #fff; border-color: $color-link-hover; } }
+.btn-3 { background: transparent; border-color: rgba(20,21,26,.55); color: $color-text;
+  &:hover, &:focus { background: transparent; border-color: $color-text; color: $color-text; } }
+
+.eyebrow    { color: $color-accent; font-family: $font-accent; }
+.text-link  { color: $color-accent; &:hover { color: $color-link-hover; } }
+.hl         { color: $color-accent; }
+.tag        { color: $color-accent; border-color: rgba(109,31,36,.45);
+              &::before { background: $color-accent; } }
+.feature-list li::before { color: $color-accent; }
+.card-badge        { background: $color-secondary; font-family: $font-accent; border-radius: 0; }
+.card-badge--cpo   { background: $color-primary; }
+.card-badge--new   { background: $color-accent; }
+.card-badge--sale  { background: $color-danger; }
+
+h1, h2, h3, h4, h5, h6, .display, .subheading { font-family: $font-display; color: $color-heading; }
+p, .lead { font-family: $font-body; color: $color-text; }
+.caption { color: $color-muted; font-family: $font-body; }
+
+//  Section rows: the shipped versions carry the kit's white/grey defaults, and
+//  .trending-vehicle-section additionally ships a dark navy band that reads as
+//  a foreign object on this bone page.
+.aan-section          { background: $bg-row; }
+.aan-section--page    { background: $bg-page; }
+.aan-section--alt     { background: $bg-row-alt; }
+.aan-section--invert  { background: $bg-invert; }
+.trending-vehicle-section,
+.trending-vehicle-section.aan-section--page { background: $bg-page; }
+.trending-vehicle-section h2,
+.trending-vehicle-section .eyebrow,
+.trending-vehicle-section .caption { color: inherit; }
+.trending-vehicle-section h2 { color: $color-heading; }
+.trending-vehicle-section .eyebrow { color: $color-accent; }
+.trending-vehicle-section .caption { color: $color-muted; }
+.inventory-page-section { background: $bg-page; }
+.banner-section         { background: $bg-page; }
+.prefoot                { background: $bg-row-alt; }
+
+// ============================================================================
+//  MERIDIAN COMPONENTS
+// ============================================================================
+.mm-util {
+  background: $bg-row-alt;
+  border-bottom: $border-width solid $rule;
+  padding-block: map.get($space, 2);
+  .mm-util__line { @include mono(11px); color: $ink-70; margin: 0; }
+}
+
+.mm-brand {
+  display: inline-block; text-decoration: none; color: $color-text;
+  font-family: $font-display; font-weight: $fw-semibold;
+  font-size: 17px; letter-spacing: -.02em; line-height: 1.1;
+  small { display: block; @include mono(9px, .22em); color: $color-muted;
+          margin-top: 2px; font-weight: $fw-medium; }
+}
+
+.mm-nav {
+  a { @include mono(11px); color: $ink-70; text-decoration: none;
+      padding-block: map.get($space, 2); border-bottom: $border-width solid transparent;
+      transition: color .2s $ease-out, border-color .2s $ease-out;
+      &:hover, &:focus { color: $color-text; border-bottom-color: rgba(20,21,26,.55); } }
+}
+
+// ── hero ────────────────────────────────────────────────────────────────────
+.mm-hero {
+  padding-block: map.get($space, 7) map.get($space, 9);
+  border-bottom: $border-width solid $rule;
+  h1 { font-size: clamp(40px, 5.5vw, 80px); line-height: .96; letter-spacing: -.035em;
+       max-width: 15ch; margin: map.get($space, 4) 0 0; }
+  &__figure { margin: 0; background: $bg-row-alt; aspect-ratio: 3 / 2; overflow: hidden;
+              img { width: 100%; height: 100%; object-fit: cover; } }
+  &__facts { display: flex; flex-wrap: wrap; gap: map.get($space, 3) map.get($space, 7);
+             margin-top: map.get($space, 6); padding-top: map.get($space, 5);
+             border-top: $border-width solid $rule;
+             span { @include mono(11px); color: $ink-70; } }
+}
+
+// ── search strip ────────────────────────────────────────────────────────────
+.mm-search {
+  background: $bg-row-alt;
+  border-bottom: $border-width solid $rule;
+  padding-block: map.get($space, 5);
+  label { @include mono(11px); color: $ink-70; display: block;
+          margin-bottom: map.get($space, 2); }
+  // the kit's own field token set, restyled square to match the design
+  .aan-field { border-radius: 0; background: $bg-page; border-color: $color-border-2;
+               font-size: 15px; }
+}
+
+// ── inventory: a record, not a card grid ────────────────────────────────────
+//  .car-col is the theme's vehicle-card root — targeted so this drops into the
+//  real SRP template rather than inventing a wrapper (hard rule 6).
+.car-col.mm-car {
+  display: block; text-decoration: none; color: inherit;
+  margin-bottom: map.get($space, 8);
+
+  .mm-car__fig { position: relative; margin: 0 0 map.get($space, 4);
+    background: $bg-row-alt; aspect-ratio: $srp-card-image-ratio; overflow: hidden;
+    img { width: 100%; height: 100%; object-fit: cover;
+          transition: transform .4s $ease-out; } }
+  &:hover .mm-car__fig img { transform: scale(1.02); }   // 2%, nothing more
+
+  h3 { font-size: clamp(19px, 1.2vw + 1rem, 24px); margin: 0 0 map.get($space, 2);
+       letter-spacing: -.02em; line-height: 1.15; }
+  .mm-car__price { font-family: $font-display; font-weight: $fw-semibold;
+    font-size: 22px; letter-spacing: -.02em; font-variant-numeric: tabular-nums;
+    margin: 0 0 map.get($space, 4); }
+}
+
+// spec plate — facts as a record: hairlines, mono keys, tabular figures
+.mm-plate {
+  display: grid; grid-template-columns: auto 1fr;
+  column-gap: map.get($space, 5); row-gap: 0; margin: 0;
+  dt { @include mono(11px); color: $color-muted; padding-block: map.get($space, 2);
+       border-top: $border-width solid $rule; }
+  dd { margin: 0; padding-block: map.get($space, 2); text-align: right;
+       border-top: $border-width solid $rule;
+       font-size: 14px; font-variant-numeric: tabular-nums; }
+}
+
+// ── steps ───────────────────────────────────────────────────────────────────
+.mm-step {
+  border-top: $border-width solid rgba(20,21,26,.55);
+  padding-top: map.get($space, 4);
+  .mm-step__n { @include mono(11px, .14em); color: $color-accent; margin: 0; }
+  h3 { font-size: 20px; margin: map.get($space, 3) 0; letter-spacing: -.02em; }
+  p  { font-size: 14px; color: $ink-70; margin: 0; }
+}
+
+// ── instagram ───────────────────────────────────────────────────────────────
+.mm-ig__item {
+  display: block; position: relative; overflow: hidden; background: $bg-row-alt;
+  img { width: 100%; height: auto; display: block; transition: transform .4s $ease-out; }
+  &:hover img { transform: scale(1.03); }
+}
+
+// Owl is the only carousel library on this stack — its chrome restyled to match
+.mm-ig .owl-nav { margin-top: map.get($space, 4); display: flex; gap: map.get($space, 2); }
+.mm-ig .owl-nav button.owl-prev,
+.mm-ig .owl-nav button.owl-next {
+  @include mono(11px); background: transparent; color: $color-text;
+  border: $border-width solid rgba(20,21,26,.55); padding: 8px 16px; border-radius: 0;
+  &:hover { background: $color-text; color: $bg-page; }
+}
+.mm-ig .owl-dots { display: none; }
+
+// ── visit / map ─────────────────────────────────────────────────────────────
+.mm-map {
+  border: $border-width solid $rule; background: $bg-row-alt;
+  aspect-ratio: 16 / 10; overflow: hidden;
+  iframe { width: 100%; height: 100%; border: 0; display: block;
+           filter: grayscale(1) contrast(.92); }
+}
+
+// ── section rhythm ──────────────────────────────────────────────────────────
+//  .aan-section is the kit's own row helper; only the padding is retuned.
+.aan-section.mm-section { padding-block: map.get($space, 9); }
+.mm-section__head {
+  display: flex; flex-wrap: wrap; gap: map.get($space, 3) map.get($space, 6);
+  align-items: baseline; justify-content: space-between;
+  margin-bottom: map.get($space, 7);
+}
+
+// ── footer ──────────────────────────────────────────────────────────────────
+#footer.mm-footer {
+  background: $bg-footer; border-top: $border-width solid $rule;
+  padding-block: map.get($space, 8) map.get($space, 6); margin-top: map.get($space, 9);
+  a { display: block; color: $ink-70; text-decoration: none; padding-block: 4px;
+      &:hover { color: $color-text; } }
+}
+
+// ── focus: visible everywhere, on the accent ────────────────────────────────
+a:focus-visible, button:focus-visible, select:focus-visible,
+input:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid $color-primary;
+  outline-offset: 2px;
+}
+
+.mm-skip { position: absolute; left: -9999px; top: map.get($space, 3); z-index: 99;
+           &:focus { left: map.get($space, 4); } }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: .001ms !important; animation-duration: .001ms !important; }
+}

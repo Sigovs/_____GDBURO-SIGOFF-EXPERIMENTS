@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Alexander Sigoff — Selected Work (variant C)</title>
+<meta name="description" content="WebGL variant. The work as a navigable space." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+/* ===========================================================================
+   VARIANT C — the corridor.
+
+   A and B were both a dark plane with a full-bleed photograph and mono labels.
+   They differ in mechanism and read as siblings, which is a fair criticism.
+   This one changes the MEDIUM: the cases stop being pictures on a page and
+   become objects in a space you travel through. Depth is real, not implied —
+   perspective, fog and camera distance do the composing.
+
+   Design Read
+     Reading this as a spatial variant of the same hiring-decision portfolio.
+     Dialect: brief-derived / no stored dialect.
+
+   `immersive-authored-world` is still NOT selected — TASTE.md says it is never
+   inferred, only named by Alex. This build is the argument for naming it, and
+   for the `realtime-craft` skill the system is missing.
+
+   Invariants, and where they bite in a WebGL page:
+     motion I1  the DOM gallery below is the real page; WebGL is an enhancement
+                layered over it. No JS, no WebGL, or reduced motion all leave a
+                complete composed document — not a blank canvas.
+     motion I3  GSAP eases are mapped onto the same duration tokens; the library
+                does not get its own private vocabulary.
+     motion I4  only camera and object transforms animate. No layout is touched.
+     color I1   the HUD never sits over the moving scene without a scrim, and
+                the worst case MOVES, so the scrim is bound to the HUD.
+     color      MeshBasicMaterial and sRGB in/out with no tone mapping: the
+                client's work must be shown in its own colour, not relit by me.
+     U6/U7      no horizontal page scroll; every case exists in the DOM.
+   ======================================================================== */
+:root{
+  --space-2:.5rem; --space-3:.75rem; --space-4:1rem; --space-5:1.5rem;
+  --space-6:2rem;  --space-7:3rem;   --space-8:4rem; --space-9:6rem;
+  --space-10:8rem; --space-11:12rem;
+
+  --text-xs:.6875rem;
+  --text-sm:clamp(.8125rem,.8vw + .7rem,.9375rem);
+  --text-body:clamp(1rem,.35vw + .95rem,1.125rem);
+  --text-h2:clamp(2rem,3vw + 1.2rem,3.25rem);
+  --text-display:clamp(2.5rem,7vw + 1rem,6.5rem);
+
+  --bg:#0a0b0d;
+  --bg-raised:#14161a;
+  --ink:#f2f1ee;
+  --ink-70:rgba(242,241,238,.72);
+  --ink-58:rgba(242,241,238,.58);
+  --rule:rgba(242,241,238,.14);
+  --rule-strong:rgba(242,241,238,.38);
+
+  --dur-1:.15s; --dur-2:.25s; --dur-3:.4s; --dur-4:1.2s;
+  --ease-out:cubic-bezier(.22,1,.36,1);
+  --mat:clamp(1.25rem,4vw,4rem);
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{overflow-x:clip}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Inter Tight",system-ui,sans-serif;font-size:var(--text-body);
+  line-height:1.6;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%;height:auto}
+.label{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:var(--text-xs);
+  text-transform:uppercase;letter-spacing:.14em;font-weight:500;line-height:1.2;
+  color:var(--ink-70);margin:0}
+.num{font-variant-numeric:tabular-nums}
+:where(a,button,[tabindex]):focus-visible{outline:2px solid var(--ink);outline-offset:3px;
+  box-shadow:0 0 0 5px var(--bg);border-radius:1px}
+.skip{position:absolute;left:-9999px;top:var(--space-4);z-index:60}
+.skip:focus{left:var(--mat)}
+
+header{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;
+  justify-content:space-between;align-items:baseline;gap:var(--space-5);
+  padding:var(--space-5) var(--mat);pointer-events:none}
+header a{pointer-events:auto;color:var(--ink);text-decoration:none}
+
+/* ---------------------------------------------------------------------------
+   THE FALLBACK IS THE DOCUMENT. This block is what the HTML actually is; the
+   canvas is added on top only when the machine can carry it. Nothing here is
+   hidden until WebGL has genuinely started.
+   ------------------------------------------------------------------------ */
+.doc{padding:var(--space-11) var(--mat) var(--space-9);display:grid;gap:var(--space-10)}
+.doc-case{display:grid;gap:var(--space-5)}
+.doc-case figure{margin:0;background:var(--bg-raised);aspect-ratio:16/10;overflow:hidden}
+.doc-case img{width:100%;height:100%;object-fit:cover}
+.doc-case h2{font-size:var(--text-h2);font-weight:600;letter-spacing:-.03em;margin:0;line-height:1}
+.doc-meta{display:flex;flex-wrap:wrap;gap:var(--space-3) var(--space-6)}
+.open{display:inline-block;text-decoration:none;color:var(--ink);
+  border-block-end:1px solid var(--rule-strong);padding-block-end:var(--space-2);
+  transition:border-color var(--dur-2) var(--ease-out)}
+.open:hover{border-color:var(--ink)}
+@media (min-width:64rem){
+  .doc-case{grid-template-columns:5fr 7fr;gap:var(--space-8);align-items:center}
+}
+
+/* ---------------------------------------------------------------------------
+   WebGL layer. Only ever added by script, and only after a context exists.
+   ------------------------------------------------------------------------ */
+.gl-on .doc{display:none}
+.gl-on body{overflow:visible}
+#gl{position:fixed;inset:0;z-index:1;display:block}
+#scroller{position:relative;z-index:2;pointer-events:none}
+.gl-scene{height:100svh}
+
+.hud{position:fixed;left:0;right:0;bottom:0;z-index:3;padding:var(--mat);
+  pointer-events:none;opacity:0}
+.hud::before{content:"";position:absolute;left:0;right:0;bottom:0;top:-40%;z-index:-1;
+  background:linear-gradient(to top,rgba(10,11,13,.97) 0%,rgba(10,11,13,.94) 45%,
+             rgba(10,11,13,.72) 74%,rgba(10,11,13,0) 100%)}
+.hud-in{display:grid;gap:var(--space-4);max-width:min(60ch,90vw)}
+.hud h2{font-size:var(--text-display);font-weight:600;letter-spacing:-.035em;
+  line-height:.94;margin:0}
+.hud a{pointer-events:auto}
+.hud .row{display:flex;flex-wrap:wrap;gap:var(--space-3) var(--space-6);align-items:baseline}
+
+.rail{position:fixed;right:var(--mat);top:50%;transform:translateY(-50%);z-index:4;
+  display:flex;flex-direction:column;gap:var(--space-3)}
+.rail button{appearance:none;background:none;border:0;padding:0;cursor:pointer;
+  display:flex;align-items:center;gap:var(--space-3);justify-content:flex-end;color:var(--ink-58);
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:var(--text-xs);letter-spacing:.12em;
+  transition:color var(--dur-2) var(--ease-out)}
+.rail .tick{display:block;width:1.75rem;height:1px;background:currentColor;
+  transform-origin:right center;transform:scaleX(.45);
+  transition:transform var(--dur-2) var(--ease-out)}
+.rail button[aria-current="true"]{color:var(--ink)}
+.rail button[aria-current="true"] .tick{transform:scaleX(1)}
+.rail button:hover{color:var(--ink)}
+.rail button:hover .tick{transform:scaleX(1)}
+@media (max-width:47.99rem){.rail{display:none}}
+
+/* A designed static path, per motion I1: with reduced motion we never start
+   WebGL at all and the document below is the deliverable. */
+@media (prefers-reduced-motion:reduce){
+  #gl,.hud,.rail,#scroller{display:none!important}
+  .gl-on .doc{display:grid!important}
+}
+</style>
+</head>
+
+<body>
+<a href="#work" class="skip label">Skip to the work</a>
+
+<header>
+  <a class="label" href="#top" style="color:var(--ink)">Alexander Sigoff</a>
+  <p class="label">Variant C &nbsp;/&nbsp;
+    <a href="index1.html" style="color:inherit">A</a> &nbsp;
+    <a href="index2.html" style="color:inherit">B</a></p>
+</header>
+
+<canvas id="gl" aria-hidden="true"></canvas>
+
+<nav class="rail" aria-label="Cases" hidden>
+  <button type="button" data-go="0"><span>Ferrari</span><span class="tick"></span></button>
+  <button type="button" data-go="1"><span>Prestige</span><span class="tick"></span></button>
+  <button type="button" data-go="2"><span>Pagani</span><span class="tick"></span></button>
+  <button type="button" data-go="3"><span>Dimamid</span><span class="tick"></span></button>
+  <button type="button" data-go="4"><span>MODA</span><span class="tick"></span></button>
+  <button type="button" data-go="5"><span>Porsche</span><span class="tick"></span></button>
+</nav>
+
+<div class="hud" id="hud" aria-hidden="true">
+  <div class="hud-in">
+    <p class="label" id="hud-sector">Marque dealer</p>
+    <h2 id="hud-name">Cauley Ferrari</h2>
+    <div class="row">
+      <span class="label num" id="hud-year" style="color:var(--ink)">2025</span>
+      <span class="label" id="hud-scope" style="color:var(--ink)">Multi-page product</span>
+      <a class="open label" id="hud-link" href="https://www.cauleyferrari.com/" rel="noopener">Open the site &nbsp;&rarr;</a>
+    </div>
+  </div>
+</div>
+
+<div id="scroller" hidden>
+  <div class="gl-scene"></div><div class="gl-scene"></div><div class="gl-scene"></div>
+  <div class="gl-scene"></div><div class="gl-scene"></div><div class="gl-scene"></div>
+  <div class="gl-scene"></div>
+</div>
+
+<main id="top">
+<!-- THE DOCUMENT — this is the page. WebGL is layered over it, never instead. -->
+<div class="doc" id="work">
+  <p class="label">Selected work &nbsp;/&nbsp; <span class="num">2021 &mdash; 2026</span></p>
+
+  <article class="doc-case">
+    <div>
+      <p class="label">01 &nbsp;/&nbsp; Marque dealer</p>
+      <h2 style="margin-block-start:var(--space-3)">Cauley Ferrari</h2>
+      <div class="doc-meta" style="margin-block-start:var(--space-5)">
+        <span class="label num" style="color:var(--ink)">2025</span>
+        <span class="label" style="color:var(--ink)">Art direction &middot; UI</span>
+      </div>
+      <a class="open label" style="margin-block-start:var(--space-5)" href="https://www.cauleyferrari.com/" rel="noopener">Open the site &nbsp;&rarr;</a>
+    </div>
+    <figure><img src="assets/cases/case-01-frame.webp" width="1800" height="1125" alt="Cauley Ferrari — the home page hero." /></figure>
+  </article>
+
+  <article class="doc-case">
+    <div>
+      <p class="label">02 &nbsp;/&nbsp; Dealer group, service</p>
+      <h2 style="margin-block-start:var(--space-3)">Prestige Imports</h2>
+      <div class="doc-meta" style="margin-block-start:var(--space-5)">
+        <span class="label num" style="color:var(--ink)">2026</span>
+        <span class="label" style="color:var(--ink)">Art direction &middot; UI</span>
+      </div>
+      <a class="open label" style="margin-block-start:var(--space-5)" href="https://sigovs.github.io/prestige-website/index_6.html" rel="noopener">Open the site &nbsp;&rarr;</a>
+    </div>
+    <figure><img src="assets/cases/case-02-frame.webp" width="1800" height="1125" loading="lazy" alt="Prestige Imports — the services section." /></figure>
+  </article>
+
+  <article class="doc-case">
+    <div>
+      <p class="label">03 &nbsp;/&nbsp; Marque dealer</p>
+      <h2 style="margin-block-start:var(--space-3)">Pagani of Chicago</h2>
+      <div class="doc-meta" style="margin-block-start:var(--space-5)">
+        <span class="label num" style="color:var(--ink)">2025</span>
+        <span class="label" style="color:var(--ink)">Art direction &middot; UI</span>
+      </div>
+      <a class="open label" style="margin-block-start:var(--space-5)" href="https://www.paganiofchicago.com/" rel="noopener">Open the site &nbsp;&rarr;</a>
+    </div>
+    <figure><img src="assets/cases/case-03-frame.webp" width="1800" height="1125" loading="lazy" alt="Pagani of Chicago — the Zonda model page." /></figure>
+  </article>
+
+  <article class="doc-case">
+    <div>
+      <p class="label">04 &nbsp;/&nbsp; Music project</p>
+      <h2 style="margin-block-start:var(--space-3)">Dimamid</h2>
+      <div class="doc-meta" style="margin-block-start:var(--space-5)">
+        <span class="label num" style="color:var(--ink)">2025</span>
+        <span class="label" style="color:var(--ink)">Art direction &middot; UI</span>
+      </div>
+      <a class="open label" style="margin-block-start:var(--space-5)" href="https://sigovs.github.io/dimamid/" rel="noopener">Open the site &nbsp;&rarr;</a>
+    </div>
+    <figure><img src="assets/cases/case-04-frame.webp" width="1800" height="771" loading="lazy" alt="Dimamid — a figure adrift in space at a console." /></figure>
+  </article>
+
+  <article class="doc-case">
+    <div>
+      <p class="label">05 &nbsp;/&nbsp; Concours &amp; auction</p>
+      <h2 style="margin-block-start:var(--space-3)">MODA Miami / Sotheby&rsquo;s</h2>
+      <div class="doc-meta" style="margin-block-start:var(--space-5)">
+        <span class="label num" style="color:var(--ink)">2023</span>
+        <span class="label" style="color:var(--ink)">Art direction &middot; UI</span>
+      </div>
+      <a class="open label" style="margin-block-start:var(--space-5)" href="https://www.behance.net/gallery/179848061/MODA-MIAMI-Sothebys" rel="noopener">View the case &nbsp;&rarr;</a>
+    </div>
+    <figure><img src="assets/cases/case-05-frame.webp" width="1364" height="853" loading="lazy" alt="MODA Miami for Sotheby's — a classic Ferrari under the Biltmore colonnade." /></figure>
+  </article>
+
+  <article class="doc-case">
+    <div>
+      <p class="label">06 &nbsp;/&nbsp; Restoration service</p>
+      <h2 style="margin-block-start:var(--space-3)">Porsche Restoration Services</h2>
+      <div class="doc-meta" style="margin-block-start:var(--space-5)">
+        <span class="label num" style="color:var(--ink)">2021</span>
+        <span class="label" style="color:var(--ink)">Art direction &middot; UI</span>
+      </div>
+      <a class="open label" style="margin-block-start:var(--space-5)" href="https://www.behance.net/gallery/130127865/Porsche-Restoration-Services" rel="noopener">View the case &nbsp;&rarr;</a>
+    </div>
+    <figure><img src="assets/cases/case-06-frame.webp" width="1728" height="1080" loading="lazy" alt="Porsche Restoration Services — home page." /></figure>
+  </article>
+
+  <section id="contact" style="padding-block-start:var(--space-8)">
+    <p class="label">Contact</p>
+    <p style="font-size:var(--text-h2);font-weight:600;letter-spacing:-.03em;margin:var(--space-4) 0 0">[Contact headline]</p>
+    <p style="margin-block-start:var(--space-6)"><a class="open label" href="mailto:[EMAIL]">[EMAIL] &nbsp;&rarr;</a></p>
+  </section>
+</div>
+</main>
+
+<footer style="padding:var(--space-6) var(--mat);border-top:1px solid var(--rule);
+               display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--space-3);
+               position:relative;z-index:5;background:var(--bg)">
+  <p class="label">Variant C &mdash; WebGL</p>
+  <p class="label">Alexander Sigoff &nbsp;&middot;&nbsp; <span class="num">&copy; 2026</span></p>
+</footer>
+
+<script type="importmap">
+{"imports":{"three":"https://unpkg.com/three@0.169.0/build/three.module.js"}}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+
+<script type="module">
+import * as THREE from 'three';
+
+const CASES = [
+  {n:'01', name:'Cauley Ferrari',               sector:'Marque dealer',        year:'2025', scope:'Multi-page product', tex:'assets/gl/case-01-frame.webp', href:'https://www.cauleyferrari.com/'},
+  {n:'02', name:'Prestige Imports',             sector:'Dealer group, service',year:'2026', scope:'Light system',       tex:'assets/gl/case-02-frame.webp', href:'https://sigovs.github.io/prestige-website/index_6.html'},
+  {n:'03', name:'Pagani of Chicago',            sector:'Marque dealer',        year:'2025', scope:'Model pages',        tex:'assets/gl/case-03-frame.webp', href:'https://www.paganiofchicago.com/'},
+  {n:'04', name:'Dimamid',                      sector:'Music project',        year:'2025', scope:'Authored world',     tex:'assets/gl/case-04-frame.webp', href:'https://sigovs.github.io/dimamid/'},
+  {n:'05', name:'MODA Miami / Sotheby’s',  sector:'Concours & auction',   year:'2023', scope:'Event platform',     tex:'assets/gl/case-05-frame.webp', href:'https://www.behance.net/gallery/179848061/MODA-MIAMI-Sothebys'},
+  {n:'06', name:'Porsche Restoration Services', sector:'Restoration service',  year:'2021', scope:'Service site',       tex:'assets/gl/case-06-frame.webp', href:'https://www.behance.net/gallery/130127865/Porsche-Restoration-Services'},
+];
+
+/* THE FALLBACK CONTRACT — the missing invariant this build is arguing for.
+   We only take the document away once a real context exists AND the libraries
+   actually loaded. Any failure leaves the DOM gallery standing. */
+function webglOK(){
+  try{
+    const c=document.createElement('canvas');
+    return !!(window.WebGL2RenderingContext && c.getContext('webgl2'));
+  }catch(e){ return false; }
+}
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (reduce || !webglOK() || !window.gsap || !window.ScrollTrigger) {
+  console.info('[variant C] staying on the document: ' +
+    (reduce ? 'reduced motion' : !webglOK() ? 'no WebGL2' : 'GSAP unavailable'));
+} else {
+  gsap.registerPlugin(ScrollTrigger);
+  start();
+}
+
+function start(){
+  const canvas = document.getElementById('gl');
+  const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:false,
+                                            powerPreference:'high-performance'});
+  /* COLOUR MANAGEMENT — the point the taste system currently has no rule for.
+     sRGB in, sRGB out, NO tone mapping, and MeshBasicMaterial rather than a lit
+     material: the client's work must appear in its own colour. A PBR material
+     would relight someone else's art direction and quietly misrepresent it. */
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.NoToneMapping;
+  renderer.setClearColor(0x0a0b0d, 1);
+
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.Fog(0x0a0b0d, 9, 30);       // depth by atmosphere
+  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+
+  const GAP = 7.2, W = 6;
+  const loader = new THREE.TextureLoader();
+  const planes = [];
+
+  /* THE HOLE IN THE FALLBACK CONTRACT, closed.
+     WebGL starting is not the same as the work being visible. On file:// the
+     browser refuses CORS for local images and every texture fails, which left
+     the document hidden behind six blank planes — the worst of both paths.
+     Any texture failure now hands the page back to the document. */
+  let failed = 0;
+  function abandon(why){
+    console.warn('[variant C] ' + why + ' — returned to the document');
+    toDocument();
+  }
+
+  CASES.forEach((c,i)=>{
+    const tex = loader.load(c.tex, t=>{
+      t.colorSpace = THREE.SRGBColorSpace;
+      t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+      const ar = t.image.width / t.image.height;
+      mesh.geometry.dispose();
+      mesh.geometry = new THREE.PlaneGeometry(W, W/ar);
+    }, undefined, ()=>{ if(!failed++) abandon('textures could not load (serve over http, not file://)'); });
+    const mat = new THREE.MeshBasicMaterial({map:tex, toneMapped:false});
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(W, W*0.625), mat);
+    // alternate sides: the eye path zig-zags down the corridor instead of
+    // running straight, which is what stops it reading as a slideshow
+    const side = i % 2 ? 1 : -1;
+    mesh.position.set(side * 1.9, (i%3-1) * 0.5, -i * GAP);
+    mesh.rotation.y = side * -0.22;
+    scene.add(mesh);
+    planes.push(mesh);
+  });
+
+  const END = -(CASES.length-1) * GAP;
+  const cam = {z: 6, x: 0};
+  camera.position.set(0, 0, cam.z);
+
+  function resize(){
+    const w = innerWidth, h = innerHeight;
+    // PERFORMANCE BUDGET: cap the pixel ratio. Uncapped DPR on a 3x phone is
+    // 9x the fragments for no visible gain on a photograph.
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setSize(w, h, false);
+    camera.aspect = w/h; camera.updateProjectionMatrix();
+  }
+  addEventListener('resize', resize); resize();
+
+  const hud = document.getElementById('hud');
+  function toDocument(){
+    document.documentElement.classList.remove('gl-on');
+    document.getElementById('scroller').hidden = true;
+    document.querySelector('.rail').hidden = true;
+    hud.style.display = 'none';
+    canvas.style.display = 'none';
+    if (window.ScrollTrigger) ScrollTrigger.getAll().forEach(t=>t.kill());
+  }
+
+  document.documentElement.classList.add('gl-on');
+  document.getElementById('scroller').hidden = false;
+  document.querySelector('.rail').hidden = false;
+  gsap.to(hud, {opacity:1, duration:0.4, ease:'power2.out', delay:0.2});
+
+  /* GSAP eases are mapped onto the SAME duration tokens the CSS uses, so the
+     library does not get a private vocabulary (motion-taste I3). */
+  const DUR = {t1:0.15, t2:0.25, t3:0.4, t4:1.2};
+
+  let active = -1;
+  const els = {
+    sector: document.getElementById('hud-sector'),
+    name:   document.getElementById('hud-name'),
+    year:   document.getElementById('hud-year'),
+    scope:  document.getElementById('hud-scope'),
+    link:   document.getElementById('hud-link'),
+  };
+  const rail = [...document.querySelectorAll('.rail button')];
+
+  function show(i){
+    if (i === active || !CASES[i]) return;
+    active = i;
+    const c = CASES[i];
+    gsap.timeline()
+      .to('.hud-in', {opacity:0, y:10, duration:DUR.t2, ease:'power2.in'})
+      .add(()=>{
+        els.sector.textContent = c.sector;
+        els.name.textContent   = c.name;
+        els.year.textContent   = c.year;
+        els.scope.textContent  = c.scope;
+        els.link.href          = c.href;
+        els.link.textContent   = c.href.includes('behance') ? 'View the case  →' : 'Open the site  →';
+      })
+      .to('.hud-in', {opacity:1, y:0, duration:DUR.t3, ease:'power2.out'});
+    rail.forEach((b,k)=>b.setAttribute('aria-current', k===i ? 'true':'false'));
+  }
+  show(0);
+
+  ScrollTrigger.create({
+    trigger:'#scroller', start:'top top', end:'bottom bottom', scrub:0.6,
+    onUpdate: self => {
+      const p = self.progress;
+      /* The camera stops 6 units IN FRONT of the last plane. The first version
+         ran to END-12, flying six units past it, so the final 15% of the scroll
+         sat behind the corridor and chapter 05 was skipped entirely. */
+      cam.z = 6 + END * p;
+      camera.position.z = cam.z;
+      camera.position.x = Math.sin(p * Math.PI * 2) * 0.9;   // slow lateral drift
+      camera.lookAt(0, 0, cam.z - 8);
+      const idx = Math.round((6 - cam.z) / GAP);
+      show(Math.max(0, Math.min(CASES.length-1, idx)));
+    }
+  });
+
+  rail.forEach(b=>b.addEventListener('click', ()=>{
+    const i = +b.dataset.go;
+    const target = (i / (CASES.length-1)) *
+      (document.getElementById('scroller').offsetHeight - innerHeight);
+    // native smooth scroll: GSAP's scrollTo is a separate plugin and loading a
+    // second file to do what the platform already does is not a good trade
+    window.scrollTo({top:target, behavior:'smooth'});
+  }));
+
+  /* FRAME BUDGET, enforced rather than hoped for. If the device cannot hold
+     the target, drop resolution before dropping frames. */
+  let last = performance.now(), acc = 0, frames = 0, ratio = Math.min(devicePixelRatio,2);
+  function tick(now){
+    const dt = now - last; last = now; acc += dt; frames++;
+    if (acc > 1000){
+      const fps = frames * 1000 / acc; acc = 0; frames = 0;
+      if (fps < 45 && ratio > 1){ ratio = Math.max(1, ratio - 0.25);
+        renderer.setPixelRatio(ratio);
+        console.info('[variant C] fps', fps.toFixed(0), '-> pixelRatio', ratio); }
+    }
+    renderer.render(scene, camera);
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  // context loss must not leave a black rectangle where the work was
+  canvas.addEventListener('webglcontextlost', e => {
+    e.preventDefault();
+    abandon('context lost');
+  });
+}
+</script>
+</body>
+</html>

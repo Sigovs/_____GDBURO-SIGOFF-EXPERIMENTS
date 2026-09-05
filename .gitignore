@@ -37,3 +37,7 @@ Thumbs.db
 /_buro test 1/assets/source/
 /_buro test 1/assets/models/*.raw.glb
 /_buro test 1/public/decoders/
+
+# A stray verification capture at the project root. previews/ is the place for
+# deliberate ones; a screenshot dropped beside index.html is scratch.
+/_buro test 2/act00.png

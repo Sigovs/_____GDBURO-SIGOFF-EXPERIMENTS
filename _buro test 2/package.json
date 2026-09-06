@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "plan": "python3 tools/extract-plan.py",
     "frames": "python3 tools/build-frames.py",
-    "assets": "npm run plan && npm run frames"
+    "assets": "npm run plan && npm run frames",
+    "publish": "node tools/publish.mjs",
+    "hub": "node tools/build-hub.mjs"
   },
   "dependencies": {
     "gsap": "^3.15.0",

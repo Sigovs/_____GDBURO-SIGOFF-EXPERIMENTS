@@ -1,0 +1,57 @@
+{
+  "_": [
+    "The variant register, and the source of truth for both tools/publish.mjs and",
+    "the portal at index.html. Same convention as _buro test 1 and _buro test 3:",
+    "",
+    "A VARIANT IS A FILE, NOT A BRANCH AND NOT A FOLDER. It is `indexN.html` at the",
+    "top of this folder, published as it stands, sharing `assets2/`. GitHub serves",
+    "the repository whole, so publishing is: build, copy to the top of this folder,",
+    "regenerate the portal, commit. There is no second branch and no second repo.",
+    "",
+    "`from` is the path inside dist/ that the build emits. `file` is the published",
+    "name. Order is presentation order: newest first.",
+    "",
+    "A variant is REMOVED by deleting its entry here, deleting its indexN.html, and",
+    "running `npm run publish`.",
+    "",
+    "`shotAt` is the element previews/indexN.jpg is captured at. It matters: two of these",
+    "three are the whole site and both open on the same act 00 photograph, so shooting the",
+    "top gave two identical cards for two builds whose whole difference is act 02."
+  ],
+  "title": "Luxe Corsa",
+  "subject": "121 private automotive suites — Lake Zurich, Illinois",
+  "repo": "https://github.com/Sigovs/_____GDBURO-SIGOFF-EXPERIMENTS",
+  "note": "An unaffiliated redesign study. Figures verified against luxecorsa.com, read 4 September 2026.",
+  "variants": [
+    {
+      "file": "index2.html",
+      "from": "exploration/integrated/v5-full-site.html",
+      "name": "The full site",
+      "sub": "Acts 00–07 with the V5.2 compound",
+      "note": "The whole homepage, with act 02 replaced by the guided sales interface. Choose one of eleven buildings on the model, then one of its suites; the real door lights up, the price and the size follow, and ENTER puts you on the apron in front of it. Every building is selectable — 30 of 30 in a randomised pointer test.",
+      "date": "2026-09-06",
+      "status": "current",
+      "shotAt": "#act-02"
+    },
+    {
+      "file": "index3.html",
+      "from": "exploration/study/proposed-v5-guided-sales.html",
+      "name": "Act 02 on its own",
+      "sub": "The compound, full screen",
+      "note": "The same interface with nothing around it — the fastest way to judge the model, the hover, the suite rail and the site plan without scrolling a page to reach them.",
+      "date": "2026-09-06",
+      "status": "current",
+      "shotAt": "top"
+    },
+    {
+      "file": "index4.html",
+      "from": "home.html",
+      "name": "The site as it stands",
+      "sub": "Acts 00–07, production act 02",
+      "note": "The same eight acts with the earlier act 02: an SVG drawing and a record column rather than a model. Kept beside the others because the comparison is the argument.",
+      "date": "2026-09-05",
+      "status": "superseded",
+      "shotAt": "#act-02"
+    }
+  ]
+}

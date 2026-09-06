@@ -761,7 +761,12 @@ export function initCompound3D(mount, model, opts = {}) {
        and the integrated review at /exploration/integrated/ both requested
        .../study/models/tree-1.glb, got index.html back, and logged a JSON parse error
        nobody was reading. Measured: 0 silhouettes planted at 106 points. */
-    draco.setDecoderPath('/draco/gltf/')
+      /* BASE_URL, NOT A LEADING SLASH. A root-absolute path is right on a dev server at
+       / and wrong the moment this folder is published under
+       /_____GDBURO-SIGOFF-EXPERIMENTS/_buro%20test%202/ — it would ask the domain root
+       for a decoder that lives two directories down. Vite substitutes the real base at
+       build time, so one expression is correct in both places. */
+    draco.setDecoderPath(import.meta.env.BASE_URL + 'draco/gltf/')
     const loader = new GLTFLoader()
     loader.setDRACOLoader(draco)
 
@@ -775,7 +780,7 @@ export function initCompound3D(mount, model, opts = {}) {
            and then failed to parse the result. Large binary assets belong in `public/`
            and are fetched by path: nothing to analyse, nothing to inline, and the files
            are served exactly as they were exported. */
-        const g = await loader.loadAsync(`/models/${name}.glb`)
+        const g = await loader.loadAsync(`${import.meta.env.BASE_URL}models/${name}.glb`)
         models.push(g.scene)
       } catch (err) { console.warn('[luxe-corsa] tree', name, 'did not load', err) }
     }

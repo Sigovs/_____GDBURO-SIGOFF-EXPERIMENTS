@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Luxe Corsa — 121 private suites, Lake Zurich, Illinois</title>
+<meta name="description" content="121 private, climate-controlled auto suites inside a gated members' community in Lake Zurich, Illinois. Type A from $699,000, Type B from $549,000.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- The LCP element is act 00's photograph. Nothing waits on a canvas, because there
+     is no canvas: the compound is a drawing and no renderer is in the graph. -->
+<link rel="preload" as="image" href="./assets2/perimeter-1600-C7J2cH9I.jpg"
+      imagesrcset="./assets2/perimeter-1100-DksFj9pN.jpg 1100w, ./assets2/perimeter-1600-C7J2cH9I.jpg 1600w, ./assets2/perimeter-2200-BmcXoEQ0.jpg 2200w"
+      imagesizes="100vw" fetchpriority="high">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230E1013'/%3E%3Crect x='6' y='9' width='20' height='14' fill='none' stroke='%23ECEEF1' stroke-width='1.5'/%3E%3Crect x='13' y='9' width='6' height='14' fill='%236E7C88'/%3E%3C/svg%3E">
+<style>
+  /* Act 02 becomes a full-height stage inside the real page. It is the only act that
+     owns the whole viewport, which is what a pinned interactive act needs and what the
+     production act 02 already asks for with data-pin.
+
+     MIN-HEIGHT, NOT ONLY HEIGHT, AND THAT IS NOT BELT AND BRACES. mountV5 puts the
+     class v5 on this element, and v5.css carries .v5{height:100%} at the same
+     specificity as this rule. In dev the inline block below wins on order; in a BUILD
+     Vite emits the bundled stylesheet as a <link> that lands after it, height:100%
+     of an auto-height section resolves to zero, and act 02 collapses to a 1425x0 strip
+     with nothing selectable in it. Measured on the built page: 0 of 11 buildings.
+     A min-height cannot be undone by a height, whatever the order turns out to be. */
+  .v5-host{position:relative;height:100vh;min-height:100vh;width:100%;background:#060708}
+  /* The page already has a persistent header carrying the mark and the location, so the
+     interface's own standalone mark would be the same words twice on the same screen. */
+  .v5-host .mark{display:none}
+  /* The site header sits above act 02's own controls. */
+  .v5 .nav{top:70px}
+</style>
+  <script type="module" crossorigin src="./assets2/v5site-CbmNWY4u.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets2/preload-helper-DtWiEIvH.js">
+  <link rel="modulepreload" crossorigin href="./assets2/main-CZupjTKB.js">
+  <link rel="modulepreload" crossorigin href="./assets2/v5-j0OCEtuI.js">
+  <link rel="modulepreload" crossorigin href="./assets2/ScrollTrigger-BJZ90ViQ.js">
+  <link rel="stylesheet" crossorigin href="./assets2/main-Wf1M1BYj.css">
+  <link rel="stylesheet" crossorigin href="./assets2/v5-CYjqT8rA.css">
+</head>
+<body>
+
+<a class="skip" href="#act-02">Skip to the compound plan</a>
+
+<!-- ================================================================================
+     THE PERSISTENT HEADER
+     Live from first paint. TOUR and the phone work before anything animates, which is
+     why no act below repeats a primary CTA and why "members-only" needs no gate.
+     ================================================================================ -->
+<header class="header" role="banner">
+  <a class="header__mark" href="#act-00">
+    <strong>Luxe&nbsp;Corsa</strong>
+  </a>
+  <span class="t-label header__act" aria-live="polite" aria-atomic="true">
+    <span class="u-visually-hidden">Act </span><span data-act-number>00</span>
+  </span>
+  <span class="t-label header__where">Lake Zurich, Illinois</span>
+  <a class="t-label header__tel" href="tel:+12246620000">224-662-0000</a>
+  <a class="header__tour" href="#act-07">Tour</a>
+</header>
+
+<!-- The Plan Rail. One continuous architectural drawing, present from act 00 to act 07,
+     whose state reports the visitor's position in the compound. It orients, and nothing
+     else — it is the darkest, thinnest mass on screen and never carries the optical
+     centre. On one column it leaves the column set and becomes a position line. -->
+<div class="rail" aria-hidden="true" data-rail>
+  <div class="rail__progress" data-rail-progress></div>
+  <svg class="rail__svg" viewBox="0 0 40 900" fill="none" preserveAspectRatio="xMidYMin meet">
+    <path class="rail__line" data-rail-spine d="M20 0 V900"></path>
+    <!-- The rail's fragment has always been a spine with three ticks coming off it,
+         which is the same instrument act 02's three levels are. Splitting the one path
+         into its ticks costs nothing outside act 02 — the geometry is identical and
+         --rail-k still lifts the whole thing for the recognition beat — and inside act
+         02 each tick can report a level. This is what makes the rail functional rather
+         than decorative, and it does it as line, with no label: the record names the
+         level, the rail says how deep in it you are. -->
+    <path class="rail__mark" data-rail-draw d="M20 120 V300 M20 300 V520"></path>
+    <path class="rail__mark rail__tick" data-rail-tick="compound" d="M8 120 H32"></path>
+    <path class="rail__mark rail__tick" data-rail-tick="building" d="M10 300 H30"></path>
+    <path class="rail__mark rail__tick" data-rail-tick="suite" d="M12 520 H28"></path>
+    <rect class="rail__marker" data-rail-marker x="16" y="0" width="8" height="2"></rect>
+  </svg>
+</div>
+
+<main id="main">
+
+<!-- ================================================================================
+     00 · ENTRY — exclusion, then invitation
+     Shot: reveal. The frame holds; the subject is discovered by light.
+     The first screen identifies the proposition without a gate, a hold or a required
+     gesture. One of only two moments of typographic scale on the page.
+     ================================================================================ -->
+<section class="act" id="act-00" data-act="00" data-register="photographic"
+         data-aperture="gate" data-aperture-into="act-01" aria-labelledby="h-00"
+         style="padding:0">
+  <div class="field field--full" data-field>
+    <picture class="field__pic" style="--tone:#16191c">
+      <source media="(max-width: 700px)" srcset="./assets2/perimeter-p640-Dx9dxNps.jpg 640w, ./assets2/perimeter-p900-BTEscatR.jpg 900w" sizes="100vw">
+      <img class="field__img" src="./assets2/perimeter-1600-C7J2cH9I.jpg"
+           srcset="./assets2/perimeter-760-QcTcGVGB.jpg 760w, ./assets2/perimeter-1100-DksFj9pN.jpg 1100w, ./assets2/perimeter-1600-C7J2cH9I.jpg 1600w, ./assets2/perimeter-2200-BmcXoEQ0.jpg 2200w"
+           sizes="100vw" width="2200" height="1238" fetchpriority="high" decoding="async"
+           alt="A long dark perimeter wall at night with a single lit opening in a low gatehouse.">
+    </picture>
+    <div class="field__scrim field__scrim--b"></div>
+
+    <div class="act__grid field__stage">
+      <div class="span-wide">
+        <h1 class="t-display" id="h-00" data-arrive data-split>
+          121 closed doors.<br>One opened for you.
+        </h1>
+        <p class="t-label" style="margin-top:var(--s-6); color:var(--ink-70)" data-arrive>
+          Private automotive suites <span aria-hidden="true">·</span> Lake Zurich, Illinois
+        </p>
+      </div>
+    </div>
+
+    <p class="t-label field__caption field__caption--tr" data-arrive>
+      Perimeter at night <span aria-hidden="true">·</span> stand-in, not the property
+    </p>
+  </div>
+</section>
+
+<!-- ================================================================================
+     01 · ARRIVAL — scale. This is not a garage.
+     Shot: dolly. A scrubbed lateral pass, the only lateral movement on the page.
+     Scale is claimed once, here, and never again: two monuments cancel.
+     ================================================================================ -->
+<section class="act" id="act-01" data-act="01" data-register="photographic"
+         data-aperture="grade" aria-labelledby="h-01" style="padding:0; min-height:140svh">
+  <!-- The frame holds at one viewport and STICKS while the act's 1.4 viewports pass;
+       the plate travels laterally inside it. Stretching the frame to 140svh instead
+       would make object-fit crop away the ceiling plane and the vanishing point, which
+       are the two things this act's scale argument is made of. -->
+  <div class="field field--full field--sticky" data-field data-dolly>
+    <picture class="field__pic" style="--tone:#3a3e43">
+      <source media="(max-width: 700px)" srcset="./assets2/frontage-p640-CAXXpCun.jpg 640w, ./assets2/frontage-p900-DVUIMlwc.jpg 900w" sizes="100vw">
+      <img class="field__img" src="./assets2/frontage-1600--K1ah3Gh.jpg"
+           srcset="./assets2/frontage-760-CQ9x6Ds3.jpg 760w, ./assets2/frontage-1100-mwNWE1nS.jpg 1100w, ./assets2/frontage-1600--K1ah3Gh.jpg 1600w, ./assets2/frontage-2200-C-rJvMw_.jpg 2200w"
+           sizes="100vw" width="2200" height="1238" loading="lazy" decoding="async"
+           alt="A wide internal roadway running between two facing rows of closed sectional doors, receding into the distance.">
+    </picture>
+    <div class="field__scrim field__scrim--tr"></div>
+    <h2 class="u-visually-hidden" id="h-01">Arrival</h2>
+
+    <!-- One mono caption, ten words or fewer, carrying one verified figure and its
+         source. Sits in the frame's quiet region — the dark above the roofline. -->
+    <p class="t-label field__caption field__caption--tr" data-arrive>
+      11 buildings <span aria-hidden="true">·</span> 121 suites<br>
+      <span style="color:var(--ink-40)">Internal frontage <span aria-hidden="true">·</span> stand-in, not the property</span>
+    </p>
+  </div>
+</section>
+
+<!-- ================================================================================
+     02 · THE COMPOUND — recognition, then specificity
+     Shot: interruption. The light goes flat: photographic dusk cuts to surveyed ground.
+     The recognition act, and the mechanism of the signature. Three levels, each owing a
+     truth the last did not deliver. This act IS the plan — the object that has been a
+     marginal hairline for two acts is now the subject at full scale, and nothing
+     announces it. A reveal that explains itself is not a reveal.
+     ================================================================================ -->
+<!-- ================================================================================
+     02 · COMPOUND / BUILDING / SUITE — the V5.2 guided sales interface.
+
+     The section, its id, its data-act, its data-pin and its heading are the live site's.
+     What is replaced is the STAGE: instead of production's SVG drawing with a record
+     column beside it, this mounts the V5 interface, which is the same module the
+     standalone exploration at /exploration/study/proposed-v5-guided-sales.html mounts.
+     data-compound is deliberately absent so main.js stands its own act 02 down.
+     ================================================================================ -->
+<section class="act" id="act-02" data-act="02" data-register="surveyed"
+         data-pin="compound" aria-labelledby="h-02" style="padding:0">
+  <h2 class="u-visually-hidden" id="h-02">121 private suites, 11 buildings</h2>
+  <div class="v5-host" data-pin-stage data-v5-host></div>
+</section>
+
+<!-- ================================================================================
+     03 · THE SUITE — THE PEAK. Possession.
+     Shot: push-in that has already happened. The push is the transition; the act is
+     the hold. ONE LOCKED CAMERA, four states, four truths, no repetition at different
+     intensities. The camera never moves for the whole act — customisation is only
+     legible if the frame does not move.
+     ================================================================================ -->
+<section class="act" id="act-03" data-act="03" data-register="photographic"
+         data-pin="suite" data-aperture="shutter" data-aperture-into="act-04" aria-labelledby="h-03" style="padding:0">
+  <div class="field field--full suite" data-suite>
+    <div class="suite__states" style="position:absolute; inset:0">
+
+      <div class="suite__state" data-state="delivered" data-active="true">
+        <picture class="field__pic" style="--tone:#3e3f40">
+          <source media="(max-width: 700px)" srcset="./assets2/delivered-p640-CKge1qUT.jpg 640w, ./assets2/delivered-p900-ChtNuJSL.jpg 900w" sizes="100vw">
+          <img class="field__img" src="./assets2/delivered-1600-DbF9JcES.jpg"
+               srcset="./assets2/delivered-1100-BaqHBG9B.jpg 1100w, ./assets2/delivered-1600-DbF9JcES.jpg 1600w, ./assets2/delivered-2200-DVR41OQc.jpg 2200w"
+               sizes="100vw" width="2200" height="1238" loading="lazy" decoding="async"
+               alt="An empty private suite seen from the doorway: sealed floor, insulated walls, a staircase rising to a mezzanine.">
+        </picture>
+      </div>
+
+      <div class="suite__state" data-state="garage">
+        <picture class="field__pic" style="--tone:#202021">
+          <source media="(max-width: 700px)" srcset="./assets2/garage-p640-DmWHKVF5.jpg 640w, ./assets2/garage-p900-U8WeBztO.jpg 900w" sizes="100vw">
+          <img class="field__img" src="./assets2/garage-1600-CfKZFKIo.jpg"
+               srcset="./assets2/garage-1100-Du4yE68z.jpg 1100w, ./assets2/garage-1600-CfKZFKIo.jpg 1600w, ./assets2/garage-2200-BRt6mXTH.jpg 2200w"
+               sizes="100vw" width="2200" height="1238" loading="lazy" decoding="async"
+               alt="The same suite with cars in it, the room still dominant and the cars sitting low in the frame.">
+        </picture>
+      </div>
+
+      <div class="suite__state" data-state="lounge">
+        <picture class="field__pic" style="--tone:#413d39">
+          <source media="(max-width: 700px)" srcset="./assets2/lounge-p640-Dkdj7s7f.jpg 640w, ./assets2/lounge-p900-BiCbfLIX.jpg 900w" sizes="100vw">
+          <img class="field__img" src="./assets2/lounge-1600-EnOO-x8V.jpg"
+               srcset="./assets2/lounge-1100-DyBQVt8n.jpg 1100w, ./assets2/lounge-1600-EnOO-x8V.jpg 1600w, ./assets2/lounge-2200-B4GZsjeo.jpg 2200w"
+               sizes="100vw" width="2200" height="1238" loading="lazy" decoding="async"
+               alt="The mezzanine finished out and occupied, with the ground floor visible beneath it.">
+        </picture>
+      </div>
+
+      <div class="suite__state" data-state="personalized">
+        <picture class="field__pic" style="--tone:#2a2727">
+          <source media="(max-width: 700px)" srcset="./assets2/personalized-p640-DTejJQj4.jpg 640w, ./assets2/personalized-p900-gpt2bUOF.jpg 900w" sizes="100vw">
+          <img class="field__img" src="./assets2/personalized-1600-CYk0gpPv.jpg"
+               srcset="./assets2/personalized-1100-BkILYkqO.jpg 1100w, ./assets2/personalized-1600-CYk0gpPv.jpg 1600w, ./assets2/personalized-2200-DubgvATo.jpg 2200w"
+               sizes="100vw" width="2200" height="1238" loading="lazy" decoding="async"
+               alt="One owner's fit-out: machines parked beneath the staircase and mezzanine soffit.">
+        </picture>
+      </div>
+    </div>
+
+    <div class="field__scrim field__scrim--l"></div>
+    <div class="field__scrim field__scrim--r"></div>
+
+    <div class="act__grid" style="position:absolute; inset:0; align-content:center; padding:96px var(--margin) var(--s-8) calc(var(--margin) + 28px); z-index:2">
+      <div class="span-text">
+        <p class="t-label">03 — The suite</p>
+        <h2 class="t-h2" id="h-03" style="margin-top:var(--s-4)" data-arrive>The room is the product.</h2>
+
+        <!-- Four states, four truths. Reachable by pointer and keyboard identically. -->
+        <div class="state-nav" style="margin-top:var(--s-7)" role="group" aria-label="Suite state">
+          <button class="level-btn" type="button" data-state-btn="delivered" aria-current="true">Delivered</button>
+          <button class="level-btn" type="button" data-state-btn="garage">Garage</button>
+          <button class="level-btn" type="button" data-state-btn="lounge">Lounge</button>
+          <button class="level-btn" type="button" data-state-btn="personalized">Personalized</button>
+        </div>
+        <p class="t-mono" style="margin-top:var(--s-4); color:var(--ink-55); max-width:42ch" data-state-truth>
+          What you are actually given.
+        </p>
+      </div>
+
+      <div class="span-record record" style="align-self:end">
+        <div class="record__head">
+          <p class="t-label">Selected suite</p>
+        </div>
+        <dl class="plate" data-plate-peak>
+          <div class="plate__row"><dt class="plate__k">Type</dt><dd class="plate__v">Type B</dd></div>
+          <div class="plate__row"><dt class="plate__k">Footprint</dt><dd class="plate__v t-fig">23′ × 50′</dd></div>
+          <div class="plate__row"><dt class="plate__k">Mezzanine</dt><dd class="plate__v t-fig">23′ × 31′ · 713 sq ft</dd></div>
+          <div class="plate__row"><dt class="plate__k">Total</dt><dd class="plate__v t-fig"><strong>1,863 sq ft</strong></dd></div>
+          <div class="plate__row"><dt class="plate__k">Capacity</dt><dd class="plate__v t-fig">≈4 cars, 2 motorcycles</dd></div>
+          <div class="plate__row"><dt class="plate__k">Electric</dt><dd class="plate__v t-fig">100 amp service</dd></div>
+          <div class="plate__row"><dt class="plate__k">Climate</dt><dd class="plate__v">Climate controlled</dd></div>
+          <div class="plate__row"><dt class="plate__k">From</dt><dd class="plate__v t-fig"><strong>$549,000</strong></dd></div>
+        </dl>
+
+        <!-- The footprint notation: the drawing that just became this room, kept where
+             the reader can check it against what they are looking at. -->
+        <div class="footprint" data-footprint aria-hidden="true">
+          <svg viewBox="0 0 60 110">
+            <rect class="footprint__sel" x="6" y="6" width="46" height="98"></rect>
+            <rect class="footprint__outline" x="6" y="6" width="46" height="98"></rect>
+            <rect class="footprint__mezz" x="6" y="6" width="46" height="61"></rect>
+          </svg>
+        </div>
+        <p class="t-label" data-footprint-label>Selected footprint · 23′ × 50′</p>
+      </div>
+    </div>
+
+    <p class="t-label field__caption" data-state-caption style="left:auto; right:var(--margin); bottom:var(--s-4); text-align:right; max-width:34ch">
+      Suite as delivered <span aria-hidden="true">·</span> stand-in, not the property
+    </p>
+  </div>
+</section>
+
+<!-- ================================================================================
+     04 · MACHINE / SPACE — physical intimacy
+     Shot: macro. Three frames, no whole car and no whole room in any.
+     The build-quality argument made by looking closely rather than by claiming. The
+     page's deliberate non-selling act: it asks for nothing.
+     ================================================================================ -->
+<section class="act" id="act-04" data-act="04" data-register="photographic"
+         data-aperture="glazed" data-aperture-into="act-05" aria-labelledby="h-04">
+  <div class="act__grid">
+    <div class="span-full">
+      <p class="t-label">04 — Machine / space</p>
+      <h2 class="t-h2" id="h-04" style="margin-top:var(--s-4); max-width:20ch" data-arrive>Someone specified this building properly.</h2>
+    </div>
+
+    <div class="span-full macro macro--stagger" style="margin-top:var(--s-8)">
+      <!-- Each caption follows technical fact → observable consequence → value to this
+           buyer. No adjectives, and every word measures something. -->
+      <figure class="macro__cell" data-arrive>
+        <div class="macro__frame">
+          <img src="./assets2/seal-1100-BP2PeTmb.jpg" srcset="./assets2/seal-760-BkSZ_rwF.jpg 760w, ./assets2/seal-1100-BP2PeTmb.jpg 1100w, ./assets2/seal-1600-DyZqdI-6.jpg 1600w"
+               sizes="(max-width: 860px) 100vw, 33vw" width="1100" height="619" loading="lazy" decoding="async"
+               alt="Macro view of the rubber bottom seal of an overhead door compressed against a concrete floor.">
+        </div>
+        <figcaption class="t-label">
+          Insulated sectional door, sealed at the slab.<br>
+          <span style="color:var(--ink-40)">Holds temperature against an Illinois winter. Stand-in, not the property.</span>
+        </figcaption>
+      </figure>
+
+      <figure class="macro__cell" data-arrive>
+        <div class="macro__frame">
+          <img src="./assets2/floor-1100-BOLzYJWD.jpg" srcset="./assets2/floor-760-Cm_FAS9-.jpg 760w, ./assets2/floor-1100-BOLzYJWD.jpg 1100w, ./assets2/floor-1600-C1juj4UU.jpg 1600w"
+               sizes="(max-width: 860px) 100vw, 33vw" width="1100" height="619" loading="lazy" decoding="async"
+               alt="Macro view of a sealed concrete floor meeting the base of a painted steel column.">
+        </div>
+        <figcaption class="t-label">
+          Sealed slab, no coating to lift.<br>
+          <span style="color:var(--ink-40)">Takes a jack and a lift without marking. Stand-in, not the property.</span>
+        </figcaption>
+      </figure>
+
+      <figure class="macro__cell" data-arrive>
+        <div class="macro__frame">
+          <img src="./assets2/graze-1100-DmfapOZo.jpg" srcset="./assets2/graze-760-BfMPTcCI.jpg 760w, ./assets2/graze-1100-DmfapOZo.jpg 1100w, ./assets2/graze-1600-BSaVgUIg.jpg 1600w"
+               sizes="(max-width: 860px) 100vw, 33vw" width="1100" height="619" loading="lazy" decoding="async"
+               alt="Macro view of light grazing across a dark stone plane, picking out its figure.">
+        </div>
+        <figcaption class="t-label">
+          LED throughout, raking rather than flat.<br>
+          <span style="color:var(--ink-40)">Reads paint and panel gaps at arm's length. Developer render.</span>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================================
+     05 · THE CLUB — company, after solitude
+     Shot: orbit — a short arc at fixed radius, never a revolution.
+     The page's only temperature change, and the meaning is the change: cold machines,
+     warm people, one glazed door between them. The club exists BECAUSE the machines
+     are next door.
+     ================================================================================ -->
+<section class="act" id="act-05" data-act="05" data-register="warm"
+         data-aperture="grade" aria-labelledby="h-05" style="min-height:160svh; display:grid; align-content:center">
+  <div class="act__grid">
+    <div class="span-text">
+      <p class="t-label">05 — The club</p>
+      <h2 class="t-h2" id="h-05" style="margin-top:var(--s-4)" data-arrive>The paddock has people in it.</h2>
+      <p class="t-body" style="margin-top:var(--s-6)" data-arrive>
+        The clubhouse is not an amenity that happens to be nearby. It is the reason the
+        compound is a community rather than a storage yard: the machines are through the
+        glass, and the people who own them are standing in front of it. Rooftop bar and
+        lounge, racing and golf simulators, a wellness centre, business and event space,
+        and a detailing and customisation shop on the same site.
+      </p>
+    </div>
+
+    <div class="span-record record" data-arrive>
+      <div class="record__head"><p class="t-label">Amenities</p></div>
+      <!-- A column, not cards. There is no card component in this system. -->
+      <ul class="spec-list">
+        <li><span class="t-fig">01</span><span>Clubhouse with rooftop bar and lounge</span></li>
+        <li><span class="t-fig">02</span><span>Racing and golf simulators</span></li>
+        <li><span class="t-fig">03</span><span>Wellness centre</span></li>
+        <li><span class="t-fig">04</span><span>Business and event space</span></li>
+        <li><span class="t-fig">05</span><span>Detailing and customisation</span></li>
+        <li><span class="t-fig">06</span><span>Gated community</span></li>
+        <li><span class="t-fig">07</span><span>24/7 surveillance</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- One dominant frame and two subordinates — a different composition from act 04's
+       stagger, because these two acts must not read as the same section twice. The lead
+       is the act's argument: people in the room, and the compound through the glass. -->
+  <div class="act__grid" style="margin-top:var(--s-8)">
+    <div class="span-full club">
+      <figure class="macro__cell club__lead" data-arrive>
+        <div class="macro__frame">
+          <img src="./assets2/community-1600-SNIrkHEn.jpg" srcset="./assets2/community-1100-DyWR-GwT.jpg 1100w, ./assets2/community-1600-SNIrkHEn.jpg 1600w, ./assets2/community-2200-wnoILbKa.jpg 2200w"
+               sizes="(max-width: 860px) 100vw, 72vw" width="1600" height="900" loading="lazy" decoding="async"
+               alt="Members standing and sitting in conversation in a warm-lit clubhouse lounge, with a cool-lit row of closed vehicle doors visible through full-height glazing on the right.">
+        </div>
+        <figcaption class="t-label">
+          The machines are through the glass.<br>
+          <span style="color:var(--ink-40)">Club interior, the compound beyond · stand-in, not the property.</span>
+        </figcaption>
+      </figure>
+
+      <figure class="macro__cell club__a" data-arrive>
+        <div class="macro__frame">
+          <img src="./assets2/bar-1100-DKtCyJGs.jpg" srcset="./assets2/bar-760-q_YWbgB0.jpg 760w, ./assets2/bar-1100-DKtCyJGs.jpg 1100w, ./assets2/bar-1600-BuUblyD-.jpg 1600w"
+               sizes="(max-width: 860px) 100vw, 30vw" width="1100" height="619" loading="lazy" decoding="async"
+               alt="The clubhouse bar and lounge, warm-lit, with glazing to the grounds beyond.">
+        </div>
+        <figcaption class="t-label">Rooftop bar and lounge <span style="color:var(--ink-40)">· developer render</span></figcaption>
+      </figure>
+
+      <figure class="macro__cell club__b" data-arrive>
+        <div class="macro__frame">
+          <img src="./assets2/lounge-1100-C7IP7PZI.jpg" srcset="./assets2/lounge-760-CCgeWtTi.jpg 760w, ./assets2/lounge-1100-C7IP7PZI.jpg 1100w, ./assets2/lounge-1600-D9GweZSA.jpg 1600w"
+               sizes="(max-width: 860px) 100vw, 52vw" width="1100" height="619" loading="lazy" decoding="async"
+               alt="The clubhouse lounge with seating, a games table and full-height glazing.">
+        </div>
+        <figcaption class="t-label">Lounge and games floor <span style="color:var(--ink-40)">· developer render</span></figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================================
+     06 · COMMUNITY / OWNERSHIP — seriousness
+     Shot: interruption. The second and last grade change, back to surveyed ground.
+     Not an image — a document. The highest text density on the page, and it is the
+     content: specification is content, not an appendix. No motion in this act at all,
+     except the A↔B diagram, and it is identical in reduced-motion mode.
+     ================================================================================ -->
+<section class="act" id="act-06" data-act="06" data-register="surveyed"
+         data-aperture="sectional" data-aperture-into="act-07" aria-labelledby="h-06">
+  <div class="act__grid">
+    <div class="span-full">
+      <p class="t-label">06 — Community / ownership</p>
+      <h2 class="t-h2" id="h-06" style="margin-top:var(--s-4); max-width:22ch">What you own, and on what terms.</h2>
+    </div>
+  </div>
+
+  <div class="act__grid" style="margin-top:var(--s-7)">
+    <div class="span-full doc">
+
+      <!-- The A ↔ B diagram. One shared plan, the depth axis visibly locked. -->
+      <div class="doc__block">
+        <h3 class="t-h3">Two types, one depth</h3>
+        <p class="t-body">
+          Both types are 50 feet deep with a 31-foot mezzanine. Only the width changes —
+          30 feet against 23 — so the difference is a width, not a size. The dimension
+          line below runs the full 50 feet and does not move.
+        </p>
+
+        <div class="ab" style="margin-top:var(--s-5)">
+          <div class="ab__stage">
+            <svg viewBox="0 0 340 260" role="img" aria-label="Comparison plan: Type A is 30 feet wide, Type B is 23 feet wide. Both are 50 feet deep with a 31-foot mezzanine.">
+              <!-- the locked depth axis — drawn at boundary weight so the lock is visible -->
+              <line class="ab__dim-locked" x1="24" y1="40" x2="24" y2="230"></line>
+              <line class="ab__dim-locked" x1="18" y1="40" x2="30" y2="40"></line>
+              <line class="ab__dim-locked" x1="18" y1="230" x2="30" y2="230"></line>
+              <text class="ab__t ab__t--locked" x="0" y="140" transform="rotate(-90 8 140)">50′ — 0″</text>
+
+              <!-- the unit. Only this rect's width tweens. -->
+              <rect class="ab__mezz" data-ab-mezz x="44" y="40" width="200" height="118"></rect>
+              <rect class="ab__unit" data-ab-unit x="44" y="40" width="200" height="190"></rect>
+
+              <!-- the mezzanine band, locked at 31' -->
+              <line class="ab__dim" data-ab-mezzline x1="44" y1="158" x2="244" y2="158"></line>
+              <text class="ab__t" x="52" y="152">Mezzanine 31′</text>
+
+              <!-- the travelling width dimension -->
+              <line class="ab__dim" data-ab-wdim x1="44" y1="248" x2="244" y2="248"></line>
+              <text class="ab__t" data-ab-wlabel x="128" y="242">30′</text>
+
+              <!-- Scale reference at true scale. Labelled, because the source states a
+                   capacity and does not publish an arrangement. -->
+              <rect class="ab__car" data-ab-car x="62" y="186" width="30" height="62" rx="4"></rect>
+              <text class="ab__t" x="44" y="20" style="font-size:11px">Scale reference — not a parking layout</text>
+            </svg>
+          </div>
+
+          <div class="record">
+            <div class="levels" role="group" aria-label="Suite type">
+              <button class="level-btn" type="button" data-ab-btn="A" aria-current="true">Type A</button>
+              <button class="level-btn" type="button" data-ab-btn="B">Type B</button>
+            </div>
+            <dl class="plate" data-ab-plate>
+              <div class="plate__row"><dt class="plate__k">Footprint</dt><dd class="plate__v t-fig">30′ × 50′</dd></div>
+              <div class="plate__row"><dt class="plate__k">Ground floor</dt><dd class="plate__v t-fig">1,500 sq ft</dd></div>
+              <div class="plate__row"><dt class="plate__k">Mezzanine</dt><dd class="plate__v t-fig">30′ × 31′ · 930 sq ft</dd></div>
+              <div class="plate__row"><dt class="plate__k">Total</dt><dd class="plate__v t-fig"><strong>2,430 sq ft</strong></dd></div>
+              <div class="plate__row"><dt class="plate__k">Capacity</dt><dd class="plate__v t-fig">≈6 cars, 3 motorcycles</dd></div>
+              <div class="plate__row"><dt class="plate__k">Units</dt><dd class="plate__v t-fig">26 of 121</dd></div>
+              <div class="plate__row"><dt class="plate__k">From</dt><dd class="plate__v t-fig"><strong>$699,000</strong></dd></div>
+            </dl>
+          </div>
+        </div>
+      </div>
+
+      <div class="doc__block">
+        <h3 class="t-h3">Included in every suite</h3>
+        <div class="doc__cols">
+          <ul class="spec-list">
+            <li><span class="t-fig">01</span><span>Climate controlled</span></li>
+            <li><span class="t-fig">02</span><span>Pedestrian door</span></li>
+            <li><span class="t-fig">03</span><span>Bathroom with walk-in shower</span></li>
+            <li><span class="t-fig">04</span><span>LED lighting throughout</span></li>
+            <li><span class="t-fig">05</span><span>Insulated walls, ceilings and garage door</span></li>
+          </ul>
+          <ul class="spec-list">
+            <li><span class="t-fig">06</span><span>100 amp electric service</span></li>
+            <li><span class="t-fig">07</span><span>Commercial-grade overhead garage door</span></li>
+            <li><span class="t-fig">08</span><span>Wood staircase and railings to mezzanine</span></li>
+            <li><span class="t-fig">09</span><span>Upgrades available through the onsite designer</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="doc__block">
+        <h3 class="t-h3">Availability</h3>
+        <div class="doc__cols">
+          <dl class="plate">
+            <div class="plate__row"><dt class="plate__k">Total suites</dt><dd class="plate__v t-fig">121 across 11 buildings</dd></div>
+            <div class="plate__row"><dt class="plate__k">Available</dt><dd class="plate__v t-fig">98 <span style="color:var(--ink-40)">(81%)</span></dd></div>
+            <div class="plate__row"><dt class="plate__k">Sold</dt><dd class="plate__v t-fig"><span class="t-scarce">23</span> <span style="color:var(--ink-40)">(19%)</span></dd></div>
+            <div class="plate__row"><dt class="plate__k">Type A</dt><dd class="plate__v t-fig">21 of 26 available</dd></div>
+            <div class="plate__row"><dt class="plate__k">Type B</dt><dd class="plate__v t-fig">77 of 95 available</dd></div>
+          </dl>
+          <div>
+            <p class="dated">Figures as of 4 Sep 2026. Availability changes; confirm on enquiry.</p>
+            <!-- An expandable schedule that does not move the list it lives in. -->
+            <div class="disclose" data-disclose style="margin-top:var(--s-5)">
+              <button class="disclose__btn" type="button" data-disclose-btn aria-expanded="false" aria-controls="d-location">
+                <span>Location and expansion</span><span class="disclose__sign" aria-hidden="true">+</span>
+              </button>
+              <div class="disclose__body" id="d-location">
+                <p class="t-body">
+                  24455 US-12, Lake Zurich, Illinois 60047. A second location in South
+                  Florida is announced and pending; no site, unit count or pricing has
+                  been published for it.
+                </p>
+              </div>
+            </div>
+            <div class="disclose" data-disclose>
+              <button class="disclose__btn" type="button" data-disclose-btn aria-expanded="false" aria-controls="d-security">
+                <span>Security and access</span><span class="disclose__sign" aria-hidden="true">+</span>
+              </button>
+              <div class="disclose__body" id="d-security">
+                <p class="t-body">
+                  The community is gated, with 24/7 surveillance. Access terms are set by
+                  the association and confirmed at contract.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================================
+     07 · PRIVATE TOUR — resolution, the door held open
+     Shot: release. The camera settles, damping resolves, motion stops on a composed
+     frame. Deliberately the same place as act 01, so the page closes where it opened
+     with one door now open. The page's second and last moment of typographic scale.
+     ================================================================================ -->
+<section class="act" id="act-07" data-act="07" data-register="photographic"
+         aria-labelledby="h-07" style="padding:0">
+  <div class="field field--full" data-field>
+    <picture class="field__pic" style="--tone:#2d2f2f">
+      <source media="(max-width: 700px)" srcset="./assets2/roadway-p640-DwsCv1jD.jpg 640w, ./assets2/roadway-p900-Cg3ZHeFm.jpg 900w" sizes="100vw">
+      <img class="field__img" src="./assets2/roadway-1600-lviFEfBV.jpg"
+           srcset="./assets2/roadway-760-CiBVzp9M.jpg 760w, ./assets2/roadway-1100-BHa2DH6g.jpg 1100w, ./assets2/roadway-1600-lviFEfBV.jpg 1600w, ./assets2/roadway-2200-DkqOg7zM.jpg 2200w"
+           sizes="100vw" width="2200" height="1238" loading="lazy" decoding="async"
+           alt="The internal roadway at the end of the day with a single door open and light spilling across the floor.">
+    </picture>
+    <div class="field__scrim field__scrim--b"></div>
+
+    <div class="act__grid field__stage">
+      <div class="span-wide">
+        <p class="t-label">07 — Private tour</p>
+        <h2 class="t-display" id="h-07" style="margin-top:var(--s-4)" data-arrive data-split>
+          Come and<br>stand in it.
+        </h2>
+        <p class="t-mono" style="margin-top:var(--s-5); color:var(--ink-70)" data-close-selection>
+          Type B <span aria-hidden="true">·</span> 23′ × 50′ <span aria-hidden="true">·</span> 1,863 sq ft
+        </p>
+
+        <div class="close__actions" style="margin-top:var(--s-7)">
+          <a class="action" href="tel:+12246620000">Schedule a private tour</a>
+          <a class="action action--quiet" href="tel:+12246620000">224-662-0000</a>
+          <a class="action action--quiet" href="#act-06">Read the terms</a>
+        </div>
+        <p class="t-label" style="margin-top:var(--s-5); color:var(--ink-40)">
+          24455 US-12, Lake Zurich, Illinois 60047
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- The footer shares act 06's ground and grid. No new register, no fade to empty. -->
+<footer class="footer">
+  <div class="act">
+    <div class="footer__rule" aria-hidden="true"></div>
+    <div class="footer__cols">
+      <div>
+        <p class="t-label" style="color:var(--ink-70)">Luxe Corsa</p>
+        <p class="t-mono" style="margin-top:var(--s-3); color:var(--ink-55)">
+          24455 US-12<br>Lake Zurich, IL 60047
+        </p>
+      </div>
+      <div>
+        <p class="t-label" style="color:var(--ink-70)">Contact</p>
+        <p class="t-mono" style="margin-top:var(--s-3)"><a href="tel:+12246620000">224-662-0000</a></p>
+      </div>
+      <div>
+        <p class="t-label" style="color:var(--ink-70)">Suites</p>
+        <p class="t-mono t-fig" style="margin-top:var(--s-3); color:var(--ink-55)">
+          Type A from $699,000<br>Type B from $549,000
+        </p>
+      </div>
+      <div>
+        <p class="t-label" style="color:var(--ink-70)">Expansion</p>
+        <p class="t-mono" style="margin-top:var(--s-3); color:var(--ink-55)">South Florida — pending</p>
+      </div>
+    </div>
+
+    <!-- Sources, in the render rather than only in a ledger. -->
+    <p class="t-mono footer__note" style="margin-top:var(--s-7)">
+      Figures verified against luxecorsa.com and luxecorsa.com/vehicle-suites/, read
+      4 September 2026. Site-plan geometry measured from the published site plan.
+      Interior and clubhouse images are developer renders. Frames captioned
+      “stand-in” are generated placeholders that depict neutral architecture and not
+      this property; they are held until photography exists.
+    </p>
+    <p class="t-mono footer__note" style="margin-top:var(--s-3)">
+      A design experiment — an unaffiliated redesign study, not a Luxe Corsa publication.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

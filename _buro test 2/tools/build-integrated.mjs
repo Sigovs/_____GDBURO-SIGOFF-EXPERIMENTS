@@ -4,7 +4,7 @@
    GENERATED, NOT COPIED.  A hand-made duplicate of a 743-line index.html is a fork that
    rots the first time either side is touched, and this review has already been burned
    once by two representations drifting apart. So the integrated page is BUILT from the
-   real index.html every time: same markup, same images, same video, same stylesheet,
+   real home.html every time: same markup, same images, same video, same stylesheet,
    same main.js, same motion.js, same GSAP and ScrollTrigger. Nothing is recreated and
    nothing is a screenshot.
 
@@ -30,7 +30,9 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const SRC = path.join(ROOT, 'index.html')
+/* The homepage SOURCE is home.html: index.html at the top of this folder is the
+   published portal, and one path cannot be two files. */
+const SRC = path.join(ROOT, 'home.html')
 const OUT_DIR = path.join(ROOT, 'exploration/integrated')
 const OUT = path.join(OUT_DIR, 'v5-full-site.html')
 
@@ -88,8 +90,16 @@ html = html.replace('<link rel="stylesheet" href="/src/site/index.css">',
 <style>
   /* Act 02 becomes a full-height stage inside the real page. It is the only act that
      owns the whole viewport, which is what a pinned interactive act needs and what the
-     production act 02 already asks for with data-pin. */
-  .v5-host{position:relative;height:100vh;width:100%;background:#060708}
+     production act 02 already asks for with data-pin.
+
+     MIN-HEIGHT, NOT ONLY HEIGHT, AND THAT IS NOT BELT AND BRACES. mountV5 puts the
+     class v5 on this element, and v5.css carries .v5{height:100%} at the same
+     specificity as this rule. In dev the inline block below wins on order; in a BUILD
+     Vite emits the bundled stylesheet as a <link> that lands after it, height:100%
+     of an auto-height section resolves to zero, and act 02 collapses to a 1425x0 strip
+     with nothing selectable in it. Measured on the built page: 0 of 11 buildings.
+     A min-height cannot be undone by a height, whatever the order turns out to be. */
+  .v5-host{position:relative;height:100vh;min-height:100vh;width:100%;background:#060708}
   /* The page already has a persistent header carrying the mark and the location, so the
      interface's own standalone mark would be the same words twice on the same screen. */
   .v5-host .mark{display:none}

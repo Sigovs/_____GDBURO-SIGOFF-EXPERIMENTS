@@ -1,11 +1,61 @@
-<!doctype html>
+#!/usr/bin/env node
+/* ==================================================================================
+   THE PORTAL — index.html at the top of this folder.
+
+   Not a page of the work; the door to it. It exists because the dashboard links one
+   URL per project and this project is three builds, and because a client opening a
+   link should see WHICH build is which before reading a word.
+
+   THE PICTURE IS THE CONTENT. Everything else on a card is a caption. So the shot
+   gets the mass and the type gets the margin. A card is used here and would be wrong
+   on the site itself: a bordered container is right when the thing inside is an
+   independently clickable object with its own edges, and a screenshot is exactly
+   that.
+
+   Generated from variants.json. Never hand-edited — it is overwritten on every
+   `npm run publish`.
+   ================================================================================== */
+
+import { readFileSync, writeFileSync, existsSync } from 'node:fs'
+import { join, resolve } from 'node:path'
+
+const ROOT = resolve(import.meta.dirname, '..')
+const R = JSON.parse(readFileSync(join(ROOT, 'variants.json'), 'utf8'))
+
+const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+const dateOf = (d) => {
+  if (!d) return ''
+  const t = new Date(d + 'T00:00:00Z')
+  return Number.isNaN(+t) ? d : t.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
+}
+
+const cards = R.variants.map((v) => {
+  const stem = v.file.replace(/\.html?$/i, '')
+  const shot = ['jpg', 'jpeg', 'png', 'webp'].map((e) => 'previews/' + stem + '.' + e).find((p) => existsSync(join(ROOT, p)))
+  const figure = shot
+    ? `<img src="${esc(shot)}" alt="" width="1600" height="1000" loading="lazy" decoding="async">`
+    /* A card whose shot has not been captured yet says so, rather than showing a
+       broken image or a grey rectangle pretending to be one. */
+    : `<span class="v__none">no capture yet</span>`
+  return `      <a class="v" href="${esc(v.file)}"${v.status === 'current' ? ' data-current' : ''}>
+        <figure class="v__pic">${figure}</figure>
+        <div class="v__body">
+          <p class="v__k">${esc(v.sub || v.file)}</p>
+          <h2 class="v__n">${esc(v.name)}</h2>
+          <p class="v__note">${esc(v.note)}</p>
+          <p class="v__meta"><span>${esc(dateOf(v.date))}</span>${v.status ? `<em>${esc(v.status)}</em>` : ''}<b>Open →</b></p>
+        </div>
+      </a>`
+}).join('\n')
+
+const html = `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Luxe Corsa — versions</title>
+<title>${esc(R.title)} — versions</title>
 <meta name="robots" content="noindex">
-<meta name="description" content="121 private automotive suites — Lake Zurich, Illinois">
+<meta name="description" content="${esc(R.subject)}">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Crect width=%2716%27 height=%2716%27 fill=%27%23090a0c%27/%3E%3Crect x=%272%27 y=%275%27 width=%2712%27 height=%276%27 fill=%27none%27 stroke=%27%23e8ebee%27 stroke-width=%271%27/%3E%3Crect x=%272%27 y=%275%27 width=%272.6%27 height=%276%27 fill=%27%23ce3b32%27/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -73,46 +123,24 @@ a{color:inherit;text-decoration:none}
 <main class="wrap">
   <header class="top">
     <p class="top__k">Versions</p>
-    <h1 class="top__t">Luxe Corsa</h1>
-    <p class="top__s">121 private automotive suites — Lake Zurich, Illinois</p>
-    <p class="top__note">An unaffiliated redesign study. Figures verified against luxecorsa.com, read 4 September 2026.</p>
-    <p class="top__links"><a href="https://github.com/Sigovs/_____GDBURO-SIGOFF-EXPERIMENTS">Repository ↗</a></p>
+    <h1 class="top__t">${esc(R.title)}</h1>
+    <p class="top__s">${esc(R.subject)}</p>
+    ${R.note ? `<p class="top__note">${esc(R.note)}</p>` : ''}
+    <p class="top__links"><a href="${esc(R.repo)}">Repository ↗</a></p>
   </header>
 
   <div class="list">
-      <a class="v" href="index2.html" data-current>
-        <figure class="v__pic"><img src="previews/index2.jpg" alt="" width="1600" height="1000" loading="lazy" decoding="async"></figure>
-        <div class="v__body">
-          <p class="v__k">Acts 00–07 with the V5.2 compound</p>
-          <h2 class="v__n">The full site</h2>
-          <p class="v__note">The whole homepage, with act 02 replaced by the guided sales interface. Choose one of eleven buildings on the model, then one of its suites; the real door lights up, the price and the size follow, and ENTER puts you on the apron in front of it. Every building is selectable — 30 of 30 in a randomised pointer test.</p>
-          <p class="v__meta"><span>6 September 2026</span><em>current</em><b>Open →</b></p>
-        </div>
-      </a>
-      <a class="v" href="index3.html" data-current>
-        <figure class="v__pic"><img src="previews/index3.jpg" alt="" width="1600" height="1000" loading="lazy" decoding="async"></figure>
-        <div class="v__body">
-          <p class="v__k">The compound, full screen</p>
-          <h2 class="v__n">Act 02 on its own</h2>
-          <p class="v__note">The same interface with nothing around it — the fastest way to judge the model, the hover, the suite rail and the site plan without scrolling a page to reach them.</p>
-          <p class="v__meta"><span>6 September 2026</span><em>current</em><b>Open →</b></p>
-        </div>
-      </a>
-      <a class="v" href="index4.html">
-        <figure class="v__pic"><img src="previews/index4.jpg" alt="" width="1600" height="1000" loading="lazy" decoding="async"></figure>
-        <div class="v__body">
-          <p class="v__k">Acts 00–07, production act 02</p>
-          <h2 class="v__n">The site as it stands</h2>
-          <p class="v__note">The same eight acts with the earlier act 02: an SVG drawing and a record column rather than a model. Kept beside the others because the comparison is the argument.</p>
-          <p class="v__meta"><span>5 September 2026</span><em>superseded</em><b>Open →</b></p>
-        </div>
-      </a>
+${cards}
   </div>
 
   <footer class="foot">
-    <p>3 versions · built 6 September 2026</p>
+    <p>${R.variants.length} version${R.variants.length === 1 ? '' : 's'} · built ${dateOf(new Date().toISOString().slice(0, 10))}</p>
     <p>A design experiment — an unaffiliated redesign study, not a Luxe Corsa publication.</p>
   </footer>
 </main>
 </body>
 </html>
+`
+
+writeFileSync(join(ROOT, 'index.html'), html)
+console.log('  published  index.html   (portal, ' + R.variants.length + ' versions)')

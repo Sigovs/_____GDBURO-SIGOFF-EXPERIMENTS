@@ -1,11 +1,8 @@
 connecting...
-navigating http://localhost:5183/exploration/study/proposed-v5-guided-sales.html
-window.__v5 appeared after 0.5s
+navigating http://127.0.0.1:5199/_buro%20test%202/index2.html
+window.__v5 appeared after 1s
 buildings   ["01","02","03","04","05","06","07","08","09","10","11"]
 suites      121
 proxies     "13 proxies {\"10\":2,\"11\":1,\"01\":1,\"02\":2,\"03\":1,\"04\":1,\"05\":1,\"06\":1,\"07\":1,\"08\":1,\"09\":1}"
 messages:
-   DEBUG [vite] connecting...
-   DEBUG [vite] connected.
-   INFO [luxe-corsa] planting 5 silhouettes at 106 points
-   INFO [luxe-corsa] planted 106
+   INFO [luxe-corsa] motion took hold: 41 triggers, full path.

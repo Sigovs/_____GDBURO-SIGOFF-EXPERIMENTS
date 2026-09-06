@@ -121,8 +121,20 @@ function baysFor(row, typeAInRow) {
     out.push({
       cx: row.cx + u * c,
       cy: row.cy + u * s,
+      /* THE DRAWN UNIT and THE BUILT SLOT are two different measurements, and conflating
+         them is what put a 2.4ft slot between every pair of suites in the model.
+
+         `len` is what the DRAWING shows: a unit with a hairline of air around it, so a
+         plan reads as a row of rooms rather than one long bar.  `slot` is what the
+         BUILDING is: the full pitch, edge to edge, because a suite's party wall is
+         shared with its neighbour and there is no gap between them in the world.
+
+         The model extrudes `slot`.  The drawing draws `len`.  Both come from the same
+         `step`, so they cannot drift. */
       len: step * 0.92,
+      slot: step,
       dep: row.depth * 0.9,
+      depth: row.depth,
       ang: row.ang,
       type: isA ? 'A' : 'B',
     })
@@ -450,6 +462,8 @@ export function buildCompound(mount) {
              rectangle and extrudes it itself. Both read the same measured numbers from
              the same loop, so the two representations cannot drift apart. */
           w, dep: b.dep, ang: b.ang, faceNormal: [nx * sign, ny * sign],
+          /* the built dimensions, for the model: full pitch and full building depth */
+          slot: b.slot, depth: b.depth,
         })
         g.appendChild(poly)
         g.appendChild(door)

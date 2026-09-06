@@ -267,11 +267,17 @@ export function initCompound3D(mount, model, opts = {}) {
      model throws onto it. This is what makes the compound an OBJECT PLACED ON the page
      rather than a picture floating in front of it — the contact shadow is the whole of
      the effect, so the plane itself is invisible. */
+  /* CLIPPED TO THE SITE.  At 4200 x 4200 this plane reached 31 units past the plinth on
+     every side — nearly four times the compound — and it is invisible except where a
+     shadow lands on it.  Every shadow that fell beyond the plinth edge therefore drew a
+     dark slab hanging in empty space, which is the "large grey trapezoid" the audit
+     found.  The contact shadow is the whole point of the plane, and a contact shadow
+     only exists where there is ground: the receiver is now the site's own footprint. */
   const table = new THREE.Mesh(
-    new THREE.PlaneGeometry(4200, 4200),
+    new THREE.ShapeGeometry(new THREE.Shape(data.perimeter.map(([x, y]) => v2(x, y)))),
     new THREE.ShadowMaterial({ opacity: 0.62, color: 0x000000 }),
   )
-  table.rotation.x = -Math.PI / 2
+  table.rotation.x = Math.PI / 2
   table.receiveShadow = true
 
   /* --- MATERIALS. One instance each, shared by every mesh that wears it. ---------- */
@@ -402,8 +408,25 @@ export function initCompound3D(mount, model, opts = {}) {
   const apronMat = M.concrete
   const apronGeo = new THREE.PlaneGeometry(1, 1)
   const APRON_D = ft(46)          /* deep enough to stand a car on, which is the point */
+  /* AN APRON BELONGS ON A DOOR SIDE.  Four buildings — 01, 03, 06 and 10 — are built
+     from two parallel rows, and the old rule gave every row an apron on whichever face
+     was nearer the drive.  For the back row of a pair that face is the blind rear wall,
+     so four full-length concrete forecourts were being laid in open ground behind
+     buildings, which is the light trapezoid the audit found sitting on its own.
+
+     The doors already solved this per bay.  The apron now asks THEM which way the run
+     faces instead of asking the roadway a second time. */
+  const rowDoorDir = (row) => {
+    const bays = model.suites.filter((s) => Math.abs(s.ang - row.ang) < 0.01 &&
+      Math.hypot(s.cx - row.cx, s.cy - row.cy) < row.length * 0.62)
+    if (!bays.length) return buildingApronDir(row)
+    let x = 0, y = 0
+    for (const b of bays) { x += b.faceNormal[0]; y += b.faceNormal[1] }
+    const L = Math.hypot(x, y)
+    return L < 0.001 ? buildingApronDir(row) : [x / L, y / L]
+  }
   for (const row of data.rows) {
-    const B = buildingApronDir(row)
+    const B = rowDoorDir(row)
     if (!B) continue
     const a = new THREE.Mesh(apronGeo, apronMat)
     a.rotation.x = -Math.PI / 2
@@ -873,10 +896,19 @@ export function initCompound3D(mount, model, opts = {}) {
     const B = buildingObjs.get(s.building)
     if (!B) continue
     const m = new THREE.Mesh(bayGeo, s.sold ? M.sold : M.wall)
-    /* The measured footprint, extruded. A 0.94 factor on the width leaves the party
-       wall a visible joint rather than a coincident face — coplanar neighbours z-fight
-       and, worse, read as one continuous block. */
-    m.scale.set(s.w * 0.94, H_SUITE, s.dep * 0.96)
+    /* THE MASS FILLS ITS SLOT.
+
+       This is the correction the whole pass turns on.  The width was shrunk twice —
+       0.92 in the bay builder and 0.94 again here — and the depth twice more, which cut
+       a 2.4-to-2.9 ft slot, 26 ft tall, clean through the building between every pair of
+       suites, front to back.  Measured on every one of the thirteen runs it came to
+       13.5 % of the pitch for a Type A bay and over 30 % for a Type B.  A visitor saw
+       DOOR, VOID, DOOR.  A commercial building does not have holes in it.
+
+       Adjacent boxes now share a face exactly.  They do not z-fight: the two coplanar
+       faces are back to back, so one is always facing away and only ever one is drawn.
+       The joint the old comment wanted is now a real PIER, built below. */
+    m.scale.set(s.slot ?? s.w, H_SUITE, s.depth ?? s.dep)
     m.position.set(s.cx, H_SUITE / 2, s.cy)
     m.rotation.y = -(s.ang * Math.PI) / 180
     m.castShadow = true
@@ -889,11 +921,36 @@ export function initCompound3D(mount, model, opts = {}) {
        inset panel in a metallic material: it is a commercial overhead door, and under a
        raking key light a slightly metallic recess is what makes a wall read as having
        an opening in it. */
-    const dw = s.w * 0.66
+    /* THE PIER.  The vertical division between two suites: full height, standing proud
+       of the door plane, and the element the reference elevation is built out of.  Every
+       bay carries the pier on its own leading edge, so a run of n suites draws n piers
+       and the last bay's far edge is closed by the run's end pier below. */
+    const slotW = s.slot ?? s.w
+    const PIER_W = ft(1.9)
+    const clear = slotW - PIER_W          /* the opening available between two piers */
+    const rot0 = -(s.ang * Math.PI) / 180
+    const [fnx0, fny0] = s.faceNormal
+    const faceD0 = (s.depth ?? s.dep) * 0.5
+
+    const pierL = new THREE.Mesh(bayGeo, M.wall)
+    pierL.scale.set(PIER_W, H_SUITE, ft(1.5))
+    pierL.position.set(
+      s.cx - Math.cos(rot0) * (slotW / 2) + fnx0 * (faceD0 - ft(0.4)),
+      H_SUITE / 2,
+      s.cy + Math.sin(rot0) * (slotW / 2) + fny0 * (faceD0 - ft(0.4)),
+    )
+    pierL.rotation.y = rot0
+    pierL.castShadow = true
+    pierL.receiveShadow = true
+    B.group.add(pierL)
+
+    /* THE DOOR occupies ~80 % of the clear bay between piers, which is what the
+       reference elevation shows and what a car actually needs. */
+    const dw = clear * 0.80
     const dh = H_SUITE * 0.5
     const [fnx, fny] = s.faceNormal
     const rot = -(s.ang * Math.PI) / 180
-    const faceD = s.dep * 0.48
+    const faceD = faceD0
 
     /* THE REVEAL. A door set flush in a wall is a rectangle of a different colour; a
        door set BACK behind a frame is an opening, because the frame's own edge throws a
@@ -929,6 +986,33 @@ export function initCompound3D(mount, model, opts = {}) {
       line.rotation.y = rot
       B.group.add(line)
     }
+
+    /* THE GLAZED HEAD.  Every real Luxe Corsa door has a windowed top section, and it is
+       the detail that stops a bay reading as a black rectangle: it catches the sky where
+       the rest of the leaf catches nothing. */
+    const glazeH = dh * 0.24
+    const glaze = new THREE.Mesh(bayGeo, M.glass)
+    glaze.scale.set(dw * 0.94, glazeH, ft(0.34))
+    glaze.position.set(
+      s.cx + fnx0 * (faceD0 - ft(0.42)),
+      dh - glazeH * 0.62,
+      s.cy + fny0 * (faceD0 - ft(0.42)),
+    )
+    glaze.rotation.y = rot0
+    B.group.add(glaze)
+
+    /* THE UNIT PLAQUE, beside the opening, where the render puts it. Small, light, and
+       the only thing on the elevation that identifies one bay from another. */
+    const plaque = new THREE.Mesh(bayGeo, M.trim)
+    const plaqueW = Math.min(ft(1.4), (clear - dw) * 0.42)
+    plaque.scale.set(plaqueW, ft(0.9), ft(0.14))
+    plaque.position.set(
+      s.cx + Math.cos(rot0) * (dw / 2 + plaqueW) + fnx0 * (faceD0 + ft(0.12)),
+      dh * 0.84,
+      s.cy - Math.sin(rot0) * (dw / 2 + plaqueW) + fny0 * (faceD0 + ft(0.12)),
+    )
+    plaque.rotation.y = rot0
+    B.group.add(plaque)
 
     /* One small wall light over every door. It is the detail that makes a compound at
        dusk read as occupied, and it is emissive rather than a light source — 116 point
@@ -1061,18 +1145,51 @@ export function initCompound3D(mount, model, opts = {}) {
        that you can see into it — a continuous dark glass band at head height, set very
        slightly proud so its own reveal reads. The clubhouse is where the compound is
        social, and glass is the only material on the model that says so. */
+    /* GLASS NEEDS AN EDGE TO BE GLASS.  A near-black band with no frame, no head and no
+       mullion is not a window — it is a hole, and from three-quarters on it read as a
+       black bar sticking out of the clubhouse.  The band is rebuilt as a real opening:
+       a trim surround one step proud, the glass recessed behind it, and mullions at a
+       structural pitch so the head has something to land on. */
     const bandH = H_CIVIC * 0.34
+    const bandY = H_CIVIC * 0.6
     for (const [ax, az] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
       const rr = -(c.ang * Math.PI) / 180
       const cs = Math.cos(rr), sn = Math.sin(rr)
       const halfL = c.length / 2, halfD = c.depth / 2
-      const ox = ax * (halfL + ft(0.3))
-      const oz = az * (halfD + ft(0.3))
+      const runL = ax ? c.depth * 0.86 : c.length * 0.86
+      const put = (offset, mesh) => {
+        const ox = ax * (halfL + offset)
+        const oz = az * (halfD + offset)
+        mesh.position.set(c.cx + ox * cs - oz * sn, bandY, c.cy + ox * sn + oz * cs)
+        mesh.rotation.y = rr
+        civicGroup.add(mesh)
+      }
+      /* the surround, proud of the wall — this is the reveal that makes it an opening */
+      const frame = new THREE.Mesh(bayGeo, M.trim)
+      frame.scale.set(ax ? ft(0.5) : runL + ft(1.6), bandH + ft(1.6), az ? ft(0.5) : runL + ft(1.6))
+      frame.castShadow = true
+      put(ft(0.42), frame)
+      /* the glass, set back inside it */
       const g2 = new THREE.Mesh(bayGeo, M.glass)
-      g2.scale.set(ax ? ft(0.6) : c.length * 0.9, bandH, az ? ft(0.6) : c.depth * 0.9)
-      g2.position.set(c.cx + ox * cs - oz * sn, H_CIVIC * 0.6, c.cy + ox * sn + oz * cs)
-      g2.rotation.y = rr
-      civicGroup.add(g2)
+      g2.scale.set(ax ? ft(0.3) : runL, bandH, az ? ft(0.3) : runL)
+      put(ft(0.10), g2)
+      /* mullions, at a structural pitch rather than a decorative one */
+      const bays = Math.max(3, Math.round(runL / ft(11)))
+      for (let i = 1; i < bays; i++) {
+        const u = (i / bays - 0.5) * runL
+        const mull = new THREE.Mesh(bayGeo, M.trim)
+        mull.scale.set(ax ? ft(0.36) : ft(0.5), bandH, az ? ft(0.36) : ft(0.5))
+        const ox = ax * (halfL + ft(0.3)) + (ax ? 0 : u)
+        const oz = az * (halfD + ft(0.3)) + (az ? 0 : 0)
+        const lx = ax ? u : 0
+        mull.position.set(
+          c.cx + (ox - (ax ? 0 : 0)) * cs - (oz + (ax ? lx : 0)) * sn + (ax ? 0 : 0),
+          bandY,
+          c.cy + ox * sn + (oz + (ax ? lx : 0)) * cs,
+        )
+        mull.rotation.y = rr
+        civicGroup.add(mull)
+      }
     }
 
     roofAssembly(c.cx, c.cy, c.length, c.depth, c.ang, H_CIVIC, civicGroup, null, null)
@@ -1440,6 +1557,13 @@ export function initCompound3D(mount, model, opts = {}) {
   M_lit.roughness = 0.55
 
   const M_sub = M.wall.clone(); M_sub.color.setHex(0x272d35)
+  /* HOVER HAS TO BE VISIBLE IN THE MODEL, NOT ONLY IN A TAG.  Considering a building now
+     steps every other building back to roughly two thirds of its emphasis — far enough
+     that the subject separates instantly, not so far that the compound stops being a
+     place.  Distinct from the focus subordinate above, which goes further because a
+     selection is a commitment and a hover is a question. */
+  const M_hoverSub = M.wall.clone(); M_hoverSub.color.setHex(0x4a545f)
+  const M_roofHoverSub = M.roof.clone(); M_roofHoverSub.color.setHex(0x2b323a)
   const M_roofFocus = M.roof.clone()
   M_roofFocus.color.setHex(0x424b57)
   M_roofFocus.emissive = lume.clone(); M_roofFocus.emissiveIntensity = 0.05
@@ -1456,7 +1580,13 @@ export function initCompound3D(mount, model, opts = {}) {
       const isHover = B.num === hoverNum && !focusNum
       const subordinate = (focusNum && !isFocus)
 
-      for (const r of B.roofs) r.material = isFocus || isHover ? M_roofFocus : (subordinate ? M_roofSub : M.roof)
+      const hoverSubordinate = !focusNum && hoverNum && !isHover
+      for (const r of B.roofs) {
+        r.material = isFocus || isHover ? M_roofFocus
+          : subordinate ? M_roofSub
+          : hoverSubordinate ? M_roofHoverSub
+          : M.roof
+      }
 
       for (const o of B.bays) {
         if (o.suite.sold) { o.mesh.material = M.sold; continue }
@@ -1471,7 +1601,7 @@ export function initCompound3D(mount, model, opts = {}) {
           continue
         }
         if (isHover) { o.mesh.material = M_focus; continue }
-        o.mesh.material = subordinate ? M_sub : M.wall
+        o.mesh.material = subordinate ? M_sub : (hoverSubordinate ? M_hoverSub : M.wall)
       }
 
       /* THE LIFT. Considering a building raises it a little off the slab; inspecting
@@ -1492,7 +1622,7 @@ export function initCompound3D(mount, model, opts = {}) {
          a building and must stay part of it: it steps forward by a foot and a half —
          enough for its own party walls to throw a shadow and for the eye to find it
          instantly — and everything else that distinguishes it is illumination. */
-      const want = (selectedSuite && o.suite === selectedSuite) ? ft(1.6) : 0
+      const want = (selectedSuite && o.suite === selectedSuite) ? ft(0.8) : 0
       const cur = o.mesh.position.y - o.baseY
       if (Math.abs(cur - want) > 0.001) tweenSuiteLift(o, want)
     }

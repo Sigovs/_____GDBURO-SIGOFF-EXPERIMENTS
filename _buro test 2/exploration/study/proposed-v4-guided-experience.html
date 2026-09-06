@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Act 02 — V4 · Guided experience + optional site plan</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+/* ======================================================================================
+   V4 — GUIDED EXPERIENCE, with the plan as an optional second mode.
+
+   The change of model: the compound is no longer a map to be read, it is a place to be
+   walked.  Three consequences, and each is a deletion before it is an addition.
+
+   1. NO LEADERS AT REST.  Nine simultaneous leaders were an engineering drawing, and a
+      first-time visitor was being asked to read it before they could do anything.  At
+      rest there are none.  One appears for the building under the pointer, one for the
+      building chosen, one for the suite chosen — never more than one at a time.  The
+      MODEL says what is interactive; the leader only names what the model has already
+      picked out.
+
+   2. THE PLAN IS A MODE, NOT THE JOURNEY.  Building numbers, availability, type keys and
+      overview navigation still exist, behind one deliberate door, with an exit that is
+      always on screen.  A visitor who wants the map can have it; nobody is put in it.
+
+   3. THE CONSOLE IS A CONTROLLER.  Left is where you are, centre is what you can choose,
+      right is what happens next — with hierarchy, not three equal columns.
+   ====================================================================================== */
+:root{
+  --void:#060708; --ground:#0A0B0D; --panel:#0B0D10; --panel2:#0E1114;
+  --ink:#F2F4F6; --ink-85:rgb(242 244 246/.85); --ink-70:rgb(242 244 246/.70);
+  --ink-55:rgb(242 244 246/.55); --ink-40:rgb(242 244 246/.40);
+  --ink-24:rgb(242 244 246/.24); --ink-16:rgb(242 244 246/.16); --ink-10:rgb(242 244 246/.10);
+  /* three, all derived from the project: the portal wordmark and corner reveal; the
+     precast and apron; the roof cladding and glazing. */
+  --red:#D8453C; --red-70:rgb(216 69 60/.70); --red-24:rgb(216 69 60/.24);
+  --sand:#C9BCA8; --sand-70:rgb(201 188 168/.70); --sand-24:rgb(201 188 168/.24);
+  --steel:#8FA4B4; --steel-40:rgb(143 164 180/.40); --steel-16:rgb(143 164 180/.16);
+  --grot:'Archivo',ui-sans-serif,system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  --s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--s7:48px;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--void);color:var(--ink);overflow:hidden}
+body{font-family:var(--grot);-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+
+.stage{position:fixed;inset:0;background:var(--ground);isolation:isolate}
+.mount{position:absolute;inset:0}
+.compound__svg{width:100%;height:100%;display:block;overflow:hidden}
+.compound__gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y;cursor:grab}
+.compound__gl:active{cursor:grabbing}
+.stage[data-gl='on'] .compound__svg{visibility:hidden}
+.cal{display:none}
+.stage::after{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(to bottom,rgb(6 7 8/.6) 0%,rgb(6 7 8/0) 13%),
+             linear-gradient(to top,rgb(6 7 8/.93) 0%,rgb(6 7 8/.5) 12%,rgb(6 7 8/0) 32%)}
+
+.mark{position:absolute;z-index:6;top:var(--s6);left:var(--s7);display:grid;gap:var(--s1)}
+.mark b{font-size:15px;font-weight:600;letter-spacing:.10em;text-transform:uppercase}
+.mark span{font-family:var(--mono);font-size:14px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-55)}
+
+/* --- ONE LEADER AT A TIME -------------------------------------------------------- */
+#leaders{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:visible}
+#leaders .path{fill:none;stroke:var(--sand-70);stroke-width:1;vector-effect:non-scaling-stroke}
+#leaders .ring{fill:none;stroke:var(--sand);stroke-width:1.2}
+#leaders .spark{fill:none;stroke:#fff;stroke-width:1.6;stroke-linecap:round;opacity:.9}
+#leaders[data-s='on'] .path{stroke:var(--red-70)} #leaders[data-s='on'] .ring{stroke:var(--red)}
+@keyframes drawline{from{stroke-dashoffset:var(--len)}to{stroke-dashoffset:0}}
+#leaders .spark{animation:drawline .55s var(--ease) forwards}
+@media (prefers-reduced-motion:reduce){#leaders .spark{animation:none;stroke-dashoffset:0;opacity:.5}}
+#tag{position:absolute;z-index:4;transform:translate(0,-50%);white-space:nowrap;pointer-events:none;
+  font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.12em;
+  color:var(--void);background:var(--sand);padding:5px 9px 4px;font-variant-numeric:tabular-nums}
+#tag[data-s='on']{color:#fff;background:var(--red)}
+#tag small{display:block;margin-top:3px;padding-top:3px;border-top:1px solid rgb(0 0 0/.3);font-size:14px;letter-spacing:.08em;text-transform:uppercase}
+
+/* --- THE CONSOLE ------------------------------------------------------------------ */
+.con{position:absolute;z-index:7;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--ink-24)}
+.con::before{content:'';position:absolute;left:0;top:-2px;height:3px;width:126px;background:var(--red)}
+.row{display:grid;grid-template-columns:minmax(300px,auto) 1fr auto;align-items:center;gap:var(--s6);padding:var(--s5) var(--s7)}
+.who{display:flex;align-items:baseline;gap:var(--s4)}
+.who__fig{font-size:48px;font-weight:600;line-height:.82;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.who__id{display:grid;gap:2px}
+.who__k{font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.20em;text-transform:uppercase;color:var(--ink-55)}
+.who__v{font-size:17px;color:var(--ink-85)} .who__v b{color:var(--ink);font-weight:500}
+.pill{display:inline-block;font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;padding:2px 7px 1px;margin-left:var(--s2)}
+.pill--a{color:var(--void);background:var(--sand)}
+.pill--b{color:var(--steel);border:1px solid var(--steel-40)}
+
+.mid{justify-self:start;display:grid;gap:var(--s2)}
+.tell{font-size:21px;font-weight:600;letter-spacing:-.01em}
+.tell em{font-style:normal;color:var(--sand)}
+.hint{font-family:var(--mono);font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-40)}
+
+.acts{display:flex;align-items:center;gap:var(--s5)}
+.lnk{appearance:none;background:none;border:0;cursor:pointer;font-family:var(--mono);font-size:14px;font-weight:500;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--ink-55);padding:10px 0;transition:color .25s var(--ease)}
+.lnk:hover{color:var(--ink)}
+.go{appearance:none;display:inline-grid;grid-template-columns:auto 50px;align-items:stretch;border:1px solid var(--red-24);
+  background:none;padding:0;cursor:not-allowed;font:inherit;transition:background-color .3s var(--ease),border-color .3s var(--ease)}
+.go__t{padding:13px var(--s5) 12px;text-align:left;display:flex;flex-direction:column;justify-content:center;
+  font-size:17px;font-weight:600;color:var(--ink-40);transition:color .3s var(--ease)}
+.go__t i{font-style:normal;font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:inherit;opacity:.72;margin-bottom:2px}
+.go__a{display:flex;align-items:center;justify-content:center;border-left:1px solid var(--red-24);color:var(--ink-40);font-size:18px;transition:color .3s var(--ease),border-color .3s var(--ease)}
+.go[data-ready='true']{border-color:var(--red);cursor:pointer}
+.go[data-ready='true'] .go__t{color:var(--red)} .go[data-ready='true'] .go__a{color:var(--red);border-left-color:var(--red)}
+.go[data-ready='true']:hover{background:var(--red)}
+.go[data-ready='true']:hover .go__t,.go[data-ready='true']:hover .go__a{color:#fff}
+.go[data-ready='true']:hover .go__a{border-left-color:rgb(255 255 255/.34)}
+
+/* --- MINIATURE GARAGE BAYS ---------------------------------------------------------- */
+.bays{border-top:1px solid var(--ink-16);padding:var(--s4) var(--s7) var(--s5);display:grid;grid-template-columns:auto 1fr auto;align-items:end;gap:var(--s5)}
+.bays__lead{display:grid;gap:3px;padding-bottom:6px}
+.bays__lead b{font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--red)}
+.bays__lead span{font-size:15px;color:var(--ink-55)}
+.strip{display:flex;gap:3px;align-items:flex-end}
+.bay{appearance:none;padding:0;cursor:pointer;position:relative;height:40px;
+  background:var(--ink-10);border:1px solid var(--steel-16);border-bottom:2px solid var(--steel-40);
+  transition:height .2s var(--ease),background-color .2s var(--ease),border-color .2s var(--ease)}
+.bay[data-type='A']{width:38px}   /* premium is wider, in the control as on the elevation */
+.bay[data-type='B']{width:28px}
+.bay::before{content:'';position:absolute;left:3px;right:3px;top:11px;bottom:3px;background:var(--steel-16);transition:background-color .2s var(--ease)}
+.bay::after{content:'';position:absolute;left:3px;right:3px;top:4px;height:5px;background:var(--steel-40);transition:background-color .2s var(--ease)}
+.bay:hover,.bay[data-hot='true']{height:50px;border-color:var(--sand);background:var(--sand-24)}
+.bay:hover::before,.bay[data-hot='true']::before{background:var(--sand-70)}
+.bay:hover::after,.bay[data-hot='true']::after{background:var(--sand)}
+.bay[data-sold='true']{cursor:not-allowed;height:26px;background:transparent;border-color:var(--ink-10);border-bottom-color:var(--ink-16)}
+.bay[data-sold='true']::before,.bay[data-sold='true']::after{background:var(--ink-10)}
+.bay[aria-pressed='true']{height:56px;border-color:var(--red);background:var(--red-24)}
+.bay[aria-pressed='true']::before{background:var(--red)}
+.bay[aria-pressed='true']::after{background:#fff}
+.bay__n{position:absolute;left:50%;top:-26px;transform:translateX(-50%);font-family:var(--mono);font-size:14px;font-weight:500;
+  color:var(--ink);background:rgb(8 9 11/.94);border:1px solid var(--ink-40);padding:2px 6px 1px;opacity:0;transition:opacity .16s var(--ease);pointer-events:none}
+.bay:hover .bay__n,.bay[data-hot='true'] .bay__n{opacity:1}
+.bay[aria-pressed='true'] .bay__n{opacity:1;color:#fff;background:var(--red);border-color:var(--red)}
+.bays__n{font-size:16px;color:var(--ink-55);padding-bottom:8px;text-align:right;font-variant-numeric:tabular-nums}
+.bays__n b{color:var(--ink);font-weight:500}
+.con:not([data-level='building']):not([data-level='suite']) .bays{display:none}
+
+/* --- THE SITE PLAN, as a mode ------------------------------------------------------- */
+.plan{position:fixed;inset:0;z-index:20;background:var(--panel2);display:grid;grid-template-rows:auto 1fr}
+.plan__bar{display:flex;align-items:center;justify-content:space-between;gap:var(--s6);padding:var(--s4) var(--s7);border-bottom:1px solid var(--ink-24)}
+.plan__t{display:flex;align-items:baseline;gap:var(--s4)}
+.plan__t b{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.plan__t span{font-family:var(--mono);font-size:14px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-55)}
+/* THE EXIT IS FIXED, ALWAYS ON SCREEN, AND THE FIRST THING IN THE BAR. Nobody is ever
+   put somewhere they have to hunt for the way out of. */
+.plan__exit{appearance:none;cursor:pointer;background:none;border:1px solid var(--ink-40);color:var(--ink);
+  font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;padding:9px 16px 8px;transition:background-color .25s var(--ease),color .25s var(--ease)}
+.plan__exit:hover{background:var(--ink);color:var(--void)}
+.plan__key{display:flex;align-items:center;gap:var(--s5);font-family:var(--mono);font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-55)}
+.plan__key i{display:inline-block;width:22px;height:9px;margin-right:7px;vertical-align:-1px;font-style:normal}
+.plan__body{position:relative;overflow:hidden}
+.plan__grid{position:absolute;inset:0;display:grid;grid-template-columns:1fr 300px}
+.plan__map{position:relative;overflow:hidden}
+.plan__list{border-left:1px solid var(--ink-16);padding:var(--s5) var(--s6);overflow:auto}
+.plan__list h4{margin:0 0 var(--s4);font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-55)}
+.prow{display:grid;grid-template-columns:auto 1fr auto;gap:var(--s3);align-items:baseline;padding:9px 0;border-bottom:1px solid var(--ink-10);cursor:pointer;background:none;border-left:0;border-right:0;border-top:0;width:100%;text-align:left;font:inherit;color:inherit}
+.prow:hover{color:var(--sand)}
+.prow b{font-family:var(--mono);font-size:16px;font-weight:500;font-variant-numeric:tabular-nums}
+.prow span{font-size:15px;color:var(--ink-55)}
+.prow em{font-style:normal;font-family:var(--mono);font-size:14px;color:var(--ink-70)}
+
+/* THE PLAN HAS TO BE PAINTED HERE. The production drawing carries its class names but
+   its paint lives in src/site/index.css, which this exploration does not load on purpose
+   — so without these rules every mass renders as a black silhouette. Painted in V4's own
+   palette, and this is also where PREMIUM and STANDARD become visible on the plan: sand
+   for Type A, steel for Type B, and sold reduced to an outline. */
+.plan__map svg{width:100%;height:100%;display:block;visibility:visible}
+.plan__map .perimeter{fill:none;stroke:var(--ink-24);stroke-width:1.4;vector-effect:non-scaling-stroke}
+.plan__map .mass-road-trace,.plan__map .compound__road{fill:#141a20;stroke:none}
+.plan__map .mass-road-line{fill:none;stroke:var(--ink-16);stroke-width:1;vector-effect:non-scaling-stroke}
+.plan__map .mass-run,.plan__map .mass-side{fill:#1b2129;stroke:var(--ink-16);stroke-width:.8;vector-effect:non-scaling-stroke}
+.plan__map .mass-civic{fill:#2a323b;stroke:var(--ink-24);stroke-width:.8;vector-effect:non-scaling-stroke}
+.plan__map .bay{stroke:rgb(10 12 15/.9);stroke-width:.6;vector-effect:non-scaling-stroke;transition:fill .18s var(--ease)}
+.plan__map .bay[data-type='A']{fill:var(--sand-70)}
+.plan__map .bay[data-type='B']{fill:var(--steel-40)}
+.plan__map .bay[data-sold='true']{fill:none;stroke:var(--ink-24)}
+.plan__map .bay:hover{fill:var(--red)}
+.plan__map .door{fill:none;stroke:var(--ink-40);stroke-width:.8;vector-effect:non-scaling-stroke}
+.plan__map .leader,.plan__map .route{display:none}
+.plan__map .pnum{fill:var(--ink);font-family:var(--mono);font-size:13px;font-weight:500;letter-spacing:.08em;paint-order:stroke;stroke:rgb(6 7 8/.85);stroke-width:4px}
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <div class="mount" id="mount"></div>
+  <svg id="leaders" hidden><polyline class="path"/><polyline class="spark"/><circle class="ring" r="4.5"/></svg>
+  <div id="tag" hidden></div>
+
+  <div class="mark"><b>Luxe&nbsp;Corsa</b><span>Lake Zurich, Illinois</span></div>
+
+  <div class="con" id="con" data-level="compound">
+    <div class="row">
+      <div class="who">
+        <div class="who__fig" id="fig">121</div>
+        <div class="who__id"><div class="who__k" id="whoK">Private automotive suites</div><div class="who__v" id="whoV"></div></div>
+      </div>
+      <div class="mid">
+        <div class="tell" id="tell">Choose a building.</div>
+        <div class="hint" id="hint">Point at any building in the compound</div>
+      </div>
+      <div class="acts">
+        <button class="lnk" id="planBtn" type="button">Explore site plan</button>
+        <button class="lnk" id="back" type="button" hidden>← Compound</button>
+        <button class="go" id="go" type="button" data-ready="false" hidden>
+          <span class="go__t" id="goT">Select a suite</span><span class="go__a">→</span>
+        </button>
+      </div>
+    </div>
+    <div class="bays">
+      <div class="bays__lead"><b id="baysK">Select a suite</b><span>Each bay is one suite</span></div>
+      <div class="strip" id="strip" role="group" aria-label="Suites in this building"></div>
+      <div class="bays__n" id="baysN"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================ THE OPTIONAL SITE PLAN ============================ -->
+<div class="plan" id="plan" hidden>
+  <div class="plan__bar">
+    <button class="plan__exit" id="planExit" type="button">← Back to the experience</button>
+    <div class="plan__t"><b>Site plan</b><span>11 buildings · 121 suites</span></div>
+    <div class="plan__key">
+      <span><i style="background:var(--sand)"></i>Premium — Type A</span>
+      <span><i style="background:var(--steel-40)"></i>Standard — Type B</span>
+      <span><i style="background:var(--ink-10)"></i>Sold</span>
+    </div>
+  </div>
+  <div class="plan__body"><div class="plan__grid">
+    <div class="plan__map" id="planMap"></div>
+    <div class="plan__list" id="planList"><h4>Buildings</h4></div>
+  </div></div>
+</div>
+
+<script type="module">
+import { buildCompound, TYPE_SPEC } from '/src/site/compound.js'
+
+const $ = (id) => document.getElementById(id)
+const stage = $('stage'), mount = $('mount'), con = $('con')
+const compound = buildCompound(mount)
+let gl = null
+const state = { level: 'compound', building: null, suite: null, hover: null, hoverSuite: null, plan: false }
+const available = compound.suites.filter((s) => !s.sold).length
+const say = (v) => String(v).replace(/\bSQ FT\b/g, 'sq ft').replace(/\bTYPE\b/g, 'Type').replace(/\bFROM\b/g, 'from')
+const typeName = (t) => (t === 'A' ? 'Premium' : 'Standard')
+
+function hoverBuilding(b){ if(state.hover===b) return; state.hover=b; gl?.setHoverBuilding(b?b.num:null); paint() }
+function hoverSuite(s){ if(state.hoverSuite===s) return; state.hoverSuite=s; gl?.setHoverSuite(s||null); paint() }
+function selectBuilding(b){ if(!b) return
+  Object.assign(state,{building:b,suite:null,hover:null,hoverSuite:null,level:'building'})
+  gl?.setLevel('building',b.num); renderBays(); paint() }
+function selectSuite(s){ if(!s||s.sold) return
+  Object.assign(state,{suite:s,building:s.bldg,hoverSuite:null,level:'suite'})
+  gl?.setLevel('suite',s.bldg.num,s.index); paint() }
+function toCompound(){ Object.assign(state,{level:'compound',building:null,suite:null,hover:null,hoverSuite:null})
+  gl?.setLevel('compound'); paint() }
+function back(){ if(state.level==='suite'&&state.building){ const b=state.building; state.suite=null; state.level='building'; gl?.setLevel('building',b.num); paint() }
+  else if(state.level==='building') toCompound() }
+
+/* ======================================================================================
+   ONE LEADER, FOR ONE THING.
+   ====================================================================================== */
+const svg=$('leaders'), tagEl=$('tag')
+const pathEl=svg.querySelector('.path'), sparkEl=svg.querySelector('.spark'), ringEl=svg.querySelector('.ring')
+let anchors = new Map()
+let lastKey = null
+
+function drawLeader() {
+  const subject = state.suite ? null : (state.building || state.hover)
+  const A = subject ? anchors.get(subject.num) : null
+  if (!gl || !A) { svg.hidden = true; tagEl.hidden = true; lastKey = null; return }
+  const p = A.anchor.clone().project(gl.camera)
+  if (p.z > 1) { svg.hidden = true; tagEl.hidden = true; return }
+  const w = innerWidth, h = innerHeight, conH = con.getBoundingClientRect().height
+  const x = (p.x*.5+.5)*w, y = (-p.y*.5+.5)*h
+  /* the path is derived from where the building actually is: it leaves upward when there
+     is sky above it and downward into the foreground when there is not, and the reach is
+     a function of the mass's own projected height. Two buildings never get the same line. */
+  const dirX = x < w*0.5 ? 1 : -1
+  const up = y > h*0.42
+  const rise = Math.max(70, Math.min(190, A.screenH*1.15))
+  let ty = up ? y-rise : y+rise
+  ty = Math.max(90, Math.min(h-conH-40, ty))
+  const tx = Math.max(120, Math.min(w-260, x + dirX*(40+Math.min(60,A.screenH*0.4))))
+  const pts = `${x},${y} ${x},${ty} ${tx},${ty}`
+  pathEl.setAttribute('points',pts); sparkEl.setAttribute('points',pts)
+  ringEl.setAttribute('cx',x); ringEl.setAttribute('cy',y)
+  const len = Math.abs(y-ty)+Math.abs(tx-x)
+  sparkEl.style.setProperty('--len',len); sparkEl.style.strokeDasharray = `${Math.min(52,len*.4)} ${len}`
+  const on = !!state.building
+  svg.dataset.s = on ? 'on' : 'hover'; tagEl.dataset.s = on ? 'on' : 'hover'
+  tagEl.style.left = (dirX<0 ? tx-8 : tx+8)+'px'; tagEl.style.top = ty+'px'
+  tagEl.style.transform = `translate(${dirX<0?'-100%':'0'},-50%)`
+  tagEl.innerHTML = `Building ${subject.num}<small>${subject.suites.length} suites · ${subject.open} available</small>`
+  svg.hidden = false; tagEl.hidden = false
+  const key = subject.num + (on?'-on':'-hv')
+  if (key !== lastKey) { lastKey = key; sparkEl.style.animation='none'; void sparkEl.offsetWidth; sparkEl.style.animation='' }
+}
+
+/* ======================================================================================
+   BAYS
+   ====================================================================================== */
+const strip=$('strip')
+function renderBays(){
+  strip.replaceChildren()
+  for(const s of state.building?.suites||[]){
+    const b=document.createElement('button')
+    b.type='button'; b.className='bay'; b.dataset.sold=s.sold?'true':'false'; b.dataset.type=s.type
+    b.setAttribute('aria-label',`Suite ${s.ref}, ${typeName(s.type)} type ${s.type}${s.sold?', sold':''}`)
+    b.innerHTML=`<span class="bay__n">${s.ordinal} · ${typeName(s.type)}</span>`
+    b.addEventListener('pointerenter',()=>hoverSuite(s))
+    b.addEventListener('pointerleave',()=>hoverSuite(null))
+    b.addEventListener('focus',()=>hoverSuite(s))
+    b.addEventListener('click',()=>selectSuite(s))
+    b._s=s; strip.appendChild(b)
+  }
+}
+
+/* ======================================================================================
+   PAINT
+   ====================================================================================== */
+const fig=$('fig'),whoK=$('whoK'),whoV=$('whoV'),tell=$('tell'),hint=$('hint')
+const backBtn=$('back'),go=$('go'),goT=$('goT'),planBtn=$('planBtn')
+function pill(t){ return `<span class="pill pill--${t.toLowerCase()}">${typeName(t)}</span>` }
+
+function paint(){
+  con.dataset.level=state.level
+  const b=state.building, s=state.suite
+  if(state.level==='suite'&&s){
+    const t=TYPE_SPEC[s.type]
+    fig.textContent=s.ref; whoK.textContent='Suite'
+    whoV.innerHTML=`${say(t.total)} · <b>${t.price.replace('FROM ','')}</b>${pill(s.type)}`
+    tell.textContent='Ready to enter.'; hint.textContent=`Building ${b.num} · available now`
+  } else if(state.level==='building'&&b){
+    const hs=state.hoverSuite
+    fig.textContent=hs?hs.ordinal:b.num
+    whoK.textContent=hs?'Suite':'Building'
+    whoV.innerHTML=hs?`${say(TYPE_SPEC[hs.type].total)}${hs.sold?' · sold':''}${pill(hs.type)}`
+      :`${b.suites.length} suites · <b>${b.open} available</b>`
+    tell.textContent=hs&&!hs.sold?'Click to choose it.':'Choose a suite.'
+    hint.textContent=hs?`${typeName(hs.type)} · Type ${hs.type}`:'Each bay below is one suite'
+  } else {
+    const h=state.hover
+    fig.textContent=h?h.num:String(available)
+    whoK.textContent=h?'Building':'Private automotive suites'
+    whoV.innerHTML=h?`${h.suites.length} suites · <b>${h.open} available</b>`
+      :`11 buildings · <b>${available} available</b> · Lake Zurich`
+    tell.innerHTML=h?`Open <em>building ${h.num}</em>.`:'Choose a building.'
+    hint.textContent=h?'Click the building':'Point at any building in the compound'
+  }
+  backBtn.hidden=state.level==='compound'
+  backBtn.textContent=state.level==='suite'?`← Building ${b?.num??''}`:'← Compound'
+  planBtn.hidden=state.level!=='compound'
+  go.hidden=state.level==='compound'
+  go.dataset.ready=s?'true':'false'
+  goT.innerHTML=s?`<i>Next</i>Enter suite ${s.ref}`:'Select a suite'
+  $('baysK').textContent=s?'Selected':'Select a suite'
+  if(b) $('baysN').innerHTML=`<b>${b.open}</b> of ${b.suites.length} available`
+  for(const el of strip.children){
+    el.setAttribute('aria-pressed',el._s===s?'true':'false')
+    if(el._s===state.hoverSuite&&el._s!==s) el.setAttribute('data-hot','true'); else el.removeAttribute('data-hot')
+  }
+  drawLeader()
+}
+
+backBtn.addEventListener('click',back)
+addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ if(state.plan) closePlan(); else back() } })
+
+/* ======================================================================================
+   THE SITE PLAN — a mode, entered and left deliberately, state preserved.
+   ====================================================================================== */
+const planEl=$('plan'), planMap=$('planMap'), planList=$('planList')
+let planBuilt=false
+function buildPlan(){
+  if(planBuilt) return
+  planBuilt=true
+  /* the plan IS the production drawing — the same measured SVG the model is built from,
+     which is why the two can never disagree about where a building is */
+  const svgEl=compound.svg.cloneNode(true)
+  svgEl.removeAttribute('style'); svgEl.style.width='100%'; svgEl.style.height='100%'
+  svgEl.style.visibility='visible'
+  planMap.appendChild(svgEl)
+  /* THE MAP NEEDS ITS NUMBERS. This is the one mode where reading the plan IS the task,
+     so the buildings are labelled in place — the thing the guided experience deliberately
+     refuses to do. Positions come from each building's own bbox in the drawing, so a
+     number can never end up on the wrong mass. */
+  const NS='http://www.w3.org/2000/svg'
+  for(const b of compound.buildings){
+    const src=svgEl.querySelector('g[data-building="' + b.num + '"]')
+    if(!src) continue
+    const bb=src.getBBox()
+    const t=document.createElementNS(NS,'text')
+    t.textContent=b.num
+    t.setAttribute('x',bb.x+bb.width/2); t.setAttribute('y',bb.y+bb.height/2)
+    t.setAttribute('text-anchor','middle'); t.setAttribute('dominant-baseline','middle')
+    t.setAttribute('class','pnum')
+    svgEl.appendChild(t)
+  }
+  for(const b of compound.buildings){
+    const row=document.createElement('button')
+    row.type='button'; row.className='prow'
+    const a=b.suites.filter(s=>s.type==='A').length
+    row.innerHTML=`<b>${b.num}</b><span>${b.suites.length} suites${a?` · ${a} premium`:''}</span><em>${b.open} free</em>`
+    row.addEventListener('click',()=>{ closePlan(); selectBuilding(b) })
+    planList.appendChild(row)
+  }
+}
+function openPlan(){ buildPlan(); state.plan=true; planEl.hidden=false }
+function closePlan(){ state.plan=false; planEl.hidden=true; paint() }
+planBtn.addEventListener('click',openPlan)
+$('planExit').addEventListener('click',closePlan)
+
+/* ======================================================================================
+   THE MODEL
+   ====================================================================================== */
+import('/src/site/compound3d.js').then(async ({ initCompound3D })=>{
+  gl=initCompound3D(mount,compound)
+  if(!gl) throw new Error('no webgl')
+  stage.setAttribute('data-gl','on')
+  const bldgOf=(n)=>compound.byNum.get(n)
+  gl.onHoverBuilding=(n)=>hoverBuilding(n?bldgOf(n):null)
+  gl.onHoverSuite=(i)=>hoverSuite(i==null?null:compound.suites[i])
+  gl.onPickBuilding=(n)=>{ const b=bldgOf(n); if(b) selectBuilding(b) }
+  gl.onPickSuite=(i)=>{ const s=compound.suites[i]; if(s) selectSuite(s) }
+  const THREE=await import('three')
+  for(const b of compound.buildings){
+    const all=new THREE.Box3()
+    gl.site.traverse((o)=>{ if(o.isMesh&&o.userData?.kind==='suite'&&o.userData.building===b.num) all.expandByObject(o) })
+    if(all.isEmpty()) continue
+    const c=all.getCenter(new THREE.Vector3())
+    anchors.set(b.num,{anchor:new THREE.Vector3(c.x,all.max.y,c.z),box:all,screenH:60})
+  }
+  window.__v4={state,compound,selectBuilding,selectSuite,hoverBuilding,hoverSuite,back,openPlan,closePlan,gl}
+  const tick=()=>{ requestAnimationFrame(tick)
+    for(const [,A] of anchors){
+      const a=A.box.min.clone().project(gl.camera), d=A.box.max.clone().project(gl.camera)
+      A.screenH=Math.abs((a.y-d.y)*.5*innerHeight)
+    }
+    drawLeader() }
+  requestAnimationFrame(()=>{ gl.setLevel('compound'); paint(); tick() })
+}).catch((e)=>{ console.warn('[v4] model did not stand',e) })
+
+paint()
+</script>
+</body>
+</html>

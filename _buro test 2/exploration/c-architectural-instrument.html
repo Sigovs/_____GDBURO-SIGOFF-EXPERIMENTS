@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Act 02 — Direction C · Architectural Instrument</title>
+<link rel="stylesheet" href="./_shared.css">
+<style>
+/* ==================================================================================
+   DIRECTION C — ARCHITECTURAL INSTRUMENT
+
+   THE RELATIONSHIP: one object sits in front of the model and it is a DEVICE — a
+   rangefinder readout, a survey instrument, the strip of glass on a viewfinder. Not a
+   dashboard: a dashboard is many controls arranged in a field, and this is a single
+   machined part with a fixed width that reports and accepts input along one axis.
+
+   Why an instrument rather than a panel: the visitor is doing one thing at a time, at
+   one level, on one subject. A panel is shaped for browsing many things at once and
+   therefore always looks half-empty or half-full. An instrument is shaped for reading
+   one state, so it is correct at every level and never has dead cells.
+
+   THE RULES IT KEEPS TO
+     - fixed width and fixed left edge at every level. Only its HEIGHT changes, and
+       only downward, so its top edge is a constant the eye can rest against.
+     - the level track is part of the instrument, not a separate breadcrumb: three
+       stops on one rail, and the travelling mark is the visitor's position.
+     - it never covers the subject. It is docked bottom-left, and the camera's own
+       composition puts the compound to the right of it.
+     - it expands only where a level actually has more to report.
+
+   At rest it is 4% of the stage. Selected, it is 14%. The model never drops below 86%.
+   ================================================================================== */
+
+.inst {
+  position: absolute; z-index: 4;
+  left: 56px; bottom: 56px; width: 396px;
+  background: rgb(10 11 13 / .72);
+  backdrop-filter: blur(14px) saturate(120%);
+  border: 1px solid var(--ink-16);
+  display: grid;
+}
+/* The machined top edge: one brighter hairline, the only "made" line in the frame. */
+.inst::before {
+  content: ''; position: absolute; left: -1px; right: -1px; top: -1px; height: 1px;
+  background: var(--ink-70);
+}
+
+/* --- THE TRACK. Three stops on one rail; the mark is the visitor's position. ----- */
+.track { display: grid; grid-template-columns: repeat(3, 1fr); align-items: center; }
+.stop {
+  position: relative; padding: 13px var(--s4) 12px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--ink-40); border-right: 1px solid var(--ink-08); white-space: nowrap;
+}
+.stop:last-child { border-right: 0; }
+.stop--done { color: var(--ink-70); }
+.stop--on { color: var(--ink); }
+/* the travelling mark — a 2px rule under the active stop only */
+.stop--on::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--ink);
+}
+.stop--idle { color: var(--ink-16); }
+
+/* --- THE READOUT. What the instrument reports at the current level. -------------- */
+.readout { border-top: 1px solid var(--ink-16); padding: var(--s4) var(--s4) var(--s4); display: grid; gap: var(--s3); }
+.readout__top { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--s4); }
+.readout__fig { font-family: var(--grot); font-size: 44px; font-weight: 600; letter-spacing: -0.035em; line-height: .86; font-variant-numeric: tabular-nums; }
+.readout__unit { font-family: var(--mono); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-55); padding-bottom: 5px; }
+.readout__note { font-family: var(--mono); font-size: 11px; letter-spacing: .05em; color: var(--ink-55); }
+
+/* the measured row — a strip of paired figures, the instrument's own scale marks */
+.scale { display: flex; gap: var(--s5); padding-top: var(--s1); }
+.scale__c { display: grid; gap: 3px; }
+.scale__k { font-family: var(--mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-40); }
+.scale__v { font-family: var(--mono); font-size: 13px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.scale__v--warn { color: var(--oxide); }
+
+/* --- THE ACTION BAR. Docked to the instrument's foot. --------------------------- */
+.acts { border-top: 1px solid var(--ink-16); display: grid; grid-auto-flow: column; }
+.act {
+  padding: 12px var(--s4); font-family: var(--mono); font-size: 11px;
+  letter-spacing: .18em; text-transform: uppercase; color: var(--ink-55);
+  border-right: 1px solid var(--ink-08); white-space: nowrap;
+}
+.act:last-child { border-right: 0; }
+.act--primary { color: var(--ink); background: rgb(242 244 246 / .07); }
+.act--idle { color: var(--ink-16); }
+
+/* --- THE SUITE DRAWER. The only place the instrument grows sideways-in-content. -- */
+.drawer { border-top: 1px solid var(--ink-16); max-height: 172px; overflow: hidden; }
+.drawer__hd { padding: 10px var(--s4) 8px; font-family: var(--mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-40); }
+.drow {
+  display: grid; grid-template-columns: 46px 1fr auto; gap: var(--s3); align-items: baseline;
+  padding: 7px var(--s4); border-top: 1px solid var(--ink-08);
+  font-family: var(--mono); font-size: 11px; letter-spacing: .04em; color: var(--ink-55);
+}
+.drow b { font-family: var(--grot); font-size: 13px; font-weight: 600; color: var(--ink-70); letter-spacing: -0.01em; }
+.drow--on { color: var(--ink); background: rgb(242 244 246 / .05); }
+.drow--on b { color: var(--ink); }
+.drow--sold { color: var(--ink-16); }
+.drow--sold span:last-child { color: var(--oxide); }
+
+/* --- THE HEADER. Two lines, top-left, never a bar. ------------------------------ */
+.hd { position: absolute; z-index: 3; top: 44px; left: 56px; display: grid; gap: 4px; }
+.hd__k { font-family: var(--mono); font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--ink-40); }
+.hd__n { font-family: var(--grot); font-size: 15px; font-weight: 600; letter-spacing: .03em; }
+
+/* --- ONE CALLOUT, and it shares the instrument's number. ------------------------ */
+.co { position: absolute; z-index: 3; }
+.co__dot { position: absolute; width: 5px; height: 5px; border: 1px solid var(--ink); border-radius: 50%; }
+.co__l { position: absolute; background: var(--ink-70); }
+.co__t { position: absolute; display: grid; gap: 3px; white-space: nowrap; }
+.co__fig { font-family: var(--grot); font-size: 26px; font-weight: 600; letter-spacing: -0.03em; line-height: .9; }
+.co__k { font-family: var(--mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-70); }
+
+/* the far-right hint, at the frame edge, quiet */
+.hint { position: absolute; z-index: 3; right: 56px; bottom: 60px; text-align: right; display: grid; gap: 4px; }
+.hint__k { font-family: var(--mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-40); }
+</style>
+</head>
+<body>
+
+<div class="deckhead">
+  <h1>C — Architectural Instrument</h1>
+  <p>One machined device docked bottom-left. Fixed width and fixed left edge at every level; only its height changes, and only downward. The level track is part of the instrument rather than a separate breadcrumb. At rest it is 4% of the stage; fully open, 14%.</p>
+</div>
+
+<!-- ============================== 1 · COMPOUND ============================== -->
+<div class="cap"><span><b>C1</b> &nbsp; Compound — instrument at rest</span><span>1440 × 900</span></div>
+<div class="frame">
+  <img class="frame__plate" src="./plates/compound.jpeg" alt="">
+  <div class="layer">
+    <div class="hd">
+      <div class="hd__k">02 — The compound</div>
+      <div class="hd__n">Luxe&nbsp;Corsa</div>
+    </div>
+
+    <div class="inst">
+      <div class="track">
+        <div class="stop stop--on">Compound</div>
+        <div class="stop stop--idle">Building</div>
+        <div class="stop stop--idle">Suite</div>
+      </div>
+      <div class="readout">
+        <div class="readout__top">
+          <div class="readout__fig">121</div>
+          <div class="readout__unit">Private suites<br>11 buildings</div>
+        </div>
+        <div class="readout__note">Point at a building. Click to enter it.</div>
+      </div>
+    </div>
+
+    <div class="hint">
+      <div class="hint__k">98 available · 23 sold</div>
+      <div class="hint__k">Drag to orbit</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== 2 · BUILDING ============================== -->
+<div class="cap"><span><b>C2</b> &nbsp; Building selected — the instrument opens</span><span>height grows downward only</span></div>
+<div class="frame">
+  <img class="frame__plate" src="./plates/building.jpeg" alt="">
+  <div class="layer">
+    <div class="hd">
+      <div class="hd__k">02 — The compound</div>
+      <div class="hd__n">Luxe&nbsp;Corsa</div>
+    </div>
+
+    <div class="co" style="left:860px; top:466px">
+      <div class="co__dot" style="left:-2px; top:-2px"></div>
+      <div class="co__l" style="left:0; top:0; width:1px; height:104px"></div>
+      <div class="co__l" style="left:0; top:-1px; width:66px; height:1px"></div>
+      <div class="co__t" style="left:0; top:-58px">
+        <div class="co__fig">03</div>
+        <div class="co__k">Building · 23 suites</div>
+      </div>
+    </div>
+
+    <div class="inst">
+      <div class="track">
+        <div class="stop stop--done">Compound</div>
+        <div class="stop stop--on">Building 03</div>
+        <div class="stop stop--idle">Suite</div>
+      </div>
+      <div class="readout">
+        <div class="readout__top">
+          <div class="readout__fig">03</div>
+          <div class="readout__unit">Building<br>Two runs</div>
+        </div>
+        <div class="scale">
+          <div class="scale__c"><div class="scale__k">Suites</div><div class="scale__v">23</div></div>
+          <div class="scale__c"><div class="scale__k">Avail</div><div class="scale__v">19</div></div>
+          <div class="scale__c"><div class="scale__k">Type A</div><div class="scale__v">1</div></div>
+          <div class="scale__c"><div class="scale__k">Type B</div><div class="scale__v">22</div></div>
+          <div class="scale__c"><div class="scale__k">Sold</div><div class="scale__v scale__v--warn">4</div></div>
+        </div>
+      </div>
+      <div class="drawer">
+        <div class="drawer__hd">Suites — choose one</div>
+        <div class="drow"><b>01</b><span>Type A · 30′ × 50′</span><span>2,430</span></div>
+        <div class="drow"><b>02</b><span>Type B · 23′ × 50′</span><span>1,863</span></div>
+        <div class="drow drow--sold"><b>03</b><span>Type B · 23′ × 50′</span><span>Sold</span></div>
+        <div class="drow"><b>04</b><span>Type B · 23′ × 50′</span><span>1,863</span></div>
+      </div>
+      <div class="acts">
+        <div class="act">← Compound</div>
+        <div class="act">Reset view</div>
+        <div class="act act--idle">Enter</div>
+      </div>
+    </div>
+
+    <div class="hint">
+      <div class="hint__k">Building 03 in focus</div>
+      <div class="hint__k">Choose a suite</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== 3 · SUITE ============================== -->
+<div class="cap"><span><b>C3</b> &nbsp; Suite selected — ENTER becomes the instrument's primary</span><span>full height, 14% of stage</span></div>
+<div class="frame">
+  <img class="frame__plate" src="./plates/suite.jpeg" alt="">
+  <div class="layer">
+    <div class="hd">
+      <div class="hd__k">02 — The compound</div>
+      <div class="hd__n">Luxe&nbsp;Corsa</div>
+    </div>
+
+    <div class="co" style="left:520px; top:410px">
+      <div class="co__dot" style="left:-2px; top:-2px"></div>
+      <div class="co__l" style="left:0; top:0; width:1px; height:120px"></div>
+      <div class="co__l" style="left:0; top:-1px; width:78px; height:1px"></div>
+      <div class="co__t" style="left:0; top:-58px">
+        <div class="co__fig">03 · 07</div>
+        <div class="co__k">Type B · door to the drive</div>
+      </div>
+    </div>
+
+    <div class="inst">
+      <div class="track">
+        <div class="stop stop--done">Compound</div>
+        <div class="stop stop--done">Building 03</div>
+        <div class="stop stop--on">Suite 03 · 07</div>
+      </div>
+      <div class="readout">
+        <div class="readout__top">
+          <div class="readout__fig">1,863</div>
+          <div class="readout__unit">Sq ft total<br>Type B</div>
+        </div>
+        <div class="scale">
+          <div class="scale__c"><div class="scale__k">Footprint</div><div class="scale__v">23′ × 50′</div></div>
+          <div class="scale__c"><div class="scale__k">Mezz</div><div class="scale__v">713</div></div>
+          <div class="scale__c"><div class="scale__k">Cars</div><div class="scale__v">≈4</div></div>
+          <div class="scale__c"><div class="scale__k">From</div><div class="scale__v">$549,000</div></div>
+        </div>
+      </div>
+      <div class="acts">
+        <div class="act">← Building 03</div>
+        <div class="act">Reset</div>
+        <div class="act act--primary">Enter suite →</div>
+      </div>
+    </div>
+
+    <div class="hint">
+      <div class="hint__k">Door lit · route complete</div>
+      <div class="hint__k">Enter to cross the threshold</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

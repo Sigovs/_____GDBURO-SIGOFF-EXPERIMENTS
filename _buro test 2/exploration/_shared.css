@@ -1,0 +1,98 @@
+/* ==================================================================================
+   ACT 02 — UX/UI EXPLORATION. Shared ground for the three directions.
+
+   These files are PROTOTYPES. They do not import from src/, they do not run the app,
+   and nothing here is wired to the state machine — each state is a static composition
+   so the three directions can be judged as pictures rather than as builds.
+
+   The model plates are real captures of the working Three.js compound with every UI
+   layer hidden at runtime. The model is therefore identical across all three
+   directions and across all three states, which is the point: the only variable is
+   the RELATIONSHIP between the model and the interface.
+
+   THE LENS. Borrowed qualities only — automotive editorial discipline, a near-black
+   canvas, minimal chrome, full-stage presence, engineering precision, restrained
+   high-contrast interaction. No marks, no stripes, no borrowed typography. The palette
+   and the two typefaces are Luxe Corsa's own, unchanged.
+   ================================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root {
+  --void:      #060708;
+  --ground:    #0A0B0D;
+  --deck:      #101315;
+  --ink:       #F2F4F6;
+  --ink-85:    rgb(242 244 246 / .85);
+  --ink-70:    rgb(242 244 246 / .70);
+  --ink-55:    rgb(242 244 246 / .55);
+  --ink-40:    rgb(242 244 246 / .40);
+  --ink-16:    rgb(242 244 246 / .16);
+  --ink-08:    rgb(242 244 246 / .08);
+  --lume:      #CBD6DE;
+  --oxide:     #C86B60;
+
+  --grot: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+
+  --micro: 12px;      /* prototype label size — the real build holds a 14px floor */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px;
+  --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--void); color: var(--ink); }
+body { font-family: var(--grot); -webkit-font-smoothing: antialiased; }
+
+/* Each state is one 1440x900 frame, stacked, so they can be shot one at a time. */
+.frame {
+  position: relative;
+  width: 1440px;
+  height: 900px;
+  overflow: hidden;
+  background: var(--ground);
+  margin: 0 auto 40px;
+  isolation: isolate;
+}
+.frame__plate {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+/* A very slight vignette so edge-anchored type always has ground under it. Not a
+   decorative shadow — it is the ground the annotation layer needs to exist. */
+.frame::after {
+  content: '';
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background:
+    linear-gradient(to bottom, rgb(6 7 8 / .78) 0%, rgb(6 7 8 / 0) 22%),
+    linear-gradient(to top,    rgb(6 7 8 / .82) 0%, rgb(6 7 8 / 0) 30%);
+}
+.layer { position: absolute; inset: 0; z-index: 2; }
+
+/* --- shared type roles ----------------------------------------------------------- */
+.lbl {
+  font-family: var(--mono); font-size: var(--micro);
+  letter-spacing: .16em; text-transform: uppercase; color: var(--ink-55);
+}
+.lbl--on { color: var(--ink); }
+.val { font-family: var(--mono); font-size: 13px; letter-spacing: .04em; color: var(--ink-85); font-variant-numeric: tabular-nums; }
+.fig {
+  font-family: var(--grot); font-weight: 600; line-height: .88;
+  letter-spacing: -0.035em; font-variant-numeric: tabular-nums;
+}
+.rule { height: 1px; background: var(--ink-16); }
+.rule--on { background: var(--ink-70); }
+
+/* the caption strip used between frames in the deck */
+.cap {
+  width: 1440px; margin: 0 auto 12px; padding-top: 28px;
+  font-family: var(--mono); font-size: var(--micro); letter-spacing: .16em;
+  text-transform: uppercase; color: var(--ink-40);
+  display: flex; justify-content: space-between; align-items: baseline;
+}
+.cap b { color: var(--ink); font-weight: 500; letter-spacing: .16em; }
+.deckhead { width: 1440px; margin: 48px auto 8px; }
+.deckhead h1 { font-family: var(--grot); font-size: 34px; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 8px; }
+.deckhead p { font-family: var(--mono); font-size: 13px; color: var(--ink-55); margin: 0; max-width: 78ch; line-height: 1.7; letter-spacing: .02em; }

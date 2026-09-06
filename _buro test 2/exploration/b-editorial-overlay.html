@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Act 02 — Direction B · Editorial Overlay</title>
+<link rel="stylesheet" href="./_shared.css">
+<style>
+/* ==================================================================================
+   DIRECTION B — EDITORIAL OVERLAY
+
+   THE RELATIONSHIP: the model is the SHEET, and the interface is what is printed on
+   it. There is no container anywhere — no band, no panel, no rail. Every piece of
+   information is anchored to the frame's own edges by hairlines that run the full
+   width or height of the composition, exactly as a competition board or a technical
+   plate is set out.
+
+   The two devices doing the work:
+
+     THE REGISTRATION LINES — two hairlines, one horizontal and one vertical, crossing
+     the whole frame. They are the layout. Everything hangs off them, so the annotation
+     reads as one drawn system rather than as items placed in corners.
+
+     THE DISPLAY FIGURE — the count set very large and cropped by the frame edge. It is
+     the only typographic mass in the composition and it is what makes the page read as
+     editorial rather than as an interface.
+
+   Data does not accumulate here. It CHANGES: each level re-prints the sheet with the
+   annotations that level warrants, so the composition is always the same weight and
+   only ever says one thing at a time.
+   ================================================================================== */
+
+/* --- REGISTRATION. The hairlines everything is set against. --------------------- */
+.reg { position: absolute; z-index: 2; background: var(--ink-08); }
+.reg--h { left: 0; right: 0; height: 1px; }
+.reg--v { top: 0; bottom: 0; width: 1px; }
+.reg--live { background: var(--ink-16); }
+
+/* --- CORNER BLOCKS. Four anchors, each with one job. ---------------------------- */
+.corner { position: absolute; z-index: 3; display: grid; gap: var(--s2); }
+.corner--tl { top: 44px;  left: 56px; }
+.corner--tr { top: 44px;  right: 56px; text-align: right; justify-items: end; }
+.corner--bl { bottom: 44px; left: 56px; }
+.corner--br { bottom: 44px; right: 56px; text-align: right; justify-items: end; }
+
+.k { font-family: var(--mono); font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-40); }
+.v { font-family: var(--mono); font-size: 13px; letter-spacing: .04em; color: var(--ink-85); font-variant-numeric: tabular-nums; }
+.v--on { color: var(--ink); }
+
+/* --- THE DISPLAY FIGURE. Cropped by the frame — committed, never tangent. ------- */
+.display {
+  position: absolute; z-index: 2;
+  font-family: var(--grot); font-weight: 700; line-height: .78;
+  letter-spacing: -0.055em; font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  mix-blend-mode: normal;
+}
+.display--compound { left: 40px; bottom: 96px; font-size: 260px; }
+.display--sub {
+  position: absolute; z-index: 3;
+  font-family: var(--mono); font-size: 13px; letter-spacing: .3em; text-transform: uppercase; color: var(--ink-70);
+}
+
+/* --- THE INDEX. An editorial list at the left registration line, not a table. ---- */
+.index { position: absolute; z-index: 3; display: grid; gap: 0; }
+.index__row {
+  display: grid; grid-template-columns: 34px 1fr auto; gap: var(--s4);
+  align-items: baseline; padding: 7px 0;
+  border-bottom: 1px solid var(--ink-08);
+  font-family: var(--mono); font-size: 12px; letter-spacing: .06em; color: var(--ink-40);
+}
+.index__row b { font-family: var(--grot); font-size: 15px; font-weight: 600; letter-spacing: -0.01em; color: var(--ink-55); }
+.index__row--on { color: var(--ink); border-bottom-color: var(--ink-70); }
+.index__row--on b { color: var(--ink); }
+
+/* --- CALLOUTS. Leaders that run to the registration lines, not short stubs. ------ */
+.co { position: absolute; z-index: 3; }
+.co__dot { position: absolute; width: 5px; height: 5px; border: 1px solid var(--ink); border-radius: 50%; }
+.co__l { position: absolute; background: var(--ink-70); }
+.co__t { position: absolute; display: grid; gap: 3px; white-space: nowrap; }
+.co__fig { font-family: var(--grot); font-size: 34px; font-weight: 600; letter-spacing: -0.03em; line-height: .9; }
+.co__k { font-family: var(--mono); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-70); }
+
+/* --- THE SPEC PLATE. A technical block set against the right registration line. -- */
+.plate { position: absolute; z-index: 3; display: grid; gap: 0; min-width: 250px; }
+.plate__hd { font-family: var(--mono); font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-40); padding-bottom: var(--s3); border-bottom: 1px solid var(--ink-70); }
+.plate__r { display: flex; justify-content: space-between; gap: var(--s5); padding: 8px 0; border-bottom: 1px solid var(--ink-08); }
+.plate__k { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-40); }
+.plate__v { font-family: var(--mono); font-size: 12px; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* --- ENTER. Set as a headline, not a control. ----------------------------------- */
+.enterline { position: absolute; z-index: 3; display: grid; gap: var(--s3); }
+.enterline__t { font-family: var(--grot); font-size: 40px; font-weight: 600; letter-spacing: -0.03em; line-height: 1; }
+.enterline__r { height: 2px; background: var(--ink); width: 100%; }
+.enterline__s { font-family: var(--mono); font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-55); }
+</style>
+</head>
+<body>
+
+<div class="deckhead">
+  <h1>B — Editorial Overlay</h1>
+  <p>The model is the sheet; the interface is printed on it. No containers at all — two registration hairlines cross the whole frame and every annotation hangs off them. One large cropped figure carries the typographic mass. Each level re-prints the sheet rather than adding to it.</p>
+</div>
+
+<!-- ============================== 1 · COMPOUND ============================== -->
+<div class="cap"><span><b>B1</b> &nbsp; Compound — at rest</span><span>1440 × 900</span></div>
+<div class="frame">
+  <img class="frame__plate" src="./plates/compound.jpeg" alt="">
+  <div class="reg reg--h" style="top:120px"></div>
+  <div class="reg reg--v" style="left:56px"></div>
+  <div class="reg reg--v" style="right:56px"></div>
+
+  <div class="layer">
+    <div class="corner corner--tl">
+      <div class="k">Luxe Corsa</div>
+      <div class="v v--on">02 — The compound</div>
+    </div>
+    <div class="corner corner--tr">
+      <div class="k">Lake Zurich, Illinois</div>
+      <div class="v">41°11′N 88°04′W · 21591 N Rand Rd</div>
+    </div>
+
+    <div class="display display--compound">121</div>
+    <div class="display--sub" style="left:48px; bottom:64px">Private suites · 11 buildings · 1 clubhouse</div>
+
+    <div class="corner corner--br">
+      <div class="k">Availability · 4 Sep 2026</div>
+      <div class="v"><span class="v--on">98</span> available &nbsp;·&nbsp; <span style="color:var(--oxide)">23 sold</span></div>
+      <div class="k" style="margin-top:12px">Point at a building · drag to orbit</div>
+    </div>
+
+    <!-- ONE context callout at rest. A second, at the entry, was tried and cut: the
+         display figure occupies the lower left, and an annotation underneath it was
+         read through 260px of type. The leader now stops short of the right
+         registration line so its label sits inside the frame's own margin — a label
+         cropped by the edge is worse than no label. -->
+    <div class="co" style="left:1010px; top:298px">
+      <div class="co__dot" style="left:-2px; top:-2px"></div>
+      <div class="co__l" style="left:0; top:0; width:196px; height:1px"></div>
+      <div class="co__t" style="left:196px; top:-9px">
+        <div class="co__k">Clubhouse</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== 2 · BUILDING ============================== -->
+<div class="cap"><span><b>B2</b> &nbsp; Building selected</span><span>the sheet is re-printed</span></div>
+<div class="frame">
+  <img class="frame__plate" src="./plates/building.jpeg" alt="">
+  <div class="reg reg--h" style="top:120px"></div>
+  <div class="reg reg--v" style="left:56px"></div>
+  <div class="reg reg--v" style="right:56px"></div>
+  <div class="reg reg--h reg--live" style="bottom:150px"></div>
+
+  <div class="layer">
+    <div class="corner corner--tl">
+      <div class="k">Luxe Corsa · 02</div>
+      <div class="v"><span style="color:var(--ink-40)">Compound</span> &nbsp;/&nbsp; <span class="v--on">Building 03</span></div>
+    </div>
+    <div class="corner corner--tr">
+      <div class="k">Back · Reset view</div>
+      <div class="v">Choose a suite</div>
+    </div>
+
+    <!-- the index moves in as a left-hand editorial list -->
+    <div class="index" style="left:56px; top:168px; width:236px">
+      <div class="index__row"><b>01</b><span>22 suites</span><span>18</span></div>
+      <div class="index__row index__row--on"><b>03</b><span>23 suites</span><span>19</span></div>
+      <div class="index__row"><b>04</b><span>7 suites</span><span>5</span></div>
+      <div class="index__row"><b>06</b><span>15 suites</span><span>12</span></div>
+      <div class="index__row"><b>07</b><span>8 suites</span><span>7</span></div>
+      <div class="index__row"><b>08</b><span>8 suites</span><span>6</span></div>
+      <div class="index__row"><b>09</b><span>9 suites</span><span>7</span></div>
+    </div>
+
+    <div class="co" style="left:840px; top:470px">
+      <div class="co__dot" style="left:-2px; top:-2px"></div>
+      <div class="co__l" style="left:0; top:0; width:1px; height:280px"></div>
+      <div class="co__t" style="left:-16px; top:-84px">
+        <div class="co__fig">03</div>
+        <div class="co__k">Building · 23 suites · 19 available</div>
+      </div>
+    </div>
+
+    <div class="corner corner--bl">
+      <div class="k">Composition</div>
+      <div class="v"><span class="v--on">1</span> Type A &nbsp;·&nbsp; <span class="v--on">22</span> Type B &nbsp;·&nbsp; <span style="color:var(--oxide)">4 sold</span></div>
+    </div>
+    <div class="corner corner--br">
+      <div class="k">Two runs · doors to the drive</div>
+      <div class="v">Select a suite to enter</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== 3 · SUITE ============================== -->
+<div class="cap"><span><b>B3</b> &nbsp; Suite selected — ENTER as a headline</span><span>spec plate at the right line</span></div>
+<div class="frame">
+  <img class="frame__plate" src="./plates/suite.jpeg" alt="">
+  <div class="reg reg--h" style="top:120px"></div>
+  <div class="reg reg--v" style="left:56px"></div>
+  <div class="reg reg--v reg--live" style="right:340px"></div>
+
+  <div class="layer">
+    <div class="corner corner--tl">
+      <div class="k">Luxe Corsa · 02</div>
+      <div class="v"><span style="color:var(--ink-40)">Compound &nbsp;/&nbsp; Building 03 &nbsp;/&nbsp;</span> <span class="v--on">Suite 03 · 07</span></div>
+    </div>
+
+    <div class="co" style="left:470px; top:400px">
+      <div class="co__dot" style="left:-2px; top:-2px"></div>
+      <div class="co__l" style="left:0; top:0; width:1px; height:200px"></div>
+      <div class="co__t" style="left:-14px; top:-88px">
+        <div class="co__fig">03 · 07</div>
+        <div class="co__k">Type B · 23′ × 50′ · door to the drive</div>
+      </div>
+    </div>
+
+    <!-- the spec plate: a technical block, ruled, set against the live vertical -->
+    <div class="plate" style="right:56px; top:168px; width:250px">
+      <div class="plate__hd">Suite 03 · 07</div>
+      <div class="plate__r"><span class="plate__k">Type</span><span class="plate__v">B</span></div>
+      <div class="plate__r"><span class="plate__k">Footprint</span><span class="plate__v">23′ × 50′</span></div>
+      <div class="plate__r"><span class="plate__k">Ground</span><span class="plate__v">1,150 sq ft</span></div>
+      <div class="plate__r"><span class="plate__k">Mezzanine</span><span class="plate__v">713 sq ft</span></div>
+      <div class="plate__r"><span class="plate__k">Total</span><span class="plate__v">1,863 sq ft</span></div>
+      <div class="plate__r"><span class="plate__k">Capacity</span><span class="plate__v">≈4 cars</span></div>
+      <div class="plate__r"><span class="plate__k">Electric</span><span class="plate__v">100 amp</span></div>
+      <div class="plate__r"><span class="plate__k">From</span><span class="plate__v">$549,000</span></div>
+    </div>
+
+    <div class="enterline" style="left:56px; bottom:64px; width:420px">
+      <div class="enterline__t">Enter this suite</div>
+      <div class="enterline__r"></div>
+      <div class="enterline__s">Back to building 03 &nbsp;·&nbsp; Reset view</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

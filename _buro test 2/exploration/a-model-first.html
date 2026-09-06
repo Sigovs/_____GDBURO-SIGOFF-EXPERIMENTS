@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Act 02 — Direction A · Model First</title>
+<link rel="stylesheet" href="./_shared.css">
+<style>
+/* ==================================================================================
+   DIRECTION A — MODEL FIRST
+
+   THE RELATIONSHIP: the model is the page. Interface is a THIN BAND along the bottom
+   edge and nothing else, and that band grows only as the visitor descends the
+   hierarchy. At rest it carries one line. There is no column, no panel and no table
+   anywhere in the composition.
+
+   The wager: a compound is a place, and the way you learn a place is by looking at it
+   for a while without being handed a specification. So at COMPOUND the interface says
+   almost nothing — the whole stage is the object, and the only text is what a visitor
+   needs to know that the object answers a pointer.
+
+   Data is EARNED. Each descent buys more of it, and the band grows in one direction
+   only, so its growth is itself the feedback that a level was entered.
+   ================================================================================== */
+
+/* --- THE BAND. One element, three heights. -------------------------------------- */
+.band {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 3;
+  padding: var(--s5) var(--s7) var(--s6);
+  display: grid; gap: var(--s4);
+  /* No background: the frame's own bottom vignette is the ground, so the band reads as
+     type on the photograph rather than as a bar laid over it. */
+}
+.band__rule { height: 1px; background: var(--ink-16); }
+
+/* the level line — navigation, and the only persistent chrome in the direction */
+.nav { display: flex; align-items: baseline; gap: var(--s3); }
+.nav__stop {
+  font-family: var(--mono); font-size: var(--micro); letter-spacing: .16em;
+  text-transform: uppercase; color: var(--ink-40);
+}
+.nav__stop--on { color: var(--ink); }
+.nav__sep { color: var(--ink-16); font-family: var(--mono); font-size: var(--micro); }
+.nav__stop--back { color: var(--ink-70); }
+
+/* the figure row — what the band actually carries at each level */
+.row { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--s7); }
+.spec { display: flex; align-items: flex-end; gap: var(--s7); }
+.spec__cell { display: grid; gap: var(--s2); }
+.spec__k { font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-40); }
+.spec__v { font-family: var(--mono); font-size: 14px; letter-spacing: .03em; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+.title { display: grid; gap: var(--s2); }
+.title__fig { font-size: 76px; }
+.title__sub { font-family: var(--mono); font-size: 13px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-70); }
+
+/* THE INVITATION. One line, and it retires on first selection. */
+.invite { font-family: var(--mono); font-size: 13px; letter-spacing: .05em; color: var(--ink-55); }
+.invite b { color: var(--ink); font-weight: 500; }
+
+/* ENTER. Not a button — a line of the band that takes boundary weight once a suite
+   exists. Before that it is not drawn at all, so the control cannot be misread as
+   available. */
+.enter {
+  display: inline-flex; align-items: center; gap: var(--s4);
+  padding-bottom: var(--s2);
+  border-bottom: 2px solid var(--ink);
+  font-family: var(--mono); font-size: 14px; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--ink);
+}
+.enter__mark { width: 22px; height: 1px; background: var(--ink); }
+
+/* the two utilities sit far right, quiet, at the band's own baseline */
+.util { display: flex; gap: var(--s5); align-items: baseline; }
+.util span { font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-40); }
+
+/* --- TOP-LEFT IDENTITY. The act's own header, minimal, never a nav bar. --------- */
+.mark { position: absolute; top: var(--s6); left: var(--s7); z-index: 3; display: grid; gap: var(--s2); }
+.mark__act { font-family: var(--mono); font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--ink-40); }
+.mark__name { font-family: var(--grot); font-size: 15px; font-weight: 600; letter-spacing: .04em; }
+
+/* --- THE ONE CALLOUT. At building and suite level only, anchored into the model. -- */
+.callout { position: absolute; z-index: 3; }
+.callout__leader { position: absolute; background: var(--ink-70); }
+.callout__box { position: absolute; display: grid; gap: var(--s2); white-space: nowrap; }
+.callout__fig { font-size: 30px; }
+.callout__lbl { font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-70); }
+.callout__dot { position: absolute; width: 5px; height: 5px; border: 1px solid var(--ink); border-radius: 50%; }
+</style>
+</head>
+<body>
+
+<div class="deckhead">
+  <h1>A — Model First</h1>
+  <p>The model is the page. Interface is one band along the bottom edge that grows as the visitor descends. No column, no panel, no table. At rest the composition is almost entirely compound.</p>
+</div>
+
+<!-- ============================== 1 · COMPOUND ============================== -->
+<div class="cap"><span><b>A1</b> &nbsp; Compound — at rest</span><span>1440 × 900</span></div>
+<div class="frame">
+  <img class="frame__plate" src="./plates/compound.jpeg" alt="">
+  <div class="layer">
+    <div class="mark">
+      <div class="mark__act">02 — The compound</div>
+      <div class="mark__name">Luxe&nbsp;Corsa</div>
+    </div>
+
+    <div class="band">
+      <div class="band__rule"></div>
+      <div class="row">
+        <div class="title">
+          <div class="title__fig">121</div>
+          <div class="title__sub">Private suites · 11 buildings · Lake Zurich</div>
+        </div>
+        <div style="display:grid; gap:var(--s4); justify-items:end">
+          <div class="invite">Point at a building to see it. <b>Click to enter it.</b></div>
+          <div class="util"><span>98 available</span><span>Drag to orbit</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== 2 · BUILDING ============================== -->
+<div class="cap"><span><b>A2</b> &nbsp; Building selected</span><span>the band grows once</span></div>
+<div class="frame">
+  <img class="frame__plate" src="./plates/building.jpeg" alt="">
+  <div class="layer">
+    <div class="mark">
+      <div class="mark__act">02 — The compound</div>
+      <div class="mark__name">Luxe&nbsp;Corsa</div>
+    </div>
+
+    <!-- one callout, anchored on the lit building -->
+    <div class="callout" style="left:690px; top:470px">
+      <div class="callout__dot" style="left:-2px; top:-2px"></div>
+      <div class="callout__leader" style="left:0; top:0; width:1px; height:96px"></div>
+      <div class="callout__leader" style="left:0; top:-1px; width:74px; height:1px"></div>
+      <div class="callout__box" style="left:0; top:-64px">
+        <div class="callout__fig">03</div>
+        <div class="callout__lbl">Building · 23 suites</div>
+      </div>
+    </div>
+
+    <div class="band">
+      <div class="band__rule"></div>
+      <div class="nav">
+        <span class="nav__stop nav__stop--back">Compound</span>
+        <span class="nav__sep">/</span>
+        <span class="nav__stop nav__stop--on">Building 03</span>
+      </div>
+      <div class="row">
+        <div class="spec">
+          <div class="spec__cell"><div class="spec__k">Suites</div><div class="spec__v">23</div></div>
+          <div class="spec__cell"><div class="spec__k">Available</div><div class="spec__v">19</div></div>
+          <div class="spec__cell"><div class="spec__k">Type A</div><div class="spec__v">1</div></div>
+          <div class="spec__cell"><div class="spec__k">Type B</div><div class="spec__v">22</div></div>
+          <div class="spec__cell"><div class="spec__k">Sold</div><div class="spec__v" style="color:var(--oxide)">4</div></div>
+        </div>
+        <div style="display:grid; gap:var(--s4); justify-items:end">
+          <div class="invite">Choose a suite.</div>
+          <div class="util"><span>Back</span><span>Reset view</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== 3 · SUITE ============================== -->
+<div class="cap"><span><b>A3</b> &nbsp; Suite selected — ENTER appears</span><span>the band is at full height</span></div>
+<div class="frame">
+  <img class="frame__plate" src="./plates/suite.jpeg" alt="">
+  <div class="layer">
+    <div class="mark">
+      <div class="mark__act">02 — The compound</div>
+      <div class="mark__name">Luxe&nbsp;Corsa</div>
+    </div>
+
+    <div class="callout" style="left:560px; top:430px">
+      <div class="callout__dot" style="left:-2px; top:-2px"></div>
+      <div class="callout__leader" style="left:0; top:0; width:1px; height:120px"></div>
+      <div class="callout__leader" style="left:0; top:-1px; width:88px; height:1px"></div>
+      <div class="callout__box" style="left:0; top:-68px">
+        <div class="callout__fig">03 · 07</div>
+        <div class="callout__lbl">Type B · 1,863 sq ft</div>
+      </div>
+    </div>
+
+    <div class="band">
+      <div class="band__rule"></div>
+      <div class="nav">
+        <span class="nav__stop nav__stop--back">Compound</span>
+        <span class="nav__sep">/</span>
+        <span class="nav__stop nav__stop--back">Building 03</span>
+        <span class="nav__sep">/</span>
+        <span class="nav__stop nav__stop--on">Suite 03 · 07</span>
+      </div>
+      <div class="row">
+        <div class="spec">
+          <div class="spec__cell"><div class="spec__k">Type</div><div class="spec__v">B</div></div>
+          <div class="spec__cell"><div class="spec__k">Footprint</div><div class="spec__v">23′ × 50′</div></div>
+          <div class="spec__cell"><div class="spec__k">Mezzanine</div><div class="spec__v">713 sq ft</div></div>
+          <div class="spec__cell"><div class="spec__k">Total</div><div class="spec__v">1,863 sq ft</div></div>
+          <div class="spec__cell"><div class="spec__k">Capacity</div><div class="spec__v">≈4 cars</div></div>
+          <div class="spec__cell"><div class="spec__k">From</div><div class="spec__v">$549,000</div></div>
+        </div>
+        <div style="display:grid; gap:var(--s4); justify-items:end">
+          <div class="enter"><span class="enter__mark"></span>Enter this suite</div>
+          <div class="util"><span>Back to building 03</span><span>Reset view</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

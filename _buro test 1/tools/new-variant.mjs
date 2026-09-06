@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Registers a new variant.
 //
-//   node tools/new-variant.mjs v02-slug "Name" "what this one is trying"
+//   node tools/new-variant.mjs index2.html "Name" "what this one is trying"
 //
 // It only writes the register entry and rebuilds the hub. It does NOT branch,
 // copy or scaffold any source — a variant of this project is a state of the
@@ -16,22 +16,25 @@ import { execFileSync } from 'node:child_process';
 const ROOT = resolve(import.meta.dirname, '..');
 const FILE = join(ROOT, 'variants.json');
 
-const [slug, name, note] = process.argv.slice(2).filter((a) => a !== '--');
+const [file, name, note] = process.argv.slice(2).filter((a) => a !== '--');
 
-if (!slug) {
-  console.error('\n  node tools/new-variant.mjs v02-slug "Name" "note"\n');
+if (!file) {
+  console.error('\n  node tools/new-variant.mjs index2.html "Name" "note"\n');
   process.exit(1);
 }
-if (!/^[a-z0-9][a-z0-9-]*$/.test(slug)) {
-  console.error(`\n  "${slug}" is not a usable slug — it becomes a URL path.`);
-  console.error('  lower case, digits and hyphens only.\n');
+// A variant is indexN.html beside this folder's other versions, which is the
+// naming every _buro test uses and the name the dashboard links. Anything else
+// is registered under a name nothing will look for.
+if (!/^index\d+\.html$/.test(file)) {
+  console.error(`\n  "${file}" is not a usable variant name.`);
+  console.error('  it must be indexN.html — index2.html, index3.html.\n');
   process.exit(1);
 }
 
 const register = JSON.parse(readFileSync(FILE, 'utf8'));
 
-if (register.variants.some((v) => v.slug === slug)) {
-  console.error(`\n  "${slug}" is already registered.\n`);
+if (register.variants.some((v) => v.file === file)) {
+  console.error(`\n  "${file}" is already registered.\n`);
   process.exit(1);
 }
 
@@ -40,23 +43,19 @@ if (register.variants.some((v) => v.slug === slug)) {
 for (const v of register.variants) if (v.status === 'current') v.status = 'superseded';
 
 register.variants.unshift({
-  slug,
-  name: name || slug,
+  file,
+  name: name || file,
   note: note || '',
   date: new Date().toISOString().slice(0, 10),
   status: 'current',
-  entries: [
-    { path: '', label: 'The page' },
-    { path: 'lab/rig.html', label: 'Rig bench' },
-  ],
 });
 
 writeFileSync(FILE, JSON.stringify(register, null, 2) + '\n');
 
-console.log(`\n  registered ${slug} — "${name || slug}"`);
+console.log(`\n  registered ${file} — "${name || file}"`);
 console.log('  previous "current" is now "superseded"\n');
 
 execFileSync(process.execPath, [join(ROOT, 'tools', 'build-hub.mjs')], { cwd: ROOT, stdio: 'inherit' });
 
-console.log(`  when it is ready:  npm run deploy -- ${slug}`);
+console.log('  when it is ready:  npm run publish');
 console.log('                     npm run shoot\n');

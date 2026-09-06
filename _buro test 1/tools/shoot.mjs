@@ -25,14 +25,16 @@ import { chromium } from 'playwright';
 const ROOT = resolve(import.meta.dirname, '..');
 const OUT = join(ROOT, 'previews');
 const REGISTER = JSON.parse(readFileSync(join(ROOT, 'variants.json'), 'utf8'));
-const ORIGIN = 'https://sigovs.github.io';
-const BASE = REGISTER.base.replace(/\/+$/, '') + '/';
+// The folder is published as part of the repository it lives in, which GitHub
+// serves whole. There is no per-variant folder and no second repository any
+// more, so the address of a variant is the origin plus its own filename.
+const ORIGIN = 'https://sigovs.github.io/_____GDBURO-SIGOFF-EXPERIMENTS/_buro%20test%201/';
 
 const args = process.argv.slice(2).filter((a) => a !== '--');
 const local = args.includes('--local');
 const only = args.find((a) => !a.startsWith('--'));
 
-const variants = REGISTER.variants.filter((v) => !only || v.slug === only);
+const variants = REGISTER.variants.filter((v) => !only || v.file === only);
 if (!variants.length) {
   console.error(`\n  no variant matching "${only}" in variants.json\n`);
   process.exit(1);
@@ -40,9 +42,9 @@ if (!variants.length) {
 
 mkdirSync(OUT, { recursive: true });
 
-const urlFor = (v) => (local ? (v.dev || 'http://localhost:5180/') : `${ORIGIN}${BASE}${v.slug}/`);
+const urlFor = (v) => (local ? (v.dev || `http://localhost:5200/${v.file}`) : ORIGIN + v.file);
 
-console.log(`\n  shooting ${variants.length} variant${variants.length === 1 ? '' : 's'} from ${local ? 'the dev server' : ORIGIN + BASE}\n`);
+console.log(`\n  shooting ${variants.length} variant${variants.length === 1 ? '' : 's'} from ${local ? 'the dev server' : ORIGIN}\n`);
 
 const browser = await chromium.launch();
 const page = await browser.newPage({
@@ -54,7 +56,7 @@ let failed = 0;
 
 for (const v of variants) {
   const url = urlFor(v);
-  process.stdout.write('  ' + v.slug.padEnd(22));
+  process.stdout.write('  ' + v.file.padEnd(18));
   try {
     await page.goto(url, { waitUntil: 'load', timeout: 45000 });
 
@@ -85,7 +87,7 @@ for (const v of variants) {
     await page.waitForTimeout(2800);
 
     await page.screenshot({
-      path: join(OUT, v.slug + '.jpg'),
+      path: join(OUT, v.file.replace(/\.html?$/i, '') + '.jpg'),
       type: 'jpeg',
       quality: 84,
     });

@@ -1,13 +1,17 @@
-// The hub page, built from variants.json. One template, two outputs.
+// The portal page, built from variants.json.
 //
-//   LOCAL   versions/index.html  — double-click it. Links point at the dev
-//                                  server and at the deployed copy, and the
-//                                  preview is read off disk, so it works with
-//                                  no network and no build.
-//   REMOTE  the root of gh-pages — links point at /vNN/, previews are copied in.
+// ONE OUTPUT, ONE SET OF LINKS. This used to render twice — a local copy whose
+// links were absolute, so they resolved from file://, and a copy at the root of
+// a gh-pages branch whose links were relative to per-variant folders. There is
+// no branch now and there are no folders: a variant is `indexN.html` lying next
+// to this page. Relative links reach it from disk, from a dev server and from
+// Pages without being told which, so the second rendering had nothing left to
+// differ in and is gone.
 //
-// The two are the same file with different hrefs, because a hub that looks like
-// something else locally is a preview of something else.
+// The one thing lost with it is the file:// case — `href="index1.html"` opens
+// from the file tree, but the page it opens is a module build and a browser will
+// not run modules over file://. That was already true of the deployed links it
+// replaces, which needed the network. Use the dev server or the published URL.
 
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -18,9 +22,15 @@ const esc = (s) => String(s)
 
 const PREVIEW_EXT = ['.jpg', '.jpeg', '.png', '.webp'];
 
-export function previewFor(root, slug) {
+/** previews/index1.jpg for index1.html — the key is the file's own stem. */
+export function stemOf(file) {
+  return String(file).replace(/\.html?$/i, '');
+}
+
+export function previewFor(root, file) {
+  const stem = stemOf(file);
   for (const ext of PREVIEW_EXT) {
-    if (existsSync(join(root, 'previews', slug + ext))) return 'previews/' + slug + ext;
+    if (existsSync(join(root, 'previews', stem + ext))) return 'previews/' + stem + ext;
   }
   return null;
 }
@@ -28,46 +38,31 @@ export function previewFor(root, slug) {
 /**
  * @param {object}  register  parsed variants.json
  * @param {object}  opts
- * @param {'local'|'remote'} opts.mode
- * @param {string}  opts.root        where previews/ lives (the repo, or the branch)
- * @param {string}  opts.repoRoot    where the template lives — always the repo
- * @param {Function} opts.isLive     (variant) => boolean — is it actually published
- * @param {string}  opts.origin      https://sigovs.github.io
- * @param {string}  opts.base        /gd_buro_tests/
+ * @param {string}  opts.root      the project folder — where the variants and previews/ live
+ * @param {string}  opts.repoRoot  where the template lives
+ * @param {Function} opts.isLive   (variant) => boolean — is the file actually there
  */
-export function buildHub(register, { mode, root, repoRoot = root, isLive, origin, base }) {
-  // PORTAL is the file in the project root: opened from disk, so every link has
-  // to be absolute or it resolves against file:// and goes nowhere. REMOTE is the
-  // same page at the root of the branch, where relative links are correct and
-  // shorter. They differ in exactly this and nothing else.
-  const portal = mode === 'portal';
-
+export function buildHub(register, { root, repoRoot = root, isLive }) {
   const cards = register.variants.map((v) => {
     const live = isLive(v);
-    const shot = previewFor(root, v.slug);
-    const abs = `${origin}${base}${v.slug}/`;
+    const shot = previewFor(root, v.file);
 
-    const entries = v.entries?.length ? v.entries : [{ path: '', label: 'Open' }];
-    const href = (path) => (portal ? abs + path : `${v.slug}/${path}`);
-
-    // A card whose build is not published has nothing to link to, so it says so
+    // A card whose file is not there has nothing to link to, so it says so
     // rather than offering a link into a 404.
     const links = live
-      ? entries.map((e) =>
-        `          <a href="${esc(href(e.path))}"${portal ? ' target="_blank" rel="noopener"' : ''}>${esc(e.label)}</a>`)
-      : [`          <span class="pending">npm run deploy -- ${esc(v.slug)}</span>`];
+      ? `          <a href="${esc(v.file)}">Open</a>`
+      : `          <span class="pending">missing — ${esc(v.file)}</span>`;
 
     const media = shot
       ? `<img src="${esc(shot)}" alt="" loading="lazy" width="1440" height="900">`
       : '<p class="noshot">no preview — npm run shoot</p>';
 
-    const status = live ? '' : '<span class="tag tag--gone">not deployed</span>';
-    const primary = live ? href('') : null;
+    const status = live ? '' : '<span class="tag tag--gone">missing</span>';
 
     // The shot is the click target when there is somewhere to go, and a plain
     // element when there is not — a dead <a> is a link that lies about itself.
-    const shotBlock = primary
-      ? `<a class="card__shot" href="${esc(primary)}"${portal ? ' target="_blank" rel="noopener"' : ''}>
+    const shotBlock = live
+      ? `<a class="card__shot" href="${esc(v.file)}">
           ${media}
           ${status}
         </a>`
@@ -83,7 +78,7 @@ export function buildHub(register, { mode, root, repoRoot = root, isLive, origin
           <h2 class="card__name">${esc(v.name)}</h2>
           <p class="card__note">${esc(v.note || '')}</p>
           <div class="card__links">
-${links.join('\n')}
+${links}
           </div>
         </div>
       </article>`;
@@ -92,26 +87,18 @@ ${links.join('\n')}
   const liveCount = register.variants.filter(isLive).length;
   const n = register.variants.length;
 
-  // The template always comes from the repo. `root` may be a checked-out branch
-  // that has previews and no tools/ at all.
   const template = readFileSync(join(repoRoot, 'tools', 'hub.template.html'), 'utf8');
 
   return template
     .replaceAll('{{TITLE}}', esc(register.title))
     .replaceAll('{{SUBJECT}}', esc(register.subject))
     .replace('{{CARDS}}', cards)
-    .replace('{{LEAD}}', portal
-      ? 'Every version is a published build — the links go straight to it, so this page needs nothing running. Open them in a real browser: VS Code&rsquo;s built-in preview does not put WebGL on screen.'
-      : 'Each version is a full build at its own address.')
-    .replace('{{COUNT}}', portal
-      ? `${n} version${n === 1 ? '' : 's'} · ${liveCount} deployed`
-      : `${liveCount} version${liveCount === 1 ? '' : 's'} live`)
+    .replace('{{LEAD}}', 'Every version is a built page in this folder. Open them in a real browser: VS Code&rsquo;s built-in preview does not put WebGL on screen.')
+    .replace('{{COUNT}}', `${n} version${n === 1 ? '' : 's'} · ${liveCount} built`)
     .replace('{{BUILT}}', new Date().toISOString().slice(0, 10))
     .replace('{{REPO}}', esc(register.repo))
-    .replace('{{FOOT}}', portal
-      ? `<p>This page is generated. The site itself is <code>index1.html</code>; run it with <code>npm run dev</code>.</p>
-    <p>New version: <code>npm run new-variant -- v02-slug "Name" "note"</code></p>
-    <p>Then: <code>npm run deploy -- v02-slug</code> · <code>npm run shoot</code> · <code>npm run hub</code></p>`
-      : `<p><a href="${esc(register.repo)}">Source</a></p>`)
+    .replace('{{FOOT}}', `<p>This page is generated. The source of the current version is <code>src/index1.html</code>; run it with <code>npm run dev</code> and publish it with <code>npm run publish</code>.</p>
+    <p>New version: <code>npm run new-variant -- index2.html "Name" "note"</code></p>
+    <p>Then: <code>npm run shoot</code> · <code>npm run hub</code></p>`)
     .replace('{{PROBE}}', '');
 }

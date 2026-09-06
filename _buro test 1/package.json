@@ -8,14 +8,14 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "node tools/deploy.mjs",
     "hub": "node tools/build-hub.mjs",
     "shoot": "node tools/shoot.mjs",
     "new-variant": "node tools/new-variant.mjs",
     "decoders": "node tools/decoders.mjs",
     "convert": "node tools/convert.mjs",
     "inspect": "node tools/inspect.mjs",
-    "postinstall": "node tools/decoders.mjs"
+    "postinstall": "node tools/decoders.mjs",
+    "publish": "node tools/publish.mjs"
   },
   "dependencies": {
     "gsap": "^3.15.0",
@@ -29,9 +29,9 @@
     "playwright": "^1.62.1",
     "vite": "^8.2.2"
   },
-  "homepage": "https://sigovs.github.io/gd_buro_tests/",
+  "homepage": "https://sigovs.github.io/_____GDBURO-SIGOFF-EXPERIMENTS/_buro%20test%201/index1.html",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Sigovs/gd_buro_tests.git"
+    "url": "https://github.com/Sigovs/_____GDBURO-SIGOFF-EXPERIMENTS.git"
   }
 }

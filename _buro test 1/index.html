@@ -218,13 +218,13 @@ footer a { color: var(--ink-muted); }
     <p class="eyebrow">Buro Lab</p>
     <h1>Machine study 01</h1>
     <p class="subject">KUKA KR 700 PA</p>
-    <p class="lead">Every version is a published build — the links go straight to it, so this page needs nothing running. Open them in a real browser: VS Code&rsquo;s built-in preview does not put WebGL on screen.</p>
+    <p class="lead">Every version is a built page in this folder. Open them in a real browser: VS Code&rsquo;s built-in preview does not put WebGL on screen.</p>
   </header>
 
   <div class="grid">
       <article class="card">
-        <a class="card__shot" href="https://sigovs.github.io/gd_buro_tests/v01-level-line/" target="_blank" rel="noopener">
-          <img src="previews/v01-level-line.jpg" alt="" loading="lazy" width="1440" height="900">
+        <a class="card__shot" href="index1.html">
+          <img src="previews/index1.jpg" alt="" loading="lazy" width="1440" height="900">
           
         </a>
         <div class="card__meta">
@@ -232,18 +232,17 @@ footer a { color: var(--ink-muted); }
           <h2 class="card__name">The level line</h2>
           <p class="card__note">Six camera stations around roughly 490° of travel. The datum lives in the room rather than on the glass, so the arm occludes it. Split-flap opening; instrument layer reads real azimuth and distance.</p>
           <div class="card__links">
-          <a href="https://sigovs.github.io/gd_buro_tests/v01-level-line/" target="_blank" rel="noopener">The page</a>
-          <a href="https://sigovs.github.io/gd_buro_tests/v01-level-line/lab/rig.html" target="_blank" rel="noopener">Rig bench</a>
+          <a href="index1.html">Open</a>
           </div>
         </div>
       </article>
   </div>
 
   <footer>
-    <p class="footer__count">1 version · 1 deployed · built 2026-09-03</p>
-    <p>This page is generated. The site itself is <code>index1.html</code>; run it with <code>npm run dev</code>.</p>
-    <p>New version: <code>npm run new-variant -- v02-slug "Name" "note"</code></p>
-    <p>Then: <code>npm run deploy -- v02-slug</code> · <code>npm run shoot</code> · <code>npm run hub</code></p>
+    <p class="footer__count">1 version · 1 built · built 2026-09-06</p>
+    <p>This page is generated. The source of the current version is <code>src/index1.html</code>; run it with <code>npm run dev</code> and publish it with <code>npm run publish</code>.</p>
+    <p>New version: <code>npm run new-variant -- index2.html "Name" "note"</code></p>
+    <p>Then: <code>npm run shoot</code> · <code>npm run hub</code></p>
   </footer>
 
 </div>

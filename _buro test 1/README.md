@@ -1,36 +1,45 @@
 # Buro Lab — INDEX1 · KR 700 PA
 
-## → index.html
+## → index1.html
 
-**Click `index.html` in the file tree.** That is the portal: every version, with
-a picture of each, and links straight to the published build. It needs no server
-and no build — open it as a file.
+**The page is `index1.html`** at the top of this folder — a built page, published
+as it stands:
 
-The same page is published at
-**https://sigovs.github.io/gd_buro_tests/** for sharing.
+**https://sigovs.github.io/_____GDBURO-SIGOFF-EXPERIMENTS/_buro%20test%201/index1.html**
 
-> **The site itself is `index1.html`**, not `index.html`. The portal took the
-> index name because that is the file a person clicks without being told to. Run
-> the site with `npm run dev`; the deploy renames the built entry back to
-> `index.html` inside each version folder, so `/v01-level-line/` still resolves.
+`index.html` beside it is the **portal**: every version with a picture of each,
+generated from [variants.json](variants.json). Both are served from this folder
+as part of the repository, which GitHub Pages publishes whole.
+
+> **A variant is a file, not a branch and not a folder.** `indexN.html` here,
+> with its assets in `assetsN/` and its card picture in `previews/indexN.jpg` —
+> the naming every `_buro test` uses. This project used to publish variants as
+> folders on a `gh-pages` branch of a separate repository, `gd_buro_tests`. That
+> repository is gone and its Pages site answers 404; nothing addresses it any
+> more.
+
+> **The SOURCE of the page is `src/index1.html`**, not the `index1.html` you see
+> at the top of the folder. They cannot share a path: one is a Vite entry with
+> bare imports and `import.meta.glob`, which no browser can run, and the other is
+> the build that Pages actually serves. `vite.config.js` sets `root: src/` so the
+> build lands on the published name with no renaming step to get wrong.
 
 | | |
 |---|---|
-| `npm run hub` | rebuild `index.html` |
+| `npm run dev` | the source, at http://localhost:5200/index1.html |
+| `npm run publish` | build → copy to the top of this folder → rebuild the portal |
+| `npm run hub` | rebuild `index.html` alone |
 | `npm run shoot` | screenshot every version into `previews/` |
-| `npm run new-variant -- v02-slug "Name" "note"` | register a version |
-| `npm run deploy -- v02-slug` | publish it |
-| `npm run deploy -- --list` | what is registered and where |
+| `npm run new-variant -- index2.html "Name" "note"` | register a version |
 
 ### Adding a variant
 
-Register it, build it, publish it, shoot it, rebuild the portal. The register in
-[variants.json](variants.json) is the source of truth in both directions: an
-unregistered slug is refused rather than published as an untitled folder, and a
-folder whose entry is deleted is removed by the next deploy.
+Register it, build it, shoot it, rebuild the portal. [variants.json](variants.json)
+is the source of truth: a name that is not `indexN.html` is refused, and a card
+whose file is not on disk says so instead of linking into a 404.
 
-Each version is published to its own path — `/v01-level-line/` — and both copies
-of the portal are regenerated from one template, so they cannot drift.
+Publishing is a normal commit. There is no second remote, no branch to force, and
+nothing that can orphan a folder.
 
 ---
 
@@ -42,12 +51,12 @@ make you see the not-tilting.
 
 ```
 npm install
-npm run dev        http://localhost:5180
+npm run dev        http://localhost:5200/index1.html
 ```
 
 | | |
 |---|---|
-| `/` | **INDEX1** — the page |
+| `/index1.html` | **INDEX1** — the page |
 | `/lab/rig.html` | **rig bench** — the articulation, driven directly, one axis at a time |
 | `/lab/` | **intake bench** — scale, budget and material audit for an incoming object |
 | `/lab/shots.html` | **shot bench** — the seven shots, driven by scroll |

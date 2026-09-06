@@ -12,7 +12,6 @@ import { createScene } from './scene.js';
 import { createStory, createStill } from './story.js';
 import { playIntro, armIntro } from './intro.js';
 import { createPreloader } from './preload.js';
-import { createBackdrop } from './backdrop.js';
 import { createReveals } from './reveal.js';
 
 // The reduced-motion path is a DELIVERABLE with its own composition (DNA43,
@@ -38,14 +37,20 @@ async function boot() {
   // say nothing — not to show an apology where a machine should be.
   const reduced = prefersReduced() || FORCE_REDUCED;
 
-  // The backdrop is started BEFORE the model is asked for: it is the page's
-  // ground and it costs one draw call, so it should be there for the wait rather
-  // than arriving with the machine. It shares the page's ticker, so this adds a
-  // draw to the existing frame instead of a second animation loop.
-  const backdrop = createBackdrop(document.getElementById('backdrop'), {
-    ticker: gsap.ticker,
-    reduced,
-  });
+  /*
+    THE BACKDROP IS GONE, AND THE HALL IS WHY.
+
+    It was a generated mesh shader standing in as the page's ground while the
+    scene had no ground of its own. Once the floor existed it stopped being a
+    backdrop and became a defect: measured at the horizon, the fogged floor
+    resolves to rgb(10,12,13) — exactly --ground — while the shader rendered
+    rgb(0,0,0) above it. That two-value step drew a hard horizontal seam across
+    every frame on the page.
+
+    With it removed the horizon is a true dissolve: the floor fades into the
+    document's own colour and the join is not findable. The page keeps a draw
+    call and a full-screen fragment pass, and loses nothing that was doing work.
+  */
 
   // The dial is armed before the request, not after: its 200ms threshold has to
   // be measured from when the wait actually began. It usually expires without
@@ -66,7 +71,7 @@ async function boot() {
     // without the machine, and it is not whole under a permanent loader.
     preload.destroy();
     document.querySelector('.stage')?.setAttribute('data-unavailable', '');
-    return;   // the backdrop stays: it is the page's ground, not part of the scene
+    return;   // the page is still whole: --ground is the ground, and it needs no canvas
   }
 
   // The scene is ready, and the loader may still be holding. Compose the frame
@@ -106,7 +111,7 @@ async function boot() {
   // Type arrives rather than being scrolled past, figures count up to what they
   // were measured at, and the field answers the scroll. Created after the story
   // so its triggers are registered against the same, already-measured layout.
-  const stopReveals = createReveals(document.documentElement, { reduced, backdrop });
+  const stopReveals = createReveals(document.documentElement, { reduced });
 
   // Refresh is tied to real geometry change, never fired reflexively (G8, DNA47).
   const stopRefresh = refreshOnResize();
@@ -121,7 +126,6 @@ async function boot() {
     stopIntro();
     preload.destroy();
     stopReveals();
-    backdrop?.dispose();
     stopRefresh();
     world.dispose();
   }, { once: true });

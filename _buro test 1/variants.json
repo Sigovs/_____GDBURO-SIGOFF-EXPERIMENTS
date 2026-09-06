@@ -16,14 +16,42 @@
     "nothing at all.",
     "",
     "A variant is REMOVED by deleting its entry here, deleting its indexN.html and",
-    "assetsN/, and running `npm run hub`."
+    "assetsN/, and running `npm run hub`.",
+    "",
+    "A VARIANT IS A PAGE; A DIRECTION IS AN ART DIRECTION. index2/3/4.html are the",
+    "three directions explored off index1 — they share one bootstrap (src/site/vboot.js)",
+    "and differ only in src/directions/{a,b,c}.js and site/dir-{a,b,c}.css. The letter",
+    "survives inside the source because it names the direction; the published page is",
+    "still indexN.html, because that is the name the portal and the dashboard look for."
   ],
-
   "title": "Machine study 01",
   "subject": "KUKA KR 700 PA",
   "repo": "https://github.com/Sigovs/_____GDBURO-SIGOFF-EXPERIMENTS",
-
   "variants": [
+    {
+      "file": "index2.html",
+      "name": "Monumental",
+      "note": "Direction A. The machine as architecture — cropped on two or three edges in every shot, one hard source and almost no fill, and the callouts carrying the language in place of shot statements.",
+      "date": "2026-09-06",
+      "status": "direction A",
+      "scroll": 0.35
+    },
+    {
+      "file": "index3.html",
+      "name": "Editorial",
+      "note": "Direction B. The machine as a printed subject: a measured column of type against a held frame, generous margins, the figures set as a plate rather than an overlay.",
+      "date": "2026-09-06",
+      "status": "direction B",
+      "scroll": 0.82
+    },
+    {
+      "file": "index4.html",
+      "name": "Machine film",
+      "note": "Direction C. The machine as footage: long lens, shallow stops, the frame moving as a camera rather than as a page. Type stays out of the way of the shot.",
+      "date": "2026-09-06",
+      "status": "direction C",
+      "scroll": 0.82
+    },
     {
       "file": "index1.html",
       "name": "The level line",

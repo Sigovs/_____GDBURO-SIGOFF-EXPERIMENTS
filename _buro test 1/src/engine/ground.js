@@ -21,6 +21,18 @@ export function createContactShadow(scene, {
   darkness = 1.4,
   opacity = 0.85,
   y = 0,
+  /*
+    Objects hidden for the duration of the depth pass.
+
+    This exists because the pass renders the WHOLE scene from an orthographic
+    camera sitting on the ground and looking up, and a hall floor is a plane at
+    exactly that camera's near plane. Rendered, it fills the target at
+    fragCoordZ 0 — which the depth material writes as full darkness — and the
+    contact shadow becomes an opaque black square the size of its own plane.
+    The floor has no business in a pass that measures how close the SUBJECT comes
+    to the ground.
+  */
+  ignore = [],
 } = {}) {
   const group = new THREE.Group();
   group.name = 'contact-shadow';
@@ -103,8 +115,15 @@ export function createContactShadow(scene, {
     scene.overrideMaterial = depthMaterial;
     renderer.setClearAlpha(0);
 
+    // Restored in the same call, so a throw between here and there would leave
+    // the hall hidden — hence no early return anywhere inside the pass.
+    const hidden = ignore.filter((o) => o && o.visible);
+    for (const o of hidden) o.visible = false;
+
     renderer.setRenderTarget(target);
     renderer.render(scene, shadowCamera);
+
+    for (const o of hidden) o.visible = true;
 
     scene.overrideMaterial = null;
     blurShadow(renderer, blur);

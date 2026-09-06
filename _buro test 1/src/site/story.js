@@ -99,7 +99,8 @@ const SHOTS = {
     pose: { from: 0.12, to: 0.20, at: [0.15, 0.95] },
     light: 'sculpt',
     lightAt: [0.00, 0.30],
-    level: 'off',
+    // Tight bay: the crop is close and the floor is mostly foreground.
+    pool: { radius: [2.2, 8.0], floor: 0.035 },
   },
 
   // 02 — all the way round to the far side, and wide.
@@ -113,14 +114,28 @@ const SHOTS = {
   scale: {
     trigger: '#scale',
     from: at(18, 2.70, 0.72, V(0.42, 1.55, 0), 48),
-    to:   at(110, 11.0, 3.80, V(0.35, 1.30, 0), 34),
+    /*
+      IN, AND DOWN TO NEAR EYE LEVEL.
+
+      It stood at 11 m and 3.8 m high, which put the horizon above the machine and
+      the machine at about a quarter of the frame. That was survivable while the
+      background was an empty void — there was nothing for it to be small against.
+      With a floor under it the same station reads as a plan view of a small
+      object, and the shot whose whole claim is 2 744 mm cannot afford that.
+
+      7.6 m at 2.05 m puts the camera near standing height, so the HORIZON PASSES
+      BEHIND THE MACHINE rather than above it. That single relationship is what
+      turns a floor into a room, and it is the reason this station moved.
+    */
+    to:   at(103, 6.20, 1.95, V(0.35, 1.24, 0), 42),
     // Opens fast then holds: the negative space is the composition, and it only
     // becomes one once the travel has stopped.
     camEase: easeOut,
     pose: { from: 0.20, to: 0.34, at: [0.18, 0.92] },
     light: 'clean',
     lightAt: [0.12, 0.58],
-    level: 'off',
+    // The widest field on the page, so the bay opens with it.
+    pool: { radius: [3.4, 13.0], floor: 0.045 },
   },
 
   // 03 — rear three-quarter. The balance linkage and the rear rod are nearest
@@ -128,19 +143,31 @@ const SHOTS = {
   // mechanism rather than as a silhouette.
   rear: {
     trigger: '#rear',
-    from: at(110, 11.0, 3.80, V(0.35, 1.30, 0), 34),
+    from: at(103, 6.20, 1.95, V(0.35, 1.24, 0), 42),   // = scale.to; the journey is continuous
     to:   at(250, 4.30, 1.55, V(0.30, 1.80, 0), 38),
     pose: { from: 0.34, to: 0.60, at: [0.05, 0.88] },
     light: 'side',
     lightAt: [0.04, 0.40],
-    level: 'proving',
+    pool: { radius: [3.0, 11.0], floor: 0.05 },
   },
 
   // 04 — high. Looking down the top of the boom while the tool comes round.
   above: {
     trigger: '#above',
     from: at(250, 4.30, 1.55, V(0.30, 1.80, 0), 38),
-    to:   at(315, 5.20, 7.40, V(0.95, 1.55, 0), 50),
+    /*
+      SWUNG TOWARD BROADSIDE, AND THAT IS THE SPAN CLAIM'S DOING.
+
+      At pose E the column sits at a1 = 0.42 rad, which puts the arm along scene
+      azimuth 114 deg — so the broadside views are 24 and 204. Standing at 315 was
+      69 deg off, and the shot that claims 3 070 mm ACROSS was showing the machine
+      at close to its narrowest. 350 is 34 deg off broadside and still monotonic
+      into the macro's 372, so the journey does not double back to get there.
+
+      Height comes down with it: 7.4 m was a plan view, and a plan view of a span
+      is a diagram. 6.6 keeps the aerial read and lets the arm have length.
+    */
+    to:   at(350, 4.60, 5.20, V(0.85, 1.45, 0), 46),
     // Arrives in the first half and HOLDS. Without this the aerial only exists on
     // the shot's very last frame: stopped at 55% it still read as a raised
     // three-quarter, which is a view the page already has twice.
@@ -148,7 +175,8 @@ const SHOTS = {
     pose: { from: 0.60, to: 0.79, at: [0.10, 0.90] },
     light: 'top',
     lightAt: [0.20, 0.66],
-    level: 'off',
+    // From above the floor IS the frame, so the bay is the composition.
+    pool: { radius: [4.6, 16.0], floor: 0.05 },
   },
 
   // 05 — macro. Close enough that the machine leaves the frame entirely and what
@@ -156,7 +184,7 @@ const SHOTS = {
   // because a macro that also travels is a blur.
   macro: {
     trigger: '#macro',
-    from: at(315, 5.20, 7.40, V(0.95, 1.55, 0), 50),
+    from: at(350, 4.60, 5.20, V(0.85, 1.45, 0), 46),   // = above.to
     to:   at(372, 1.45, 2.30, V(1.78, 2.05, 0), 30),
     // Arrives in the first half and then HOLDS. easeIn was tried and spends most
     // of the section still travelling, so most stoppable frames in the macro shot
@@ -165,7 +193,7 @@ const SHOTS = {
     pose: { from: 0.79, to: 0.87, at: [0.00, 0.62] },
     light: 'specular',
     lightAt: [0.00, 0.34],
-    level: 'off',
+    pool: { radius: [3.0, 11.0], floor: 0.05 },
   },
 
   // 06 — the hero. The azimuth here is CALCULATED, not chosen: at pose E the
@@ -181,12 +209,20 @@ const SHOTS = {
   hero: {
     trigger: '#hero',
     from: at(372, 1.45, 2.30, V(1.78, 2.05, 0), 30),
-    to:   at(545, 8.40, 1.05, V(1.05, 1.24, 0), 40),
+    /*
+      The target moves right so the machine does. The closing statement is the
+      largest type on the page and the arm is in front of it by design — but with
+      the machine centred the arm was crossing the END of both lines and taking the
+      full stop with it, which is occlusion eating the sentence rather than
+      crossing it. Pushing the target to x 2.05 walks the machine into the right
+      third and leaves the statement its own column.
+    */
+    to:   at(545, 8.40, 1.05, V(2.05, 1.24, 0), 40),
     camEase: easeOut,
     pose: { from: 0.87, to: 1.00, at: [0.04, 0.72] },
     light: 'hero',
     lightAt: [0.16, 0.62],
-    level: 'proving',
+    pool: { radius: [4.0, 15.0], floor: 0.04 },
   },
 };
 
@@ -201,7 +237,12 @@ const MOBILE = {
   scale:  [at(18, 4.10, 0.85, V(0.45, 1.60, 0), 54), at(110, 15.0, 4.60, V(0.35, 1.45, 0), 40)],
   rear:   [at(110, 15.0, 4.60, V(0.35, 1.45, 0), 40), at(250, 5.60, 1.70, V(0.35, 1.75, 0), 44)],
   above:  [at(250, 5.60, 1.70, V(0.35, 1.75, 0), 44), at(315, 6.60, 7.80, V(0.95, 1.55, 0), 56)],
-  macro:  [at(315, 6.60, 7.80, V(0.95, 1.55, 0), 56), at(372, 2.05, 2.28, V(1.76, 2.05, 0), 36)],
+  /*
+    The portrait macro was framing mostly empty air: at 2.05 m out with the target
+    high on the boom, the joint the shot is about sat low-left and the top half of
+    the frame was floor. Closer, and aimed at the elbow itself.
+  */
+  macro:  [at(315, 6.60, 7.80, V(0.95, 1.55, 0), 56), at(372, 1.70, 2.05, V(1.62, 1.92, 0), 34)],
   hero:   [at(372, 2.05, 2.28, V(1.76, 2.05, 0), 36), at(545, 11.0, 1.25, V(1.05, 1.24, 0), 46)],
 };
 
@@ -215,14 +256,14 @@ export function openingStation(mobile) {
 /* ── the story ───────────────────────────────────────────────────────────── */
 
 export function createStory(scope, world) {
-  const { rigCam, rig, level } = world;
+  const { rigCam, rig, drawing } = world;
   const mob = world.mobile;
 
   const track = (name) =>
     (mob && MOBILE[name] ? { from: MOBILE[name][0], to: MOBILE[name][1] } : { from: SHOTS[name].from, to: SHOTS[name].to });
 
   const put = (station) => { rigCam.set(station); world.touch(); };
-  const setLevel = (state) => level?.setState(state);
+  const setShot = (name) => drawing?.setShot(name);
 
   const ctx = gsap.context(() => {
     ORDER.forEach((name, i) => {
@@ -267,9 +308,12 @@ export function createStory(scope, world) {
         // channels moving in step is one channel wearing four names.
         const [la, lb] = shot.lightAt ?? [0.0, 0.45];
         world.setLight(shot.light, ease(span(p, la, lb)), prev?.light ?? shot.light);
-          setLevel(shot.level);
+          // The bay of light follows the shot: a close crop gets a tight pool, the
+          // aerial gets a wide one. See hall.js for what the pool is doing.
+          if (shot.pool) world.setPool(shot.pool);
+          setShot(name);
         },
-        onEnterBack: () => setLevel(shot.level),
+        onEnterBack: () => { setShot(name); if (shot.pool) world.setPool(shot.pool); },
       });
     });
 
@@ -378,10 +422,32 @@ export function createStory(scope, world) {
 
     // The record: the scene falls away rather than being covered. An opaque
     // surface travelling across live content cuts a hard edge through it (U13).
+    /*
+      THE APPROACH USED TO BEGIN UNDER THE CLOSING STATEMENT.
+
+      `top bottom` fires the moment the record's column clears the bottom of the
+      screen, which on a 945px viewport is hero progress ~0.39 — so the exposure
+      started falling, the machine started turning and the datum started fading
+      while "The hand that never tilts." was still arriving. Measured: the level
+      line was at opacity 0.30 by hero 0.53 and at ZERO by 0.69. For the last
+      third of the frame that states the page's thesis, the instrument proving it
+      was gone.
+
+      `top center` → `top 15%` moves the whole approach behind the statement. The
+      datum now holds at full strength to hero ~0.74 and is still readable while
+      the statement exits at 0.80, which is the one pairing this page exists to
+      show.
+
+      The end is `top 15%` and not `top top` because `top top` is unreachable:
+      #record is exactly one viewport and sits last, so the document's maximum
+      scroll leaves the column's top around 120px below the viewport top. A
+      trigger that can never complete would leave the machine part-turned and the
+      exposure part-way down on the final frame.
+    */
     ScrollTrigger.create({
       trigger: '#record .record',
-      start: 'top bottom',
-      end: 'top center',
+      start: 'top center',
+      end: 'top 15%',
       scrub: true,
       invalidateOnRefresh: true,
       onUpdate: (self) => {
@@ -394,12 +460,42 @@ export function createStory(scope, world) {
         recordP = self.progress;
         putRecord();
 
-        // 0.14, not 0.34. This number is now the only thing standing between
-        // --ink and a lit orange casting: the record's scrim was deleted, so the
-        // frame going down IS the legibility mechanism. Measured on the render
-        // behind the table rather than picked for mood.
-        world.setExposure(lerp(1.18, 0.14, self.progress));
-        level?.setFade(1 - clamp01(self.progress * 2));
+        /*
+          0.58, NOT 0.14.
+
+          0.14 was not a dim, it was a kill: it rendered the subject as a flat
+          maroon cut-out with no highlight, no material and no form, so the last
+          thing the page showed of the machine was the worst picture of it on the
+          page. The justification was that the frame going down is the legibility
+          mechanism now the record's scrim is gone — true, but the column sits on
+          the opposite half of the screen from the machine on desktop, so the
+          exposure was buying contrast it did not need and paying for it with the
+          subject.
+
+          The floor is now the darkest the machine can be while its castings still
+          read as castings. Measured against the render, not chosen for mood, and
+          it is a contrast control rather than a mood one exactly as before — only
+          set where the two requirements actually meet instead of well past it.
+        */
+        // On a phone the record has no cast shadow to give the machine a reason to
+        // be there, and the column crosses it rather than sitting beside it — so it
+        // goes further down there than it does on desktop.
+        world.setExposure(lerp(1.18, world.mobile ? 0.34 : 0.58, self.progress));
+        /*
+          The drawing leaves with the light. The record is the place the marks
+          are READ rather than drawn — every figure on the last screen is the
+          same figure a dimension carried on the way down — so holding the
+          annotation over the table would be saying it twice.
+        */
+        drawing?.setFade(1 - clamp01(self.progress));
+        /*
+          The marks switch off only once the fade has taken them, not on the first
+          frame of the approach. Clearing the shot immediately dropped datum A to
+          zero at hero progress 0.80 — the exact frame the closing statement begins
+          to leave, and the one pairing this page exists to show. Measured: datum 0
+          against statement 1.
+        */
+        drawing?.setShot(self.progress > 0.9 ? 'record' : 'hero');
       },
       onLeaveBack: () => {
         spinDrag = 0;
@@ -407,7 +503,8 @@ export function createStory(scope, world) {
         world.setSpin(0);   // leaving the last screen returns the machine to the heading the shots were composed around
         put(recordFrom);
         world.setExposure(1.18);
-        level?.setFade(null);
+        drawing?.setFade(1);
+        drawing?.setShot('hero');
       },
     });
   }, scope);
@@ -424,7 +521,7 @@ export function createStory(scope, world) {
  * what the travel demonstrated.
  */
 export function createStill(world) {
-  const { rigCam, rig, level } = world;
+  const { rigCam, rig, drawing } = world;
   const station = world.mobile && MOBILE.hero ? MOBILE.hero[1] : SHOTS.hero.to;
   const s = place(station);
 
@@ -432,7 +529,8 @@ export function createStill(world) {
   rigCam.cut({ position: s.position, target: s.target, fov: s.fov });
   world.setLight('hero', 1);
 
-  level?.setState('proving');
+  drawing?.setShot('hero');
+  drawing?.update();
   world.touch();
   return () => {};
 }

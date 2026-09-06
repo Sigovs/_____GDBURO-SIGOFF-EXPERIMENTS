@@ -22,8 +22,10 @@ import * as THREE from 'three';
 import { createStage } from '../engine/stage.js';
 import { createCameraRig } from '../engine/camera-rig.js';
 import { loadModel } from '../engine/loaders.js';
-import { createContactShadow, createShadowCatcher } from '../engine/ground.js';
+import { createContactShadow } from '../engine/ground.js';
 import { auditMaterials } from '../engine/materials.js';
+import { createHall, KEY_ANCHOR, KEY_DISTANCE } from './hall.js';
+import { createDrawing } from './drawing.js';
 import { createRig } from './rig.js';
 import MODEL from '../../assets/models/kr700pa-rig2.glb?url';
 
@@ -56,7 +58,16 @@ function workshopEnvironment(renderer, scene) {
 
   // The overhead strip the key belongs to. Long and narrow: a machine hall is
   // lit by lines, not by a softbox, and the reflection has to say that.
-  panel(0xfff2e0, 5.2, [3, 22], [-5, 11, 1], [Math.PI / 2, 0, 0]);
+  //
+  // IT IS NOW WHERE THE KEY IS. The strip was authored at (-5, 11, 1) and the key
+  // at (-5.5, 8.5, 3.2) — near enough to pass a glance, far enough apart that the
+  // highlight running down a casting traced a source the room did not contain.
+  // Both are derived from KEY_ANCHOR now, so the reflection is a photograph of
+  // the lamp that made it. See hall.js for why that vector is the one.
+  const keyAt = KEY_ANCHOR.clone().multiplyScalar(KEY_DISTANCE);
+  panel(0xfff2e0, 5.2, [3, 22], [keyAt.x, keyAt.y, keyAt.z]).lookAt(0, 0, 0);
+  // The opposite line, dimmer. It is what the shadow side of the machine sees,
+  // and it is the reflected half of the fill.
   panel(0xfff2e0, 1.6, [2, 18], [7, 11, -2], [Math.PI / 2, 0, 0]);
 
   // A cold bounce off the floor on the shadow side — the fill, in reflection form.
@@ -95,23 +106,37 @@ export async function createScene(canvas, { ticker, reduced = false, onProgress 
   // separate against. One depth idea per view (DM6) — there is no parallax layer
   // and no second spatial system anywhere on this page.
   //
-  // The range was 9..30 and it had to move. The wide station now stands 24 units
-  // out instead of 15, and at 9..30 that put the machine 71% fogged — the shot
-  // that exists to show the whole thing would have shown a stain. 14..52 gives
-  // the new wide shot about the same atmosphere the old one had (~0.29), and
-  // leaves every close station clear.
-  scene.fog = new THREE.Fog(0x0a0c0d, 14, 52);
+  // The range was 9..30, then 14..52 when the wide station moved out.
+  //
+  // IT NOW HAS SOMETHING TO ACT ON. Until the floor existed the fog was an
+  // instruction with no receiver: nothing in the scene was further away than the
+  // machine, so nothing ever faded and the "hall" was a word in a comment. The
+  // floor is what turns the far value into a HORIZON — the distance at which the
+  // ground stops being ground and becomes the page's own colour.
+  //
+  // Pulled in from 52 to 44 because that horizon now has to land inside the
+  // frame rather than past it. The fog colour is --ground exactly, so a fully
+  // fogged floor resolves to the same value as the document behind the canvas
+  // and the join is not findable.
+  scene.fog = new THREE.Fog(0x0a0c0d, 11, 34);
 
   const key = new THREE.DirectionalLight(0xfff0dc, 3.4);
-  key.position.set(-5.5, 8.5, 3.2);
+  // Seeded on the anchor the environment's strip is built from — the per-shot
+  // table below still walks it around, but it now starts where the room says
+  // the light is.
+  key.position.copy(KEY_ANCHOR).multiplyScalar(10);
   key.castShadow = !mobile;
   if (key.castShadow) {
     key.shadow.mapSize.set(2048, 2048);
     key.shadow.bias = -0.0005;
     key.shadow.normalBias = 0.02;
     const c = key.shadow.camera;
-    c.near = 1; c.far = 26;
-    c.left = c.bottom = -6; c.right = c.top = 6;
+    // Widened with the key’s elevation drop. At 52 degrees the cast shadow was
+    // a blot under the base; at 30 it runs several metres, and a +/-6 frustum
+    // sheared it off mid-arm. The shadow is a compositional element now, so the
+    // frustum has to contain the whole of it.
+    c.near = 1; c.far = 38;
+    c.left = c.bottom = -15; c.right = c.top = 15;
     c.updateProjectionMatrix();
   }
 
@@ -168,18 +193,59 @@ export async function createScene(canvas, { ticker, reduced = false, onProgress 
   spin.add(rig.root);
   scene.add(spin);
 
-  // Contact shadow, always (DNA59). Sized to the machine's actual footprint
-  // rather than to a round number — a shadow plane wider than the subject is a
-  // grey square you can see the edge of.
-  const contact = mobile ? null : createContactShadow(scene, {
+  /*
+    THE HALL.
+
+    One floor, and the horizon the fog makes with it. It replaces
+    createShadowCatcher, which was a ShadowMaterial — a surface that is invisible
+    except where a shadow lands, and therefore a surface that draws black onto a
+    near-black page. The key's cast shadow was in every frame and visible in none
+    of them.
+
+    Net cost is nothing: one plane out, one plane in.
+  */
+  const hall = createHall(scene, { receiveShadow: !mobile });
+  /*
+    THE FLOOR TAKES LESS OF THE ROOM THAN THE MACHINE DOES.
+
+    A rough dielectric still has a specular lobe, and at the grazing angles a
+    floor is mostly seen at, Fresnel drives it hard. The first cut of this put the
+    far slab at luma 72 against a page ground of 12 — a bright horizon band
+    reflecting the overhead strips straight back down the lens. Physically
+    correct, and the end of the darkness the whole palette was derived for.
+
+    The environment is held back here and ONLY here: the castings keep the full
+    1.25 that makes them read as painted steel, because the machine is what the
+    room is for.
+  */
+  hall.material.envMapIntensity = 0.35;
+
+  /*
+    Contact shadow, always (DNA59). Sized to the machine's actual footprint
+    rather than to a round number — a shadow plane wider than the subject is a
+    grey square you can see the edge of.
+
+    IT NOW RUNS ON MOBILE TOO. It was skipped there with the rest of the shadow
+    work, which was defensible while the machine floated in a void — nothing was
+    grounded, so nothing looked ungrounded. With a lit floor under it, a phone
+    would have shown the machine hovering over a surface it never touches, which
+    is the most conspicuous of the 3D tells. The map is a quarter of the desktop
+    one and the pass already stops the moment the scene settles.
+
+    Lifted a hair off the slab: both planes live at y 0 and the contact plane
+    writes no depth, so at exactly equal depth it is a coin toss which one the
+    driver keeps.
+  */
+  const contact = createContactShadow(scene, {
     size: 7,
     height: 0.9,
-    resolution: 512,
+    resolution: mobile ? 256 : 512,
     blur: 3.2,
     darkness: 1.8,
     opacity: 0.8,
+    y: 0.004,
+    ignore: [hall.floor],
   });
-  if (!mobile) createShadowCatcher(scene, { size: 60, opacity: 0.42 });
 
   const rigCam = createCameraRig(camera, { lambda: 3.2, fovLambda: 2.4 });
 
@@ -194,24 +260,39 @@ export async function createScene(canvas, { ticker, reduced = false, onProgress 
   const LIGHT = {
     // 00 — where the opening starts. One rim and almost nothing else, so the
     // machine exists as an edge before it exists as an object.
-    dark:     { key: [-4.2, 6.0, 2.2, 0.16], fill: [5, -1.5, 4, 0.05], rim: [2.6, 1.4, -6.2, 1.05], exposure: 0.72 },
-    // 01 — sculptural rim. Almost no fill: at this crop the form is read from
-    // one bright edge running down the casting, and the rest can go.
-    sculpt:   { key: [-4.2, 6.0, 2.2, 2.1], fill: [5, -1.5, 4, 0.30], rim: [2.6, 1.4, -6.2, 3.4], exposure: 1.12 },
+    dark:     { key: [-7.6, 5.4, 2.6, 0.22], fill: [5, -1.5, 4, 0.12], rim: [2.6, 1.4, -6.2, 1.10], exposure: 0.76 },
+    /*
+      01 — sculptural rim. The form is read from one bright edge running down the
+      casting.
+
+      THE FILL FLOOR. It said "almost no fill: … and the rest can go", and the
+      rest did go: at 0.30 the shadow side of the casting fell below the value of
+      the ground behind it, so it stopped being a dark side of a solid and became
+      a hole cut in the picture. That was survivable while the ground was an
+      empty void with nothing to compare against. It is not survivable now the
+      floor has a value — an object whose dark side is darker than the floor it
+      stands on does not read as an object.
+
+      The rule this and `specular` are now set by: THE DARKEST LIT SURFACE OF THE
+      MACHINE STAYS ABOVE THE FLOOR'S VALUE AT THE SAME DEPTH. Measured on the
+      render, and it costs the drama nothing — the bright edge is doing the
+      sculpting either way.
+    */
+    sculpt:   { key: [-8.4, 4.6, 2.4, 2.4], fill: [5, -1.5, 4, 0.60], rim: [2.6, 1.4, -6.2, 3.2], exposure: 1.10 },
     // 02 — clean and even. The machine is small here and has to read whole.
-    clean:    { key: [-5.5, 8.5, 4.5, 3.2], fill: [6, -1.0, 5, 0.95], rim: [3.0, 1.6, -6.5, 1.5], exposure: 1.18 },
+    clean:    { key: [-8.0, 5.0, 2.2, 3.3], fill: [6, -1.0, 5, 0.88], rim: [3.0, 1.6, -6.5, 1.8], exposure: 1.16 },
     // 03 — harder side light. The pose is the event, so the light rakes across
     // the linkage and lets the rods throw their own shadows on the castings.
-    side:     { key: [-7.5, 3.4, 1.2, 3.9], fill: [5, -1.0, 4, 0.45], rim: [4.0, 1.2, -5.5, 2.2], exposure: 1.10 },
+    side:     { key: [-9.2, 3.8, 1.6, 3.8], fill: [5, -1.0, 4, 0.62], rim: [4.0, 1.2, -5.5, 2.3], exposure: 1.10 },
     // 04 — specular. Close enough that the subject IS the highlight, so the key
     // is tight and hot and the fill barely exists.
-    specular: { key: [-2.0, 3.2, 3.4, 4.6], fill: [4, 0.4, 3, 0.22], rim: [2.2, 1.0, -3.4, 3.0], exposure: 0.98 },
+    specular: { key: [-4.0, 3.4, 3.2, 4.4], fill: [4, 0.4, 3, 0.55], rim: [2.2, 1.0, -3.4, 2.9], exposure: 0.98 },
     // 04 — from above. The key comes over the top so the boom's upper surfaces
     // carry the frame and the floor falls away into nothing.
-    top:      { key: [-1.6, 9.5, 1.4, 3.6], fill: [5, 0.2, 4, 0.55], rim: [3.2, 2.4, -6.0, 1.7], exposure: 1.14 },
+    top:      { key: [-3.0, 8.4, 2.0, 3.5], fill: [5, 0.2, 4, 0.60], rim: [3.2, 2.4, -6.0, 1.7], exposure: 1.12 },
     // 06 — resolved. Broad key, real fill, rim back to separating the arm from
     // the hall. The frame is wide again and everything has to hold together.
-    hero:     { key: [-6.0, 7.0, 3.0, 3.0], fill: [6.5, -1.2, 5, 0.80], rim: [3.4, 1.4, -7.0, 2.6], exposure: 1.20 },
+    hero:     { key: [-8.6, 4.4, 2.0, 3.4], fill: [6.5, -1.2, 5, 0.85], rim: [3.4, 1.4, -7.0, 2.5], exposure: 1.18 },
   };
 
   const _c = { key: [...LIGHT.sculpt.key], fill: [...LIGHT.sculpt.fill], rim: [...LIGHT.sculpt.rim] };
@@ -248,81 +329,59 @@ export async function createScene(canvas, { ticker, reduced = false, onProgress 
     };
   };
 
-  // ── the level line ─────────────────────────────────────────────────────
-  // The signature move's whole content is its own stillness, so what it reads
-  // has to be the real thing: the projected screen height of the tool plate,
-  // every frame, with no smoothing that could hide a wobble.
-  // The rule and the marks are two elements at two depths, so the geometry they
-  // share is published to :root rather than written onto one of them.
-  const ruleEl = document.querySelector('[data-level]');
-  const marksEl = document.querySelector('[data-level-marks]');
-  const rootEl = document.documentElement;
-
-  const level = {
-    setState(state) {
-      const on = state !== 'off';
-      if (ruleEl) ruleEl.hidden = !on;
-      if (marksEl) marksEl.hidden = !on;
-      // NOT `data-level`: that is the rule element's own hook, and writing the
-      // same attribute onto :root made document.querySelector('[data-level]')
-      // return <html>. The rule then silently stopped being styled and the
-      // module was toggling `hidden` on the whole document.
-      rootEl.dataset.levelState = on ? state : 'introduced';
-    },
-    /** Scrubbed, so it is written directly rather than transitioned. */
-    setFade(v) {
-      const value = v === null ? '' : String(v);
-      if (ruleEl) ruleEl.style.opacity = value;
-      if (marksEl) marksEl.style.opacity = value;
-    },
-  };
-
   // The readout. Real camera state, printed — azimuth around the machine and the
   // distance the camera is standing at. Both are read off the camera every frame
   // rather than mirrored from the station table, so if the two ever disagree the
   // readout tells the truth about what is on screen.
+  /*
+    THE DRAWING LAYER.
+
+    It replaces the level line and the three written leaders with marks that
+    terminate on projected model points — see drawing.js. Built after the rig,
+    because every mark reads the rig.
+  */
+  const drawing = createDrawing({ camera, rig });
+
   const readoutEl = document.querySelector('[data-readout]');
   let lastAz = -999;
+  let lastDist = -999;
 
   const updateReadout = () => {
     if (!readoutEl) return;
     const az = (Math.atan2(camera.position.x, camera.position.z) * 180 / Math.PI + 360) % 360;
-    if (Math.abs(az - lastAz) < 0.5) return;
-    lastAz = az;
     const dist = Math.hypot(camera.position.x, camera.position.z);
+    // BOTH values gate it. Gating on azimuth alone froze the metres through
+    // every dolly on the page — measured at 10.4 M printed against 7.6 M actual.
+    if (Math.abs(az - lastAz) < 0.5 && Math.abs(dist - lastDist) < 0.05) return;
+    lastAz = az; lastDist = dist;
     readoutEl.textContent = `AZ ${az.toFixed(0).padStart(3, '0')}\u00b0 \u00b7 ${dist.toFixed(1)} M`;
   };
 
-  const flange = new THREE.Vector3();
-  let lastTop = -1;
-  let lastLeft = -1;
+  /*
+    THE RECORD MAKES TWO CLAIMS ABOUT THIS SCENE, SO THIS SCENE PUBLISHES THEM.
 
-  const updateLevel = () => {
-    if (!ruleEl && !marksEl) return;
-    rig.flangePoint(flange).project(camera);
-
-    const top = (1 - (flange.y + 1) / 2) * 100;
-    if (Math.abs(top - lastTop) >= 0.001) {
-      lastTop = top;
-      rootEl.style.setProperty('--level-y', top.toFixed(3) + '%');
-    }
-
-    // The horizontal position of the same point. The line is no longer a rule of
-    // constant weight: it carries the accent at full strength HERE and falls away
-    // either side, because this is the only place on it that is a measurement.
-    // Clamped rather than left free — when the plate leaves the frame the ramp
-    // should walk off the edge, not resolve to a gradient stop in the hundreds.
-    const left = Math.min(Math.max((flange.x + 1) / 2 * 100, -25), 125);
-    if (Math.abs(left - lastLeft) >= 0.001) {
-      lastLeft = left;
-      rootEl.style.setProperty('--level-x', left.toFixed(3) + '%');
-    }
+    "Draw-call floor · 9" and "Triangles · 137 613" are figures in the table, and
+    the table's whole argument is that its figures were measured. The hall added
+    geometry, so both had to be re-measured rather than assumed — publishing them
+    from the renderer is how they stay checkable instead of becoming two numbers
+    that were true once.
+  */
+  const publishBudget = () => {
+    const r = renderer.info.render;
+    window.__render = { calls: r.calls, triangles: r.triangles, programs: renderer.info.programs?.length ?? 0 };
   };
 
   let moving = true;
+
   stage.onFrame((dt) => {
+    // FIRST in the callback, deliberately. onFrame runs before the main render,
+    // and the contact pass further down this same function ends by rendering a
+    // two-triangle blur plane — so reading the renderer's counters after it
+    // reports the blur, not the frame. Read here and they are the previous main
+    // render's totals, which is the number the record's claim is about.
+    publishBudget();
     const settled = rigCam.update(dt);
-    updateLevel();
+    drawing.update();
     updateReadout();
     // The contact shadow is a full extra scene pass, so it runs while anything
     // is actually moving and stops when nothing is (DNA75). A still frame does
@@ -341,7 +400,7 @@ export async function createScene(canvas, { ticker, reduced = false, onProgress 
     model,
     rig,
     rigCam,
-    level,
+    drawing,
     mobile,
     /** Marks the scene dirty so the contact shadow re-renders this frame. */
     touch() { moving = true; },
@@ -357,9 +416,13 @@ export async function createScene(canvas, { ticker, reduced = false, onProgress 
     },
     /** Crossfade the lighting setup. See LIGHT above — one world, five setups. */
     setLight: applyLight,
+    /** Shapes the bay of light per shot. See hall.js. */
+    setPool: (v) => hall.setPool(v),
     setExposure: (v) => stage.setExposure(v),
     dispose() {
       contact?.dispose();
+      drawing.dispose();
+      hall.dispose();
       stage.dispose();
       delete window.__subject;
     },

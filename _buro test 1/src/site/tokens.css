@@ -55,15 +55,34 @@
 
   /* ── type ───────────────────────────────────────────────────────────── */
   /*
-    AUTHORED, and a judgment call: no webfont ships. The payload budget has room
-    for one, but a licensed grotesque is a decision about the studio's identity
-    and this page is a machine study, not the identity. So the distinction is
-    carried by setting — scale, tracking, measure and restraint — rather than by
-    a purchased face. Named as the first upgrade if this becomes the front door.
+    THREE VOICES, THREE JOBS, AND THE MONO ONLY HAS ONE OF THEM NOW.
+
+    The page shipped no webfont and set everything in Helvetica plus a system
+    mono. That was defensible on payload and indefensible on the result: the
+    largest type on the page — the closing statement — was system Helvetica, which
+    is the most template-legible setting available, and the mono was doing eight
+    different jobs at one size, which is why it had no authority anywhere.
+
+    VOICE A · ARCHIVO carries every statement: the designation, the six shot
+    headings, the figures, the record's heading. A grotesque with enough width and
+    a flat, machined skeleton — engineering-neutral rather than DIN-literal, which
+    matters because a condensed technical face would have pushed this page toward
+    the motorsport trope the brief rules out. It ships as ONE variable file that
+    serves 400 through 700, so three weights cost what one used to.
+
+    VOICE B · IBM PLEX MONO carries measurement and nothing else: dimension text,
+    leader labels, balloon numerals, the readout. Stripping its other seven jobs is
+    what makes it read as an instrument rather than as a default.
+
+    VOICE C is Archivo at 400 for prose, not a third family. A deliberate call: the
+    meaningful contrast on this page is grotesque against mono, and two neighbouring
+    sans faces would read as mush while costing a third file.
+
+    64 KB for the whole type system, latin subset only.
   */
-  --face-display: "Helvetica Neue", Helvetica, Inter, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
-  --face-body:    "Helvetica Neue", Helvetica, Inter, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
-  --face-mono:    ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --face-display: "Archivo", "Helvetica Neue", Helvetica, system-ui, sans-serif;
+  --face-body:    "Archivo", "Helvetica Neue", Helvetica, system-ui, sans-serif;
+  --face-mono:    "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   /* Adjacent ranks differ by at least 1.6x or they are one rank wearing two sizes (DNA7). */
   --t-h1:    clamp(3.25rem, 8.6vw, 9.25rem);  /* 52 -> 148 */
@@ -76,7 +95,9 @@
   --lh-body:    1.62;
   --lh-label:   1.45;
 
-  --tr-display: -0.028em; /* PROVED — optical, corrected at 148px, not chosen at 16 (I10, DNA11). */
+  --tr-display: -0.022em; /* PROVED — optical, re-measured in Archivo at 148px. Its
+                             wider sidebearings need less negative tracking than
+                             Helvetica did; -0.028 closed the counters at display size. */
   --tr-label:   0.09em;   /* uppercase is tracked and short (I4). */
 
   --measure: 34ch;        /* 60-75 characters is the reading target; 34ch is the *column*, and the body sits at ~62 characters in it. */
@@ -110,10 +131,9 @@
   --d-quick: 240ms;
   --d-base:  450ms;
   --d-slow:  800ms;
-  /* The page's ONE ambient loop (motion D4), spent here on purpose: the pulse at
-     the point where the plate meets the line. Slow, because it is a measurement
-     being taken rather than a heartbeat. */
-  --d-ping:  2200ms;
+  /* There is no ambient loop. --d-ping carried the pulse at the contact point and
+     went with it: the datum reads as authoritative because it is still, and a
+     token describing a loop the page no longer runs is a comment that lies. */
   --e-enter: cubic-bezier(0.22, 1, 0.36, 1);
   --e-exit:  cubic-bezier(0.55, 0, 1, 0.45);   /* NOT --e-enter reversed: an ease-out on an exit spends its travel in the first third and turns an 800ms fade into a 400ms snap with an invisible tail (U20). */
 

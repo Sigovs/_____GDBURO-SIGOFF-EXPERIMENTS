@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KR 700 PA — editorial · Buro Lab</title>
+<meta name="description" content="A KUKA KR 700 PA palletiser, reconstructed from a 107-solid CAD file and re-articulated on its real hinge centres.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Crect width=%2716%27 height=%2716%27 fill=%27%230a0c0d%27/%3E%3Crect x=%271%27 y=%277.5%27 width=%2714%27 height=%271%27 fill=%27%23f2903f%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="./site/variant.css">
+<link rel="stylesheet" href="./site/dir-b.css">
+</head>
+<body class="dir-b">
+<a class="skip" href="#record">Skip to the measurements</a>
+
+<header class="masthead">
+  <span class="wordmark">Buro&nbsp;Lab</span>
+  <span class="masthead__meta">Machine study 01 · B</span>
+</header>
+<span class="readout" data-readout aria-hidden="true"></span>
+
+<div class="stage" aria-hidden="true"><canvas id="scene"></canvas></div>
+
+<main>
+
+  <section class="beat beat--open" id="open" data-in="0.04" data-out="0.62" data-enter="crop">
+    <div class="type">
+      <h1 class="bleed" data-r>KR700PA</h1>
+      <p class="kicker" data-r>KUKA · palletiser · 2 744 mm</p>
+    </div>
+  </section>
+
+  <section class="beat beat--height beat--figleft" id="height" data-in="0.14" data-out="0.82" data-enter="crop">
+    <div class="type">
+      <p class="figlabel" data-r>Standing still</p>
+      <h2 class="fig-huge" data-r>2744</h2>
+      <p class="figunit" data-r>millimetres</p>
+    </div>
+  </section>
+
+  <section class="beat beat--axes beat--split" id="axes" data-in="0.12" data-out="0.84" data-enter="slide">
+    <div class="type">
+      <h2 class="word word--1" data-r>FOUR</h2>
+      <h2 class="word word--2" data-r>AXES</h2>
+      <p class="aside" data-r>Two closed linkages. The plate holds flat while the arm drives.</p>
+    </div>
+  </section>
+
+  <section class="beat beat--reach beat--figtop" id="reach" data-in="0.16" data-out="0.82" data-enter="drop">
+    <div class="type">
+      <h2 class="fig-huge fig-huge--top" data-r>3070</h2>
+      <p class="figlabel figlabel--right" data-r>Across, at full reach</p>
+    </div>
+  </section>
+
+  <section class="beat beat--grain" id="grain" data-in="0.22" data-out="0.8" data-enter="slide">
+    <div class="type">
+      <h2 class="statement" data-r>Precision<br>is mechanical.</h2>
+    </div>
+  </section>
+
+  <section class="beat beat--level beat--behind" id="level" data-in="0.14" data-out="0.86" data-enter="crop">
+    <div class="type">
+      <h2 class="bleed bleed--end" data-r>NEVER TILTS</h2>
+      <p class="kicker kicker--end" data-r>0.000° across the full range</p>
+    </div>
+  </section>
+
+  <section class="beat beat--record" id="record" data-in="0.05" data-out="0.98">
+    <div class="record">
+      <h2 class="record__head"><span class="plate-on">Measured, not quoted</span></h2>
+      <p class="note" data-r>Every figure below was measured from the file in this repository. No manufacturer
+        specification is used. The designation &ldquo;KR&nbsp;700&nbsp;PA&rdquo; conventionally implies a
+        700&nbsp;kg payload, and that figure does not appear here, because an implication is not a source.</p>
+      <table class="plate">
+        <caption class="visually-hidden">Measured properties of the KR 700 PA model</caption>
+        <tbody>
+          <tr><th scope="row">Overall height</th><td class="fig">2 744 mm</td></tr>
+          <tr><th scope="row">Overall span</th><td class="fig">3 070 mm</td></tr>
+          <tr><th scope="row">Linkage members</th><td class="fig">3 × 1 300 mm</td></tr>
+          <tr><th scope="row">Driven axes</th><td class="fig">4</td></tr>
+          <tr><th scope="row">Closed loops</th><td class="fig">2</td></tr>
+          <tr><th scope="row">Solids in source</th><td class="fig">107</td></tr>
+          <tr><th scope="row">Triangles</th><td class="fig">137 613</td></tr>
+          <tr><th scope="row">Draw-call floor</th><td class="fig">9</td></tr>
+          <tr><th scope="row">Payload</th><td class="fig">442 KB</td></tr>
+          <tr><th scope="row">Worst plate tilt, full range</th><td class="fig">0.000°</td></tr>
+        </tbody>
+      </table>
+      <p class="provenance"><em>KR 700 PA</em>, obtained from CGTrader under its Royalty&nbsp;Free License.
+        STEP converted with <code>tools/step-to-glb.mjs</code>; hinge centres derived by
+        <code>tools/rod-ends.mjs</code> and the hierarchy recorded in <code>assets/robo&nbsp;hand/rig.json</code>.
+        KUKA and KR&nbsp;700&nbsp;PA are marks of their owner, used to name the machine accurately and not
+        under licence or endorsement.</p>
+    </div>
+    <div class="orbit" data-orbit><span class="orbit__hint">Drag to rotate · 360°</span></div>
+    <footer class="colophon"><p><span class="wordmark">Buro&nbsp;Lab</span> — machine study 01</p></footer>
+  </section>
+</main>
+
+<script type="module">
+  import direction from './directions/b.js';
+  import { bootVariant } from './site/vboot.js';
+  bootVariant(direction);
+</script>
+</body>
+</html>

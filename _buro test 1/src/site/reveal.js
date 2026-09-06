@@ -57,7 +57,24 @@ const CHOREO = {
   scale:  { in: 0.14, out: 0.72, enter: 'fromOutside',  exit: 'cropOut' },
   rear:   { in: 0.10, out: 0.76, enter: 'lineTravel',   exit: 'reverseLift' },
   above:  { in: 0.17, out: 0.70, enter: 'maskDown',     exit: 'liftUp' },
-  macro:  { in: 0.05, out: 0.56, enter: 'lateralLeft',  exit: 'trailLeft' },
+  /*
+    THE MACRO'S WINDOW WAS RUNNING AGAINST ITS OWN CAMERA.
+
+    It was `in: 0.05, out: 0.56`. This shot's camera is `easeOut(t / 0.52)`, so
+    the approach is still travelling for the first half and the composed macro
+    frame — one joint, filling the screen — only exists from about 0.52 onward.
+    The copy therefore arrived while the camera was still moving and left at the
+    moment the frame it belongs to resolved. Measured on settled frames: both
+    lines at full opacity from 0.10 to 0.45, and BOTH AT ZERO from 0.62 to 1.00.
+    Thirty-eight percent of the shortest shot on the page carried no statement at
+    all, and it was the thirty-eight percent worth looking at.
+
+    Moved to sit on the arrival instead of ahead of it. The separation also
+    matters on its own: at 0.05/0.56 the entrance (0.85s plus stagger) was still
+    resolving when the exit began, so the pair never both reached full opacity in
+    the same frame — a two-line statement that is never once fully present.
+  */
+  macro:  { in: 0.16, out: 0.84, enter: 'lateralLeft',  exit: 'trailLeft' },
   hero:   { in: 0.12, out: 0.80, enter: 'riseBehind',   exit: 'clearEarly' },
 };
 
@@ -71,9 +88,9 @@ const TARGETS = {
   scale:  ['.stat__fig', '.stat__unit', '.stat__cap'],
   // The leader is always LAST in its shot's sequence: it annotates a composition,
   // so it arrives once that composition is there to annotate.
-  rear:   ['@lines', '.pin__label'],
-  above:  ['.edge', '.stat__fig', '.stat__unit', '.stat__cap', '.pin__label'],
-  macro:  ['@lines', '.pin__label'],
+  rear:   ['@lines'],
+  above:  ['.edge', '.stat__fig', '.stat__unit', '.stat__cap'],
+  macro:  ['@lines'],
   hero:   ['@lines'],
 };
 
@@ -259,10 +276,10 @@ function collect(section, spec) {
 
 /**
  * @param {Element} scope
- * @param {{ reduced?: boolean, backdrop?: { setScroll(p: number): void } }} options
+ * @param {{ reduced?: boolean }} options
  * @returns {() => void} teardown
  */
-export function createReveals(scope, { reduced = false, backdrop = null } = {}) {
+export function createReveals(scope, { reduced = false } = {}) {
   if (reduced) return () => {};
 
   const ctx = gsap.context(() => {
@@ -319,6 +336,22 @@ export function createReveals(scope, { reduced = false, backdrop = null } = {}) 
         */
         if (past) { enter.progress(1).pause(); exit.progress(1).pause(); }
         else { exit.progress(0).pause(); enter.progress(0).pause(); }
+
+        /*
+          AND THEN SAY IT OUTRIGHT.
+
+          Both branches mean the same thing for what is on screen: before its cue
+          the block has not arrived, after its exit it has gone, and in neither
+          case is it visible. Restoring that through two timelines that both own
+          opacity leaves it depending on which one wrote last — and it did fail:
+          shot 01's "Nothing here moves by accident." was measured at full opacity
+          in the top-right of SHOT 02, one whole section after it should have
+          cleared, because a refresh had re-run the timelines in the other order.
+
+          One line, no inference. The gestures still play on a real scroll; this
+          only fixes where a skipped or refreshed section leaves them.
+        */
+        gsap.set(els, { opacity: 0 });
       };
 
       // And the same order at build: arm the exit's start values, then hide.
@@ -429,18 +462,6 @@ export function createReveals(scope, { reduced = false, backdrop = null } = {}) 
       });
     }
 
-    /*
-      The backdrop's answer to the scroll. One trigger over the whole document: it
-      is already the mechanism driving every other scroll-linked value here, so the
-      field pans on the same clock as the camera instead of on a second one that
-      drifts against it.
-    */
-    if (backdrop) {
-      ScrollTrigger.create({
-        start: 0, end: 'max', scrub: true, invalidateOnRefresh: true,
-        onUpdate: (self) => backdrop.setScroll(self.progress),
-      });
-    }
   }, scope);
 
   return () => ctx.revert();

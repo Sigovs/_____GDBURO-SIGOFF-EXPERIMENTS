@@ -1,20 +1,34 @@
 # Buro Lab — INDEX1 · KR 700 PA
 
-## → index1.html
+## → the four published pages
 
-**The page is `index1.html`** at the top of this folder — a built page, published
-as it stands:
+`index.html` at the top of this folder is the **portal**: every version with a
+picture of each, generated from [variants.json](variants.json). Start there.
 
-**https://sigovs.github.io/_____GDBURO-SIGOFF-EXPERIMENTS/_buro%20test%201/index1.html**
+**https://sigovs.github.io/_____GDBURO-SIGOFF-EXPERIMENTS/_buro%20test%201/**
 
-`index.html` beside it is the **portal**: every version with a picture of each,
-generated from [variants.json](variants.json). Both are served from this folder
-as part of the repository, which GitHub Pages publishes whole.
+| | | |
+|---|---|---|
+| **[The level line](https://sigovs.github.io/_____GDBURO-SIGOFF-EXPERIMENTS/_buro%20test%201/index1.html)** | `index1.html` | six camera stations, the datum in the room |
+| **[Monumental](https://sigovs.github.io/_____GDBURO-SIGOFF-EXPERIMENTS/_buro%20test%201/index2.html)** | `index2.html` | direction A — the machine as architecture |
+| **[Editorial](https://sigovs.github.io/_____GDBURO-SIGOFF-EXPERIMENTS/_buro%20test%201/index3.html)** | `index3.html` | direction B — the machine as a printed subject |
+| **[Machine film](https://sigovs.github.io/_____GDBURO-SIGOFF-EXPERIMENTS/_buro%20test%201/index4.html)** | `index4.html` | direction C — the machine as footage |
+
+index2/3/4 are three DIRECTIONS taken off index1, meant to be opened beside each
+other rather than in succession. They share one bootstrap — `src/site/vboot.js` —
+and differ in `src/directions/{a,b,c}.js` and `src/site/dir-{a,b,c}.css`. The
+letter names the direction; the page is still `indexN.html`, because that is the
+name the portal and the dashboard look for.
+
+All of it is served from this folder as part of the repository, which GitHub
+Pages publishes whole.
 
 > **A variant is a file, not a branch and not a folder.** `indexN.html` here,
-> with its assets in `assetsN/` and its card picture in `previews/indexN.jpg` —
-> the naming every `_buro test` uses. This project used to publish variants as
-> folders on a `gh-pages` branch of a separate repository, `gd_buro_tests`. That
+> with its card picture in `previews/indexN.jpg` — the naming every `_buro test`
+> uses. The chunks all land in one `assets1/`, because the four pages are built in
+> one pass and share three.js, the decoders and the model between them.
+>
+> This project used to publish variants as folders on a `gh-pages` branch of a separate repository, `gd_buro_tests`. That
 > repository is gone and its Pages site answers 404; nothing addresses it any
 > more.
 
@@ -26,10 +40,10 @@ as part of the repository, which GitHub Pages publishes whole.
 
 | | |
 |---|---|
-| `npm run dev` | the source, at http://localhost:5200/index1.html |
-| `npm run publish` | build → copy to the top of this folder → rebuild the portal |
+| `npm run dev` | the source, at http://localhost:5200/index1.html — index2/3/4.html beside it |
+| `npm run publish` | build EVERY registered version in one pass → copy to the top of this folder → rebuild the portal |
 | `npm run hub` | rebuild `index.html` alone |
-| `npm run shoot` | screenshot every version into `previews/` |
+| `npm run shoot` | screenshot every version into `previews/` (`--local` shoots the dev server; `BURO_DEV=…` if it is not on 5200) |
 | `npm run new-variant -- index2.html "Name" "note"` | register a version |
 
 ### Adding a variant

@@ -34,6 +34,23 @@ The last column is not decoration. **What is reflected is a design decision**
 (`DNA58`) — a default studio HDRI under a nocturne art direction is a mismatch and
 it is visible in the render.
 
+## Typefaces
+
+Self-hosted in `src/fonts/` and served from the build, not from a CDN — a page
+that fetches its type from a third party hands that party its traffic, and it
+renders in a fallback face for as long as the request takes.
+
+| file | family | origin | licence |
+|---|---|---|---|
+| archivo-var.woff2 | Archivo (variable, 400–700) | Omnibus-Type, *Archivo* — the download this copy came from is **not recorded**; the family is the one published at fonts.google.com/specimen/Archivo | SIL Open Font License 1.1 |
+| ibm-plex-mono-400.woff2 | IBM Plex Mono, 400 | IBM, *IBM Plex* — the download this copy came from is **not recorded**; the family is the one published at github.com/IBM/plex | SIL Open Font License 1.1 |
+| ibm-plex-mono-500.woff2 | IBM Plex Mono, 500 | as above | SIL Open Font License 1.1 |
+
+The OFL permits embedding and web use, including commercially, and asks that the
+files not be sold on their own and that a Reserved Font Name not be reused for a
+modified copy. Nothing here modifies the outlines: the subsetting, if any was
+done, is not recorded either — the row says so rather than guessing.
+
 ## Textures
 
 | file | origin | licence | colour space |

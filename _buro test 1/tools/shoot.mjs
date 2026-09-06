@@ -30,6 +30,15 @@ const REGISTER = JSON.parse(readFileSync(join(ROOT, 'variants.json'), 'utf8'));
 // more, so the address of a variant is the origin plus its own filename.
 const ORIGIN = 'https://sigovs.github.io/_____GDBURO-SIGOFF-EXPERIMENTS/_buro%20test%201/';
 
+// 5200 is the port vite.config.js opens, and --local assumes it. It is also a
+// port a SECOND checkout of this project can be holding — this repository is
+// worked in more than one worktree, and the server answering 5200 is whichever
+// one started first, which is not necessarily the one being shot. So the origin
+// can be said out loud when it matters:
+//
+//   BURO_DEV=http://localhost:5201/ node tools/shoot.mjs --local index2.html
+const DEV = process.env.BURO_DEV || 'http://localhost:5200/';
+
 const args = process.argv.slice(2).filter((a) => a !== '--');
 const local = args.includes('--local');
 const only = args.find((a) => !a.startsWith('--'));
@@ -42,9 +51,9 @@ if (!variants.length) {
 
 mkdirSync(OUT, { recursive: true });
 
-const urlFor = (v) => (local ? (v.dev || `http://localhost:5200/${v.file}`) : ORIGIN + v.file);
+const urlFor = (v) => (local ? (v.dev || DEV.replace(/\/?$/, '/') + v.file) : ORIGIN + v.file);
 
-console.log(`\n  shooting ${variants.length} variant${variants.length === 1 ? '' : 's'} from ${local ? 'the dev server' : ORIGIN}\n`);
+console.log(`\n  shooting ${variants.length} variant${variants.length === 1 ? '' : 's'} from ${local ? DEV : ORIGIN}\n`);
 
 const browser = await chromium.launch();
 const page = await browser.newPage({

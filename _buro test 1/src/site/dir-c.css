@@ -1,0 +1,81 @@
+/*
+  DIRECTION C — CINEMATIC MACHINE FILM
+
+  The camera and the light carry the story, so the page gives them the frame.
+  One line per beat, small, set low left like a subtitle, and it leaves before
+  the shot resolves — you are meant to be looking at the machine when the frame
+  lands, not reading.
+
+  Beats are the longest of the three directions because a camera move needs time
+  to be a move rather than a cut.
+*/
+
+.beat--open    { min-height: 150vh; }
+.beat--push    { min-height: 160vh; }
+.beat--work    { min-height: 170vh; }
+.beat--shape   { min-height: 150vh; }
+.beat--skin    { min-height: 130vh; }
+.beat--release { min-height: 190vh; }
+
+.beat .type {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  padding: 6rem var(--gutter) 4.5rem;
+  display: grid;
+  align-content: end;
+  justify-items: start;
+  pointer-events: none;
+  z-index: 10;
+  overflow: clip;
+}
+
+/* the film's title card */
+.beat--open .type { align-content: end; }
+.filmtitle {
+  margin: 0;
+  font: 600 clamp(2.4rem, 5vw, 5rem)/0.98 var(--display);
+  letter-spacing: -0.03em;
+}
+.caption {
+  margin: 0.9rem 0 0;
+  font: 400 clamp(1.15rem, 1.7vw, 1.6rem)/1.35 var(--display);
+  color: rgb(var(--ink-rgb) / 0.86);
+  max-width: 26ch;
+  /*
+    A subtitle sits ON the picture, so it carries the one scrim in this
+    direction — constructed to fade to nothing before it reaches an edge, so it
+    never draws a hard line across a deliberately transparent ground.
+  */
+  padding: 0.7em 1.6em 0.7em 0;
+  background: linear-gradient(to right, rgb(10 12 13 / 0.78) 45%, rgb(10 12 13 / 0));
+}
+.beat--open .caption { color: var(--accent); background: none; padding: 0; }
+
+/* the closing line, larger, still low */
+.filmend {
+  margin: 0;
+  font: 600 clamp(2rem, 4.6vw, 4.8rem)/1.02 var(--display);
+  letter-spacing: -0.028em;
+  /* 18ch broke this line as "The hand that never / tilts." - an orphan. */
+  max-width: 13ch;
+}
+
+/*
+  CALLOUTS ARE RARE HERE — two in the whole film — so when one appears it is a
+  title card rather than a label. It gets the accent rule and a wider landing,
+  and it is the only graphic element in the direction.
+*/
+.dir-c .co__label { font-size: 24px; letter-spacing: 0.13em; }
+.dir-c .co__box { fill: none; stroke: var(--accent); stroke-width: 1.8; }
+.dir-c .co__rule { stroke: rgb(var(--accent-rgb) / 0.6); stroke-width: 1.4; }
+.dir-c .co__value { fill: var(--ink); font-size: 18px; }
+.dir-c .co__lead { stroke: rgb(var(--ink-rgb) / 0.8); }
+
+.beat--record {
+  min-height: 100svh;
+  display: grid;
+  align-content: center;
+  padding: 54svh var(--gutter) 6rem;
+}
+.record__head { font-size: clamp(1.5rem, 2.6vw, 2.4rem); }

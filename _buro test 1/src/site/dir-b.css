@@ -1,0 +1,150 @@
+/*
+  DIRECTION B — RADICAL EDITORIAL
+
+  The type is the composition. Words and figures are set at 18–34vw and CROPPED
+  BY THE VIEWPORT on purpose; the machine moves through them, in front of some and
+  behind others. Nothing is centred and no two beats share a skeleton.
+
+  The depth is the layout: `z-index: -1` on a type block puts it in the room, so
+  the arm occludes it — that is the device this direction is built on.
+*/
+
+/*
+  The type-as-picture beats are long so the sticky block holds, and the RIDE-OUT
+  at the end of each beat is the exit. The closing word needed a deeper lead than
+  the others: at 19vw the ride walked its cap-line straight through the masthead
+  band, so it starts 40vh down and clears the band for the whole hold.
+*/
+.beat--open   { min-height: 120vh; }
+.beat--height { min-height: 140vh; }
+.beat--axes   { min-height: 150vh; }
+.beat--reach  { min-height: 130vh; }
+.beat--grain  { min-height: 110vh; }
+.beat--level  { min-height: 160vh; }
+
+.beat .type {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  padding: 6rem var(--gutter) 4rem;
+  display: grid;
+  pointer-events: none;
+  z-index: 10;
+  overflow: clip;
+}
+
+/* ── the opening: the designation run past both edges ─────────────────────
+   One vw value fits every width because the string is fixed and both the type
+   width and the font size scale linearly with vw. */
+/* Set low, not centred: at 27vw and centred the cap-line collided with the
+   masthead and the word read as a crop of a crop. */
+.beat--open .type { align-content: end; justify-items: start; padding-bottom: 9rem; }
+.bleed {
+  margin: 0;
+  font: 700 21vw/0.86 var(--display);
+  letter-spacing: -0.055em;
+  white-space: nowrap;
+  transform: translateX(-6%);
+  color: var(--ink);
+}
+.kicker {
+  margin: 1.2rem 0 0;
+  font: 500 15px/1 var(--mono);
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* ── the figure beats: a numeral as a picture ─────────────────────────────
+   The figure is cropped hard left and the machine stands inside its counter. */
+.beat--figleft .type { align-content: center; justify-items: start; }
+.fig-huge {
+  margin: 0;
+  font: 700 clamp(9rem, 34vw, 30rem)/0.74 var(--display);
+  letter-spacing: -0.045em;
+  color: rgb(var(--ink-rgb) / 0.9);
+  font-variant-numeric: tabular-nums;
+  transform: translateX(-9%);
+  /* IN THE ROOM. The arm crosses the numeral rather than sitting beside it —
+     the single strongest device this direction has. */
+  z-index: -1;
+  position: relative;
+}
+.figlabel {
+  margin: 0 0 0.6rem;
+  font: 500 15px/1 var(--mono);
+  letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent);
+}
+.figunit {
+  margin: 0.8rem 0 0;
+  font: 400 15px/1 var(--mono);
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-muted);
+}
+
+.beat--figtop .type { align-content: start; justify-items: end; text-align: right; }
+.fig-huge--top { transform: translateX(9%); }
+.figlabel--right { margin-top: 0.9rem; }
+
+/* ── the split beat: two words, opposite corners, machine between them ──── */
+/*
+  THE SPLIT BEAT.
+
+  Two words at opposite ends of the frame with the machine between them. The
+  first cut put them in a three-row grid and the top word vanished behind the
+  masthead's band; they are placed explicitly now, and the second word sits in
+  the room so the arm crosses it.
+*/
+.beat--split .type { display: block; position: relative; }
+.word {
+  position: absolute;
+  margin: 0;
+  font: 700 clamp(4rem, 12vw, 11rem)/0.86 var(--display);
+  letter-spacing: -0.04em;
+}
+.word--1 { left: 0; top: 16%; }
+.word--2 { right: 0; bottom: 12%; color: var(--ink); z-index: -1; }
+.aside {
+  position: absolute;
+  left: 0; top: 46%;
+  margin: 0;
+  max-width: 24ch;
+  font: 400 15px/1.55 var(--display);
+  color: var(--ink-muted);
+}
+
+/* ── the closing: full-bleed word, the arm through the middle of it ─────── */
+/* Placed rather than centred: grid centring put the cap-line into the masthead
+   band, so the closing word read as a crop of a crop. */
+.beat--behind .type { align-content: start; justify-items: start; z-index: -1; padding-top: 40vh; }
+.bleed--end {
+  font-size: 19vw;
+  letter-spacing: -0.05em;
+  transform: translateX(-3%);
+}
+.kicker--end { color: var(--ink-muted); }
+
+.beat--grain .type { align-content: center; justify-items: start; }
+.statement {
+  margin: 0;
+  font: 600 clamp(2rem, 4.4vw, 4.6rem)/1.0 var(--display);
+  letter-spacing: -0.025em;
+}
+
+/*
+  CALLOUTS AS PART OF THE GRID.
+
+  They are set to the same tracking as the kickers so they read as a member of
+  the type system rather than an overlay on it, and the marker is outlined so it
+  sits beside a 30rem numeral without competing with it.
+*/
+.dir-b .co__label { font-size: 22px; letter-spacing: 0.14em; }
+.dir-b .co__num { font-size: 18px; }
+.dir-b .co__lead { stroke-width: 1.5; }
+
+.beat--record {
+  min-height: 100svh;
+  display: grid;
+  align-content: center;
+  /* The ledger must not climb into the closing frame. */
+  padding: 52svh var(--gutter) 6rem;
+}
+.record__head { font-size: clamp(1.6rem, 3vw, 2.8rem); }

@@ -265,6 +265,42 @@ export function createRig(loaded) {
       this.set(poseAt(t));
     },
     residuals,
+    /*
+      NAMED WORLD POINTS, FOR THE DRAWING LAYER.
+
+      Every mark on this page has to terminate on a real point or it is
+      decoration. These are the survey's own pivots — the same numbers the
+      exporter was driven by — read out of the live hierarchy, so a centreline
+      through the elbow is through the elbow at whatever pose the scroll has
+      reached rather than at a position someone typed.
+
+      Read-only. Nothing here writes a transform, a pose or a solve.
+    */
+    /** World position of a named link's pivot: 'column', 'lowerArm', 'boom', 'rocker', 'flange', 'tool'. */
+    point(name, out = new THREE.Vector3()) {
+      const node = link[name];
+      if (!node) return out.set(0, 0, 0);
+      node.updateWorldMatrix(true, false);
+      return out.setFromMatrixPosition(node.matrixWorld);
+    },
+
+    /** World position of an arbitrary survey-frame point belonging to a named link. */
+    pointOn(name, p, out = new THREE.Vector3()) {
+      const node = link[name];
+      if (!node) return out.set(0, 0, 0);
+      return pointOn(node, p, out);
+    },
+
+    /** The machine's world bounding box, recomputed on demand. */
+    bounds(out = new THREE.Box3()) {
+      return out.setFromObject(root);
+    },
+
+    /** Measured rod lengths in millimetres — the source of "3 x 1 300 mm". */
+    rodLengths() {
+      return residuals().map((r) => r.restLen);
+    },
+
     /** World position of the tool plate. The level line reads this. */
     flangePoint(out = new THREE.Vector3()) {
       const node = link.tool ?? link.flange;

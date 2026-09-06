@@ -1,4 +1,37 @@
 /*
+  THE FACES.
+
+  Two files, three voices. Archivo is variable, so one file covers 400/600/700;
+  IBM Plex Mono ships two static cuts because it has no variable build on this
+  channel. Latin subset only — this page is English and a full subset would
+  more than double the payload for glyphs it never sets.
+
+  font-display: swap, and the fallback metrics are close enough that the swap
+  does not reflow the shot copy: the page is measured with the display face
+  loaded, and ScrollTrigger refreshes on document.fonts.ready (see index.js).
+*/
+@font-face {
+  font-family: "Archivo";
+  src: url("../fonts/archivo-var.woff2") format("woff2-variations");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("../fonts/ibm-plex-mono-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("../fonts/ibm-plex-mono-500.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+/*
   index.css — INDEX1 · KR 700 PA
 
   Five shots, and the type is placed differently in every one. That is the point:
@@ -60,7 +93,6 @@ body {
 /*
   THE STACK, and it is the whole spatial argument of the page in four lines:
 
-    -2  .backdrop        one field, fixed, dimmed. It does not scroll.
     -1  .intro[data-behind]   the opening's type once it has stepped back
      0  .stage           the machine, on a TRANSPARENT canvas
      +  the page         everything positioned after it, in tree order
@@ -70,35 +102,22 @@ body {
   engine/stage.js, where `background: null` asks for that.
 */
 
-.backdrop {
-  position: fixed; inset: 0; z-index: -2;
-  display: block; width: 100%; height: 100%;
-  pointer-events: none;
-}
 
 .stage { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 .stage canvas { display: block; width: 100%; height: 100%; }
 
-/* ── the instrument layer ────────────────────────────────────────────────
-   Corner registrations and a live readout. Hairlines only, at --rule, so it
-   registers as the frame the machine is being measured in rather than as
-   ornament laid on top of it. It never crosses the reading zone: the ticks live
-   in the corners and the readout sits under the masthead's own line. */
+/* ── the readout ─────────────────────────────────────────────────────────
+   Real camera state, printed, under the masthead's own line.
+
+   The four corner registrations that used to live here are gone. Every other
+   mark on this page terminates on a measured point; those four terminated on
+   the viewport, which makes them the one piece of pure ornament in a design
+   whose argument is that nothing in it is ornament. */
 
 .marks {
   position: fixed; inset: 0; z-index: 8;
   pointer-events: none;
 }
-.marks__tick {
-  position: absolute;
-  width: 14px; height: 14px;
-  border: 0 solid var(--rule);
-}
-.marks__tick--tl { top: var(--s-md); left: var(--gutter); border-top-width: var(--hair); border-left-width: var(--hair); }
-.marks__tick--tr { top: var(--s-md); right: var(--gutter); border-top-width: var(--hair); border-right-width: var(--hair); }
-.marks__tick--bl { bottom: var(--s-md); left: var(--gutter); border-bottom-width: var(--hair); border-left-width: var(--hair); }
-.marks__tick--br { bottom: var(--s-md); right: var(--gutter); border-bottom-width: var(--hair); border-right-width: var(--hair); }
-
 .marks__readout {
   position: absolute;
   top: calc(var(--s-md) + 1.9rem);
@@ -112,7 +131,7 @@ body {
 @media (max-width: 767px) {
   /* On a phone the corners are where the thumbs are and the readout would sit on
      the kicker. The frame keeps its two upper registrations and nothing else. */
-  .marks__tick--bl, .marks__tick--br, .marks__readout { display: none; }
+  .marks__readout { display: none; }
 }
 
 /* Shot 06's statement sits IN the room rather than over it: below the stage, so
@@ -120,134 +139,71 @@ body {
    in reveal.js is named for. */
 .shot--hero .type { z-index: -1; }
 
-/* ── the level line ──────────────────────────────────────────────────────── */
+/* ── the drawing ─────────────────────────────────────────────────────────
 
-/*
-  The line is not a solid rule any more. It carries the accent at full strength
-  at the CONTACT POINT — the projected position of the tool plate, written into
-  --level-x by scene.js every frame — and falls to nothing either side.
+   Two SVG layers at two depths, and the split is drafting convention rather
+   than taste: a CENTRELINE is a property of the object, so it lives in the room
+   behind the machine and the machine occludes it; a DIMENSION is an annotation
+   of the drawing, so it lives on the glass in front. See drawing.js.
 
-  WHY. A rule of constant weight across the frame claims the whole width is the
-  measurement. It is not: the measurement is one point, and everything either
-  side of it is the line explaining where that point sits. Ramping the alpha says
-  that, and it says it without adding a colour, a glow or a second idea. A glow
-  was the other candidate and it was refused: it would turn an instrument into an
-  effect on the one page whose argument is that its figures were measured.
+   TWO WEIGHTS AND TWO ALPHAS, and no third of either. Context lines recede at
+   --ink/0.24; the one active dimension per frame carries the accent. That is now
+   the accent's entire job on this page — which is what keeps an orange machine
+   from being annotated in its own colour. */
 
-  TWO LAYERS, NOT ONE PROPERTY. The quiet state and the proving state used to be
-  a border-color transition. A gradient cannot be transitioned and a custom
-  property does not interpolate unless it is registered, so the quiet ramp is the
-  element's own background and the bright ramp is ::before over it, crossfaded on
-  opacity. Same authored slow change of state, same timing token.
-*/
-
-.level {
-  position: fixed; left: 0; right: 0;
-  z-index: -1;          /* BEHIND the stage: the machine passes in front of it */
+.draw {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
   pointer-events: none;
-  top: var(--level-y, 62%);
-  height: var(--hair);
-  background: linear-gradient(90deg,
-    rgb(var(--accent-quiet-rgb) / 0)    calc(var(--level-x, 50%) - var(--level-reach)),
-    rgb(var(--accent-quiet-rgb) / 0.34) calc(var(--level-x, 50%) - var(--level-shoulder)),
-    rgb(var(--accent-quiet-rgb) / 1)    var(--level-x, 50%),
-    rgb(var(--accent-quiet-rgb) / 0.34) calc(var(--level-x, 50%) + var(--level-shoulder)),
-    rgb(var(--accent-quiet-rgb) / 0)    calc(var(--level-x, 50%) + var(--level-reach)));
-  opacity: 0;
-  transition: opacity var(--d-slow) var(--e-enter);
-}
-.level::before {
-  content: "";
-  position: absolute; inset: 0;
-  background: linear-gradient(90deg,
-    rgb(var(--accent-rgb) / 0)    calc(var(--level-x, 50%) - var(--level-reach)),
-    rgb(var(--accent-rgb) / 0.34) calc(var(--level-x, 50%) - var(--level-shoulder)),
-    rgb(var(--accent-rgb) / 1)    var(--level-x, 50%),
-    rgb(var(--accent-rgb) / 0.34) calc(var(--level-x, 50%) + var(--level-shoulder)),
-    rgb(var(--accent-rgb) / 0)    calc(var(--level-x, 50%) + var(--level-reach)));
-  opacity: 0;
-  transition: opacity var(--d-slow) var(--e-enter);
-}
-/* The marks layer: annotation, on the glass, above the machine. z-index 0 and
-   placed after .stage in the document, so it paints over the canvas and still
-   under the shots' own type — which is exactly where it sat before the split. */
-.level-marks {
-  position: fixed; left: 0; right: 0;
-  top: var(--level-y, 62%);
-  height: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity var(--d-slow) var(--e-enter);
-}
-.level[hidden], .level-marks[hidden] { display: none; }
-
-:root[data-level-state="introduced"] .level,
-:root[data-level-state="proving"]    .level,
-:root[data-level-state="introduced"] .level-marks,
-:root[data-level-state="proving"]    .level-marks { opacity: 1; }
-:root[data-level-state="proving"] .level::before { opacity: 1; }
-
-/* ── the contact point ───────────────────────────────────────────────────
-   Where the line meets the plate. A 3px core and one ring leaving it — the
-   page's single ambient loop (motion D4), and it is spent on the one element
-   whose entire content is that a reading is being taken and holding at 0.000.
-
-   It pulses only in `proving`. In `introduced` the line has not yet claimed
-   anything, so the point is present and still; a mark that pulses before it
-   means something is decoration, and this page has none. */
-
-.level__node {
-  position: absolute;
-  left: var(--level-x, 50%);
-  top: 50%;
-  width: 3px; height: 3px;
-  border-radius: 50%;
-  background: var(--accent-quiet);
-  transform: translate(-50%, -50%);
-  opacity: 0;
-  transition: opacity var(--d-slow) var(--e-enter), background-color var(--d-slow) var(--e-enter);
-}
-:root[data-level-state="introduced"] .level__node { opacity: 0.6; }
-:root[data-level-state="proving"]  .level__node { opacity: 1; background: var(--accent); }
-
-.level__node::after {
-  content: "";
-  position: absolute; inset: -1px;
-  border-radius: 50%;
-  border: var(--hair) solid var(--accent);
-  opacity: 0;
-}
-:root[data-level-state="proving"] .level__node::after {
-  animation: level-ping var(--d-ping) var(--e-enter) infinite;
-}
-
-/* Scale and opacity only — both compositor properties, so the loop costs no
-   layout. It rests at zero for the last third rather than restarting on the
-   instant it lands: a ring that re-fires with no gap reads as a spinner. */
-@keyframes level-ping {
-  0%   { transform: scale(1);   opacity: 0.7; }
-  62%  { transform: scale(6.5); opacity: 0; }
-  100% { transform: scale(6.5); opacity: 0; }
-}
-
-.level__label {
-  position: absolute; right: 0; top: var(--s-2xs);
-  padding: 0.4em var(--gutter) 0.5em 3.5em;
-  font: 500 var(--t-label)/1 var(--face-mono);
-  letter-spacing: var(--tr-label); text-transform: uppercase;
-  color: var(--accent);
-  /* The label rides the tool plate, so whatever the camera puts behind it
-     changes shot to shot — and at the peak that is a lit orange casting, where
-     accent-on-paint measured almost nothing. The fix is a differently
-     CONSTRUCTED scrim rather than a deeper one (DNA21): a gradient that is
-     opaque under the glyphs and fades to nothing before it reaches an edge, so
-     it never draws the hard line U17 warns about over a transparent ground. */
-  background: linear-gradient(to left, rgb(10 12 13 / 0.92) 55%, rgb(10 12 13 / 0));
-  opacity: 0;
+  overflow: visible;
   transition: opacity var(--d-base) var(--e-enter);
 }
-:root[data-level-state="proving"] .level__label { opacity: 1; }
+.draw--room  { z-index: -1; }   /* behind the stage: the machine occludes it */
+.draw--sheet { z-index: 9; }    /* on the glass, under the shot copy at 10 */
+
+.draw g { transition: opacity var(--d-slow) var(--e-enter); }
+
+/* context: extension lines, centrelines, datums */
+.dim__ext, .dim__line, .dim__tick, .cl, .datum__rule, .lead__path, .ang__base {
+  fill: none;
+  stroke: rgb(var(--ink-rgb) / 0.26);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+/* the one active dimension, and the marks that read a measurement */
+.dim__line, .dim__tick { stroke: var(--accent); }
+.datum__rule { stroke: rgb(var(--accent-rgb) / 0.55); }
+.datum__tri  { fill: var(--accent); }
+.datum__box  { fill: none; stroke: var(--accent); stroke-width: 1; }
+.lead__dot   { fill: var(--accent); }
+.lead__balloon { fill: none; stroke: rgb(var(--ink-rgb) / 0.34); stroke-width: 1; }
+.ang__arc { fill: none; stroke: var(--accent); stroke-width: 1; }
+
+/* ISO 128 type G: long dash, short dash. The only dash pattern in the system. */
+.cl { stroke-dasharray: 26 5 4 5; }
+
+/* Voice B — the measurement voice, and 14px is the floor for functional text. */
+.dim__fig, .dim__unit, .datum__letter, .lead__label, .lead__balloonNo, .ang__fig {
+  font-family: var(--face-mono);
+  font-size: var(--t-label);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tr-label);
+}
+.dim__fig  { fill: var(--ink); font-weight: 500; }
+.dim__unit { fill: var(--ink-muted); }
+.datum__letter { fill: var(--accent); font-weight: 500; }
+.lead__label { fill: var(--ink-muted); text-transform: uppercase; }
+.lead__balloonNo { fill: var(--ink-muted); }
+.ang__fig { fill: var(--accent); font-weight: 500; }
+
+@media (max-width: 767px) {
+  /* Mobile carries two marks, never three, and the leaders lose their landings.
+     A 390px frame cannot hold an annotation layer at desktop density and still
+     be a photograph. */
+  .lead__balloon, .lead__balloonNo { display: none; }
+  .dim__fig, .dim__unit, .lead__label, .ang__fig, .datum__letter { font-size: var(--t-label); }
+}
 
 /* ── masthead — the only persistent layer, and it is counted (U10) ───────── */
 
@@ -284,16 +240,62 @@ body {
   letter-spacing: var(--tr-label); text-transform: uppercase;
 }
 .masthead__meta {
-  font: 400 var(--t-label)/1 var(--face-mono);
+  /* Voice A: the sheet is named here, not measured. */
+  font: 500 var(--t-label)/1 var(--face-display);
   letter-spacing: var(--tr-label); text-transform: uppercase;
   color: var(--ink-muted);
 }
 
 /* ── shots ───────────────────────────────────────────────────────────────── */
 
-main { position: relative; z-index: 10; }
+/*
+  MAIN MUST NOT CREATE A STACKING CONTEXT.
 
-.shot { position: relative; }
+  It carried `z-index: 10`, and that is what made `.shot--hero .type { z-index: -1 }`
+  and `.record { z-index: -1 }` inert: a child cannot escape its parent's stacking
+  context, so -1 only ever meant "behind main's own background" and never "behind
+  the machine". Measured rather than reasoned about — at hero progress 0.53,
+  elementFromPoint at the statement's centre returned the section, and the arm
+  rendered in front of the type it was supposed to extend through. The page's
+  signature depth move had never once fired.
+
+  With the z-index gone, main is still the containing block for its sticky
+  children and its descendants' z-indices now resolve in the ROOT context, where
+  -1 genuinely sits behind `.stage` (0). What used to be implicit — everything
+  inside main outranked `.marks` (8) because 10 > 8 — is written out below
+  instead, so the ranks are legible in one place rather than inherited from a
+  single number on an ancestor.
+
+  THE STACK, in the root context:
+    -1  .draw--room · .shot--hero .type · .record   in the room, behind the machine
+     0  .stage                                    the machine, transparent canvas
+     8  .marks                                    instrument corner registrations
+    10  .type                                     shot copy, on the glass
+     9  .draw--sheet                             dimensions, leaders, balloons
+    12  .frame                                    corner copy
+    25  .intro   26 .intro__sub   30 .masthead / .preload
+*/
+main { position: relative; }
+
+/*
+  flow-root, and it is load-bearing.
+
+  `.frame` carries `margin-bottom: -100svh` so the `.type` after it overlays
+  rather than stacks. Where the frame is the last child — shot 01 — that margin
+  has no sibling to act on and collapses THROUGH the section, pulling the next
+  shot up over this one. The previous fix was `.frame:last-child { margin-bottom: 0 }`,
+  which stopped the collapse and simultaneously destroyed the frame's sticky
+  range: the sticky travel of an element is (containing block height − element
+  height − its own margins), so zeroing a −100svh margin took shot 01's corner
+  copy from a full-section hold down to 95px. Measured at impact progress 0.50:
+  the frame sat at y −425 and the kicker at y −329, off the top of the screen for
+  roughly ninety percent of the shot it belongs to.
+
+  A block formatting context stops margins collapsing through their parent at
+  source, so the negative margin can stay on every frame and shot 01 keeps both
+  its height and its hold. One property instead of a special case.
+*/
+.shot { position: relative; display: flow-root; }
 .shot--impact { min-height: var(--shot-1); }
 .shot--scale  { min-height: var(--shot-2); }
 .shot--rear   { min-height: var(--shot-3); }
@@ -317,6 +319,10 @@ main { position: relative; z-index: 10; }
   position: sticky;
   padding-inline: var(--gutter);
   width: 100%;
+  /* Explicit now that main no longer supplies it. Shot copy sits on the glass,
+     above the instrument registrations at 8; `.shot--hero .type` overrides to -1
+     because that one statement belongs in the room. */
+  z-index: 10;
 }
 
 /* Each shot places its type where no other shot does, and at a different SIZE
@@ -327,7 +333,24 @@ main { position: relative; z-index: 10; }
 .type--above { top: 14svh; text-align: right; }
 .type--above .stat { margin-left: auto; }
 .type--macro { top: 22svh; }
-.type--hero  { top: 17svh; }
+/*
+  THE CLOSING STATEMENT SITS LOW NOW.
+
+  At 17svh it occupied the same band as the arm, and the arm is in front of it by
+  design — so the machine did not cross the sentence, it buried it: "tilts." was
+  almost entirely behind a casting and the thesis could not be read.
+
+  At 54svh the statement takes the dark lower-left the cast shadow opens up, the
+  machine keeps the upper right, and the arm crosses only the head of the first
+  line. The occlusion is still the point; it is just no longer the whole sentence.
+*/
+/*
+  A width cap forced "The hand that" to wrap to "The / hand that", which put a
+  two-word orphan on the first line of the page's closing statement. The block
+  is sized instead: smaller type, authored line breaks intact, and the arm
+  crossing only the tail of it.
+*/
+.type--hero  { top: 50svh; }
 
 /* ── type ────────────────────────────────────────────────────────────────── */
 
@@ -361,7 +384,7 @@ h1, h2 {
 */
 .shot--macro h2 { font-size: clamp(1.25rem, 2.4vw, 2.25rem); max-width: 22ch; }
 
-.huge { font-size: clamp(3rem, 9.5vw, 11rem); max-width: 14ch; }
+.huge { font-size: clamp(2.6rem, 7.4vw, 8.4rem); max-width: 15ch; }
 
 /* The kicker was orange, which measured almost nothing against the orange
    castings it sits over (DM5). It is now plain ink, and what keeps it legible is
@@ -369,7 +392,8 @@ h1, h2 {
    corner of each shot where the ground is actually dark. Blending was tried and
    removed — over paint, difference reads cyan. */
 .kicker {
-  font: 500 var(--t-label)/1 var(--face-mono);
+  /* Voice A. A category label is a name, not a measurement. */
+  font: 600 var(--t-label)/1 var(--face-display);
   letter-spacing: 0.22em; text-transform: uppercase;
   color: var(--ink);
   margin: 0;
@@ -422,11 +446,15 @@ h1, h2 {
   390x844 viewport, shot 01's kicker and edge were at full opacity alongside shot
   02's "2 744", because both sections were genuinely active at the same scroll.
 
-  Where the frame is the last child it has nothing to overlay, so it keeps its own
-  height. Written structurally rather than as `.shot--impact` so a future section
-  built the same way cannot inherit the same collapse.
+  THAT FIX WAS `.frame:last-child { margin-bottom: 0 }`, AND IT COST THE HOLD.
+
+  It is gone. The collapse is now prevented at its source by `display: flow-root`
+  on `.shot` — see the note there — which lets every frame keep the negative
+  margin and therefore keep its full sticky range. The margin is not decoration:
+  a sticky element travels (containing block height − element height − margins),
+  so on a 100svh frame inside a 110vh section the −100svh margin is the whole
+  difference between holding for the shot and holding for 95px.
 */
-.frame:last-child { margin-bottom: 0; }
 
 /*
   ENTRANCES ARE CLIPPED BY THEIR OWN FRAME, NOT BY THE PAGE.
@@ -457,8 +485,9 @@ h1, h2 {
    reference at almost no visual cost (DNA34). */
 .edge {
   margin: 0;
-  max-width: 30ch;
-  font: 400 var(--t-label)/var(--lh-label) var(--face-mono);
+  max-width: 34ch;
+  /* Voice C. Editorial furniture is prose, and prose is not set in a readout. */
+  font: 400 var(--t-label)/var(--lh-label) var(--face-body);
   color: var(--ink-muted);
 }
 
@@ -502,11 +531,24 @@ h1, h2 {
 */
 .shot--record {
   background: none;
+  /*
+    It has to be able to grow. At exactly 100svh the table's last rows and the
+    provenance were cut off by the viewport on shorter windows — a section that
+    claims to be the record cannot hide part of the record.
+  */
   min-height: 100svh;
+  height: auto;
   /* Top clears the masthead — it is fixed at --s-md and the record scrolls under
      it, so anything less puts the heading behind the wordmark. Bottom clears the
      colophon, which is taken out of the flow below. */
-  padding: clamp(2.75rem, 5.5svh, 6rem) var(--gutter) clamp(2rem, 4svh, 5rem);
+  /*
+    THE LEAD. The record now paints in front of the hall rather than behind it
+    (see the z-index note above), so without it the measurements table is legible
+    in the bottom of the HERO frame — the closing statement and the ledger sharing
+    one screen. The lead pushes the first line below the fold of the last composed
+    frame, so the record arrives into air.
+  */
+  padding: clamp(2.75rem, 34svh, 18rem) var(--gutter) clamp(2rem, 4svh, 5rem);
   display: grid;
   align-content: center;
 }
@@ -526,7 +568,23 @@ h1, h2 {
 */
 .record {
   position: relative;
-  z-index: -1;
+  /*
+    IN FRONT, AND THE HALL IS WHY.
+
+    This sat at -1 so the column would be in the room with the machine rather than
+    on the glass over it, and while the scene's canvas was transparent everywhere
+    that cost nothing. The floor changed that: it is opaque, so everything behind
+    the canvas BELOW THE HORIZON is simply not drawn. Measured — rows six to ten
+    and the entire provenance paragraph were laid out correctly at y 520 to 817 and
+    rendered invisible, because the horizon crosses this frame at about y 545.
+
+    So the record is a sheet laid over the scene, not an object inside it. That is
+    also the more truthful description of what it is: every other mark on this page
+    is measured FROM the machine, and this is the one surface that is read INSTEAD
+    of it. The depth idea keeps its two real homes — the centrelines and datum in
+    the drawing's room layer, and the closing statement the arm passes through.
+  */
+  z-index: 10;
   /* Wider than the 54ch it started at. The column has to hold one screen, and
      the cheapest line to remove is a WRAPPED one: at 54ch the provenance ran to
      six lines, at 68ch it runs to four, and four lines of 14px text is 40px the
@@ -576,14 +634,23 @@ h1, h2 {
 /* The rule on the left goes with the plate: a marker laid over the words and a
    bracket beside them are two devices saying the same thing, and the plate says
    it louder. */
+/*
+  THE NOTE IS PROSE AGAIN.
+
+  It was set as an orange plate with box-decoration-break: clone, which produced
+  three to five ragged full-width bars of colour — the loudest thing on the page,
+  spent on a disclaimer. It also broke the accent's one job: this palette allows
+  the accent twice per screen and the record was using it for a paragraph.
+
+  The heading keeps its plate. That is the single accent moment on the last
+  screen, and it is on the one line that states the page's whole claim.
+*/
 .note {
-  display: inline;
-  font-size: var(--t-label); line-height: clamp(1.55, 0.22svh, 1.85);
-  color: var(--ground);
-  background: var(--accent);
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
-  padding: 0.16em 0.34em;
+  display: block;
+  font-size: var(--t-body);
+  line-height: var(--lh-body);
+  color: var(--ink-muted);
+  max-width: 58ch;
   margin: 0;
 }
 .note-wrap { margin: 0 0 clamp(var(--s-sm), 3.4svh, var(--s-2xl)); }
@@ -631,7 +698,7 @@ h1, h2 {
 .orbit[data-grabbing] { cursor: grabbing; }
 
 .orbit__hint {
-  font: 500 var(--t-label)/1 var(--face-mono);
+  font: 600 var(--t-label)/1 var(--face-display);
   letter-spacing: var(--tr-label);
   text-transform: uppercase;
   color: var(--ink-dim);
@@ -642,9 +709,35 @@ h1, h2 {
 .orbit:hover .orbit__hint { color: var(--ink-muted); border-color: var(--rule-bright); }
 
 @media (max-width: 767px) {
-  /* On a phone the column already uses the full width, so the surface takes the
-     lower band the table does not reach into. */
-  .orbit { width: 100%; top: auto; height: 26%; }
+  /*
+    THE SURFACE WAS SITTING ON THE TEXT, NOT BESIDE IT.
+
+    "the lower band the table does not reach into" was not true. Measured at
+    390x844: `.orbit` occupied y 624→844 and the provenance y 654→797, so the
+    surface covered the paragraph completely — elementFromPoint at the middle of
+    that paragraph returned `.orbit`, which means the one block of prose carrying
+    the model's licence and attribution could not be selected or read to by
+    anything that hit-tests. The hint chip (x 151→366, y 788→820) also overlapped
+    the colophon (x 24→239, y 801→823): text drawn across text.
+
+    The column is raised above the surface instead of the surface being moved,
+    because on this screen there is nowhere to move it to — the table, the prose
+    and the colophon already fill the viewport. The machine keeps its whole band
+    and still takes a drag anywhere the copy is not.
+  */
+  .orbit { width: 100%; top: auto; height: 26%; z-index: 6; }
+
+  /*
+    INTERIM, and named as one.
+
+    The chip has no free ground on this screen, so it is withdrawn here rather
+    than nudged into a different collision. That costs touch discoverability, and
+    the cost is real — this page's own rule is that a route nobody can find is
+    not a route. Phase 6 recomposes the record so the machine gets a band of its
+    own, and the affordance comes back inside it. Until then a collision between
+    two pieces of live text is the worse of the two failures.
+  */
+  .orbit__hint { display: none; }
 }
 
 /* The still path resolves the scene to one composed frame; a turntable would be
@@ -683,21 +776,59 @@ h1, h2 {
     the frame in every shot, the machine gets the upper two thirds, and the
     scrim below keeps the copy legible over whatever the camera is doing.
   */
+  /*
+    THE TYPE WAS NEVER AT THE FOOT.
+
+    `place-content: end start` was doing nothing at all: `.type` computes to
+    `display: block`, and place-content only applies to a grid or flex container.
+    Measured on #scale at 390x844 — the block sat at y 101→259, in the TOP third,
+    exactly where the desktop `top:` value put it. Every word above about the
+    machine getting the upper two thirds described a layout that did not exist.
+
+    Two obvious fixes are both wrong, and it is worth writing down why.
+
+    Making it a grid and giving it a height to align inside eats the sticky
+    travel the shot budget depends on: at 100svh inside these sections the type
+    would hold for 0–211px and then slide away mid-shot, which is the exact
+    failure the desktop note above warns about.
+
+    Anchoring it with `bottom` does not work either, and this was measured rather
+    than assumed — it put the block at y −534, off the top of the screen. Sticky
+    `bottom` holds an element that would otherwise sit BELOW its anchor; `.type`
+    sits at the start of its section, so by mid-shot its flow position is far
+    above the viewport and there is nothing for a bottom anchor to hold back.
+
+    So the box keeps its content height and its full travel by sticking to the
+    TOP, and it is moved to the foot by a transform, which is a paint-time offset
+    and costs the layout nothing. The percentage resolves against the element's
+    own height, so it lands the same way whatever the statement is.
+  */
   .type {
-    place-content: end start !important;
+    top: 0 !important;
+    transform: translateY(calc(100svh - 100% - var(--s-2xl)));
     text-align: left !important;
-    padding-bottom: var(--s-2xl);
   }
-  /* A scrim that reaches full opacity partway up ends in a visible horizontal
-     line over a transparent ground — U17, and it was drawing a band across the
-     machine. Taller, and easing the whole way, so it has no edge to see. */
+  /*
+    THE SCRIM WAS UPSIDE DOWN.
+
+    It runs `to top`, so it is opaque at its BOTTOM edge — correct for copy at
+    the foot, and it was inset -12svh above / -40svh below a block sitting at the
+    top of the screen. The opaque end therefore landed around y 614 on an empty
+    stretch of floor while the type at y 101 had no scrim under it at all, and
+    the gradient's lower boundary drew the visible horizontal band across the
+    machine that the note below it claims to have removed.
+
+    With the type at the foot the gradient direction is finally right, and the
+    inset is turned over to match: it reaches well ABOVE the copy and only a
+    little below, easing the whole way so it still has no edge to see.
+  */
   .type::before {
     content: '';
     position: absolute;
     /* .type is border-box and full width, so its padding box already reaches
        both viewport edges — inset 0 is enough and a negative margin would put
        the overflow straight back. */
-    inset: -12svh 0 -40svh;
+    inset: -34svh 0 -14svh;
     background: linear-gradient(to top,
       rgb(10 12 13 / 0.94) 0%,
       rgb(10 12 13 / 0.82) 34%,
@@ -706,12 +837,50 @@ h1, h2 {
     z-index: -1;
     pointer-events: none;
   }
-  .shot--impact .type { place-content: end center !important; text-align: center !important; }
   .display { font-size: clamp(3rem, 21vw, 6rem); opacity: 0.22; }
 
   .huge { font-size: clamp(2.5rem, 12vw, 4rem); }
-  .edge { position: static; margin: var(--s-md) 0 0; }
-  .level__label { padding-left: 2.5em; }
+
+  /*
+    THE FRAME'S COPY GOES TO THE HEAD ON A PHONE.
+
+    The type is anchored to the foot here, and the frame also puts its content in
+    its bottom row — so on shot 04 the stat block, its caption and the edge note
+    all landed in the same 150px and drew straight through each other. Measured on
+    the contact sheet: "3 070 MM", "ACROSS, AT FULL SPAN" and "Two closed linkages…"
+    overlapping in one band.
+
+    The frame owns the top of a portrait screen and the type owns the bottom. That
+    is the whole mobile composition, and it is the one rule that keeps them apart.
+  */
+  .frame > * { grid-row: 1; }
+  .frame { padding-top: calc(var(--s-2xl) + var(--s-lg)); align-content: start; }
+  .frame--end { justify-items: end; text-align: right; }
+  .edge { position: static; margin: var(--s-xs) 0 0; max-width: 26ch; }
+
+  /*
+    THE RECORD ARRIVES INTO AIR.
+
+    Its section begins the moment the hero's does not, so on a phone the hero's
+    composed frame had the measurements table already climbing into its lower
+    third — two acts sharing one screen, which is the failure the desktop layout
+    avoids only because it has more room. The lead pushes the first line of the
+    record below the fold of the hero's last frame.
+  */
+  /*
+    16svh, not 46. The lead exists to keep the table out of the hero's last frame,
+    and 46 did that by making the record itself a screen and a half — which put its
+    own heading above the fold and under the fixed masthead at the bottom of the
+    page. The record is allowed to be taller than one screen on a phone; it is not
+    allowed to hide its own first line.
+  */
+  .shot--record { padding-top: 16svh; }
+  /* The note is prose, and prose at 17px on a 390 column is five lines of lead-in
+     before the first measurement. */
+  .note { font-size: var(--t-label); max-width: none; }
+  /* The colophon is absolutely positioned at the foot; the prose has to stop
+     before it rather than run under it. */
+  .provenance { margin-bottom: var(--s-2xl); }
   .plate td, .plate th { font-size: var(--t-label); }
 }
 
@@ -727,10 +896,6 @@ h1, h2 {
 :root[data-reduced] .shot { min-height: auto !important; }
 :root[data-reduced] .shot--impact .type { z-index: 10; }
 :root[data-reduced] .display { opacity: 0.5; }
-:root[data-reduced] .level,
-:root[data-reduced] .level-marks { opacity: 1; }
-:root[data-reduced] .level::before { opacity: 1; }
-:root[data-reduced] .level__label { opacity: 1; }
 :root[data-reduced] .frame { position: static; height: auto; margin-bottom: 0; }
 :root[data-reduced] .shot--record { padding-top: var(--s-3xl); }
 
@@ -749,9 +914,6 @@ h1, h2 {
   .shot--record { padding-top: var(--s-3xl); }
   .shot--impact .type { z-index: 10; }
   .display { opacity: 0.5; }
-  .level, .level-marks { opacity: 1; }
-  .level::before { opacity: 1; }
-  .level__label { opacity: 1; }
 }
 
 
@@ -872,7 +1034,7 @@ h1, h2 {
    14px, which is the floor for functional text and not 3:1. */
 .preload__status {
   margin: 0;
-  font: 500 var(--t-label)/1 var(--face-mono);
+  font: 500 var(--t-label)/1 var(--face-display);
   letter-spacing: var(--tr-label);
   text-transform: uppercase;
   color: var(--ink-dim);
@@ -1032,7 +1194,7 @@ h1, h2 {
   bottom: var(--s-xl);
   z-index: 26;
   margin: 0;
-  font: 500 var(--t-label)/1 var(--face-mono);
+  font: 600 var(--t-label)/1 var(--face-display);
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--accent);
@@ -1048,94 +1210,6 @@ h1, h2 {
    headings are excluded because their parts are already flex items with their
    own baseline relationship, and blockifying them breaks it. */
 h2:not(.stat) .line { display: block; }
-
-
-/* ── leaders ─────────────────────────────────────────────────────────────
-   Three callouts along the scroll, and three is the number: a machine study
-   annotated at every joint stops being a study and becomes a diagram.
-
-   ZERO-HEIGHT STICKY. The pin sticks to the top of the viewport and contributes
-   nothing to the flow, so it can hold across its whole shot without the negative
-   margin that `.frame` uses — the same negative margin that collapsed shot 01 out
-   of the document. A device that has already caused one layout bug is not worth
-   reusing when `height: 0` does the same job with nothing to escape.
-
-   Each label is a rule with a dot at the pointing end: a leader, drawn the way a
-   drawing draws one, rather than a floating caption. --ink-dim on the ground
-   measures 4.5:1 at 14px, which is the floor for functional text and not 3:1. */
-
-.pin {
-  position: sticky;
-  top: 0;
-  height: 0;
-  z-index: 11;
-  pointer-events: none;
-}
-
-.pin__label {
-  position: absolute;
-  top: 28svh;
-  font: 500 var(--t-label)/1 var(--face-mono);
-  letter-spacing: var(--tr-label);
-  text-transform: uppercase;
-  color: var(--ink-dim);
-  white-space: nowrap;
-  padding-bottom: 0.6em;
-  border-bottom: var(--hair) solid var(--rule-bright);
-}
-
-/* The dot is the point of the leader — the end that means "this". */
-.pin__label::after {
-  content: "";
-  position: absolute;
-  bottom: -2px;
-  width: 5px; height: 5px;
-  border-radius: 50%;
-  background: var(--accent);
-}
-
-/* The rear shot's level label already owns its right edge, and two mono
-   uppercase labels stacked sixty pixels apart in one corner are two annotations
-   of the same rank arguing — the leader goes left there. Placement per shot is
-   the composition's, not a default. */
-/*
-  A SCRIM, CONSTRUCTED THE WAY THE LEVEL LABEL'S IS.
-
-  A leader crosses whatever the camera puts behind it, and in the macro shot that
-  is a lit blue-steel linkage: --ink-dim measured legible on the ground and
-  disappeared over the metal. Contrast is fixed at the BACKGROUND layer against
-  the worst region, not hoped for (color I3).
-
-  Not a new device — the same gradient the level label already uses: opaque under
-  the glyphs, faded to nothing before it reaches an edge, so it never draws the
-  hard line a rectangle would over a deliberately transparent ground (U17). It
-  runs away from the label's own anchor, which is why each side has its own. */
-
-.pin--right .pin__label {
-  right: var(--gutter);
-  padding-left: 3.5em;
-  background: linear-gradient(to left, rgb(10 12 13 / 0.92) 62%, rgb(10 12 13 / 0));
-}
-.pin--right .pin__label::after { left: -2px; }
-.pin--left  .pin__label {
-  left: var(--gutter);
-  padding-right: 3.5em;
-  background: linear-gradient(to right, rgb(10 12 13 / 0.92) 62%, rgb(10 12 13 / 0));
-}
-.pin--left  .pin__label::after { right: -2px; }
-
-.pin--mid .pin__label { top: 46svh; }
-.pin--low .pin__label { top: 64svh; }
-
-@media (max-width: 767px) {
-  /* The type sits at the FOOT of the frame on a phone, so the leaders go to the
-     head of it. Moved, never hidden — content parity holds across viewports. */
-  .pin__label,
-  .pin--mid .pin__label,
-  .pin--low .pin__label { top: 15svh; }
-  .pin--right .pin__label { right: var(--gutter); }
-  .pin--left  .pin__label { left: var(--gutter); }
-}
 
 
 /* ── the statistic ───────────────────────────────────────────────────────
@@ -1175,7 +1249,7 @@ h2:not(.stat) .line { display: block; }
 }
 .stat__cap {
   margin: var(--s-sm) 0 0;
-  font: 400 var(--t-label)/1 var(--face-mono);
+  font: 400 var(--t-label)/1 var(--face-body);
   letter-spacing: var(--tr-label);
   text-transform: uppercase;
   color: var(--ink-muted);

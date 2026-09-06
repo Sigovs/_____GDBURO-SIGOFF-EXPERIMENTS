@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'node:path';
+import { readFileSync, existsSync } from 'node:fs';
 
 // assets/ sits outside public/ on purpose: the models there are large, they are
 // referenced through import.meta.glob so the bundler can hash and tree-shake
@@ -7,6 +8,22 @@ import { resolve } from 'node:path';
 // decoders live in public/, because their workers must keep stable paths.
 
 const here = import.meta.dirname;
+
+// THE REGISTER DECIDES WHAT IS BUILT. variants.json is the source of truth for
+// the portal, for the screenshots and now for the build too, so a version is
+// added in exactly ONE place. Each entry's `file` is both the source name under
+// src/ and the published name at the top of this folder — root is src/ and Vite
+// names an output HTML file by its path relative to root, so the two agree with
+// no renaming step to get wrong. An entry whose source is not on disk is skipped
+// rather than failing the build; the portal already renders that case as
+// "missing" instead of linking into a 404.
+const REGISTER = JSON.parse(readFileSync(resolve(here, 'variants.json'), 'utf8'));
+
+const VARIANT_ENTRIES = Object.fromEntries(
+  REGISTER.variants
+    .map((v) => [v.file.replace(/\.html?$/i, ''), resolve(here, 'src', v.file)])
+    .filter(([, path]) => existsSync(path)),
+);
 
 export default defineConfig({
   // ROOT IS src/, AND THAT IS WHAT PUTS THE PAGE AT ITS PUBLISHED NAME.
@@ -47,10 +64,19 @@ export default defineConfig({
     target: 'es2022',
     assetsInlineLimit: 0,
 
-    // assets1/ for index1.html, the numbering every sibling test uses
-    // (_buro test 3 has assets14/ for index14.html, assets20/ for index20.html).
-    // It also keeps the build clear of this project's own assets/ folder, which
-    // holds the CAD source and the model ledger and is not build output.
+    // assets1/ HOLDS THE CHUNKS FOR EVERY VERSION, NOT ONLY index1.html's.
+    //
+    // The per-page numbering (_buro test 3 has assets14/ for index14.html) exists
+    // so two versions built at DIFFERENT TIMES cannot overwrite each other's
+    // chunks. Here they are built in the SAME pass — every registered version is
+    // an input below — so Rollup hashes them into one folder and the pages share
+    // three.js, the decoders and the model instead of carrying a copy each. Four
+    // separate builds would have put about 9 MB of identical bytes into this
+    // repository under four names.
+    //
+    // The name stays assets1: it is the folder already published, and it still
+    // keeps the build clear of this project's own assets/, which holds the CAD
+    // source and the model ledger and is not build output.
     assetsDir: process.env.VITE_ASSETS_DIR || 'assets1',
 
     rollupOptions: {
@@ -63,9 +89,9 @@ export default defineConfig({
       // provenance and do-not-ship. A build that quietly publishes an asset the
       // ledger says not to publish is the ledger not working.
       input: process.env.GITHUB_PAGES
-        ? { index1: resolve(here, 'src/index1.html') }
+        ? VARIANT_ENTRIES
         : {
-            index1: resolve(here, 'src/index1.html'),
+            ...VARIANT_ENTRIES,
             lab: resolve(here, 'src/lab/index.html'),
             shots: resolve(here, 'src/lab/shots.html'),
             rig: resolve(here, 'src/lab/rig.html'),

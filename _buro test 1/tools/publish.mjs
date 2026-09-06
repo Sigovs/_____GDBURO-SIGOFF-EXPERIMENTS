@@ -15,6 +15,14 @@
 // the portal. Committing it is a normal commit. There is no branch to force, no
 // second remote, and nothing that can orphan a folder.
 //
+// IT PUBLISHES THE WHOLE REGISTER, NOT ONLY THE CURRENT ONE. This used to build
+// just the entry marked "current", which is right when a version supersedes the
+// one before it and wrong when versions stand BESIDE each other — three
+// directions off one page, all four meant to be opened and compared. Building
+// one at a time also meant one assets folder per version and four copies of
+// three.js. One pass over every registered version emits every page into a
+// single hashed folder, and the pages share what they have in common.
+//
 // WHY THE COPY AND NOT A BUILD STRAIGHT TO THE ROOT. dist/ is emptied on every
 // build. Pointed at the project root that would delete the source it was built
 // from, which is a thing you get to do exactly once.
@@ -27,24 +35,30 @@ const ROOT = resolve(import.meta.dirname, '..');
 const DIST = join(ROOT, 'dist');
 
 const REGISTER = JSON.parse(readFileSync(join(ROOT, 'variants.json'), 'utf8'));
-const current = REGISTER.variants.find((v) => v.status === 'current') || REGISTER.variants[0];
 
-if (!current) {
-  console.error('\n  variants.json lists no version to publish.\n');
+// A registered version with no source under src/ is skipped rather than failing
+// the run, and the portal renders it as "missing" — which is the honest reading:
+// the register says the version exists, the disk says it has not been written.
+const publishing = REGISTER.variants.filter((v) => existsSync(join(ROOT, 'src', v.file)));
+const unbuilt = REGISTER.variants.filter((v) => !publishing.includes(v));
+
+if (!publishing.length) {
+  console.error('\n  variants.json lists no version whose source is on disk.\n');
   process.exit(1);
 }
 
-// index1.html -> assets1. The assets folder is named for its page, so two
-// versions in one folder cannot overwrite each other's chunks — the naming
-// _buro test 3 already uses (index14.html beside assets14/).
-const stem = current.file.replace(/\.html?$/i, '');
-const assetsDir = stem.replace(/^index/, 'assets') || 'assets';
+// ONE hashed folder for all of them — the note on assetsDir in vite.config.js
+// says why the per-page numbering does not apply to a single build pass.
+const assetsDir = process.env.VITE_ASSETS_DIR || 'assets1';
 
 // npm is npm.cmd on Windows and current Node refuses to spawn it without a
 // shell, so Vite's own entry is called through this same node binary instead.
 const VITE = join(ROOT, 'node_modules', 'vite', 'bin', 'vite.js');
 
-console.log(`\n  building ${current.file}  ->  ${assetsDir}/\n`);
+console.log(`\n  building ${publishing.length} version(s)  ->  ${assetsDir}/`);
+for (const v of publishing) console.log(`    ${v.file}`);
+for (const v of unbuilt) console.log(`    ${v.file}  — no src/${v.file}, skipped`);
+console.log('');
 execFileSync(process.execPath, [VITE, 'build'], {
   cwd: ROOT,
   stdio: 'inherit',
@@ -54,13 +68,16 @@ execFileSync(process.execPath, [VITE, 'build'], {
   env: { ...process.env, GITHUB_PAGES: '1', VITE_ASSETS_DIR: assetsDir },
 });
 
-const built = join(DIST, current.file);
-if (!existsSync(built)) {
-  console.error(`\n  build produced no ${current.file} — nothing copied.\n`);
+// NOTHING is copied until every page asked for came out of the build. A partial
+// copy leaves the folder holding some new pages and some stale ones, all pointing
+// at one freshly rehashed assets folder — that is a set of 404s, not a version.
+const missing = publishing.filter((v) => !existsSync(join(DIST, v.file)));
+if (missing.length) {
+  console.error(`\n  build produced no ${missing.map((v) => v.file).join(', ')} — nothing copied.\n`);
   process.exit(1);
 }
 
-for (const item of [current.file, assetsDir, 'decoders']) {
+for (const item of [...publishing.map((v) => v.file), assetsDir, 'decoders']) {
   const from = join(DIST, item);
   if (!existsSync(from)) continue;
   rmSync(join(ROOT, item), { recursive: true, force: true });

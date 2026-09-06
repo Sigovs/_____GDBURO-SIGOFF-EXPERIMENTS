@@ -1,0 +1,217 @@
+/*
+  Variant base — shared by directions A, B and C.
+  Each direction adds its own sheet on top; nothing here decides composition.
+*/
+
+@font-face {
+  font-family: "Archivo";
+  src: url("../fonts/archivo-var.woff2") format("woff2-variations");
+  font-weight: 400 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("../fonts/ibm-plex-mono-400.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("../fonts/ibm-plex-mono-500.woff2") format("woff2");
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+
+:root {
+  --ground: #0a0c0d;
+  --ink: #f2f4f5;
+  --ink-muted: #9aa3a7;
+  --ink-dim: #7d868a;
+  --accent: #f2903f;
+  --ink-rgb: 242 244 245;
+  --accent-rgb: 242 144 63;
+  --rule: #23282b;
+  --hair: 1px;
+
+  --display: "Archivo", "Helvetica Neue", Helvetica, system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+
+  --gutter: clamp(1.5rem, 5vw, 6rem);
+  --d-base: 450ms;
+  --d-slow: 800ms;
+  --e-enter: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--display);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+::selection { background: var(--accent); color: var(--ground); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
+}
+.skip {
+  position: absolute; left: var(--gutter); top: 1rem; z-index: 100;
+  transform: translateY(-200%);
+  background: var(--ink); color: var(--ground);
+  padding: 0.5rem 1rem;
+  font: 600 14px/1 var(--display); text-decoration: none;
+}
+.skip:focus-visible { transform: none; }
+
+/* ── the stage ───────────────────────────────────────────────────────────── */
+.stage { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+.stage canvas { display: block; width: 100%; height: 100%; }
+
+.masthead {
+  position: fixed; top: 1.5rem; left: 0; right: 0;
+  padding-inline: var(--gutter);
+  z-index: 30;
+  display: flex; justify-content: space-between; align-items: baseline;
+  pointer-events: none;
+}
+.wordmark { font: 700 14px/1 var(--display); letter-spacing: 0.11em; text-transform: uppercase; }
+.masthead__meta { font: 500 13px/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); }
+.readout {
+  position: fixed; top: 3.6rem; right: var(--gutter); z-index: 30;
+  font: 500 13px/1 var(--mono); letter-spacing: 0.1em;
+  color: var(--ink-dim); font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+main { position: relative; }
+.beat { position: relative; display: flow-root; }
+
+/* ══ CALLOUTS ════════════════════════════════════════════════════════════
+   The technical annotation language, at poster scale. Everything here is
+   deliberately large: this is a primary visual feature of the page, not a
+   detail you have to look for. */
+
+.co {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 9;
+  transition: opacity var(--d-base) var(--e-enter);
+}
+.co__g {
+  opacity: 0;
+  transition: opacity 620ms var(--e-enter);
+}
+
+/* the leader: 2px, one oblique run, one horizontal landing */
+.co__lead {
+  fill: none;
+  stroke: rgb(var(--ink-rgb) / 0.85);
+  stroke-width: 1.6;
+  vector-effect: non-scaling-stroke;
+}
+.co__dot { fill: var(--accent); }
+
+/* the plate: a numbered marker, a label, a measured value under a rule */
+.co__box {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.6;
+}
+.co__num {
+  fill: var(--accent);
+  font: 600 19px/1 var(--mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+.co__label {
+  fill: var(--ink);
+  font: 600 23px/1 var(--display);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+.co__value {
+  fill: var(--ink-muted);
+  font: 500 17px/1 var(--mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.05em;
+}
+.co__rule {
+  stroke: rgb(var(--ink-rgb) / 0.34);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+/*
+  THE INTRO.
+
+  Two rules and nothing else: hold the page at the top while the intro plays, and
+  STRIKE the first callout on rather than fade it. The leader is drawn from the
+  pivot outward, the marker snaps, then the label and its value land — the order
+  a draughtsman would work in, and the reason the callout reads as an act of
+  measurement instead of an element that appeared.
+*/
+:root[data-intro] { overflow: hidden; }
+:root[data-intro] body { overflow: hidden; }
+
+.co { --draw: 1; }
+.co--drawing .co__g { transition: none; }
+.co--drawing .co__lead {
+  stroke-dasharray: 1800;
+  stroke-dashoffset: calc(1800px * (1 - var(--draw)));
+}
+.co--drawing .co__dot { opacity: clamp(0, var(--draw) * 9, 1); }
+.co--drawing .co__box,
+.co--drawing .co__num { opacity: clamp(0, (var(--draw) - 0.52) * 5, 1); }
+.co--drawing .co__label,
+.co--drawing .co__value,
+.co--drawing .co__rule { opacity: clamp(0, (var(--draw) - 0.68) * 5, 1); }
+
+/* ── the record ──────────────────────────────────────────────────────────── */
+.record { position: relative; z-index: 10; max-width: 70ch; }
+.record__head { margin: 0 0 1.4rem; font-weight: 600; letter-spacing: -0.02em; }
+.record__head .plate-on { background: var(--accent); color: var(--ground); padding: 0.06em 0.3em 0.12em; }
+.note { font: 400 17px/1.6 var(--display); color: var(--ink-muted); max-width: 58ch; margin: 0 0 2.4rem; }
+.plate { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 2rem; }
+.plate tr { border-top: var(--hair) solid var(--rule); }
+.plate tr:last-child { border-bottom: var(--hair) solid var(--rule); }
+.plate th { text-align: left; font-weight: 400; color: var(--ink-muted); padding: 0.55rem 0; font-family: var(--display); }
+.plate td { text-align: right; color: var(--ink); padding: 0.55rem 0; white-space: nowrap; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.provenance { font: 400 14px/1.5 var(--display); color: var(--ink-muted); margin: 0; max-width: 62ch; }
+.provenance code { font-family: var(--mono); font-size: 0.92em; color: var(--ink); }
+.provenance em { color: var(--ink); font-style: normal; }
+
+.orbit {
+  position: absolute; top: 0; right: 0; bottom: 0; width: 44%;
+  z-index: 6; cursor: grab; touch-action: pan-y;
+  display: grid; align-content: end; justify-items: end; padding: var(--gutter);
+}
+.orbit[data-grabbing] { cursor: grabbing; }
+.orbit__hint {
+  font: 600 13px/1 var(--display); letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ink-dim); border: var(--hair) solid var(--rule); padding: 0.6em 1em;
+}
+.colophon { position: absolute; left: var(--gutter); bottom: 1.5rem; z-index: 10; margin: 0; }
+.colophon p { margin: 0; font-size: 14px; color: var(--ink-muted); }
+
+/* ── reduced motion is an authored still ─────────────────────────────────── */
+:root[data-reduced] *, :root[data-reduced] *::before, :root[data-reduced] *::after,
+.reduced-guard { }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .beat { min-height: auto !important; }
+  .beat .type { position: static !important; padding-block: 5rem; }
+  .co__g { opacity: 1; }
+}
+:root[data-reduced] .beat { min-height: auto !important; }
+:root[data-reduced] .beat .type { position: static !important; padding-block: 5rem; }
+:root[data-reduced] .orbit { display: none; }
+:root[data-reduced] .co__g { opacity: 1; }

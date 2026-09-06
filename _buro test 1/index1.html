@@ -5,9 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>KR 700 PA — engineered in motion · Buro Lab</title>
 <meta name="description" content="A KUKA KR 700 PA palletiser, reconstructed from a 107-solid CAD file and re-articulated on its real hinge centres. Its arm sweeps three metres and its tool plate never tilts.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Crect width=%2716%27 height=%2716%27 fill=%27%230a0c0d%27/%3E%3Crect x=%271%27 y=%277.5%27 width=%2714%27 height=%271%27 fill=%27%23f2903f%27/%3E%3C/svg%3E">
-  <script type="module" crossorigin src="./assets1/index1-OvWmICXt.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets1/index1-BKVJ7AwF.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Crect width=%2716%27 height=%2716%27 fill=%27%230a0c0d%27/%3E%3Crect x=%271%27 y=%277.5%27 width=%2714%27 height=%271%27 fill=%27%23f2903f%27/%3E%3C/svg%3E">
+  <script type="module" crossorigin src="./assets1/index1-D8-ypePf.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets1/kr700pa-rig2-v8O1xihs.js">
+  <link rel="stylesheet" crossorigin href="./assets1/index1-CmRCo_Xi.css">
 </head>
 <body>
 
@@ -27,64 +28,25 @@
   <span class="masthead__meta">Machine study 01</span>
 </header>
 
-<!--
-  One backdrop for the whole page. Fixed, so it does not scroll: the machine
-  travels and the page travels, and the field they travel in does not. Dimmed at
-  the palette rather than with a filter — see src/site/backdrop.js.
-
-  It is the LAST thing in the stack and the first thing painted, and it is
-  decoration: nothing is said here that is not also said in the document.
--->
-<canvas class="backdrop" id="backdrop" aria-hidden="true"></canvas>
 
 <!--
-  THE RULE. It lives in the room, not on the glass: the datum passes through the
-  hall at the height of the tool plate, so the machine stands IN FRONT of it. It
-  sits below the stage in the stacking order, and the stage's canvas is
-  transparent, so the arm occludes it exactly the way the arm occludes anything
-  else at that depth.
+  THE READOUT. Real camera state, printed: azimuth around the machine and the
+  distance the lens is standing at, read off the camera every frame rather than
+  mirrored from the station table — so if the two ever disagree, this tells the
+  truth about what is on screen.
 
-  A datum drawn over the top of the machine is a line on a screenshot. A datum
-  the machine passes in front of is a line in the room, and only one of those is
-  a measurement of the thing.
+  The four corner registrations that used to sit with it are gone. They were the
+  only marks on the page that measured nothing.
 -->
-<div class="level" data-level hidden aria-hidden="true"></div>
+<div class="marks" aria-hidden="true">
+  <span class="marks__readout" data-readout></span>
+</div>
 
 <div class="stage" aria-hidden="true">
   <canvas id="scene"></canvas>
 </div>
 
-<!--
-  THE MARKS. Annotation, and annotation is on the glass. The contact point could
-  not go behind: it sits at the centre of the tool plate, which is inside the
-  machine's own geometry, so behind the machine it would be permanently
-  invisible — and it is the one place on the line where anything is being read.
--->
-<!--
-  THE INSTRUMENT LAYER.
 
-  Four corner registrations and one readout. This is the "industrial" pass, and
-  it is deliberately four hairlines and eight words rather than a scatter of
-  technical-looking ornament: a machine study earns this language only while
-  everything in it is a real measurement. The readout prints the camera's actual
-  azimuth and its actual distance from the machine, updated from the rig — a
-  decorative fake readout on THIS page would be the one dishonest mark on it (CP1).
-
-  Decoration to assistive tech, like the canvas: nothing is said here that the
-  document does not already say.
--->
-<div class="marks" aria-hidden="true">
-  <span class="marks__tick marks__tick--tl"></span>
-  <span class="marks__tick marks__tick--tr"></span>
-  <span class="marks__tick marks__tick--bl"></span>
-  <span class="marks__tick marks__tick--br"></span>
-  <span class="marks__readout" data-readout></span>
-</div>
-
-<div class="level-marks" data-level-marks hidden aria-hidden="true">
-  <span class="level__node"></span>
-  <span class="level__label">Tool plate &middot; 0.000&deg;</span>
-</div>
 
 <!--
   The wait, and only the wait.
@@ -179,9 +141,6 @@
       carries, so nothing is claimed here that is not already in the ledger.
       Decoration to assistive tech: every one of these numbers is in the table.
     -->
-    <div class="pin pin--left" aria-hidden="true">
-      <span class="pin__label">Closed loops &middot; 2</span>
-    </div>
     <div class="type type--rear">
       <h2>Four axes.<br>One motion.</h2>
     </div>
@@ -189,9 +148,6 @@
 
   <!-- 04 ABOVE — high angle down the boom while the tool comes round. -->
   <section class="shot shot--above" id="above" data-shot="4">
-    <div class="pin pin--right pin--low" aria-hidden="true">
-      <span class="pin__label">Driven axes &middot; 4</span>
-    </div>
     <div class="frame frame--start">
       <p class="edge">Two closed linkages. The plate holds flat while the arm drives.</p>
     </div>
@@ -203,9 +159,6 @@
 
   <!-- 05 MACRO — one joint. The machine leaves the frame entirely. -->
   <section class="shot shot--macro" id="macro" data-shot="5">
-    <div class="pin pin--right pin--mid" aria-hidden="true">
-      <span class="pin__label">Linkage &middot; 3 &times; 1 300 mm</span>
-    </div>
     <div class="type type--macro">
       <h2>Precision<br>is mechanical.</h2>
     </div>
@@ -278,6 +231,6 @@
   </section>
 
 </main>
-
+
 </body>
 </html>

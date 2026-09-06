@@ -88,11 +88,22 @@ for (const v of variants) {
       return max - min > 6;
     }, null, { timeout: 30000 }).catch(() => process.stdout.write('[flat canvas] '));
 
-    // Scroll to the frame worth showing, then let the damped camera settle.
-    await page.evaluate((f) => {
-      const h = document.body.scrollHeight - window.innerHeight;
-      window.scrollTo({ top: h * f, behavior: 'instant' });
-    }, v.scroll ?? 0.82);
+    // TRAVEL TO THE FRAME, DO NOT TELEPORT TO IT. A single jump from 0 to the
+    // target lands at the right scroll position with the WRONG page on screen:
+    // the reveals between here and there never fired, the smooth scroller never
+    // saw the intermediate positions, and the shot comes back as a bare machine
+    // on an empty field — which is not what a visitor scrolling to that point
+    // sees. Stepping through gives every trigger in between its turn.
+    const target = v.scroll ?? 0.82;
+    const STEPS = 24;
+    for (let i = 1; i <= STEPS; i++) {
+      await page.evaluate((f) => {
+        const h = document.body.scrollHeight - window.innerHeight;
+        window.scrollTo({ top: h * f, behavior: 'instant' });
+      }, (target * i) / STEPS);
+      await page.waitForTimeout(90);
+    }
+    // Then let the damped camera and the last reveal settle.
     await page.waitForTimeout(2800);
 
     await page.screenshot({

@@ -42,6 +42,16 @@ export function previewFor(root, file) {
  * @param {string}  opts.repoRoot  where the template lives
  * @param {Function} opts.isLive   (variant) => boolean — is the file actually there
  */
+// The next indexN.html nobody has taken — the footer used to say "index2.html"
+// flat, which stopped being an instruction and became a collision the moment a
+// second version existed.
+function nextName(register) {
+  const taken = new Set(register.variants.map((v) => Number((/^index(\d+)\.html?$/i.exec(v.file) || [])[1])));
+  let n = 1;
+  while (taken.has(n)) n++;
+  return `index${n}.html`;
+}
+
 export function buildHub(register, { root, repoRoot = root, isLive }) {
   const cards = register.variants.map((v) => {
     const live = isLive(v);
@@ -98,7 +108,7 @@ ${links}
     .replace('{{BUILT}}', new Date().toISOString().slice(0, 10))
     .replace('{{REPO}}', esc(register.repo))
     .replace('{{FOOT}}', `<p>This page is generated. The source of the current version is <code>src/index1.html</code>; run it with <code>npm run dev</code> and publish it with <code>npm run publish</code>.</p>
-    <p>New version: <code>npm run new-variant -- index2.html "Name" "note"</code></p>
+    <p>New version: <code>npm run new-variant -- ${nextName(register)} "Name" "note"</code></p>
     <p>Then: <code>npm run shoot</code> · <code>npm run hub</code></p>`)
     .replace('{{PROBE}}', '');
 }

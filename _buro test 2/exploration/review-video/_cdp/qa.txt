@@ -6,14 +6,14 @@ DATA
   per building         01:12(2A/10B)  02:26(4A/22B)  03:13(2A/11B)  04:6(2A/4B)  05:6(2A/4B)  06:9(2A/7B)  07:9(2A/7B)  08:6(2A/4B)  09:8(2A/6B)  10:16(4A/12B)  11:10(2A/8B)
 
 LIVE POINTS — projected from each building own pick proxy, then confirmed with a real pointer
-  01  at 526,527
-  02  at 378,485
+  01  at 527,527
+  02  at 379,486
   03  at 301,457
   04  at 601,360
-  05  at 616,395
-  06  at 734,409
+  05  at 617,396
+  06  at 735,410
   07  at 846,240
-  08  at 976,245
+  08  at 976,246
   09  at 1137,278
   10  at 1109,300
   11  at 1255,330
@@ -37,5 +37,11 @@ HOVER TRANSFER — straight from one building to another, no rest in between
 
 RANDOM RUN — 30 selections in arbitrary order
   ---> 30/30 correct
+
+SUITE RAIL — hover a bay, press it, and check you got the one you pointed at
+  building 01, 12 bays
+  ---> available: 10/10 selected the bay pointed at
+  ---> sold:      2/2 correctly refused selection
+  mini-bay widths: premium 35px, standard 27px, ratio 1.296  (the built ratio is 30/23 = 1.304)
 
 CONSOLE ERRORS: none

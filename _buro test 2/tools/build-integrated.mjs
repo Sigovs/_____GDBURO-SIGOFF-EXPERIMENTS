@@ -36,8 +36,16 @@ const OUT = path.join(OUT_DIR, 'v5-full-site.html')
 
 let html = fs.readFileSync(SRC, 'utf8')
 
-/* --- 1. paths ------------------------------------------------------------------- */
-html = html.replace(/(["'(])\.\//g, '$1/')
+/* --- 1. paths -------------------------------------------------------------------
+   Every ./ that names a real top-level directory becomes /. It has to be all of them,
+   not only the ones that follow a quote: a srcset is a COMMA-SEPARATED list, so a first
+   pass that anchored on the opening quote rewrote candidate one and left candidates two
+   through four pointing at /exploration/integrated/assets/. The browser then picked one
+   of the survivors, reported complete=true with naturalWidth 0, and every photograph on
+   the page was silently missing while the markup looked correct. */
+const DIRS = ['assets', 'src', 'models', 'draco', 'exploration', 'public']
+html = html.replace(new RegExp('\\./(' + DIRS.join('|') + ')/', 'g'), '/$1/')
+const leftover = (html.match(/\.\//g) || []).length
 
 /* --- 2. act 02 ------------------------------------------------------------------- */
 const open = html.indexOf('<section class="act" id="act-02"')
@@ -82,6 +90,11 @@ html = html.replace('<link rel="stylesheet" href="/src/site/index.css">',
      owns the whole viewport, which is what a pinned interactive act needs and what the
      production act 02 already asks for with data-pin. */
   .v5-host{position:relative;height:100vh;width:100%;background:#060708}
+  /* The page already has a persistent header carrying the mark and the location, so the
+     interface's own standalone mark would be the same words twice on the same screen. */
+  .v5-host .mark{display:none}
+  /* The site header sits above act 02's own controls. */
+  .v5 .nav{top:70px}
 </style>`)
 
 html = html.replace('<script type="module" src="/src/site/main.js"></script>',

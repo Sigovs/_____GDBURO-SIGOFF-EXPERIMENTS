@@ -1,0 +1,47 @@
+PAGE: http://localhost:5183/exploration/integrated/v5-full-site.html
+  document height   14060
+  acts in the DOM   00 01 02 03 04 05 06 07
+  images            13 in markup, 2 loaded
+  video elements    0
+  scroll triggers   (not exposed)
+
+SCROLLING DOWN with a real wheel, 40 notches at a time
+   reached act 02 at scrollY 2400
+   reached act 03 at scrollY 4800
+   reached act 04 at scrollY 7200
+   reached act 05 at scrollY 9600
+   reached act 06 at scrollY 12000
+   reached act 07 at scrollY 13160
+   bottom reached    scrollY 13160 of 13160   OK
+   acts passed       02 03 04 05 06 07
+
+SCROLLING BACK UP
+   top reached       scrollY 0   OK
+
+ACT 02 INSIDE THE PAGE
+   the stage         {"x":0,"y":0,"w":1425,"h":900}
+   01   hover+click PASS
+   02   hover+click PASS
+   03   hover+click PASS
+   04   hover+click PASS
+   05   hover+click PASS
+   06   hover+click PASS
+   07   hover+click PASS
+   08   hover+click PASS
+   09   hover+click PASS
+   10   hover+click PASS
+   11   hover+click PASS
+   ---> 11/11 selectable inside the real page
+
+THE JOURNEY
+   suite hover        03 · 05
+   suite selected     03 · 05
+   ENTER             257x89 at 1214,782
+   after ENTER       entered=true  level=suite
+   site plan         {"rect":[1425,900],"viewBox":"-94.38800277709962 -91.04800262451172 1221.1760375976562 597.3460205078125","coversAt700x500":true}
+   escape from plan  state before "suite 03 · 05"  after "suite 03 · 05"  PRESERVED
+   wheel after use   scrollY 2160 -> 5360   PAGE STILL SCROLLS
+   wheel over model  scrollY 3060 -> 6260   passes through
+   element at 720,300 DIV.act__grid
+
+CONSOLE ERRORS: none

@@ -93,10 +93,23 @@
 .v5 .nav .ctx:hover{background:var(--ink-16);border-color:var(--ink-55);color:var(--ink)}
 
 /* ---- THE DECISION DOCK ----------------------------------------------------------------- */
+/* THE DOCK'S COLUMNS ARE FIXED, AND THIS IS NOT A STYLING PREFERENCE.
+
+   They were auto-sized to their content. Hovering a bay writes the suite's number and
+   type into the left cell, which is longer than "Choose a suite.", so the left column
+   GREW and the whole row of bays slid sideways under the pointer. Measured: pointing at
+   suite 05 and pressing selected a different bay — sometimes a sold one, which silently
+   does nothing at all, because a disabled button takes pointer events and issues no
+   click. That is the suite-level twin of the picking bug this pass was called to fix,
+   and no amount of care with the mouse can beat a control that moves as you reach it.
+
+   Fixed tracks per level. A LEVEL change re-renders the row anyway, so the width may
+   change there; nothing inside a level may move. */
 .v5 .dock{position:absolute;z-index:7;bottom:var(--s6);left:var(--s7);right:var(--s7);
   background:linear-gradient(to bottom,rgb(13 16 20/.97),rgb(9 11 14/.97));
   border:1px solid var(--ink-24);backdrop-filter:blur(8px);
-  display:grid;grid-template-columns:minmax(190px,auto) 1fr auto;align-items:stretch}
+  display:grid;grid-template-columns:248px 1fr 360px;align-items:stretch}
+.v5 .dock[data-level='suite']{grid-template-columns:248px 1fr 556px}
 .v5 .dock[data-level='compound']{right:auto;grid-template-columns:auto}
 .v5 .dock::before{content:'';position:absolute;left:-1px;top:-1px;bottom:-1px;width:3px;background:var(--red)}
 .v5 .cell{padding:var(--s4) var(--s5);min-width:0}
@@ -130,32 +143,32 @@
 .v5 .bayhead i.s::before{background:none;border:1px solid var(--ink-16)}
 .v5 .bays{display:flex;align-items:flex-end;gap:2px;overflow-x:auto;overflow-y:visible;padding-top:26px;scrollbar-width:none}
 .v5 .bays::-webkit-scrollbar{height:0}
-.v5 .bay{appearance:none;flex:0 0 auto;padding:0;position:relative;cursor:pointer;height:52px;
+.v5 .v5-bay{appearance:none;flex:0 0 auto;padding:0;position:relative;cursor:pointer;height:52px;
   background:var(--steel-14);border:0;border-top:2px solid var(--steel-55);
   transition:background-color .16s var(--ease),border-color .16s var(--ease)}
 /* the glazed upper panel */
-.v5 .bay::before{content:'';position:absolute;left:2px;right:2px;top:5px;height:9px;background:var(--steel-30);
+.v5 .v5-bay::before{content:'';position:absolute;left:2px;right:2px;top:5px;height:9px;background:var(--steel-30);
   transition:background-color .16s var(--ease)}
 /* the door leaf, with its own segment lines */
-.v5 .bay::after{content:'';position:absolute;left:2px;right:2px;top:17px;bottom:4px;
+.v5 .v5-bay::after{content:'';position:absolute;left:2px;right:2px;top:17px;bottom:4px;
   background:repeating-linear-gradient(to bottom,var(--steel-30) 0 6px,rgb(0 0 0/.30) 6px 7px);
   transition:background .16s var(--ease)}
-.v5 .bay[data-type='A']{border-top-color:var(--sand-70)}
-.v5 .bay:hover,.v5 .bay[data-hot='true']{background:var(--sand-14);border-top-color:var(--sand)}
-.v5 .bay:hover::before,.v5 .bay[data-hot='true']::before{background:var(--sand)}
-.v5 .bay:hover::after,.v5 .bay[data-hot='true']::after{background:repeating-linear-gradient(to bottom,var(--sand-70) 0 6px,rgb(0 0 0/.32) 6px 7px)}
-.v5 .bay[data-sold='true']{cursor:not-allowed;background:none;border-top-color:var(--ink-16)}
-.v5 .bay[data-sold='true']::before{background:var(--ink-10)}
-.v5 .bay[data-sold='true']::after{background:repeating-linear-gradient(135deg,var(--ink-10) 0 3px,transparent 3px 7px)}
-.v5 .bay[aria-pressed='true']{background:var(--red-16);border-top-color:var(--red)}
-.v5 .bay[aria-pressed='true']::before{background:#fff}
-.v5 .bay[aria-pressed='true']::after{background:repeating-linear-gradient(to bottom,var(--red) 0 6px,rgb(0 0 0/.34) 6px 7px)}
-.v5 .bay__t{position:absolute;left:50%;top:-24px;transform:translateX(-50%);white-space:nowrap;opacity:0;pointer-events:none;
+.v5 .v5-bay[data-type='A']{border-top-color:var(--sand-70)}
+.v5 .v5-bay:hover,.v5 .v5-bay[data-hot='true']{background:var(--sand-14);border-top-color:var(--sand)}
+.v5 .v5-bay:hover::before,.v5 .v5-bay[data-hot='true']::before{background:var(--sand)}
+.v5 .v5-bay:hover::after,.v5 .v5-bay[data-hot='true']::after{background:repeating-linear-gradient(to bottom,var(--sand-70) 0 6px,rgb(0 0 0/.32) 6px 7px)}
+.v5 .v5-bay[data-sold='true']{cursor:not-allowed;background:none;border-top-color:var(--ink-16)}
+.v5 .v5-bay[data-sold='true']::before{background:var(--ink-10)}
+.v5 .v5-bay[data-sold='true']::after{background:repeating-linear-gradient(135deg,var(--ink-10) 0 3px,transparent 3px 7px)}
+.v5 .v5-bay[aria-pressed='true']{background:var(--red-16);border-top-color:var(--red)}
+.v5 .v5-bay[aria-pressed='true']::before{background:#fff}
+.v5 .v5-bay[aria-pressed='true']::after{background:repeating-linear-gradient(to bottom,var(--red) 0 6px,rgb(0 0 0/.34) 6px 7px)}
+.v5 .v5-bay__t{position:absolute;left:0;top:-24px;white-space:nowrap;opacity:0;pointer-events:none;
   font-family:var(--mono);font-size:14px;font-weight:500;color:var(--void);background:var(--sand);
   padding:2px 7px 1px;transition:opacity .13s var(--ease)}
-.v5 .bay:hover .bay__t,.v5 .bay[data-hot='true'] .bay__t{opacity:1}
-.v5 .bay[aria-pressed='true'] .bay__t{opacity:1;color:#fff;background:var(--red)}
-.v5 .bay[data-sold='true'] .bay__t{background:var(--ink-24);color:var(--ink)}
+.v5 .v5-bay:hover .bay__t,.v5 .v5-bay[data-hot='true'] .bay__t{opacity:1}
+.v5 .v5-bay[aria-pressed='true'] .bay__t{opacity:1;color:#fff;background:var(--red)}
+.v5 .v5-bay[data-sold='true'] .bay__t{background:var(--ink-24);color:var(--ink)}
 
 /* ---- THE RIGHT CELL: the product, and the next action --------------------------------- */
 .v5 .right{display:flex;align-items:center;gap:var(--s5);padding:var(--s4) var(--s5)}
@@ -168,15 +181,15 @@
 .v5 .next .v{font-size:18px;font-weight:600;letter-spacing:-.01em;white-space:normal}
 .v5 .next .a{font-size:15px;color:var(--ink-55);white-space:normal}
 /* ENTER — rectangular, architectural, and the only saturated surface on the screen */
-.v5 .enter{appearance:none;cursor:pointer;display:grid;grid-template-columns:auto 56px;align-items:stretch;
+.v5 .v5-enter{appearance:none;cursor:pointer;display:grid;grid-template-columns:auto 56px;align-items:stretch;
   border:0;padding:0;font:inherit;background:var(--red);color:#fff;
   box-shadow:0 0 0 1px var(--red-40),0 14px 34px rgb(216 69 60/.20);
   transition:filter .18s var(--ease),box-shadow .18s var(--ease)}
-.v5 .enter:hover{filter:brightness(1.1);box-shadow:0 0 0 1px var(--red),0 16px 40px rgb(216 69 60/.32)}
-.v5 .enter:active{filter:brightness(.96)}
-.v5 .enter .t{padding:17px var(--s5) 16px;text-align:left;font-size:19px;font-weight:600;letter-spacing:-.005em}
-.v5 .enter .t i{display:block;font-style:normal;font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;opacity:.76;margin-bottom:3px}
-.v5 .enter .a{display:flex;align-items:center;justify-content:center;font-size:22px;border-left:1px solid rgb(255 255 255/.28)}
+.v5 .v5-enter:hover{filter:brightness(1.1);box-shadow:0 0 0 1px var(--red),0 16px 40px rgb(216 69 60/.32)}
+.v5 .v5-enter:active{filter:brightness(.96)}
+.v5 .v5-enter .t{padding:17px var(--s5) 16px;text-align:left;font-size:19px;font-weight:600;letter-spacing:-.005em;white-space:nowrap}
+.v5 .v5-enter .t i{display:block;font-style:normal;font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;opacity:.76;margin-bottom:3px}
+.v5 .v5-enter .a{display:flex;align-items:center;justify-content:center;font-size:22px;border-left:1px solid rgb(255 255 255/.28)}
 
 /* ---- SITE PLAN -------------------------------------------------------------------------- */
 .v5.plan{position:fixed;inset:0;z-index:30;background:var(--panel2);display:grid;grid-template-rows:auto 1fr}
@@ -215,6 +228,6 @@
 /* a short stage keeps the dock and the model apart at laptop heights */
 @media (max-height:880px){
   .v5 .dock{bottom:var(--s5);left:var(--s6);right:var(--s6)}
-  .v5 .who__f{font-size:31px} .v5 .bay{height:46px} .v5 .enter .t{padding:14px var(--s5) 13px;font-size:18px}
+  .v5 .who__f{font-size:31px} .v5 .v5-bay{height:46px} .v5 .v5-enter .t{padding:14px var(--s5) 13px;font-size:18px}
   .v5 .mark{top:var(--s5);left:var(--s6)} .v5 .nav{top:var(--s5);right:var(--s6)}
 }

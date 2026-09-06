@@ -33,12 +33,16 @@ const click = async (x, y) => {
   await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x, y, button: 'left', clickCount: 1, buttons: 0 })
 }
 let n = 0
+/* Every shot reports the STATE it captured. A screenshot that shows a CSS :hover while
+   the state machine holds nothing is the difference between a picture of the interface
+   working and the interface working. */
 const shot = async (name, wait = 1100) => {
   await sleep(wait)
+  const st = await ev('(() => { const S = window.__v5.S; return S.level + "  building=" + (S.building?S.building.num:"-") + "  suite=" + (S.suite?S.suite.ref:"-") + "  hoverB=" + (S.hover?S.hover.num:"-") + "  hoverS=" + (S.hoverSuite?S.hoverSuite.ref:"-") + "  plan=" + S.plan })()')
   const r = await cdp.send('Page.captureScreenshot', { format: 'jpeg', quality: 90 })
   const f = DIR + '/' + PRE + (++n) + '-' + name + '.jpeg'
   fs.writeFileSync(f, Buffer.from(r.data, 'base64'))
-  console.log('  ' + f)
+  console.log('  ' + f.padEnd(52) + st)
 }
 
 /* a live point on a given building, via its own pick proxy */
@@ -72,7 +76,7 @@ await shot('BUILDING-SELECTED', 2200)
 
 /* premium and standard suite hover, from the dock's own controls */
 const bayAt = async (which) => ev(`(() => {
-  const bs=[...document.querySelectorAll('[data-bays] .bay')].filter(b => b.dataset.sold!=='true' && b.dataset.type===${JSON.stringify(which)})
+  const bs=[...document.querySelectorAll('[data-bays] [data-bay]')].filter(b => b.dataset.sold!=='true' && b.dataset.type===${JSON.stringify(which)})
   if(!bs.length) return null
   const r=bs[Math.min(1, bs.length-1)].getBoundingClientRect()
   return [Math.round(r.left+r.width/2), Math.round(r.top+r.height/2)] })()`)

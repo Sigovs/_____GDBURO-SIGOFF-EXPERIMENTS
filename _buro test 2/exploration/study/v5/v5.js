@@ -95,7 +95,9 @@ export function mountV5(host, opts = {}) {
     Object.assign(S, { building: b, suite: null, hover: null, hoverSuite: null, level: 'building', entered: false })
     stage.dataset.hot = 'false'
     gl?.setLevel('building', b.num)
-    renderBays(); paint()
+    /* the bays cell has to be laid out before renderBays can measure the track it must
+       fit; paint() is what reveals it, so it goes first */
+    paint(); renderBays(); paint()
     opts.onLevel?.(S.level, S)
   }
   function selectSuite(s) {
@@ -183,22 +185,34 @@ export function mountV5(host, opts = {}) {
   function renderBays() {
     baysEl.replaceChildren()
     const list = S.building?.suites || []
-    const widest = Math.max(...list.map((s) => s.slot ?? s.w))
+    /* THE RATIO IS THE POINT, so it is not allowed to be compressed by the layout.
+       A first pass sized each bay as 22 + share*15 px, which is an offset plus a share —
+       and an offset flattens a ratio. Measured, a 30ft premium bay came out 37px against
+       a 23ft standard at 34px: 1.088, where the building itself is 1.304. Premium had
+       stopped reading as wider, which is the one thing this control exists to show.
+
+       Every bay is now the SAME number of pixels per foot, solved so the run fits the
+       cell it is in and clamped so a bay is never unreadably thin or comically wide.
+       Ratio in, ratio out. */
+    const GAP = 2
+    const units = list.reduce((a, s) => a + (s.slot ?? s.w), 0) || 1
+    const track = Math.max(240, dock.clientWidth - 248 - 360 - 52)
+    const perUnit = Math.min(1.72, Math.max(0.60, (track - GAP * Math.max(0, list.length - 1)) / units))
     const nA = list.filter((s) => s.type === 'A').length
     const nSold = list.filter((s) => s.sold).length
     bayHead.innerHTML = `<em>Suites</em><i>${nA} premium</i><i class="b">${list.length - nA} standard</i>`
       + (nSold ? `<i class="s">${nSold} sold</i>` : '')
     for (const s of list) {
       const b = document.createElement('button')
-      b.type = 'button'; b.className = 'bay'
+      b.type = 'button'; b.className = 'v5-bay'; b.dataset.bay = ''
       b.dataset.sold = s.sold ? 'true' : 'false'
       b.dataset.type = s.type
       /* WIDTH COMES FROM THE MODEL: a premium bay is 30:23 wider in the building, so it
          is 30:23 wider here. Nothing about premium is asserted; it is measured. */
-      b.style.width = Math.round(22 + ((s.slot ?? s.w) / widest) * 15) + 'px'
+      b.style.width = Math.max(13, Math.round((s.slot ?? s.w) * perUnit)) + 'px'
       b.disabled = s.sold
       b.setAttribute('aria-label', `Suite ${s.ref}, ${kind(s.type)} Type ${s.type}${s.sold ? ', sold' : ', available'}`)
-      b.innerHTML = `<span class="bay__t">${s.ordinal} · ${s.sold ? 'Sold' : kind(s.type)}</span>`
+      b.innerHTML = `<span class="v5-bay__t">${s.ordinal} · ${s.sold ? 'Sold' : kind(s.type)}</span>`
       b.addEventListener('pointerenter', () => hoverSuite(s))
       b.addEventListener('pointerleave', () => hoverSuite(null))
       b.addEventListener('focus', () => hoverSuite(s))
@@ -227,14 +241,14 @@ export function mountV5(host, opts = {}) {
       tell.innerHTML = chip(s.type)
       cellRight.innerHTML = S.entered
         ? `<div class="price"><span class="k">${say(t.total)}</span><span class="v">${t.price.replace('FROM ', '')}</span><span class="a">${t.capacity.toLowerCase()}</span></div>
-           <button class="enter" type="button" data-go><span class="t"><i>You are in</i>Continue to the suite</span><span class="a">↓</span></button>`
+           <button class="v5-enter" type="button" data-go><span class="t"><i>You are in</i>Continue to the suite</span><span class="a">↓</span></button>`
         : `<div class="price"><span class="k">${say(t.total)}</span><span class="v">${t.price.replace('FROM ', '')}</span><span class="a">${t.footprint} · ${t.capacity.toLowerCase()}</span></div>
-           <button class="enter" type="button" data-enter><span class="t"><i>Next</i>Enter suite ${s.ref}</span><span class="a">→</span></button>`
+           <button class="v5-enter" type="button" data-enter><span class="t"><i>Next</i>Enter suite ${s.ref}</span><span class="a">→</span></button>`
     } else if (S.level === 'building' && b) {
       const hs = S.hoverSuite
       whoK.textContent = 'Building'; whoF.textContent = b.num
       whoS.innerHTML = `${b.suites.length} suites · <b>${b.open} available</b>`
-      tell.innerHTML = hs ? `${hs.ordinal} — ${chip(hs.type)}` : '<span class="tell--go">Choose a suite.</span>'
+      tell.innerHTML = hs ? `Suite ${hs.ordinal} ${chip(hs.type)}` : '<span class="tell--go">Choose a suite.</span>'
       cellRight.innerHTML = hs
         ? `<div class="price"><span class="k">${kind(hs.type)} · Type ${hs.type}</span><span class="v">${TYPE_SPEC[hs.type].price.replace('FROM ', '')}</span><span class="a">${say(TYPE_SPEC[hs.type].total)} · ${TYPE_SPEC[hs.type].footprint}</span></div>`
         : `<div class="next"><span class="k">Next</span><span class="v">Pick a suite below</span><span class="a">Each bay is one garage suite. Its real door lights up on the model.</span></div>`

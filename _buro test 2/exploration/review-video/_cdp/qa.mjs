@@ -167,5 +167,57 @@ for (let i = 0; i < RANDOM_N; i++) {
 }
 console.log('  ---> ' + rOK + '/' + RANDOM_N + ' correct' + (misses.length ? '   misses: ' + misses.join('  ') : ''))
 console.log('')
+
+/* ---- 6. THE SUITE RAIL ----------------------------------------------------------------
+   The bay you POINT AT must be the bay you GET. This is not a formality: the dock's
+   columns used to be auto-sized, so writing the hovered suite's number into the left cell
+   grew that column and slid the whole row sideways under the pointer between the hover
+   and the press. Every bay in a building is now hovered and pressed in turn and the two
+   are compared. Sold bays are pressed too, and are required NOT to select. */
+console.log('SUITE RAIL — hover a bay, press it, and check you got the one you pointed at')
+await home()
+const testB = await ev(`(() => { const b = window.__v5.compound.buildings.find(b =>
+  b.suites.some(s=>s.type==='A'&&!s.sold) && b.suites.some(s=>s.type==='B'&&!s.sold) && b.suites.some(s=>s.sold))
+  return (b || window.__v5.compound.buildings[0]).num })()`)
+await ev(`window.__v5.selectBuilding(window.__v5.compound.byNum.get('${testB}'))`)
+await sleep(1800)
+const bayCount = await ev(`document.querySelectorAll('[data-bays] [data-bay]').length`)
+let sOK = 0, sN = 0, soldOK = 0, soldN = 0
+const sFail = []
+for (let i = 0; i < bayCount; i++) {
+  const info = await ev(`(() => { const b = document.querySelectorAll('[data-bays] [data-bay]')[${i}]
+    const r = b.getBoundingClientRect()
+    return { sold: b.dataset.sold === 'true', type: b.dataset.type, ref: b._s.ref,
+      x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2), w: Math.round(r.width) } })()`)
+  await move(700, 300); await sleep(60)
+  await move(info.x, info.y); await sleep(230)
+  const hov = await ev('window.__v5.S.hoverSuite ? window.__v5.S.hoverSuite.ref : null')
+  await click(info.x, info.y); await sleep(700)
+  const sel = await ev('window.__v5.S.suite ? window.__v5.S.suite.ref : null')
+  if (info.sold) {
+    soldN++
+    if (sel !== info.ref) soldOK++
+    else sFail.push(info.ref + ' SOLD BUT SELECTABLE')
+  } else {
+    sN++
+    if (hov === info.ref && sel === info.ref) sOK++
+    else sFail.push(info.ref + ' pointed(' + hov + ') got(' + sel + ')')
+    await ev(`window.__v5.backToBuilding()`); await sleep(700)
+  }
+}
+console.log('  building ' + testB + ', ' + bayCount + ' bays')
+console.log('  ---> available: ' + sOK + '/' + sN + ' selected the bay pointed at')
+console.log('  ---> sold:      ' + soldOK + '/' + soldN + ' correctly refused selection')
+if (sFail.length) sFail.forEach((f) => console.log('       ' + f))
+
+/* premium vs standard, measured in the control itself */
+const widths = await ev(`(() => {
+  const bs = [...document.querySelectorAll('[data-bays] [data-bay]')]
+  const a = bs.filter(b => b.dataset.type === 'A').map(b => b.getBoundingClientRect().width)
+  const b2 = bs.filter(b => b.dataset.type === 'B').map(b => b.getBoundingClientRect().width)
+  const avg = (x) => x.reduce((p, c) => p + c, 0) / (x.length || 1)
+  return { A: +avg(a).toFixed(1), B: +avg(b2).toFixed(1), ratio: +(avg(a) / avg(b2)).toFixed(3) } })()`)
+console.log('  mini-bay widths: premium ' + widths.A + 'px, standard ' + widths.B + 'px, ratio ' + widths.ratio + '  (the built ratio is 30/23 = 1.304)')
+console.log('')
 console.log('CONSOLE ERRORS: ' + (errors.length ? errors.length + '\n  ' + errors.slice(0, 8).join('\n  ') : 'none'))
 process.exit(0)

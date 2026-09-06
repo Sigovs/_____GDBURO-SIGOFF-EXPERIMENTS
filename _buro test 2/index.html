@@ -172,10 +172,24 @@
         <button class="level-btn" type="button" data-level-btn="suite" hidden>
           Suite <span class="level-btn__val" data-level-suite></span>
         </button>
+        <!-- Reset belongs beside the levels on one column, because that strip is the
+             only navigation a phone can see without scrolling past the model. On two
+             columns it lives in the record with the other controls and this copy is
+             removed from the document entirely. -->
+        <button class="level-btn level-btn--reset" type="button" data-nav-reset-inline>Reset view</button>
       </nav>
 
       <div class="compound" data-compound data-level="compound" style="margin-top:var(--s-5)">
         <div class="compound__stage" data-compound-mount></div>
+
+        <!-- THE DISCOVERY LINE. One sentence, at the model's own edge, and it retires
+             permanently the moment anything is selected. It is not onboarding: it names
+             the one action available and then gets out of the way, which is what a
+             visitor needs in the first five seconds and never again. -->
+        <p class="hint" data-hint>
+          <span class="hint__k">Explore the compound</span>
+          <span class="hint__v">Point at a building to see it · click to enter it</span>
+        </p>
       </div>
 
     </div>
@@ -202,6 +216,20 @@
           Suite <span class="level-btn__val" data-level-suite></span>
         </button>
       </nav>
+
+      <!-- THE ACT'S CONTROLS. Three, and each one is a state rather than a permanent
+           button: BACK exists only when there is somewhere to go back to, RESET only
+           matters once the visitor has turned the model, and ENTER is explicitly not
+           available until a suite is chosen — which is how it teaches that choosing a
+           suite is the thing that unlocks it. No toolbar, no icons, no map chrome:
+           three lines of the record's own mono, rules and all. -->
+      <div class="acts" role="group" aria-label="Compound controls">
+        <button class="act-btn" type="button" data-nav-back hidden>Back to compound</button>
+        <button class="act-btn" type="button" data-nav-reset>Reset view</button>
+        <button class="act-btn act-btn--enter" type="button" data-nav-enter data-ready="false" aria-disabled="true">
+          Select a suite to enter
+        </button>
+      </div>
 
       <!-- A typographic key. The drawing carries no swatch, chip or coloured marker;
            the key names what the light is doing instead of sampling it. -->

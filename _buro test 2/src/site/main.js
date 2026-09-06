@@ -33,8 +33,9 @@ const $$ = (s, r = document) => [...r.querySelectorAll(s)]
 const compoundEl = $('[data-compound]')
 const railEl = $('[data-rail]')
 const LEVELS = ['compound', 'building', 'suite']
-const state = { level: 'compound', building: null, suite: null, hover: null }
+const state = { level: 'compound', building: null, suite: null, hover: null, hoverSuite: null }
 let compound = null
+let glRef = null
 
 /* ---------------------------------------------------------------------------------
    THE CAMERA.
@@ -359,6 +360,98 @@ function paint() {
   railEl?.setAttribute('data-rail-level', String(LEVELS.indexOf(state.level)))
   syncLevelButtons()
   renderSelection()
+  syncRecord()
+}
+
+/* ---------------------------------------------------------------------------------
+   THE TWO VIEWS ARE ONE OBJECT.
+
+   The model and the record were two systems that happened to share a data source:
+   pointing at a building lit the building, pointing at its row lit nothing, and neither
+   ever told the other what it was doing. A visitor could not tell that the row and the
+   mass were the same thing, which is the single largest reason the act read as "a 3D
+   scene with a table beside it".
+
+   This is the one function that keeps them identical, and it runs on every state
+   change. It is deliberately one-way OUT of state: nothing here reads the DOM to decide
+   anything, so the model, the index, the plate and the rail can never disagree about
+   what is hovered or selected — they are four renderings of the same three variables.
+   --------------------------------------------------------------------------------- */
+/* HOVER HAS ONE ENTRY POINT, and both views call it.
+
+   Whether the pointer is over a mass in the model or over a row in the index, the same
+   two functions run: they write state and then let  render it into every view.
+   That is what makes the row and the building feel like the same object rather than two
+   things that happen to be about the same building. */
+function hoverBuilding(b) {
+  if (state.hover === b) return
+  state.hover = b
+  setRoute(b ? b.route : (state.building?.route || null))
+  glRef?.setHoverBuilding(b ? b.num : null)
+  glRef?.setRoute(b ? routePlan(b) : (state.building ? routePlan(state.building) : null))
+  paint()
+}
+
+function hoverSuite(s) {
+  if (state.hoverSuite === s) return
+  state.hoverSuite = s
+  glRef?.setHoverSuite(s || null)
+  for (const c of compound.suites) {
+    if (c.sold || c === state.suite) continue
+    const want = c === s ? 'focused' : ''
+    if (c.node.getAttribute('data-state') !== want) c.node.setAttribute('data-state', want)
+  }
+  paint()
+}
+
+function syncRecord() {
+  const focusNum = state.building?.num || null
+  const hotNum = state.hover?.num || null
+
+  /* The building index. `data-hot` is the row's version of a mass taking light. */
+  for (const btn of $$('[data-bldg-index] button')) {
+    const n = btn.dataset.bldgBtn
+    btn.setAttribute('aria-current', n === focusNum ? 'true' : 'false')
+    if (n === hotNum && n !== focusNum) btn.setAttribute('data-hot', 'true')
+    else btn.removeAttribute('data-hot')
+  }
+
+  /* The suite list, the same way. */
+  const hotSuite = state.hoverSuite
+  for (const btn of $$('[data-bay-list] button')) {
+    const i = Number(btn.dataset.suiteIndex)
+    btn.setAttribute('aria-pressed', i === state.suite?.index ? 'true' : 'false')
+    if (hotSuite && i === hotSuite.index && i !== state.suite?.index) btn.setAttribute('data-hot', 'true')
+    else btn.removeAttribute('data-hot')
+  }
+
+  /* THE NAVIGATION, which is the answer to "how do I go back" and "what happens next".
+     Both are states of the act rather than always-present chrome: BACK exists only when
+     there is somewhere to go back to, and ENTER only becomes real once a suite has been
+     chosen. Before that it is present but explicitly not yet available, which is what
+     tells a visitor that choosing a suite is the thing that unlocks it. */
+  const back = $('[data-nav-back]')
+  if (back) {
+    back.hidden = state.level === 'compound'
+    back.textContent = state.level === 'suite'
+      ? `Back to building ${state.building?.num ?? ''}`.trim()
+      : 'Back to compound'
+  }
+  const reset = $('[data-nav-reset]')
+  if (reset) reset.hidden = false
+
+  const enter = $('[data-nav-enter]')
+  if (enter) {
+    const ready = !!state.suite
+    enter.setAttribute('data-ready', ready ? 'true' : 'false')
+    enter.setAttribute('aria-disabled', ready ? 'false' : 'true')
+    enter.textContent = ready ? `Enter suite ${state.suite.ref}` : 'Select a suite to enter'
+  }
+
+  /* The opening hint retires permanently the first time anything is chosen — a cue that
+     keeps explaining an interaction the visitor has already performed is noise. */
+  const hint = $('[data-hint]')
+  if (hint && (state.building || state.suite)) hint.hidden = true
 }
 
 function syncLevelButtons() {
@@ -386,6 +479,7 @@ function selectBuilding(b, animate = true) {
   if (!b) return
   state.building = b
   state.hover = null
+  state.hoverSuite = null
   state.suite = null
   state.level = 'building'
   compound.leader?.setAttribute('opacity', '0')
@@ -400,6 +494,7 @@ function selectSuite(s, animate = true) {
   state.suite = s
   state.building = s.bldg
   state.hover = null
+  state.hoverSuite = null
   state.level = 'suite'
   /* The route extends by one leg — off the drive and up to this door. Selecting a
      suite therefore COMPLETES a line the building level already drew, which is what
@@ -416,6 +511,7 @@ function setLevel(level, animate = true) {
   if (level === 'suite' && !state.suite) return
   state.level = level
   state.hover = null
+  state.hoverSuite = null
   if (level === 'compound') {
     /* Coming out is a real return, not a zoom-out with the old choice still lit. The
        compound is the compound again, and the scroll gets its camera back. */
@@ -498,7 +594,14 @@ function renderIndex() {
       ? `Bay ${s.ordinal} · ${spec.label} · <span class="t-scarce">Sold</span>`
       : `Bay ${s.ordinal} · ${spec.label} · ${spec.footprint}`
     if (s.sold) b.disabled = true
-    else b.addEventListener('click', () => selectSuite(s))
+    else {
+      b.addEventListener('click', () => selectSuite(s))
+      /* Same contract one level down: the row is the suite. */
+      b.addEventListener('pointerenter', (e) => { if (e.pointerType !== 'touch') hoverSuite(s) })
+      b.addEventListener('pointerleave', () => { if (state.hoverSuite === s) hoverSuite(null) })
+      b.addEventListener('focus', () => hoverSuite(s))
+      b.addEventListener('blur', () => { if (state.hoverSuite === s) hoverSuite(null) })
+    }
     frag.appendChild(b)
   }
   list.replaceChildren(frag)
@@ -607,15 +710,16 @@ if (compoundEl) {
       btn.addEventListener('click', () => selectBuilding(b))
       /* The index is the drawing's twin, so pointing at a row lights the building the
          same way pointing at the building does. */
+      /* The row and the mass are the same object, so the row lights the mass. */
       btn.addEventListener('pointerenter', (e) => {
         if (e.pointerType === 'touch' || state.building) return
-        state.hover = b
-        setRoute(b.route)
-        paint()
+        hoverBuilding(b)
       })
       btn.addEventListener('pointerleave', () => {
-        if (state.hover === b) { state.hover = null; setRoute(null); paint() }
+        if (state.hover === b) hoverBuilding(null)
       })
+      btn.addEventListener('focus', () => { if (!state.building) hoverBuilding(b) })
+      btn.addEventListener('blur', () => { if (state.hover === b) hoverBuilding(null) })
       frag.appendChild(btn)
     }
     idx.appendChild(frag)
@@ -623,6 +727,37 @@ if (compoundEl) {
 
   $$('[data-level-btn]').forEach((b) => {
     b.addEventListener('click', () => setLevel(b.dataset.levelBtn))
+  })
+
+  /* --- THE CONTROLS. ---------------------------------------------------------------
+
+     BACK steps out one level, which is the same thing Escape does — Escape stays as a
+     shortcut but it can no longer be the only way out, because a shortcut nobody is
+     told about is not navigation.
+
+     RESET returns the camera to the AUTHORED POSE FOR THE CURRENT LEVEL rather than to
+     the homepage view. A visitor who has orbited too far while inspecting a building
+     wants that building composed again, not the whole compound back — resetting to the
+     top would silently undo their navigation as well as their orbit.
+
+     ENTER is a state. It only acts once a suite is chosen, and until then it says so
+     rather than failing silently. */
+  $('[data-nav-back]')?.addEventListener('click', () => {
+    const i = LEVELS.indexOf(state.level)
+    if (i > 0) setLevel(LEVELS[i - 1])
+  })
+
+  $$('[data-nav-reset], [data-nav-reset-inline]').forEach((btn) => btn.addEventListener('click', () => {
+    camera.toLevel(state.level, true)
+    glRef?.resetPose?.()
+  }))
+
+  $('[data-nav-enter]')?.addEventListener('click', () => {
+    if (!state.suite) return
+    /* ENTER is the consequence of the illuminated door: it takes the visitor to the act
+       that IS that door's interior. The threshold choreography belongs to scroll, so
+       this hands over to the page's own anchor rather than inventing a second route. */
+    document.querySelector('#act-03')?.scrollIntoView({ behavior: prefersReduced() ? 'auto' : 'smooth', block: 'start' })
   })
 
   /* The composed frame is solved against the stage's real box, so it has to be
@@ -655,6 +790,7 @@ if (compoundEl) {
     .then(({ initCompound3D }) => {
       const gl = initCompound3D(mount, compound)
       if (!gl) return
+      glRef = gl
       compoundEl.setAttribute('data-gl', 'on')
       camera.useGl(gl)
 
@@ -662,23 +798,10 @@ if (compoundEl) {
 
       /* Pointing at the model writes the same hover state pointing at the drawing
          writes, so the record and the index answer identically either way. */
-      gl.onHoverBuilding = (num) => {
-        const b = num ? bldgOf(num) : null
-        if (b === state.hover) return
-        state.hover = b
-        setRoute(b ? b.route : (state.building?.route || null))
-        gl.setRoute(b ? routePlan(b) : (state.building ? routePlan(state.building) : null))
-        paint()
-      }
-      gl.onHoverSuite = (index) => {
-        const s = index == null ? null : compound.suites[index]
-        gl.setHoverSuite(s || null)
-        for (const c of compound.suites) {
-          if (c.sold || c === state.suite) continue
-          const want = c === s ? 'focused' : ''
-          if (c.node.getAttribute('data-state') !== want) c.node.setAttribute('data-state', want)
-        }
-      }
+      /* Both callbacks go through the shared hover entry points, so pointing at the
+         model and pointing at the record produce byte-identical state. */
+      gl.onHoverBuilding = (num) => hoverBuilding(num ? bldgOf(num) : null)
+      gl.onHoverSuite = (index) => hoverSuite(index == null ? null : compound.suites[index])
       gl.onPickBuilding = (num) => { const b = bldgOf(num); if (b) selectBuilding(b) }
       gl.onPickSuite = (index) => { const s = compound.suites[index]; if (s) selectSuite(s) }
 

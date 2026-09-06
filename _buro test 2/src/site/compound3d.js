@@ -1020,7 +1020,18 @@ export function initCompound3D(mount, model, opts = {}) {
      in step: pull back in proportion to how much narrower the frame is. */
   const fit = () => Math.min(1.32, Math.max(1, 1.30 / Math.max(0.5, camera.aspect)))
 
+  /* HOW CLOSE THE VISITOR MAY GET, per level. The model should become more inspectable
+     as the hierarchy deepens — that is the reward for going in — but at no level may the
+     camera end up inside a building or so far out that the compound is a speck. */
+  const RANGE = {
+    compound: [13, 34],
+    building: [5.5, 22],
+    suite: [3.2, 16],
+  }
+
   const applyCamera = () => {
+    const [lo, hi] = RANGE[level] || RANGE.compound
+    cam.dist = Math.max(lo, Math.min(hi, cam.dist))
     const { az, el, target } = cam
     const dist = cam.dist * fit()
     /* The label band is desktop-only, so on one column the model does not need to sit
@@ -1112,8 +1123,14 @@ export function initCompound3D(mount, model, opts = {}) {
 
   const tmpV = new THREE.Vector3()
   const updateCallouts = () => {
-    const r = mount.getBoundingClientRect()
-    if (!r.width) return
+    /* Measure the LAYER, not the stage. The annotation layer is inset from the stage's
+       right edge so it can never draw under the record column — but the clamp was still
+       solving against the full stage width, so a label was allowed to sit past the
+       layer's own edge and got cropped mid-word. The clamp has to use the box the
+       labels are actually drawn in. */
+    const host = mount.getBoundingClientRect()
+    const r = calLayer.getBoundingClientRect()
+    if (!r.width || !host.width) return
     calSvg.setAttribute('viewBox', `0 0 ${r.width} ${r.height}`)
     calTick++
     for (let i = 0; i < calSpec.length; i++) {
@@ -1124,8 +1141,10 @@ export function initCompound3D(mount, model, opts = {}) {
       const world = tmpV.clone()
       tmpV.project(camera)
       const behind = tmpV.z > 1
-      const x = (tmpV.x * 0.5 + 0.5) * r.width
-      const y = (-tmpV.y * 0.5 + 0.5) * r.height
+      /* The projection is in stage space; the layer is a sub-box of it, so the point is
+         converted before anything is clamped against the layer. */
+      const x = (tmpV.x * 0.5 + 0.5) * host.width - (r.left - host.left)
+      const y = (-tmpV.y * 0.5 + 0.5) * host.height - (r.top - host.top)
 
       /* The label goes OUTWARD from the frame's centre, so it never lies across the
          compound however the model is turned — and then it is CLAMPED by its own
@@ -1396,7 +1415,17 @@ export function initCompound3D(mount, model, opts = {}) {
   }
 
   /* --- CAMERA MOVES. GSAP owns az / el / dist / target and nothing else does. ----- */
+  /* The pose the current level was composed at. Written by every authored move and
+     read only by RESET. */
+  let composed = null
+
   const flyTo = (to, dur = 1.0) => {
+    composed = {
+      az: to.az ?? cam.az,
+      el: to.el ?? cam.el,
+      dist: to.dist ?? cam.dist,
+      target: (to.target || cam.target).clone(),
+    }
     const g = gsapRef.lib
     if (!g) { Object.assign(cam, { az: to.az ?? cam.az, el: to.el ?? cam.el, dist: to.dist ?? cam.dist }); if (to.target) cam.target.copy(to.target); return }
     g.killTweensOf(cam); g.killTweensOf(cam.target)
@@ -1525,6 +1554,15 @@ export function initCompound3D(mount, model, opts = {}) {
       cam.target.set(0, HERO.ty + (ARRIVE.ty - HERO.ty) * (1 - e), 0)
     },
 
+    /* RESET returns to the pose this LEVEL was composed at — not to the homepage view.
+       Every authored fly records where it was going, so reset is simply going there
+       again rather than a second set of numbers that can drift out of step. */
+    resetPose() {
+      if (!composed) return
+      flyTo(composed, 0.9)
+      idleSince = performance.now()
+    },
+
     setLevel(next, num, suiteIndex) {
       level = next
       focusNum = next === 'compound' ? null : num
@@ -1621,6 +1659,9 @@ export function initCompound3D(mount, model, opts = {}) {
     const dy = e.clientY - lastY
     lastX = e.clientX; lastY = e.clientY
     moved += Math.abs(dx) + Math.abs(dy)
+    /* Distance is clamped PER LEVEL, so the model becomes more inspectable as the
+       visitor goes deeper: at compound level they may not get inside the buildings, and
+       at suite level they may come close enough to read a door. */
     cam.az -= dx * 0.005
     /* Pitch is clamped between a low three-quarter and a steep-but-not-plan view. */
     cam.el = Math.max(0.10, Math.min(0.85, cam.el + dy * 0.004))
@@ -1638,7 +1679,23 @@ export function initCompound3D(mount, model, opts = {}) {
   }
   el.addEventListener('pointerup', endDrag)
   el.addEventListener('pointercancel', endDrag)
-  el.addEventListener('pointerleave', () => { ptrInside = false; hoverNum = null; hoverSuite = null })
+  /* LEAVING THE MODEL MUST TELL THE RECORD.
+
+     Clearing the model's own hover locally left main.js still holding the building the
+     pointer used to be over, so moving from a mass to the index found a row already lit
+     for the wrong building and the two views disagreed — the exact defect this pass
+     exists to remove. The leave is a state change like any other and it is announced. */
+  el.addEventListener('pointerleave', () => {
+    ptrInside = false
+    if (hoverNum || hoverSuite) {
+      hoverNum = null
+      hoverSuite = null
+      paint3d()
+      api.syncCallouts()
+      api.onHoverBuilding?.(null)
+      api.onHoverSuite?.(null)
+    }
+  })
 
   function doPick() {
     const hit = pick()
@@ -1676,6 +1733,14 @@ export function initCompound3D(mount, model, opts = {}) {
     /* Hover, once per frame rather than once per pointer event. */
     if (!dragging && ptrInside) {
       const hit = pick()
+
+      /* THE CURSOR SAYS WHAT IS CLICKABLE, and it is the single cheapest piece of
+         discoverability in the whole act: a model that shows `grab` everywhere is a
+         model you turn, and one that switches to `pointer` the instant you cross a
+         building is a model you SELECT things in. Set on the canvas rather than per
+         object, because there is only ever one pointer. */
+      el.style.cursor = hit ? 'pointer' : 'grab'
+
       if (level === 'compound') {
         const n = hit ? (hit.userData.building || hit.userData.num) : null
         if (n !== hoverNum) { hoverNum = n; paint3d(); api.onHoverBuilding?.(n) }

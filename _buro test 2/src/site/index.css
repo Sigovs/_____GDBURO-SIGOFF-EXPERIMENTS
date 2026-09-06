@@ -1087,6 +1087,11 @@ ul, ol { list-style: none; padding: 0; }
    record on two. Exactly one is ever in the document's rendered tree, so there is never
    a duplicated control for a screen reader to announce twice. */
 .levels--inline { display: none; }
+/* The inline reset exists only for one column; on two the record carries the controls. */
+@media (min-width: 1025px) { .level-btn--reset { display: none; } }
+/* ...and the record's copy stands down on one column, where the inline strip above the
+   model already carries it. One reset, wherever the visitor is looking. */
+@media (max-width: 1024px) { [data-nav-reset] { display: none; } }
 @media (max-width: 1024px) {
   .record > .levels { display: none; }
   .levels--inline {
@@ -1103,6 +1108,10 @@ ul, ol { list-style: none; padding: 0; }
   .levels--inline::before { display: none; }
   .levels--inline .level-btn { padding-left: var(--s-4); min-height: 44px; }
   .levels--inline .level-btn::before { left: 0; top: 50%; }
+  /* Reset sits at the end of the strip and never carries a level tick — it is an
+     action, not a place. */
+  .level-btn--reset { margin-left: auto; color: var(--ink-55); }
+  .level-btn--reset::before { content: none; }
 }
 
 /* THE BUILDING INDEX — eleven rows where there were 121.
@@ -1128,6 +1137,72 @@ ul, ol { list-style: none; padding: 0; }
 .bldg-index__btn:hover .bldg-index__meta { color: var(--ink-70); }
 .bldg-index__btn[aria-current='true'] { color: var(--ink); border-bottom-color: var(--ink-70); }
 .bldg-index__btn[aria-current='true'] .bldg-index__meta { color: var(--ink-70); }
+
+/* THE ROW ANSWERS THE MODEL.
+
+   `data-hot` is written whenever the corresponding building or suite is under the
+   pointer IN THE MODEL, and the row responds exactly as it does to its own hover. That
+   symmetry is the point: a visitor pointing at a mass sees a row light up, points at
+   that row, and sees the mass light up — which is how they learn the two are one
+   object without being told.
+
+   The mark is a rule at the row's left edge rather than a background: a filled row is a
+   list item in a table, a ruled one is an entry being indicated. */
+.bldg-index__btn,
+.bay-list__btn { position: relative; }
+.bldg-index__btn[data-hot='true'],
+.bay-list__btn[data-hot='true'] { color: var(--ink); border-bottom-color: var(--ink-40); }
+.bldg-index__btn[data-hot='true'] .bldg-index__meta { color: var(--ink-70); }
+.bldg-index__btn[data-hot='true']::before,
+.bay-list__btn[data-hot='true']::before,
+.bldg-index__btn[aria-current='true']::before,
+.bay-list__btn[aria-pressed='true']::before {
+  content: '';
+  position: absolute; left: calc(var(--s-4) * -1); top: 50%;
+  width: 9px; height: 0;
+  border-top: var(--rule-partition);
+  transform: translateY(-50%);
+}
+.bldg-index__btn[aria-current='true']::before,
+.bay-list__btn[aria-pressed='true']::before { border-top: var(--rule-boundary); width: 13px; }
+
+/* THE CONTROLS. Three lines of the record's own language, not a toolbar. Each is a
+   state: BACK is absent when there is nowhere to go, and ENTER declares itself
+   unavailable rather than failing quietly. */
+.acts { display: grid; gap: 0; }
+.act-btn {
+  appearance: none; background: none; color: var(--ink-70);
+  border: 0; border-bottom: var(--rule-construction);
+  padding: var(--s-3) 0; text-align: left; cursor: pointer;
+  font-family: var(--face-mono); font-size: var(--t-micro);
+  letter-spacing: .12em; text-transform: uppercase;
+  min-height: 44px;
+  transition: color var(--dur-quick) var(--ease-enter), border-color var(--dur-quick) var(--ease-enter);
+}
+.act-btn:hover { color: var(--ink); border-bottom-color: var(--ink-40); }
+.act-btn[hidden] { display: none; }
+
+/* ENTER, as a state. Unavailable it is a quiet line of the record; available it takes
+   boundary weight and the page's own ink — the same promotion a selected object gets in
+   the drawing, so the control and the model are speaking one language. */
+.act-btn--enter[data-ready='false'] { color: var(--ink-40); cursor: default; }
+.act-btn--enter[data-ready='false']:hover { color: var(--ink-40); border-bottom-color: var(--ink-16); }
+.act-btn--enter[data-ready='true'] {
+  color: var(--ink);
+  border-bottom: var(--rule-boundary);
+  font-weight: 500;
+}
+
+/* THE DISCOVERY LINE. At the model's own bottom edge, in the record's voice, and it
+   never returns once the visitor has selected anything. */
+.hint {
+  display: grid; gap: 2px;
+  margin-top: var(--s-3);
+  font-family: var(--face-mono); font-size: var(--t-micro); letter-spacing: .1em;
+}
+.hint[hidden] { display: none; }
+.hint__k { color: var(--ink-70); text-transform: uppercase; }
+.hint__v { color: var(--ink-55); letter-spacing: .04em; }
 
 /* The accessible list beneath the drawing. Not a substitute control — the same one.
    The rail's meaning is never carried by the drawing alone. */

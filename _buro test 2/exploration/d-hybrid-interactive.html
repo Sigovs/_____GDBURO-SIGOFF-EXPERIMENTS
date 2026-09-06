@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Act 02 — Direction D · Hybrid, interactive</title>
+
+<!-- ====================================================================================
+     DIRECTION D — HYBRID, INTERACTIVE.  The concept is in exploration/D-BRIEF.md.
+
+     THIS ONE RUNS.  A, B and C are static compositions; D imports the production model,
+     the production data and the production picking, and implements a real state machine
+     over them.  Nothing under src/ is modified — the two modules are read, never written,
+     and every rule below is D's own so that the exploration cannot leak into production
+     and production's rejected Act 02 composition cannot leak in here.
+
+     THE WAGER, in one line: the suite register is a RAIL, not a list.  A list of 23 bays
+     is a column, a column forces a panel, and a panel forces the permanent inspector that
+     Direction A exists to refuse.  A rail of 23 marks browses the same 23 bays inside one
+     row of a bottom sill.
+     ==================================================================================== -->
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+/* ======================================================================================
+   ART DIRECTION PASS.  The structure below is unchanged — model-first, sill on the
+   bottom edge, register as a rail, three acts always reachable.  What changed is the
+   VISUAL ARGUMENT, and the diagnosis it answers was this:
+
+   D was EVENLY WEIGHTED, and that is precisely why it read as a data bar.  Four rows at
+   one gap; nine functional roles sharing one voice at one size; a subject figure too
+   small to be a mass; and the only warm note in the whole frame sitting on SOLD bays, so
+   the accent read as an error state rather than as the thing the visitor chose.
+
+   Four moves answer it: four rows become TWO RANKS, one voice becomes THREE, the figure
+   becomes a MASS, and the accent moves from sold to SELECTED.
+   ====================================================================================== */
+
+:root {
+  --void:  #060708;
+  --ground:#0A0B0D;
+  --ink:   #F2F4F6;
+  --ink-85: rgb(242 244 246 / .85);
+  --ink-70: rgb(242 244 246 / .70);
+  --ink-55: rgb(242 244 246 / .55);
+  /* --ink-40 IS NOT A TEXT VALUE ON THIS GROUND, and it took a measurement to say so.
+     The quiet rank was set at 40% to sit back from the active rank; composited over the
+     sill's own floor that lands at 3.3-3.5:1 for every 14px label in it — measured, not
+     computed from tokens. The dialect preference for dimmer chrome yields to the contrast
+     invariant: 55% is the floor for anything a visitor reads, and --ink-40 survives only
+     for the leader stroke and hairlines, which are not text.
+     The quiet rank still reads quiet — 5.4:1 against the active rank's 12:1, at 14px
+     against 17, in caps against sentence case, in mono against the grotesque. */
+  --ink-40: rgb(242 244 246 / .40);
+  --ink-24: rgb(242 244 246 / .24);
+  --ink-16: rgb(242 244 246 / .16);
+  --ink-10: rgb(242 244 246 / .10);
+  --lume:  #CBD6DE;
+
+  /* THE ACCENT, and where it comes from.  Not a brand colour and not chosen for warmth:
+     it is the compound's own APRON — the sand-toned concrete the buildings stand on,
+     which the model renders around #C9BCA8 — taken down until it holds its own against a
+     lit steel roof.  It is the one colour already in the picture that is not the sky.
+
+     It marks ONE thing: what the visitor has chosen.  Before this pass it marked SOLD
+     bays, which put the only warm note in the frame on an error state and made a register
+     of 23 suites read as a fault list.  Sold is now absence — short and dim — and the
+     accent belongs to the selection. */
+  --accent: #C86B60;
+
+  --grot: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+
+  /* THREE VOICES, NOT NINE ROLES IN ONE.
+     display   — Archivo 600, the subject figure. The only type that is a MASS.
+     editorial — Archivo 400, sentence case. Sentences: what a thing is, what to do next.
+     technical — IBM Plex Mono 500, caps, tracked. LABELS ONLY, and never a sentence.
+     Uppercase is now applied by role and stops at small labels, which is the single
+     change that removes the wall of mono. 14px stays the functional floor. */
+  --t-tech: 14px;
+  --t-edit: 17px;
+  --t-data: 15px;
+
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px;
+  --s6: 32px; --s7: 48px; --s8: 64px;
+
+  /* THE RAIL'S OWN SCALE. At 3px on a 6px pitch the register read as texture, not as an
+     instrument — and the register is the whole wager, so it is the one place in the sill
+     allowed to take room. One mark per bay door, on a pitch that echoes the door rhythm
+     visible in the model directly above it. */
+  --tick-w: 4px; --tick-gap: 4px;
+  --tick-h: 24px; --tick-hot: 32px; --tick-on: 40px; --tick-sold: 9px;
+
+  --ease: cubic-bezier(.22,.61,.36,1);
+  --dur: .34s;
+  --dur-slow: .7s;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--void); color: var(--ink); }
+body { font-family: var(--grot); -webkit-font-smoothing: antialiased; overflow: hidden; }
+[hidden] { display: none !important; }
+
+/* ------------------------------------------------------------------------------------
+   THE STAGE.  Model full-bleed, interface printed on its lower edge.
+   ------------------------------------------------------------------------------------ */
+.stage { position: fixed; inset: 0; background: var(--ground); isolation: isolate; }
+.mount { position: absolute; inset: 0; }
+.compound__svg { width: 100%; height: 100%; display: block; overflow: hidden; }
+.compound__gl {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  display: block; touch-action: pan-y; cursor: grab;
+}
+.compound__gl:active { cursor: grabbing; }
+
+/* KNOWN GAP, measured rather than assumed: with WebGL denied the SVG renders 185 polygons
+   at the right size but at fill rgb(0,0,0) with no stroke, because the geometry carries
+   production class names whose paint lives in src/site/index.css and D loads no production
+   CSS on purpose.  On this ground that is an invisible drawing.  Out of scope this pass. */
+.stage[data-gl='on'] .compound__svg { visibility: hidden; }
+
+/* THE GROUND THE TYPE STANDS ON.  Deepened at the bottom and pulled further up the frame
+   than before: the sill now carries a figure at 84px, and a large light glyph needs more
+   than a 34% fade under it or its counters fill with whatever roof is behind them.  This
+   is a tonal floor, not a decorative shadow — it is measured in the AA pass. */
+.stage::after {
+  content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background:
+    linear-gradient(to bottom, rgb(6 7 8 / .70) 0%, rgb(6 7 8 / 0) 16%),
+    linear-gradient(to top,    rgb(6 7 8 / .94) 0%, rgb(6 7 8 / .70) 14%, rgb(6 7 8 / .18) 30%, rgb(6 7 8 / 0) 44%);
+}
+
+/* ------------------------------------------------------------------------------------
+   CALLOUTS — the exhibit label, and the thing most at risk of reading as a tooltip.
+
+   Three corrections.  The leader drops to --ink-40 so it stops competing with the roofs
+   it crosses; the arrival is carried by the ring and the label instead, which is how a
+   section drawing does it.  The legend loses its border-top, which was making every
+   callout look like a small card header.  And the figure gains the same 2px DATUM the
+   sill puts above its own figure, so the annotation on the model and the annotation on
+   the sill are demonstrably one system rather than two that happen to agree.
+   ------------------------------------------------------------------------------------ */
+.cal { position: absolute; inset: 0 0 var(--sill-h, 200px) 0; z-index: 3; pointer-events: none; overflow: hidden; }
+.cal__lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.cal__leader {
+  fill: none; stroke: var(--ink-40); stroke-width: 1;
+  vector-effect: non-scaling-stroke; transition: opacity var(--dur) var(--ease);
+}
+.cal__dot {
+  position: absolute; top: 0; left: 0;
+  width: 5px; height: 5px; margin: -3px 0 0 -3px;
+  border: 1px solid var(--ink-85); border-radius: 50%;
+  transition: opacity var(--dur) var(--ease);
+}
+.cal__box {
+  position: absolute; top: 0; left: 0;
+  display: grid; gap: var(--s2); padding-bottom: var(--s2);
+  white-space: nowrap; transform-origin: 0 100%;
+  translate: 0 -100%;
+  transition: opacity var(--dur) var(--ease);
+}
+.cal__box[data-side='left'] { text-align: right; translate: -100% -100%; }
+/* SELECTIVE LEADERS.  At rest the annotation is a legend and names three things the sill
+   does not.  Below rest the sill IS the legend, so the leader keeps only its tag. */
+.stage[data-level='building'] .cal__v,
+.stage[data-level='suite'] .cal__v { display: none; }
+.cal__k {
+  position: relative;
+  font-family: var(--grot); font-size: 30px; font-weight: 500;
+  line-height: 1; letter-spacing: -0.02em; color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  padding-top: var(--s3);
+}
+/* the datum — the same mark the sill uses, at the annotation's scale */
+.cal__k::before {
+  content: ''; position: absolute; top: 0; left: 0;
+  width: 28px; height: 2px; background: var(--ink);
+}
+.cal__box[data-side='left'] .cal__k::before { left: auto; right: 0; }
+.cal__v {
+  font-family: var(--mono); font-size: var(--t-tech); font-weight: 500;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--ink-55);
+}
+
+/* ------------------------------------------------------------------------------------
+   THE MARK.  Named once, top left, quieter than before — at rest the upper field is the
+   composition's best asset and the mark is not what it is for.
+   ------------------------------------------------------------------------------------ */
+.mark { position: absolute; z-index: 6; top: var(--s6); left: var(--s7); display: grid; gap: var(--s1); }
+.mark__act {
+  font-family: var(--mono); font-size: var(--t-tech); font-weight: 500;
+  letter-spacing: .24em; text-transform: uppercase; color: var(--ink-55);
+}
+.mark__name { font-family: var(--grot); font-size: var(--t-data); font-weight: 600; letter-spacing: .06em; color: var(--ink-85); }
+
+/* ======================================================================================
+   THE SILL — TWO RANKS.
+
+   Before this pass it was four rows at one gap, which is a data bar's rhythm however the
+   rows are filled.  Now there are two ranks with different jobs and different weights:
+
+     QUIET RANK   the level path and the three acts.  Small, tracked, --ink-55, sitting
+                  just under the registration line.  It is chrome and it admits it.
+     ACTIVE RANK  the figure, its line, the spec and the register.  Everything with any
+                  weight in the interface lives here, hung off a 2px datum at the left
+                  margin, and the rank is deliberately LEFT-HEAVY — the right half stays
+                  empty at rest so the composition keeps somewhere to breathe.
+
+   Gaps are ranked too: --s3 inside the active rank, --s5 between ranks, --s6 to the
+   frame's bottom edge.  Internal smaller than external, three values instead of one.
+   ====================================================================================== */
+.sill {
+  position: absolute; z-index: 6;
+  left: 0; right: 0; bottom: 0;
+  /* 24px to the frame edge, not 32: the sill is printed ON the bottom edge of the
+     picture, and the measured budget at 1440x900 wanted the last 8px back. External
+     interval is still larger than the 16 between ranks and the 8 inside the body. */
+  padding: 0 var(--s7) var(--s5);
+  display: grid; gap: var(--s4);
+}
+/* The registration line, taken down to --ink-10.  It is a datum, not an edge: at 16% it
+   was drawing a hard horizontal across the bottom of the picture and reading as the top
+   of a panel.  The sill is held by its type and its 2px datum, not by this line. */
+.sill::before {
+  content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px;
+  background: var(--ink-10);
+}
+
+/* --- QUIET RANK --------------------------------------------------------------------- */
+.head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s7); padding-top: var(--s4); }
+
+.path { display: flex; align-items: baseline; gap: var(--s3); flex-wrap: wrap; }
+.path__stop {
+  appearance: none; background: none; border: 0; padding: 0; cursor: pointer;
+  font-family: var(--mono); font-size: var(--t-tech); font-weight: 500;
+  letter-spacing: .18em; text-transform: uppercase; color: var(--ink-55);
+  transition: color var(--dur) var(--ease);
+}
+.path__stop:hover, .path__stop:focus-visible { color: var(--ink-85); outline: none; }
+.path__stop[aria-current='true'] { color: var(--ink-85); cursor: default; }
+.path__stop + .path__stop {
+  border-left: 1px solid var(--ink-16);
+  padding-left: var(--s3);
+}
+
+.acts { display: flex; align-items: center; gap: var(--s5); }
+.act {
+  appearance: none; background: none; border: 0; padding: 0 0 7px; cursor: pointer;
+  font-family: var(--mono); font-size: var(--t-tech); font-weight: 500;
+  letter-spacing: .18em; text-transform: uppercase; color: var(--ink-55);
+  border-bottom: 2px solid transparent;
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease), letter-spacing var(--dur) var(--ease);
+}
+.act:hover, .act:focus-visible { color: var(--ink); outline: none; }
+/* A disabled control is exempt from the contrast contract, but 24% measured 1.76:1 on
+   this ground and that is not 'unavailable', that is 'absent'. ENTER has to be legible
+   as a PROMISE before a suite exists — it is the thing that tells a visitor what
+   choosing a suite is for. 40% reads as clearly off and still reads.
+   Exempt from AA by WCAG 1.4.3, and the only value in the frame below 4.5:1. */
+.act[aria-disabled='true'] { color: var(--ink-40); cursor: not-allowed; }
+
+/* ENTER IS THE THRESHOLD, and it is separated by AIR rather than by a box or a second
+   rule.  48px of it — more than the gap between the two navigation acts put together —
+   which is enough to say "this is not the same kind of thing" without adding a component.
+   Armed, it is the only element in the quiet rank at full ink, the only one carrying
+   boundary weight, and the only one whose tracking opens.  A single slow breath on the
+   rule marks the moment it becomes available; it does not loop, and it does not run at
+   all for a visitor who has asked for less motion. */
+.act--enter { margin-left: var(--s7); }
+.act--enter[data-ready='true'] {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+  letter-spacing: .26em;
+}
+.act--enter[data-ready='true']:hover { color: var(--lume); border-bottom-color: var(--lume); }
+@media (prefers-reduced-motion: no-preference) {
+  .act--enter[data-ready='true'] { animation: arm var(--dur-slow) var(--ease) 1; }
+}
+@keyframes arm {
+  from { border-bottom-color: transparent; letter-spacing: .18em; }
+  60%  { border-bottom-color: var(--lume); }
+  to   { border-bottom-color: var(--ink); letter-spacing: .26em; }
+}
+
+/* --- ACTIVE RANK -------------------------------------------------------------------- */
+.body { display: grid; gap: var(--s2); }
+
+/* THE DATUM.  A 2px bar at the left margin, above the figure.  It is the one mark in the
+   interface that is drawn rather than written, it is where the section datum sits in an
+   architectural drawing, and it is what the whole active rank hangs from.  It carries the
+   accent when a suite has been chosen — so the frame's single warm note is the visitor's
+   own selection, stated at the left margin and repeated on one tick of the register. */
+.subject {
+  position: relative;
+  display: flex; align-items: baseline; gap: var(--s5);
+}
+.subject::before {
+  content: ''; position: absolute; top: calc(var(--s2) * -1); left: 0;
+  width: 56px; height: 2px; background: var(--ink);
+  transition: background-color var(--dur) var(--ease), width var(--dur) var(--ease);
+}
+.sill[data-level='suite'] .subject::before { background: var(--accent); width: 84px; }
+
+/* THE FIGURE IS A MASS.  At 68px it was a large label; at 84 it is the second object in
+   the picture and the eye has somewhere to enter the composition from.  It is the only
+   type in the frame allowed to be big, which is what keeps that true. */
+.subject__fig {
+  font-family: var(--grot); font-weight: 600; line-height: .84;
+  letter-spacing: -0.04em; font-variant-numeric: tabular-nums;
+  font-size: 76px;
+  transition: font-size var(--dur) var(--ease);
+}
+.sill[data-level='building'] .subject__fig,
+.sill[data-level='suite']    .subject__fig { font-size: 58px; }
+
+/* THE LINE UNDER THE FIGURE is a SENTENCE, so it is set as one.  Mono caps at 14 with
+   .18em tracking is a label voice, and using it for prose is what produced the wall this
+   pass exists to remove — the vault's own note on Organimo puts it exactly: uppercase
+   belongs to small labels, not to the line that tells you what you are looking at. */
+.subject__line { display: grid; gap: var(--s1); padding-bottom: var(--s2); line-height: 1.25; }
+.subject__sub {
+  font-family: var(--grot); font-size: var(--t-edit); font-weight: 400;
+  letter-spacing: 0; color: var(--ink-85);
+}
+.subject__sub b { color: var(--ink); font-weight: 500; }
+.subject__sub .sold { color: var(--ink-40); font-weight: 400; }
+.invite { font-family: var(--grot); font-size: var(--t-edit); font-weight: 400; color: var(--ink-55); }
+
+/* --- THE SPEC.  The vault's sharpest warning, and the answer to it. -----------------
+   The judgement on the Semler Porsche VDP is that the page "becomes less distinctive as
+   it moves deeper into specifications … returns to a more conventional dealer-data
+   presentation".  That is exactly what six identical mono cells hung on a row do.  So the
+   spec keeps its facts and loses its uniformity: the PRICE separates out at data scale in
+   ink, the four measurements sit behind it at label weight, and the block is spaced on a
+   wider interval than anything else in the sill so it reads as a specification plate
+   rather than as four more columns of the same table. */
+.spec { display: flex; align-items: baseline; gap: var(--s7); margin-left: auto; padding-bottom: var(--s2); }
+.spec__cell { display: grid; gap: var(--s1); }
+.spec__k {
+  font-family: var(--mono); font-size: var(--t-tech); font-weight: 500;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--ink-55);
+}
+.spec__v { font-family: var(--mono); font-size: var(--t-data); letter-spacing: .02em; color: var(--ink-85); font-variant-numeric: tabular-nums; }
+.spec__cell--price .spec__v { font-family: var(--grot); font-size: 26px; font-weight: 500; letter-spacing: -0.02em; color: var(--ink); line-height: 1; }
+
+/* --- THE REGISTER.  The wager, given an instrument's geometry. ----------------------
+   Finer marks on a wider interval — 3px on 6 — and a baseline rule exactly the rail's
+   width so the ticks stand ON something.  That single line is what stops it reading as a
+   bar chart: a scale has a datum, a chart has bars.
+
+   Sold is now ABSENCE: short, --ink-16, no colour.  Chosen is the accent, at full height,
+   with a 3px mark dropped below the datum so the selection is legible in the rail even at
+   a glance and even in grayscale. */
+.reg { display: flex; align-items: flex-end; gap: var(--s5); }
+.reg__lbl {
+  font-family: var(--mono); font-size: var(--t-tech); font-weight: 500;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--ink-55); padding-bottom: 6px;
+}
+.reg__ticks { position: relative; display: flex; align-items: flex-end; gap: var(--tick-gap); padding-bottom: 6px; }
+/* THE DATUM UNDER THE MARKS, and the detail that makes it read as a scale rather than a
+   bar chart: the rule runs PAST the outermost ticks at both ends, which is how a
+   dimension line is drawn. A chart's baseline stops at its data; a drawing's does not. */
+.reg__ticks::after {
+  content: ''; position: absolute; left: -6px; right: -6px; bottom: 5px; height: 1px;
+  background: var(--ink-24);
+}
+.tick {
+  appearance: none; border: 0; padding: 0; cursor: pointer;
+  width: var(--tick-w); height: var(--tick-h); background: var(--ink-24);
+  transition: height var(--dur) var(--ease), background-color var(--dur) var(--ease);
+}
+/* Hover is one rule for BOTH ways in. Pointing at a bay in the model and pointing at its
+   mark on the rail are the same state, so the model's hover writes data-hot and the CSS
+   answers it identically — where the previous pass wrote an inline pixel height from JS
+   and quietly outranked every geometry token below. */
+.tick:hover, .tick:focus-visible, .tick[data-hot='true'] { background: var(--ink); height: var(--tick-hot); outline: none; }
+.tick[data-sold='true'] { height: var(--tick-sold); background: var(--ink-16); cursor: not-allowed; }
+.tick[data-sold='true']:hover, .tick[data-sold='true'][data-hot='true'] { background: var(--ink-24); height: calc(var(--tick-sold) + 3px); }
+/* Selection needs no extra mark: it is the tallest tick, it is the only accent in the
+   register, the datum at the left margin turns with it and the figure changes with it.
+   A dropped marker under the rule was a sixth signal for a state already carried by five,
+   and it positioned against the wrong ancestor — removed rather than nailed down. */
+.tick[aria-pressed='true'], .tick[aria-pressed='true'][data-hot='true'] { background: var(--accent); height: var(--tick-on); }
+.reg__count { font-family: var(--grot); font-size: var(--t-edit); color: var(--ink-55); padding-bottom: 4px; font-variant-numeric: tabular-nums; }
+.reg__count b { color: var(--ink-85); font-weight: 500; }
+.reg__step { display: flex; gap: var(--s4); padding-bottom: 3px; }
+.reg__step button {
+  appearance: none; background: none; border: 0; padding: var(--s1) var(--s2);
+  color: var(--ink-55); cursor: pointer;
+  font-family: var(--mono); font-size: 18px; line-height: 1;
+  transition: color var(--dur) var(--ease);
+}
+.reg__step button:hover, .reg__step button:focus-visible { color: var(--ink); outline: none; }
+
+/* PROGRESSIVE DISCLOSURE — unchanged behaviour, and the sill's height is still the level. */
+.sill:not([data-level='building']):not([data-level='suite']) .reg,
+.sill:not([data-level='suite']) .spec { display: none; }
+.sill[data-entered='true'] .reg,
+.sill[data-entered='true'] .spec,
+.sill[data-entered='true'] .subject { display: none; }
+
+/* SHORT VIEWPORTS.  The budget is a SHARE of the stage, so on an 800px laptop the figure
+   and the intervals step down together.  Nothing is removed. */
+@media (max-height: 860px) {
+  .sill { gap: var(--s3); padding-bottom: var(--s4); }
+  .head { padding-top: var(--s3); }
+  .subject__fig { font-size: 64px; }
+  .sill[data-level='building'] .subject__fig,
+  .sill[data-level='suite']    .subject__fig { font-size: 52px; }
+  .spec__cell--price .spec__v { font-size: 22px; }
+  --tick-h: 20px; --tick-hot: 27px; --tick-on: 34px;
+}
+
+.nogl { position: absolute; z-index: 6; left: var(--s7); top: 50%; font-family: var(--mono); font-size: var(--t-tech); color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <div class="mount" id="mount"></div>
+
+  <div class="mark">
+    <div class="mark__act">02 — The compound</div>
+    <div class="mark__name">Luxe&nbsp;Corsa</div>
+  </div>
+
+  <div class="sill" id="sill" data-level="compound">
+    <div class="head">
+      <nav class="path" id="path" aria-label="Level"></nav>
+      <div class="acts">
+        <button class="act" id="act-back" type="button">Back</button>
+        <button class="act" id="act-reset" type="button">Reset view</button>
+        <button class="act act--enter" id="act-enter" type="button" data-ready="false">Select a suite to enter</button>
+      </div>
+    </div>
+
+    <div class="body">
+      <div class="subject">
+        <div class="subject__fig" id="fig">121</div>
+        <!-- The two sentences stack under the figure and stay LEFT.  Hanging the
+             invitation right, as the previous pass did, put type in both bottom corners
+             and left the composition nowhere to breathe. -->
+        <div class="subject__line">
+          <div class="subject__sub" id="sub">Private suites · 11 buildings · Lake Zurich</div>
+          <div class="invite" id="invite">Point at any building.</div>
+        </div>
+        <div class="spec" id="spec"></div>
+      </div>
+
+      <div class="reg">
+        <div class="reg__lbl">Suites</div>
+        <div class="reg__ticks" id="ticks" role="group" aria-label="Suites in this building"></div>
+        <div class="reg__step">
+          <button type="button" id="prev" aria-label="Previous suite">‹</button>
+          <button type="button" id="next" aria-label="Next suite">›</button>
+        </div>
+        <div class="reg__count" id="count"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+/* ======================================================================================
+   THE STATE MACHINE.  Deliberately the same shape as the production one — one hover entry
+   point per subject, one select per level — because the point of this prototype is to
+   test a COMPOSITION against real behaviour, not to invent a second behaviour.
+   ====================================================================================== */
+import { buildCompound, TYPE_SPEC } from '/src/site/compound.js'
+
+const $ = (id) => document.getElementById(id)
+const stage = $('stage'), mount = $('mount'), sill = $('sill')
+
+const compound = buildCompound(mount)
+let gl = null
+
+const state = { level: 'compound', building: null, suite: null, hover: null, hoverSuite: null, entered: false }
+const available = compound.suites.filter((s) => !s.sold).length
+
+/* TYPE_SPEC is authored in the caps a mono label wants — "TYPE B", "1,863 SQ FT".  The
+   sill's editorial voice is sentence case Archivo, and shouting inside it is the tell that
+   a label has been pasted into a sentence.  The unit is lowered; the reference is not. */
+const say = (s) => String(s).replace(/\bSQ FT\b/g, 'sq ft').replace(/\bTYPE\b/g, 'Type').replace(/\bFROM\b/g, 'from')
+
+/* --- HOVER.  One entry point each, so pointing at the model and pointing at the register
+       produce identical state and the two views cannot disagree. -------------------- */
+function hoverBuilding(b) {
+  if (state.hover === b) return
+  state.hover = b
+  gl?.setHoverBuilding(b ? b.num : null)
+  paint()
+}
+function hoverSuite(s) {
+  if (state.hoverSuite === s) return
+  state.hoverSuite = s
+  gl?.setHoverSuite(s || null)
+  paint()
+}
+
+/* --- THE THREE LEVELS ------------------------------------------------------------- */
+function selectBuilding(b) {
+  if (!b) return
+  state.building = b; state.suite = null; state.hover = null; state.hoverSuite = null
+  state.level = 'building'; state.entered = false
+  gl?.setLevel('building', b.num)
+  renderTicks()
+  paint()
+}
+function selectSuite(s) {
+  if (!s || s.sold) return
+  state.suite = s; state.hoverSuite = null
+  state.building = s.bldg
+  state.level = 'suite'; state.entered = false
+  gl?.setLevel('suite', s.bldg.num, s.index)
+  paint()
+}
+function toCompound() {
+  state.level = 'compound'; state.building = null; state.suite = null
+  state.hover = null; state.hoverSuite = null; state.entered = false
+  gl?.setLevel('compound')
+  paint()
+}
+/* BACK is level-aware: from a suite it returns to that suite's building, not to the top. */
+function back() {
+  if (state.level === 'suite' && state.building) {
+    const b = state.building
+    state.suite = null; state.entered = false
+    state.level = 'building'
+    gl?.setLevel('building', b.num)
+    paint()
+  } else if (state.level === 'building') {
+    toCompound()
+  }
+}
+/* RESET returns to the pose THIS level was composed at, which is what the model already
+   records for itself — not a second set of numbers that can drift out of step. */
+function reset() { gl?.resetPose() }
+
+function enter() {
+  if (!state.suite) return
+  state.entered = true
+  paint()
+}
+
+/* --- STEPPING THE REGISTER.  The part C had and A could not afford. ---------------- */
+function step(dir) {
+  const list = state.building?.suites?.filter((s) => !s.sold) || []
+  if (!list.length) return
+  const i = state.suite ? list.indexOf(state.suite) : -1
+  selectSuite(list[(i + dir + list.length) % list.length])
+}
+
+/* ======================================================================================
+   PAINT.  Every string in the sill is derived from state here and nowhere else.
+   ====================================================================================== */
+const path = $('path'), fig = $('fig'), sub = $('sub'), invite = $('invite')
+const ticksEl = $('ticks'), countEl = $('count'), specEl = $('spec')
+const actBack = $('act-back'), actReset = $('act-reset'), actEnter = $('act-enter')
+
+function renderPath() {
+  const stops = [{ k: 'Compound', on: state.level === 'compound', go: toCompound }]
+  if (state.building) stops.push({ k: `Building ${state.building.num}`, on: state.level === 'building', go: () => selectBuilding(state.building) })
+  if (state.suite) stops.push({ k: `Suite ${state.suite.ref}`, on: state.level === 'suite', go: null })
+  path.replaceChildren()
+  stops.forEach((s, i) => {
+    const b = document.createElement('button')
+    b.type = 'button'; b.className = 'path__stop'; b.textContent = s.k
+    b.setAttribute('aria-current', s.on ? 'true' : 'false')
+    if (!s.on && s.go) b.addEventListener('click', s.go)
+    path.appendChild(b)
+  })
+}
+
+/* The register is rebuilt only when the BUILDING changes; painting a hover must never
+   rebuild 23 nodes, or the rail flickers under the pointer that is reading it. */
+function renderTicks() {
+  ticksEl.replaceChildren()
+  const list = state.building?.suites || []
+  for (const s of list) {
+    const t = document.createElement('button')
+    t.type = 'button'; t.className = 'tick'
+    t.dataset.sold = s.sold ? 'true' : 'false'
+    t.setAttribute('aria-label', `Suite ${s.ref}, type ${s.type}${s.sold ? ', sold' : ''}`)
+    t.addEventListener('pointerenter', () => hoverSuite(s))
+    t.addEventListener('pointerleave', () => hoverSuite(null))
+    t.addEventListener('focus', () => hoverSuite(s))
+    t.addEventListener('click', () => selectSuite(s))
+    t._suite = s
+    ticksEl.appendChild(t)
+  }
+}
+
+function paint() {
+  const lvl = state.entered ? 'suite' : state.level
+  sill.dataset.level = lvl
+  sill.dataset.entered = state.entered ? 'true' : 'false'
+  /* The stage carries the level too, because the annotation layer is the model's child
+     and its rules have to know how much the sill is already saying. */
+  stage.dataset.level = lvl
+
+  renderPath()
+
+  /* THE FIGURE IS THE SUBJECT, and at rest a hovered building is allowed to borrow it:
+     the model answers the pointer in the sill as well as in the light. */
+  if (state.entered) {
+    fig.textContent = ''
+  } else if (state.level === 'suite' && state.suite) {
+    fig.textContent = state.suite.ref
+    const spec = TYPE_SPEC[state.suite.type]
+    sub.innerHTML = `${say(spec.label)} · ${say(spec.total)} · Building ${state.building.num}`
+  } else if (state.level === 'building' && state.building) {
+    const b = state.building
+    const s = state.hoverSuite
+    fig.textContent = s ? s.ref : b.num
+    sub.innerHTML = s
+      ? `${say(TYPE_SPEC[s.type].label)} · ${say(TYPE_SPEC[s.type].total)}${s.sold ? ' · <span class="sold">Sold</span>' : ''}`
+      : `${b.suites.length} suites, <b>${b.open} available</b>${b.sold ? ` · <span class="sold">${b.sold} sold</span>` : ''}`
+  } else {
+    const h = state.hover
+    /* AT REST THE SILL SAYS WHAT THE MODEL DOES NOT.  The model's own legend already sets
+       "121 · PRIVATE SUITES" on a leader, so a sill that also opened with 121 put the
+       headline in the frame twice and neither instance carried more weight for it. The
+       sill takes the fact the legend has no room for: how many are still to be had. */
+    fig.textContent = h ? h.num : String(available)
+    sub.innerHTML = h
+      ? `Building ${h.num} · ${h.suites.length} suites, <b>${h.open} available</b>`
+      : `Available, of ${compound.data.totals.bays} private suites in ${compound.data.totals.buildings} buildings`
+    invite.textContent = h ? 'Click to enter this building.' : 'Point at any building.'
+  }
+
+  /* The invitation retires permanently the first time anything is chosen — a cue that
+     keeps explaining an interaction already performed is noise. */
+  invite.hidden = !!(state.building || state.suite)
+
+  /* The register. */
+  if (state.building) {
+    const b = state.building
+    countEl.innerHTML = `<b>${b.open}</b> of ${b.suites.length} available`
+    for (const t of ticksEl.children) {
+      const s = t._suite
+      t.setAttribute('aria-pressed', s === state.suite ? 'true' : 'false')
+      /* The model's hover reaches the rail as STATE, and the rail's geometry stays in the
+         stylesheet where the rest of it lives. */
+      if (s === state.hoverSuite && s !== state.suite) t.setAttribute('data-hot', 'true')
+      else t.removeAttribute('data-hot')
+    }
+  }
+
+  /* The spec, at suite level only, and laid horizontally on purpose. */
+  if (state.level === 'suite' && state.suite && !state.entered) {
+    const s = TYPE_SPEC[state.suite.type]
+    specEl.replaceChildren()
+    /* Trimmed for a sill, not abbreviated for space: the type and the total are already
+       on the subject line above, the mezzanine's own dimensions repeat the footprint's,
+       and "2 MOTORCYCLES" is the second half of a fact whose first half is the one being
+       compared. What is left is five values that differ between suites. */
+    /* The price is not the fifth measurement — it is the one figure a visitor is actually
+       deciding about, so it leaves the row of identical cells and takes display scale.
+       Four cells at label weight behind one at figure weight is a specification plate;
+       five cells at the same weight is the dealer-data table the vault warns about. */
+    for (const [k, v, mod] of [
+      ['Footprint', s.footprint, ''],
+      ['Mezzanine', s.mezzanine.split('·').pop().trim(), ''],
+      ['Total', s.total, ''],
+      ['Capacity', s.capacity.split(',')[0], ''],
+      ['From', s.price.replace('FROM ', ''), ' spec__cell--price'],
+    ]) {
+      const cell = document.createElement('div'); cell.className = 'spec__cell' + mod
+      cell.innerHTML = `<div class="spec__k">${k}</div><div class="spec__v">${v}</div>`
+      specEl.appendChild(cell)
+    }
+  }
+
+  /* The three acts.  Present always, available only when they mean something. */
+  const canBack = state.level !== 'compound'
+  actBack.setAttribute('aria-disabled', canBack ? 'false' : 'true')
+  /* At rest BACK is not "back to compound" — the visitor is already there, and naming a
+     destination they are standing on is the sentence a disabled control should never say.
+     It states only what it is, and its own dimness says it is not available yet. */
+  actBack.textContent = !canBack
+    ? 'Back'
+    : (state.level === 'suite' ? `Back to building ${state.building?.num ?? ''}`.trim() : 'Back to compound')
+  const ready = !!state.suite && !state.entered
+  actEnter.setAttribute('data-ready', ready ? 'true' : 'false')
+  actEnter.setAttribute('aria-disabled', ready ? 'false' : 'true')
+  actEnter.textContent = state.entered
+    ? 'Entered — Act 03 takes over here'
+    : (state.suite ? `Enter suite ${state.suite.ref}` : 'Select a suite to enter')
+
+  /* The callout layer is inset by the sill's real height, measured, so a leader can never
+     end underneath a line of the interface however tall the sill has grown. */
+  requestAnimationFrame(() => {
+    stage.style.setProperty('--sill-h', Math.round(sill.getBoundingClientRect().height + 16) + 'px')
+  })
+}
+
+actBack.addEventListener('click', () => { if (state.level !== 'compound') back() })
+actReset.addEventListener('click', reset)
+actEnter.addEventListener('click', enter)
+$('prev').addEventListener('click', () => step(-1))
+$('next').addEventListener('click', () => step(1))
+
+/* The register is also a keyboard: browsing 23 bays should not require 23 pointer trips. */
+addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') { step(1); e.preventDefault() }
+  else if (e.key === 'ArrowLeft') { step(-1); e.preventDefault() }
+  else if (e.key === 'Escape') back()
+  else if (e.key === 'Enter' && state.suite) enter()
+})
+
+/* ======================================================================================
+   THE MODEL.  Production's own, imported read-only.  If it does not stand, every control
+   above still works — they are views of the state, not of the renderer — but the drawing
+   underneath is UNPAINTED in this prototype, so what a visitor gets is a working sill
+   over an empty stage.  See the note on .compound__svg above.  In production that path is
+   covered; here it is a known gap and the message below says so plainly.
+   ====================================================================================== */
+import('/src/site/compound3d.js')
+  .then(({ initCompound3D }) => {
+    gl = initCompound3D(mount, compound)
+    if (!gl) throw new Error('no webgl context')
+    stage.setAttribute('data-gl', 'on')
+    /* scene handle, for the geometry audit only */
+    window.__gl = gl; window.__THREE = null
+
+    const bldgOf = (num) => compound.byNum.get(num)
+    gl.onHoverBuilding = (num) => hoverBuilding(num ? bldgOf(num) : null)
+    gl.onHoverSuite = (i) => hoverSuite(i == null ? null : compound.suites[i])
+    gl.onPickBuilding = (num) => { const b = bldgOf(num); if (b) selectBuilding(b) }
+    gl.onPickSuite = (i) => { const s = compound.suites[i]; if (s) selectSuite(s) }
+
+    requestAnimationFrame(() => { gl.setLevel('compound'); paint() })
+  })
+  .catch((err) => {
+    console.warn('[direction-d] the model did not stand; the drawing does.', err)
+    const n = document.createElement('div')
+    n.className = 'nogl'
+    n.textContent = 'Model unavailable. Every control below still works; the fallback drawing is unpainted in this prototype.'
+    stage.appendChild(n)
+  })
+
+paint()
+window.__d = { state, compound, selectBuilding, selectSuite, back, reset, enter, step }
+</script>
+</body>
+</html>

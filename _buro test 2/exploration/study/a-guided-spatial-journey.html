@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Act 02 — A · Guided Spatial Journey</title>
+<link rel="stylesheet" href="./_study.css">
+<style>
+/* ======================================================================================
+   DIRECTION A — GUIDED SPATIAL JOURNEY
+
+   THE GRAMMAR: THE MODEL IS THE NAVIGATION.  There is no index, no breadcrumb, no panel
+   and no list anywhere in this direction.  Every name a visitor needs is written ON the
+   thing it names, in the scene, at the place it is.  The only interface that is not part
+   of the model is ONE INSTRUCTION, and it is the same instruction slot at all three
+   levels: it always sits in the same place and always says the single next thing to do.
+
+   The wager: a first-time visitor does not need to be told there are eleven buildings if
+   eleven buildings are visibly numbered in front of them.  The list exists because the
+   drawing was not doing its job.
+   ====================================================================================== */
+
+/* --- BUILDING PLATES.  The index, dissolved into the site. -------------------------- */
+.bp { position: absolute; z-index: 4; display: grid; justify-items: center; gap: 5px; transform: translateX(-50%); }
+.bp__n {
+  font-family: var(--mono); font-size: var(--t-tech); font-weight: 500;
+  letter-spacing: .10em; color: var(--ink-85);
+  padding: 3px 7px 2px;
+  border: 1px solid var(--ink-24);
+  background: rgb(6 7 8 / .55);
+  font-variant-numeric: tabular-nums;
+}
+/* The stalk is what makes a plate belong to a roof instead of floating over one. */
+.bp__stalk { width: 1px; height: 16px; background: var(--ink-40); }
+.bp--dim .bp__n { color: var(--ink-40); border-color: var(--ink-10); background: rgb(6 7 8 / .35); }
+.bp--dim .bp__stalk { background: var(--ink-16); height: 11px; }
+.bp--on .bp__n {
+  color: var(--void); background: var(--ink); border-color: var(--ink);
+  font-weight: 500; padding: 4px 9px 3px; font-size: 15px;
+}
+.bp--on .bp__stalk { background: var(--ink); height: 22px; }
+
+/* --- THE ONE INSTRUCTION.  Same slot, three sentences, nothing else. ---------------- */
+.step {
+  position: absolute; z-index: 5; left: var(--s7); bottom: var(--s7);
+  display: grid; gap: var(--s3); max-width: 720px;
+}
+.step__rule { width: 64px; height: 2px; background: var(--ink); }
+.step__do { font-family: var(--grot); font-size: 40px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.02; }
+.step__ctx { font-family: var(--grot); font-size: var(--t-edit); color: var(--ink-55); }
+
+/* THE THRESHOLD.  At suite level the instruction becomes the act, and takes the project's
+   own red — the colour of the illuminated wordmark on the entry portal.  It is the only
+   saturated thing in the frame and it appears exactly once, at the end. */
+.step--enter .step__rule { background: var(--red); width: 96px; height: 3px; }
+.step--enter .step__do { color: var(--ink); }
+.step__hint { font-family: var(--mono); font-size: var(--t-tech); letter-spacing: .18em; text-transform: uppercase; color: var(--red); }
+
+/* --- IN-SCENE ANNOTATION: entry, and the chosen suite. ------------------------------ */
+.pin { position: absolute; z-index: 4; }
+.pin__dot { position: absolute; width: 7px; height: 7px; border: 1px solid var(--ink); border-radius: 50%; margin: -4px 0 0 -4px; }
+.pin__line { position: absolute; background: var(--ink-40); }
+.pin__txt { position: absolute; white-space: nowrap; display: grid; gap: 3px; }
+.pin__k { font-family: var(--mono); font-size: var(--t-tech); font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--ink); }
+.pin__v { font-family: var(--grot); font-size: 15px; color: var(--ink-55); }
+.pin--red .pin__dot { border-color: var(--red); }
+.pin--red .pin__k { color: var(--red); }
+
+/* --- THE DOOR RAIL, drawn on the building itself at BUILDING level. ------------------
+   The suites are not a list here either: they are the doors, marked where the doors are.
+   A sold bay is simply not marked. */
+.doors { position: absolute; z-index: 4; display: flex; align-items: flex-end; gap: 5px; }
+.doors i { display: block; width: 3px; height: 13px; background: var(--ink-70); }
+.doors i.sold { height: 6px; background: var(--ink-16); }
+.doors i.on { height: 24px; background: var(--red); }
+
+/* --- BACK.  One word, bottom right, and only once there is somewhere to go. --------- */
+.back {
+  position: absolute; z-index: 5; right: var(--s7); bottom: var(--s7);
+  font-family: var(--mono); font-size: var(--t-tech); font-weight: 500;
+  letter-spacing: .18em; text-transform: uppercase; color: var(--ink-55);
+}
+.back b { color: var(--ink-85); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="deckhead">
+  <h1>A — Guided Spatial Journey</h1>
+  <p>The model is the navigation. No index, no breadcrumb, no panel, no list — every name is written on the thing it names, in the scene, where that thing actually is. The only interface not part of the model is one instruction, in one fixed slot, saying the single next thing to do.</p>
+  <p class="note">Static composition board · 1440 × 900 · model plates are real captures of the production Three.js compound</p>
+</div>
+
+<!-- ============================ 1 · COMPOUND ============================ -->
+<div class="cap"><span><b>A1</b> &nbsp; Compound — first five seconds</span><span>Choose a building</span></div>
+<div class="frame">
+  <img class="plate" src="../plates/compound.jpeg" alt="">
+  <div class="layer">
+    <div class="mark">
+      <div class="mark__name">Luxe&nbsp;Corsa</div>
+      <div class="mark__where">Lake Zurich, Illinois</div>
+    </div>
+
+    <!-- the index, dissolved into the site: every building wears its own number -->
+    <div class="bp" style="left:224px; top:296px"><div class="bp__n">01</div><div class="bp__stalk"></div></div>
+    <div class="bp" style="left:300px; top:350px"><div class="bp__n">03</div><div class="bp__stalk"></div></div>
+    <div class="bp" style="left:392px; top:396px"><div class="bp__n">04</div><div class="bp__stalk"></div></div>
+    <div class="bp" style="left:512px; top:432px"><div class="bp__n">06</div><div class="bp__stalk"></div></div>
+    <div class="bp" style="left:848px; top:268px"><div class="bp__n">07</div><div class="bp__stalk"></div></div>
+    <div class="bp" style="left:660px; top:214px"><div class="bp__n">08</div><div class="bp__stalk"></div></div>
+    <div class="bp" style="left:1130px; top:106px"><div class="bp__n">09</div><div class="bp__stalk"></div></div>
+    <div class="bp" style="left:986px; top:82px"><div class="bp__n">10</div><div class="bp__stalk"></div></div>
+    <div class="bp" style="left:1306px; top:146px"><div class="bp__n">11</div><div class="bp__stalk"></div></div>
+
+    <!-- arrival, named where arrival happens -->
+    <div class="pin" style="left:132px; top:648px">
+      <div class="pin__dot"></div>
+      <div class="pin__line" style="left:0; top:0; width:1px; height:58px"></div>
+      <div class="pin__line" style="left:0; top:-1px; width:52px; height:1px"></div>
+      <div class="pin__txt" style="left:0; top:-46px">
+        <div class="pin__k">Entry</div>
+        <div class="pin__v">Gated · members only</div>
+      </div>
+    </div>
+    <div class="pin" style="left:742px; top:176px">
+      <div class="pin__dot"></div>
+      <div class="pin__line" style="left:0; top:0; width:118px; height:1px"></div>
+      <div class="pin__txt" style="left:128px; top:-22px">
+        <div class="pin__k">Clubhouse</div>
+        <div class="pin__v">Members' building</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step__rule"></div>
+      <div class="step__do">Choose a building.</div>
+      <div class="step__ctx">121 private suites across 11 buildings, Lake Zurich.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================ 2 · BUILDING ============================ -->
+<div class="cap"><span><b>A2</b> &nbsp; Building 03 selected</span><span>Choose a suite</span></div>
+<div class="frame">
+  <img class="plate" src="../plates/building.jpeg" alt="">
+  <div class="layer">
+    <div class="mark">
+      <div class="mark__name">Luxe&nbsp;Corsa</div>
+      <div class="mark__where">Lake Zurich, Illinois</div>
+    </div>
+
+    <!-- the chosen building keeps its plate and takes ink; the others recede but stay -->
+    <div class="bp bp--on" style="left:598px; top:352px"><div class="bp__n">03</div><div class="bp__stalk"></div></div>
+    <div class="bp bp--dim" style="left:330px; top:470px"><div class="bp__n">01</div><div class="bp__stalk"></div></div>
+    <div class="bp bp--dim" style="left:880px; top:470px"><div class="bp__n">04</div><div class="bp__stalk"></div></div>
+    <div class="bp bp--dim" style="left:1128px; top:404px"><div class="bp__n">06</div><div class="bp__stalk"></div></div>
+
+    <!-- the suites are the doors, marked on the building's own door line -->
+    <div class="doors" style="left:602px; top:520px">
+      <i></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i class="sold"></i><i></i><i></i>
+      <i></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i></i>
+    </div>
+
+    <div class="step">
+      <div class="step__rule"></div>
+      <div class="step__do">Choose a suite.</div>
+      <div class="step__ctx">Building 03 — 23 suites, 19 still available.</div>
+    </div>
+
+    <div class="back">← <b>Compound</b></div>
+  </div>
+</div>
+
+<!-- ============================ 3 · SUITE ============================ -->
+<div class="cap"><span><b>A3</b> &nbsp; Suite 03 · 11 selected</span><span>Enter suite</span></div>
+<div class="frame">
+  <img class="plate" src="../plates/suite.jpeg" alt="">
+  <div class="layer">
+    <div class="mark">
+      <div class="mark__name">Luxe&nbsp;Corsa</div>
+      <div class="mark__where">Lake Zurich, Illinois</div>
+    </div>
+
+    <!-- the suite is named at the door, in the project's own red -->
+    <div class="pin pin--red" style="left:614px; top:494px">
+      <div class="pin__dot"></div>
+      <div class="pin__line" style="left:0; top:-262px; width:1px; height:262px; background:var(--red)"></div>
+      <div class="pin__txt" style="left:14px; top:-286px">
+        <div class="pin__k">Suite 03 · 11</div>
+        <div class="pin__v">Type B · 1,863 sq ft · from $549,000</div>
+      </div>
+    </div>
+
+    <div class="step step--enter">
+      <div class="step__rule"></div>
+      <div class="step__do">Enter suite 03 · 11.</div>
+      <div class="step__hint">Step inside →</div>
+    </div>
+
+    <div class="back">← <b>Building 03</b></div>
+  </div>
+</div>
+
+</body>
+</html>

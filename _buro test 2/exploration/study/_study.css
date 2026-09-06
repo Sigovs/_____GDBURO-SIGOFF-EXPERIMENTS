@@ -1,0 +1,92 @@
+/* ======================================================================================
+   ACT 02 — FIRST-TIME USER STUDY.  Shared ground for the three directions.
+
+   THESE ARE STATIC COMPOSITION BOARDS.  They import nothing from src/, run no part of the
+   app, and nothing on them is clickable.  Each state is a picture, so the three directions
+   can be judged as experiences rather than as builds.
+
+   The model plates are real captures of the production Three.js compound with every
+   interface layer hidden at runtime.  The model is therefore identical across all three
+   directions and all three states: the only variable is the RELATIONSHIP between the
+   model and the interface, which is the whole subject of the study.
+
+   THE LENS.  Automotive editorial discipline, a near-black canvas, minimal chrome,
+   engineering precision, confident negative space.  No marks, no stripes, no borrowed
+   typography.  The palette and the two faces are Luxe Corsa's own.
+
+   THE ACCENT is the project's own red — the illuminated wordmark on the entry portal and
+   the hairline reveal on the corner pier of the real buildings, both visible in the
+   architect's renders in exploration/ref/.  It is used only where the project uses it:
+   on arrival, and on the thing you have chosen.
+   ====================================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root {
+  --void:  #060708;
+  --ground:#0A0B0D;
+  --ink:   #F2F4F6;
+  --ink-85: rgb(242 244 246 / .85);
+  --ink-70: rgb(242 244 246 / .70);
+  --ink-55: rgb(242 244 246 / .55);
+  --ink-40: rgb(242 244 246 / .40);
+  --ink-24: rgb(242 244 246 / .24);
+  --ink-16: rgb(242 244 246 / .16);
+  --ink-10: rgb(242 244 246 / .10);
+  --lume:  #CBD6DE;
+  --red:   #D8453C;          /* the wordmark red, from the entry-gate render */
+  --sand:  #C9BCA8;          /* the precast apron, from the exterior render */
+
+  --grot: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+
+  --t-tech: 14px;
+  --t-edit: 18px;
+
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px;
+  --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--void); color: var(--ink); }
+body { font-family: var(--grot); -webkit-font-smoothing: antialiased; }
+
+/* One 1440x900 frame per state, stacked, so each can be shot on its own. */
+.frame {
+  position: relative; width: 1440px; height: 900px;
+  overflow: hidden; background: var(--ground);
+  margin: 0 auto 40px; isolation: isolate;
+}
+.plate { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
+/* The tonal floor every edge-anchored line needs. Not decoration — without it the type
+   sits on whatever the camera happened to put behind it. */
+.frame::after {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background:
+    linear-gradient(to bottom, rgb(6 7 8 / .72) 0%, rgb(6 7 8 / 0) 17%),
+    linear-gradient(to top,    rgb(6 7 8 / .90) 0%, rgb(6 7 8 / .55) 13%, rgb(6 7 8 / .12) 30%, rgb(6 7 8 / 0) 44%);
+}
+.layer { position: absolute; inset: 0; z-index: 2; }
+
+/* --- the mark, common to all three ------------------------------------------------- */
+.mark { position: absolute; top: var(--s6); left: var(--s7); z-index: 4; display: grid; gap: var(--s1); }
+.mark__name { font-family: var(--grot); font-size: 15px; font-weight: 600; letter-spacing: .10em; text-transform: uppercase; }
+.mark__where { font-family: var(--mono); font-size: var(--t-tech); letter-spacing: .18em; text-transform: uppercase; color: var(--ink-55); }
+
+/* --- shared type roles -------------------------------------------------------------- */
+.lbl { font-family: var(--mono); font-size: var(--t-tech); font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-55); }
+.say { font-family: var(--grot); font-size: var(--t-edit); font-weight: 400; color: var(--ink-85); }
+.fig { font-family: var(--grot); font-weight: 600; line-height: .84; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+
+/* --- the deck chrome (outside the frames) ------------------------------------------ */
+.cap {
+  width: 1440px; margin: 0 auto 12px; padding-top: 30px;
+  font-family: var(--mono); font-size: var(--t-tech); letter-spacing: .16em;
+  text-transform: uppercase; color: var(--ink-40);
+  display: flex; justify-content: space-between; align-items: baseline;
+}
+.cap b { color: var(--ink); font-weight: 500; }
+.deckhead { width: 1440px; margin: 56px auto 8px; }
+.deckhead h1 { font-family: var(--grot); font-size: 38px; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 10px; }
+.deckhead p { font-family: var(--grot); font-size: 17px; color: var(--ink-55); margin: 0 0 6px; max-width: 88ch; line-height: 1.55; }
+.deckhead .note { font-family: var(--mono); font-size: var(--t-tech); color: var(--ink-40); letter-spacing: .04em; }

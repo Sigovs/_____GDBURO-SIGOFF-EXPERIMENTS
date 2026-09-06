@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Act 02 — Proposed v2 · Live leaders + console</title>
+<link rel="stylesheet" href="./_study.css">
+<style>
+/* ======================================================================================
+   PROPOSED v2 — "LIVE LEADERS + CONSOLE"
+
+   What changed from The Apron, and why.
+
+   The Apron was correct and passive.  It explained the compound; it did not ask anyone to
+   choose anything.  Three faults, and this direction answers each with a mechanism rather
+   than with more type:
+
+   1. TAGS WERE DETACHED.  Numbers floated near buildings with a stalk pointing at nothing
+      in particular.  Now every tag is the END OF A DRAWN LEADER that starts on the roof it
+      names — anchor ring, a rise, a jog, then the tag.  The leader is the relationship, it
+      is short so it never tangles, and it EXTENDS on hover: the line is the interaction.
+
+   2. THE PLATE WAS A CAPTION.  It sat under the picture and described it.  It is now a
+      CONSOLE: a left identity block, a centre control zone, a right action zone, divided
+      by real rules, with the primary action always in the same corner.  A visitor scans
+      left for "where am I", centre for "what can I do", right for "what happens next".
+
+   3. THERE WAS NO COLOUR DOING WORK.  The frame was grey and everything was equally
+      inert.  The accent is now the project's own red — the illuminated wordmark on the
+      entry portal and the hairline reveal on the corner pier of every real building — and
+      it is spent on exactly three things: THE ACTIVE TARGET, THE CHOSEN THING, and THE
+      NEXT ACTION.  Nothing else is ever red.  That is what makes it orientation rather
+      than decoration.
+
+   Luxury here is not the absence of controls.  It is a small number of controls, precisely
+   drawn, that leave no doubt about what is pressable.
+   ====================================================================================== */
+
+:root { --red-dim: rgb(216 69 60 / .30); --red-70: rgb(216 69 60 / .70); }
+
+/* ======================================================================================
+   THE LIVE LEADER SYSTEM
+   ====================================================================================== */
+.ld { position: absolute; z-index: 4; }
+/* the anchor sits ON the roof — a ring, not a pin, because a pin is a map and this is a
+   drawing */
+.ld__a { position: absolute; width: 7px; height: 7px; margin: -4px 0 0 -4px; border: 1px solid var(--ink-70); border-radius: 50%; }
+.ld__rise { position: absolute; width: 1px; background: var(--ink-40); }
+.ld__jog  { position: absolute; height: 1px; background: var(--ink-40); }
+.ld__tag {
+  position: absolute; white-space: nowrap;
+  font-family: var(--mono); font-size: var(--t-tech); font-weight: 500;
+  letter-spacing: .12em; color: var(--ink-85);
+  padding: 4px 8px 3px; border: 1px solid var(--ink-24);
+  background: rgb(8 9 11 / .72); font-variant-numeric: tabular-nums;
+}
+
+/* REST — quiet, but never invisible: a building a visitor cannot see the name of is a
+   building they will not click. */
+.ld--rest .ld__tag { color: var(--ink-70); border-color: var(--ink-16); }
+
+/* HOVER — the leader EXTENDS, the anchor opens, the tag comes to full ink and brings the
+   one fact that decides whether this building is worth entering: how many are left. */
+.ld--hover .ld__a { border-color: var(--ink); width: 9px; height: 9px; margin: -5px 0 0 -5px; }
+.ld--hover .ld__rise, .ld--hover .ld__jog { background: var(--ink-70); }
+.ld--hover .ld__tag { color: var(--ink); border-color: var(--ink-55); background: rgb(8 9 11 / .86); }
+.ld__avail {
+  display: block; margin-top: 3px; padding-top: 3px; border-top: 1px solid var(--ink-24);
+  font-size: var(--t-tech); letter-spacing: .10em; color: var(--ink-70); text-transform: uppercase;
+}
+
+/* SELECTED — the accent arrives, and it arrives on the LEADER as well as the tag, so the
+   line from the building to its name is the thing that reads as chosen. */
+.ld--on .ld__a { border-color: var(--red); width: 9px; height: 9px; margin: -5px 0 0 -5px; }
+.ld--on .ld__rise, .ld--on .ld__jog { background: var(--red); }
+.ld--on .ld__tag { color: #fff; background: var(--red); border-color: var(--red); font-weight: 500; }
+
+/* DIMMED — the other buildings do not disappear; they step back one value so the
+   compound is still legible as a whole. */
+.ld--dim .ld__a { border-color: var(--ink-24); }
+.ld--dim .ld__rise, .ld--dim .ld__jog { background: var(--ink-16); }
+.ld--dim .ld__tag { color: var(--ink-40); border-color: var(--ink-10); background: rgb(8 9 11 / .45); }
+
+/* the gate keeps a leader too — it is the one non-building thing a visitor must find */
+.ld--gate .ld__tag { border-style: dashed; }
+
+/* ======================================================================================
+   THE CONSOLE — three zones, always in the same order.
+   ====================================================================================== */
+.con {
+  position: absolute; z-index: 6; left: 0; right: 0; bottom: 0;
+  background: #0B0D10; border-top: 1px solid var(--ink-24);
+  display: grid;
+}
+/* the red reveal along the leading edge — the corner-pier detail, at the pier's own width */
+.con::before { content: ''; position: absolute; left: 0; top: -1px; height: 2px; width: 132px; background: var(--red); }
+
+.con__main { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: var(--s7); padding: var(--s5) var(--s7); }
+.con__left { display: flex; align-items: baseline; gap: var(--s5); }
+.con__fig { font-size: 52px; line-height: .82; }
+.con__id { display: grid; gap: 3px; }
+.con__k { font-family: var(--mono); font-size: var(--t-tech); font-weight: 500; letter-spacing: .20em; text-transform: uppercase; color: var(--ink-55); }
+.con__v { font-family: var(--grot); font-size: var(--t-edit); color: var(--ink-85); }
+.con__v b { color: var(--ink); font-weight: 500; }
+
+/* the instruction is a STATE LABEL, not a sentence about the compound */
+.con__tell { font-family: var(--grot); font-size: 22px; font-weight: 600; letter-spacing: -0.01em; color: var(--ink); }
+.con__tell em { font-style: normal; color: var(--red); }
+
+.con__acts { display: flex; align-items: center; gap: var(--s5); }
+.back {
+  font-family: var(--mono); font-size: var(--t-tech); font-weight: 500; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--ink-55);
+  padding: 9px 0; border-bottom: 1px solid transparent;
+}
+
+/* THE ACT.  A machined block, not a pill and not a link: square corners, a divided arrow
+   cell, and the accent carrying it.  Disarmed it is an outline the visitor can see is
+   waiting; armed it fills.  There is never any doubt that it is pressable. */
+.go { display: inline-grid; grid-template-columns: auto 46px; align-items: stretch; border: 1px solid var(--red-dim); }
+.go__t {
+  padding: 13px var(--s5) 12px;
+  font-family: var(--grot); font-size: 17px; font-weight: 600; letter-spacing: -0.005em;
+  color: var(--ink-40); display: flex; align-items: center;
+}
+.go__a { display: flex; align-items: center; justify-content: center; border-left: 1px solid var(--red-dim); color: var(--ink-40); font-size: 17px; }
+.go--armed { border-color: var(--red); }
+.go--armed .go__t { color: var(--red); }
+.go--armed .go__a { border-left-color: var(--red); color: var(--red); }
+.go--ready { background: var(--red); border-color: var(--red); }
+.go--ready .go__t { color: #fff; }
+.go--ready .go__a { color: #fff; border-left-color: rgb(255 255 255 / .34); }
+.go__sub { display: block; font-family: var(--mono); font-size: var(--t-tech); font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: rgb(255 255 255 / .62); margin-bottom: 2px; }
+
+/* ======================================================================================
+   THE SUITE RAIL — made self-explanatory.
+   Three additions over the previous rail: it says what it is, it says which end is which,
+   and the mark under the pointer names itself.
+   ====================================================================================== */
+.rail { border-top: 1px solid var(--ink-16); padding: var(--s4) var(--s7) var(--s5); display: grid; grid-template-columns: auto 1fr auto; align-items: end; gap: var(--s5); }
+.rail__lead { display: grid; gap: 4px; padding-bottom: 10px; }
+.rail__lead .k { font-family: var(--mono); font-size: var(--t-tech); font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--red); }
+.rail__lead .n { font-family: var(--grot); font-size: 15px; color: var(--ink-55); }
+
+.rail__mid { position: relative; display: flex; }
+.rail__scale { position: relative; display: inline-block; }
+.rail__marks { position: relative; display: flex; align-items: flex-end; gap: 5px; padding-bottom: 11px; }
+.rail__marks::after { content: ''; position: absolute; left: -8px; right: -8px; bottom: 5px; height: 1px; background: var(--ink-24); }
+.rail__marks i { display: block; width: 6px; height: 22px; background: var(--ink-40); }
+.rail__marks i.sold { height: 8px; background: var(--ink-16); }
+.rail__marks i.hot { height: 32px; background: var(--ink); }
+.rail__marks i.on { height: 40px; background: var(--red); }
+/* which end is which — a scale has ends, and a visitor who cannot see them cannot tell a
+   rail from a decoration */
+.rail__ends { display: flex; justify-content: space-between; margin-left: -8px; margin-right: -8px; font-family: var(--mono); font-size: var(--t-tech); color: var(--ink-40); letter-spacing: .10em; margin-top: 2px; }
+/* the mark under the pointer names itself, right above itself */
+.rail__cue {
+  /* clear of the tallest mark (40px) plus the rail padding, so the cue names the
+     mark instead of covering it */
+  position: absolute; bottom: 60px; transform: translateX(-50%);
+  font-family: var(--mono); font-size: var(--t-tech); font-weight: 500; letter-spacing: .12em;
+  color: var(--ink); background: rgb(8 9 11 / .9); border: 1px solid var(--ink-40);
+  padding: 3px 7px 2px; white-space: nowrap;
+}
+.rail__cue::after { content: ''; position: absolute; left: 50%; bottom: -12px; width: 1px; height: 11px; background: var(--ink-40); }
+.rail__cue--on { color: #fff; background: var(--red); border-color: var(--red); }
+.rail__cue--on::after { background: var(--red); }
+.rail__n { font-family: var(--grot); font-size: 17px; color: var(--ink-55); padding-bottom: 8px; text-align: right; font-variant-numeric: tabular-nums; }
+.rail__n b { color: var(--ink); font-weight: 500; }
+
+/* the three facts, on the console, at suite level only */
+.facts { display: flex; align-items: baseline; gap: var(--s7); }
+.facts div { display: grid; gap: 2px; }
+.facts .k { font-family: var(--mono); font-size: var(--t-tech); font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-55); }
+.facts .v { font-family: var(--grot); font-size: 20px; color: var(--ink); }
+.facts .v.price { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; }
+.facts .more { font-family: var(--mono); font-size: var(--t-tech); font-weight: 500; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-55); border-bottom: 1px solid var(--ink-24); padding-bottom: 3px; }
+
+/* the chosen door, named in the model */
+.door { position: absolute; z-index: 4; }
+.door__d { position: absolute; width: 9px; height: 9px; margin: -5px 0 0 -5px; border: 1px solid var(--red); border-radius: 50%; }
+.door__l { position: absolute; width: 1px; background: var(--red); }
+.door__t { position: absolute; white-space: nowrap; font-family: var(--mono); font-size: var(--t-tech); font-weight: 500; letter-spacing: .16em; color: #fff; background: var(--red); padding: 4px 8px 3px; }
+
+/* ======================================================================================
+   THE SEQUENCE STRIP — the six states as one reading.
+   ====================================================================================== */
+.seq { width: 1440px; margin: 0 auto 80px; display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--s3); }
+.seq figure { margin: 0; display: grid; gap: var(--s2); }
+.seq img { width: 100%; display: block; border: 1px solid var(--ink-16); }
+.seq figcaption { font-family: var(--mono); font-size: var(--t-tech); letter-spacing: .10em; text-transform: uppercase; color: var(--ink-55); }
+.seq b { color: var(--ink); font-weight: 500; display: block; }
+</style>
+</head>
+<body>
+
+<div class="deckhead">
+  <h1>Proposed v2 — Live leaders + console</h1>
+  <p>Every building tag is the end of a drawn leader that starts on the roof it names, and the leader extends on hover — the line is the interaction. The plate becomes a console with three zones: identity left, control centre, action right. The accent is the project's own red, spent on exactly three things: the active target, the chosen thing, and the next action. Nothing else is ever red.</p>
+  <p class="note">Static composition board · 1440 × 900 · model plates are real captures of the production Three.js compound · hover and selection states are drawn, not scripted</p>
+</div>
+
+<!-- ==================== 1 · COMPOUND REST ==================== -->
+<div class="cap"><span><b>1</b> &nbsp; Compound — rest</span><span>Primary action: choose a building</span></div>
+<div class="frame">
+  <img class="plate" src="../plates/compound.jpeg" alt="">
+  <div class="layer">
+    <div class="mark"><div class="mark__name">Luxe&nbsp;Corsa</div><div class="mark__where">Lake Zurich, Illinois</div></div>
+
+    <div class="ld ld--rest" style="left:224px; top:340px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-46px; height:46px"></div><div class="ld__jog" style="left:0; top:-46px; width:26px"></div><div class="ld__tag" style="left:26px; top:-60px">01</div></div>
+    <div class="ld ld--rest" style="left:300px; top:394px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-46px; height:46px"></div><div class="ld__jog" style="left:0; top:-46px; width:26px"></div><div class="ld__tag" style="left:26px; top:-60px">03</div></div>
+    <div class="ld ld--rest" style="left:392px; top:440px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-46px; height:46px"></div><div class="ld__jog" style="left:0; top:-46px; width:26px"></div><div class="ld__tag" style="left:26px; top:-60px">04</div></div>
+    <div class="ld ld--rest" style="left:512px; top:476px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-46px; height:46px"></div><div class="ld__jog" style="left:0; top:-46px; width:26px"></div><div class="ld__tag" style="left:26px; top:-60px">06</div></div>
+    <div class="ld ld--rest" style="left:660px; top:258px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-44px; height:44px"></div><div class="ld__jog" style="left:-26px; top:-44px; width:26px"></div><div class="ld__tag" style="left:-62px; top:-58px">08</div></div>
+    <div class="ld ld--rest" style="left:848px; top:312px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-46px; height:46px"></div><div class="ld__jog" style="left:0; top:-46px; width:26px"></div><div class="ld__tag" style="left:26px; top:-60px">07</div></div>
+    <div class="ld ld--rest" style="left:986px; top:126px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-40px; height:40px"></div><div class="ld__jog" style="left:-26px; top:-40px; width:26px"></div><div class="ld__tag" style="left:-62px; top:-54px">10</div></div>
+    <div class="ld ld--rest" style="left:1130px; top:150px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-44px; height:44px"></div><div class="ld__jog" style="left:0; top:-44px; width:26px"></div><div class="ld__tag" style="left:26px; top:-58px">09</div></div>
+    <div class="ld ld--rest" style="left:1306px; top:190px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-46px; height:46px"></div><div class="ld__jog" style="left:-26px; top:-46px; width:26px"></div><div class="ld__tag" style="left:-62px; top:-60px">11</div></div>
+    <div class="ld ld--rest ld--gate" style="left:132px; top:648px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-44px; height:44px"></div><div class="ld__jog" style="left:0; top:-44px; width:22px"></div><div class="ld__tag" style="left:22px; top:-58px">Entry</div></div>
+
+    <div class="con">
+      <div class="con__main">
+        <div class="con__left">
+          <div class="con__fig fig">121</div>
+          <div class="con__id">
+            <div class="con__k">The compound</div>
+            <div class="con__v">11 buildings · <b>98 suites available</b></div>
+          </div>
+        </div>
+        <div class="con__acts"><div class="con__tell">Choose a building.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 2 · BUILDING HOVER ==================== -->
+<div class="cap"><span><b>2</b> &nbsp; Hover building 03</span><span>Leader extends · tag brightens · availability arrives</span></div>
+<div class="frame">
+  <img class="plate" src="../plates/compound.jpeg" alt="">
+  <div class="layer">
+    <div class="mark"><div class="mark__name">Luxe&nbsp;Corsa</div><div class="mark__where">Lake Zurich, Illinois</div></div>
+
+    <div class="ld ld--rest" style="left:224px; top:340px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-46px; height:46px"></div><div class="ld__jog" style="left:0; top:-46px; width:26px"></div><div class="ld__tag" style="left:26px; top:-60px">01</div></div>
+    <!-- THE HOVERED ONE: the rise grows from 46 to 104, the jog from 26 to 44, and the tag
+         gains the one line that decides whether this building is worth entering. -->
+    <div class="ld ld--hover" style="left:300px; top:394px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-104px; height:104px"></div><div class="ld__jog" style="left:0; top:-104px; width:44px"></div><div class="ld__tag" style="left:44px; top:-136px">03<span class="ld__avail">23 suites · 19 available</span></div></div>
+    <div class="ld ld--rest" style="left:392px; top:440px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-46px; height:46px"></div><div class="ld__jog" style="left:0; top:-46px; width:26px"></div><div class="ld__tag" style="left:26px; top:-60px">04</div></div>
+    <div class="ld ld--rest" style="left:512px; top:476px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-46px; height:46px"></div><div class="ld__jog" style="left:0; top:-46px; width:26px"></div><div class="ld__tag" style="left:26px; top:-60px">06</div></div>
+    <div class="ld ld--rest" style="left:660px; top:258px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-44px; height:44px"></div><div class="ld__jog" style="left:-26px; top:-44px; width:26px"></div><div class="ld__tag" style="left:-62px; top:-58px">08</div></div>
+    <div class="ld ld--rest" style="left:848px; top:312px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-46px; height:46px"></div><div class="ld__jog" style="left:0; top:-46px; width:26px"></div><div class="ld__tag" style="left:26px; top:-60px">07</div></div>
+    <div class="ld ld--rest" style="left:986px; top:126px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-40px; height:40px"></div><div class="ld__jog" style="left:-26px; top:-40px; width:26px"></div><div class="ld__tag" style="left:-62px; top:-54px">10</div></div>
+    <div class="ld ld--rest" style="left:1130px; top:150px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-44px; height:44px"></div><div class="ld__jog" style="left:0; top:-44px; width:26px"></div><div class="ld__tag" style="left:26px; top:-58px">09</div></div>
+    <div class="ld ld--rest" style="left:1306px; top:190px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-46px; height:46px"></div><div class="ld__jog" style="left:-26px; top:-46px; width:26px"></div><div class="ld__tag" style="left:-62px; top:-60px">11</div></div>
+    <div class="ld ld--rest ld--gate" style="left:132px; top:648px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-44px; height:44px"></div><div class="ld__jog" style="left:0; top:-44px; width:22px"></div><div class="ld__tag" style="left:22px; top:-58px">Entry</div></div>
+
+    <div class="con">
+      <div class="con__main">
+        <div class="con__left">
+          <div class="con__fig fig">03</div>
+          <div class="con__id">
+            <div class="con__k">Building — under the pointer</div>
+            <div class="con__v">23 suites · <b>19 available</b></div>
+          </div>
+        </div>
+        <div class="con__acts"><div class="con__tell">Click to open <em>building 03</em>.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 3 · BUILDING SELECTED ==================== -->
+<div class="cap"><span><b>3</b> &nbsp; Building 03 selected</span><span>Accent on the leader · rail opens · primary action changes</span></div>
+<div class="frame">
+  <img class="plate" src="../plates/building.jpeg" alt="">
+  <div class="layer">
+    <div class="mark"><div class="mark__name">Luxe&nbsp;Corsa</div><div class="mark__where">Lake Zurich, Illinois</div></div>
+
+    <div class="ld ld--on" style="left:600px; top:392px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-96px; height:96px"></div><div class="ld__jog" style="left:0; top:-96px; width:40px"></div><div class="ld__tag" style="left:40px; top:-112px">Building 03</div></div>
+    <div class="ld ld--dim" style="left:300px; top:470px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-40px; height:40px"></div><div class="ld__jog" style="left:0; top:-40px; width:22px"></div><div class="ld__tag" style="left:22px; top:-54px">01</div></div>
+    <div class="ld ld--dim" style="left:1010px; top:452px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-40px; height:40px"></div><div class="ld__jog" style="left:0; top:-40px; width:22px"></div><div class="ld__tag" style="left:22px; top:-54px">04</div></div>
+    <div class="ld ld--dim" style="left:1268px; top:392px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-40px; height:40px"></div><div class="ld__jog" style="left:-22px; top:-40px; width:22px"></div><div class="ld__tag" style="left:-56px; top:-54px">06</div></div>
+
+    <div class="con">
+      <div class="con__main">
+        <div class="con__left">
+          <div class="con__fig fig">03</div>
+          <div class="con__id">
+            <div class="con__k">Building</div>
+            <div class="con__v">23 suites · <b>19 available</b></div>
+          </div>
+        </div>
+        <div class="con__acts">
+          <span class="back">← Compound</span>
+          <div class="con__tell">Choose a suite.</div>
+        </div>
+      </div>
+      <div class="rail">
+        <div class="rail__lead"><span class="k">Select a suite</span><span class="n">Each mark is one suite</span></div>
+        <div class="rail__mid"><div class="rail__scale"><div class="rail__marks">
+            <i></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i class="sold"></i><i></i><i></i>
+            <i></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
+          <div class="rail__ends"><span>01</span><span>23</span></div></div></div>
+        <div class="rail__n"><b>19</b> of 23 available</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 4 · SUITE RAIL HOVER ==================== -->
+<div class="cap"><span><b>4</b> &nbsp; Hover suite 11 on the rail</span><span>Mark names itself · bay responds in the model</span></div>
+<div class="frame">
+  <img class="plate" src="../plates/building.jpeg" alt="">
+  <div class="layer">
+    <div class="mark"><div class="mark__name">Luxe&nbsp;Corsa</div><div class="mark__where">Lake Zurich, Illinois</div></div>
+
+    <div class="ld ld--on" style="left:600px; top:392px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-96px; height:96px"></div><div class="ld__jog" style="left:0; top:-96px; width:40px"></div><div class="ld__tag" style="left:40px; top:-112px">Building 03</div></div>
+    <div class="ld ld--dim" style="left:300px; top:470px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-40px; height:40px"></div><div class="ld__jog" style="left:0; top:-40px; width:22px"></div><div class="ld__tag" style="left:22px; top:-54px">01</div></div>
+    <div class="ld ld--dim" style="left:1010px; top:452px"><div class="ld__a"></div><div class="ld__rise" style="left:0; top:-40px; height:40px"></div><div class="ld__jog" style="left:0; top:-40px; width:22px"></div><div class="ld__tag" style="left:22px; top:-54px">04</div></div>
+
+    <!-- the bay under the pointer answers in the model, at the door it is -->
+    <div class="door" style="left:742px; top:474px">
+      <div class="door__d" style="border-color:var(--ink)"></div>
+      <div class="door__l" style="top:-64px; height:64px; background:var(--ink-70)"></div>
+      <div class="door__t" style="left:10px; top:-80px; background:rgb(8 9 11 / .9); color:var(--ink); border:1px solid var(--ink-55)">Suite 03 · 11</div>
+    </div>
+
+    <div class="con">
+      <div class="con__main">
+        <div class="con__left">
+          <div class="con__fig fig">11</div>
+          <div class="con__id">
+            <div class="con__k">Suite — under the pointer</div>
+            <div class="con__v">Type B · 1,863 sq ft · <b>available</b></div>
+          </div>
+        </div>
+        <div class="con__acts">
+          <span class="back">← Compound</span>
+          <div class="con__tell">Click to choose it.</div>
+        </div>
+      </div>
+      <div class="rail">
+        <div class="rail__lead"><span class="k">Select a suite</span><span class="n">Each mark is one suite</span></div>
+        <div class="rail__mid"><div class="rail__scale"><div class="rail__cue" style="left:112px">Suite 11 · Type B</div>
+          <div class="rail__marks">
+            <i></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i class="sold"></i><i></i><i></i>
+            <i class="hot"></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
+          <div class="rail__ends"><span>01</span><span>23</span></div></div></div>
+        <div class="rail__n"><b>19</b> of 23 available</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 5 · SUITE SELECTED ==================== -->
+<div class="cap"><span><b>5</b> &nbsp; Suite 03 · 11 selected</span><span>Price becomes the figure · ENTER arms</span></div>
+<div class="frame">
+  <img class="plate" src="../plates/suite.jpeg" alt="">
+  <div class="layer">
+    <div class="mark"><div class="mark__name">Luxe&nbsp;Corsa</div><div class="mark__where">Lake Zurich, Illinois</div></div>
+
+    <div class="door" style="left:614px; top:494px">
+      <div class="door__d"></div>
+      <div class="door__l" style="top:-214px; height:214px"></div>
+      <div class="door__t" style="left:10px; top:-232px">Suite 03 · 11</div>
+    </div>
+
+    <div class="con">
+      <div class="con__main">
+        <div class="con__left">
+          <div class="con__fig fig">03 · 11</div>
+          <div class="con__id">
+            <div class="con__k">Suite — selected</div>
+            <div class="con__v">Building 03 · <b>available now</b></div>
+          </div>
+        </div>
+        <div class="con__acts">
+          <span class="back">← Building 03</span>
+          <div class="go go--armed"><div class="go__t">Enter suite 03 · 11</div><div class="go__a">→</div></div>
+        </div>
+      </div>
+      <div class="rail">
+        <div class="rail__lead"><span class="k" style="color:var(--ink-55)">Selected</span><span class="n">11 of 23</span></div>
+        <div class="rail__mid"><div class="rail__scale"><div class="rail__cue rail__cue--on" style="left:112px">Suite 11</div>
+          <div class="rail__marks">
+            <i></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i class="sold"></i><i></i><i></i>
+            <i class="on"></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
+          <div class="rail__ends"><span>01</span><span>23</span></div></div></div>
+        <div class="facts">
+          <div><span class="k">Type</span><span class="v">B</span></div>
+          <div><span class="k">Area</span><span class="v">1,863 sq ft</span></div>
+          <div><span class="k">From</span><span class="v price">$549,000</span></div>
+          <div class="more">Full specification →</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 6 · ENTER READY ==================== -->
+<div class="cap"><span><b>6</b> &nbsp; Enter — ready</span><span>The act fills · everything else steps back</span></div>
+<div class="frame">
+  <img class="plate" src="../plates/suite.jpeg" alt="">
+  <div class="layer">
+    <div class="mark"><div class="mark__name">Luxe&nbsp;Corsa</div><div class="mark__where">Lake Zurich, Illinois</div></div>
+
+    <div class="door" style="left:614px; top:494px">
+      <div class="door__d"></div>
+      <div class="door__l" style="top:-214px; height:214px"></div>
+      <div class="door__t" style="left:10px; top:-232px">Suite 03 · 11</div>
+    </div>
+
+    <div class="con">
+      <div class="con__main">
+        <div class="con__left">
+          <div class="con__fig fig">03 · 11</div>
+          <div class="con__id">
+            <div class="con__k">Suite</div>
+            <div class="con__v">Type B · 1,863 sq ft · <b>from $549,000</b></div>
+          </div>
+        </div>
+        <div class="con__acts">
+          <span class="back">← Building 03</span>
+          <div class="go go--ready">
+            <div class="go__t"><span><span class="go__sub">Next</span>Enter suite 03 · 11</span></div>
+            <div class="go__a">→</div>
+          </div>
+        </div>
+      </div>
+      <div class="rail">
+        <div class="rail__lead"><span class="k" style="color:var(--ink-55)">Selected</span><span class="n">11 of 23</span></div>
+        <div class="rail__mid"><div class="rail__scale"><div class="rail__marks">
+            <i></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i class="sold"></i><i></i><i></i>
+            <i class="on"></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
+          <div class="rail__ends"><span>01</span><span>23</span></div></div></div>
+        <div class="facts"><div class="more">Full specification →</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== THE SEQUENCE ==================== -->
+<div class="cap"><span><b>Sequence</b> &nbsp; one path through Act 02</span><span>compound → 03 → suite 11 → enter</span></div>
+<div class="seq">
+  <figure><img src="./shots/V1-COMPOUND-REST.jpeg" alt=""><figcaption><b>1 Rest</b>choose a building</figcaption></figure>
+  <figure><img src="./shots/V2-BUILDING-HOVER.jpeg" alt=""><figcaption><b>2 Hover 03</b>leader extends</figcaption></figure>
+  <figure><img src="./shots/V3-BUILDING-SELECTED.jpeg" alt=""><figcaption><b>3 Select 03</b>rail opens</figcaption></figure>
+  <figure><img src="./shots/V4-SUITE-RAIL-HOVER.jpeg" alt=""><figcaption><b>4 Hover 11</b>mark names itself</figcaption></figure>
+  <figure><img src="./shots/V5-SUITE-SELECTED.jpeg" alt=""><figcaption><b>5 Select 11</b>enter arms</figcaption></figure>
+  <figure><img src="./shots/V6-ENTER-READY.jpeg" alt=""><figcaption><b>6 Enter</b>the act fills</figcaption></figure>
+</div>
+
+</body>
+</html>

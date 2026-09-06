@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Act 02 — Proposed direction · The Apron</title>
+<link rel="stylesheet" href="./_study.css">
+<style>
+/* ======================================================================================
+   PROPOSED DIRECTION — "THE APRON"
+
+   Named after the thing it is: the concrete forecourt laid in front of every door line.
+   The compound stands on ground; so does the interface.
+
+   THE TWO RULES IT IS BUILT ON, both from the evidence pass:
+
+   1. INFORMATION IS GROUNDED, NOT FLOATING.  Earlier explorations set sentences straight
+      onto the render.  Over a lit roof they became unreadable, and over the dark ground
+      they read as a caption for nothing.  Every word that carries meaning now sits on a
+      real plate with a real edge.  What stays on the model is only what a building site
+      itself carries: a number on a building, a name on the gate.
+
+   2. ONE GRAMMAR PER SCALE.  Buildings are chosen IN THE MODEL, because a building is a
+      place and the model is where places are.  Suites are chosen ON THE APRON, because
+      twenty-three doors on one elevation cannot be told apart at compound distance.
+      There is no index, no breadcrumb, no legend and no table anywhere.
+
+   THE APRON HAS THREE HEIGHTS, and its height is the level indicator — nothing else has
+   to say which state you are in.
+   ====================================================================================== */
+
+/* --- THE PLATE.  A real ground with a real edge, not a scrim. ----------------------- */
+.apron {
+  position: absolute; z-index: 6; left: 0; right: 0; bottom: 0;
+  background: #0C0E11;
+  border-top: 1px solid var(--ink-24);
+  padding: var(--s5) var(--s7) var(--s5);
+  display: grid; gap: var(--s4);
+}
+/* The one warm line in the frame: the red reveal that runs down the corner pier of every
+   real Luxe Corsa building, laid along the plate's leading edge. It is the project's own
+   detail, at the project's own weight — 2px, and only under the subject. */
+.apron::before {
+  content: ''; position: absolute; left: 0; top: -1px; height: 2px; width: 148px;
+  background: var(--red);
+}
+
+.row1 { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s7); }
+
+/* THE SUBJECT — figure and name, always in the same place, always the largest thing. */
+.subj { display: flex; align-items: baseline; gap: var(--s5); }
+.subj__fig { font-size: 56px; line-height: .82; }
+.subj__nm { display: grid; gap: 3px; }
+.subj__k { font-family: var(--mono); font-size: var(--t-tech); font-weight: 500; letter-spacing: .20em; text-transform: uppercase; color: var(--ink-55); }
+.subj__v { font-family: var(--grot); font-size: var(--t-edit); color: var(--ink-85); }
+
+/* THE INSTRUCTION — one sentence, never more, and it lives on the plate. */
+.tell { font-family: var(--grot); font-size: 24px; font-weight: 600; letter-spacing: -0.015em; color: var(--ink); }
+
+/* THE ACTS — Back is quiet and contextual. Reset is not exposed at all: the model
+   returns to its composed pose whenever a level changes, so there is nothing to reset
+   from that Back does not already undo. */
+.acts { display: flex; align-items: center; gap: var(--s6); }
+.acts .back { font-family: var(--mono); font-size: var(--t-tech); font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-55); }
+.enter {
+  font-family: var(--grot); font-size: 22px; font-weight: 600; letter-spacing: -0.01em;
+  color: var(--ink); padding-bottom: 6px; border-bottom: 2px solid var(--red);
+}
+.enter i { font-style: normal; color: var(--red); }
+
+/* --- THE SUITE INSTRUMENT, on the apron, only once a building is chosen. ----------- */
+.reg { display: grid; grid-template-columns: 92px 1fr 150px; align-items: flex-end; gap: var(--s5); }
+.reg__l { font-family: var(--mono); font-size: var(--t-tech); font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-55); padding-bottom: 12px; }
+.reg__t { position: relative; display: flex; align-items: flex-end; gap: 5px; padding-bottom: 9px; }
+.reg__t::after { content: ''; position: absolute; left: -8px; right: -8px; bottom: 4px; height: 1px; background: var(--ink-24); }
+.reg__t i { display: block; width: 5px; height: 22px; background: var(--ink-40); }
+.reg__t i.sold { height: 8px; background: var(--ink-16); }
+.reg__t i.on { height: 38px; background: var(--red); }
+.reg__n { font-family: var(--grot); font-size: 17px; color: var(--ink-55); padding-bottom: 10px; text-align: right; font-variant-numeric: tabular-nums; }
+.reg__n b { color: var(--ink); font-weight: 500; }
+
+/* the three facts, at suite level only, on the plate where they can be read */
+.facts { display: flex; gap: var(--s7); }
+.facts div { display: grid; gap: 3px; }
+.facts .k { font-family: var(--mono); font-size: var(--t-tech); font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-55); }
+.facts .v { font-family: var(--grot); font-size: 19px; color: var(--ink); }
+.facts .more { font-family: var(--mono); font-size: var(--t-tech); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-55); align-self: end; }
+
+/* --- WHAT STAYS ON THE MODEL: identity only. --------------------------------------- */
+.bp { position: absolute; z-index: 4; display: grid; justify-items: center; gap: 5px; transform: translateX(-50%); }
+.bp__n {
+  font-family: var(--mono); font-size: var(--t-tech); font-weight: 500; letter-spacing: .10em;
+  color: var(--ink-85); padding: 3px 7px 2px;
+  border: 1px solid var(--ink-24); background: rgb(6 7 8 / .58);
+  font-variant-numeric: tabular-nums;
+}
+.bp__stalk { width: 1px; height: 15px; background: var(--ink-40); }
+.bp--dim .bp__n { color: var(--ink-40); border-color: var(--ink-10); background: rgb(6 7 8 / .32); }
+.bp--dim .bp__stalk { background: var(--ink-16); height: 10px; }
+.bp--on .bp__n { color: var(--void); background: var(--ink); border-color: var(--ink); font-size: 15px; padding: 4px 9px 3px; }
+.bp--on .bp__stalk { background: var(--ink); height: 22px; }
+
+.gate { position: absolute; z-index: 4; }
+.gate__d { position: absolute; width: 7px; height: 7px; border: 1px solid var(--ink-70); border-radius: 50%; margin: -4px 0 0 -4px; }
+.gate__l { position: absolute; background: var(--ink-40); }
+.gate__t { position: absolute; white-space: nowrap; font-family: var(--mono); font-size: var(--t-tech); font-weight: 500; letter-spacing: .20em; text-transform: uppercase; color: var(--ink-70); }
+
+/* the chosen suite, named at its own door in the project's red */
+.door { position: absolute; z-index: 4; }
+.door__d { position: absolute; width: 7px; height: 7px; border: 1px solid var(--red); border-radius: 50%; margin: -4px 0 0 -4px; }
+.door__l { position: absolute; background: var(--red); width: 1px; }
+.door__t { position: absolute; white-space: nowrap; font-family: var(--mono); font-size: var(--t-tech); font-weight: 500; letter-spacing: .20em; text-transform: uppercase; color: var(--red); }
+</style>
+</head>
+<body>
+
+<div class="deckhead">
+  <h1>Proposed — “The Apron”</h1>
+  <p>One direction, built from the evidence pass. Information is grounded on a real plate with a real edge, never floating on the render. Buildings are chosen in the model because a building is a place; suites are chosen on the apron because twenty-three doors cannot be told apart at compound distance. No index, no breadcrumb, no legend, no table. The plate has three heights, and its height is the level indicator.</p>
+  <p class="note">Static composition board · 1440 × 900 · model plates are real captures of the production Three.js compound · Reset is deliberately not exposed</p>
+</div>
+
+<!-- ============================ 1 · COMPOUND ============================ -->
+<div class="cap"><span><b>1</b> &nbsp; Compound</span><span>Choose a building</span></div>
+<div class="frame">
+  <img class="plate" src="../plates/compound.jpeg" alt="">
+  <div class="layer">
+    <div class="mark">
+      <div class="mark__name">Luxe&nbsp;Corsa</div>
+      <div class="mark__where">Lake Zurich, Illinois</div>
+    </div>
+
+    <div class="bp" style="left:224px; top:296px"><div class="bp__n">01</div><div class="bp__stalk"></div></div>
+    <div class="bp" style="left:300px; top:350px"><div class="bp__n">03</div><div class="bp__stalk"></div></div>
+    <div class="bp" style="left:392px; top:396px"><div class="bp__n">04</div><div class="bp__stalk"></div></div>
+    <div class="bp" style="left:512px; top:432px"><div class="bp__n">06</div><div class="bp__stalk"></div></div>
+    <div class="bp" style="left:848px; top:268px"><div class="bp__n">07</div><div class="bp__stalk"></div></div>
+    <div class="bp" style="left:660px; top:214px"><div class="bp__n">08</div><div class="bp__stalk"></div></div>
+    <div class="bp" style="left:1130px; top:106px"><div class="bp__n">09</div><div class="bp__stalk"></div></div>
+    <div class="bp" style="left:986px; top:82px"><div class="bp__n">10</div><div class="bp__stalk"></div></div>
+    <div class="bp" style="left:1306px; top:146px"><div class="bp__n">11</div><div class="bp__stalk"></div></div>
+
+    <div class="gate" style="left:132px; top:648px">
+      <div class="gate__d"></div>
+      <div class="gate__l" style="left:0; top:-48px; width:1px; height:48px"></div>
+      <div class="gate__t" style="left:10px; top:-60px">Entry</div>
+    </div>
+
+    <div class="apron">
+      <div class="row1">
+        <div class="subj">
+          <div class="subj__fig fig">121</div>
+          <div class="subj__nm">
+            <div class="subj__k">The compound</div>
+            <div class="subj__v">Private suites in 11 buildings · 98 available</div>
+          </div>
+        </div>
+        <div class="tell">Choose a building.</div>
+        <div class="acts"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================ 2 · BUILDING ============================ -->
+<div class="cap"><span><b>2</b> &nbsp; Building 03 selected</span><span>Choose a suite</span></div>
+<div class="frame">
+  <img class="plate" src="../plates/building.jpeg" alt="">
+  <div class="layer">
+    <div class="mark">
+      <div class="mark__name">Luxe&nbsp;Corsa</div>
+      <div class="mark__where">Lake Zurich, Illinois</div>
+    </div>
+
+    <div class="bp bp--on" style="left:598px; top:330px"><div class="bp__n">03</div><div class="bp__stalk"></div></div>
+    <div class="bp bp--dim" style="left:300px; top:452px"><div class="bp__n">01</div><div class="bp__stalk"></div></div>
+    <div class="bp bp--dim" style="left:960px; top:430px"><div class="bp__n">04</div><div class="bp__stalk"></div></div>
+    <div class="bp bp--dim" style="left:1230px; top:372px"><div class="bp__n">06</div><div class="bp__stalk"></div></div>
+
+    <div class="apron">
+      <div class="row1">
+        <div class="subj">
+          <div class="subj__fig fig">03</div>
+          <div class="subj__nm">
+            <div class="subj__k">Building</div>
+            <div class="subj__v">23 suites · 19 available</div>
+          </div>
+        </div>
+        <div class="tell">Choose a suite.</div>
+        <div class="acts"><span class="back">← Compound</span></div>
+      </div>
+      <div class="reg">
+        <div class="reg__l">Suites</div>
+        <div class="reg__t">
+          <i></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i class="sold"></i><i></i><i></i>
+          <i></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+        <div class="reg__n"><b>19</b> of 23 available</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================ 3 · SUITE ============================ -->
+<div class="cap"><span><b>3</b> &nbsp; Suite 03 · 11 selected</span><span>Enter suite</span></div>
+<div class="frame">
+  <img class="plate" src="../plates/suite.jpeg" alt="">
+  <div class="layer">
+    <div class="mark">
+      <div class="mark__name">Luxe&nbsp;Corsa</div>
+      <div class="mark__where">Lake Zurich, Illinois</div>
+    </div>
+
+    <div class="door" style="left:614px; top:494px">
+      <div class="door__d"></div>
+      <div class="door__l" style="left:0; top:-248px; height:248px"></div>
+      <div class="door__t" style="left:10px; top:-262px">Suite 03 · 11</div>
+    </div>
+
+    <div class="apron">
+      <div class="row1">
+        <div class="subj">
+          <div class="subj__fig fig">03 · 11</div>
+          <div class="subj__nm">
+            <div class="subj__k">Suite</div>
+            <div class="subj__v">Building 03 · available</div>
+          </div>
+        </div>
+        <div class="acts">
+          <span class="back">← Building 03</span>
+          <span class="enter">Enter suite <i>→</i></span>
+        </div>
+      </div>
+      <div class="reg">
+        <div class="reg__l">Suites</div>
+        <div class="reg__t">
+          <i></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i class="sold"></i><i></i><i></i>
+          <i class="on"></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+        <div class="reg__n">11 of 23</div>
+      </div>
+      <div class="facts">
+        <div><span class="k">Type</span><span class="v">B</span></div>
+        <div><span class="k">Area</span><span class="v">1,863 sq ft</span></div>
+        <div><span class="k">From</span><span class="v">$549,000</span></div>
+        <div class="more">Full specification →</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

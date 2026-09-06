@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Act 02 — C · Precision Navigation Instrument</title>
+<link rel="stylesheet" href="./_study.css">
+<style>
+/* ======================================================================================
+   DIRECTION C — PRECISION NAVIGATION INSTRUMENT
+
+   THE GRAMMAR: ONE DEVICE, TWO RAILS.  Everything a visitor can do lives in a single
+   compact instrument centred on the bottom edge — and the transformation this direction
+   tests is that the BUILDING INDEX BECOMES A RAIL TOO.  Eleven buildings are eleven
+   marks; twenty-three suites are twenty-three marks; it is the same instrument reading at
+   two scales, so a visitor learns one control and then already knows the second.
+
+   That is the difference from a bottom bar carrying a breadcrumb, an index and a rail at
+   once: here there is no breadcrumb and no index, because the rail IS the index. The
+   level is shown by which rail is armed, not by a trail of words.
+
+   It is deliberately NOT full width. A device has edges; a bar does not, and a bar that
+   runs edge to edge reads as browser chrome rather than as an instrument on the picture.
+   ====================================================================================== */
+
+.inst {
+  position: absolute; z-index: 6; left: 50%; bottom: var(--s7);
+  transform: translateX(-50%);
+  width: 690px;
+  display: grid; gap: var(--s4);
+  padding-top: var(--s4);
+  border-top: 2px solid var(--ink);
+}
+/* No plate, no card, no blur: the instrument is held by one heavy top rule and the
+   frame's own tonal floor. A translucent panel here would be the dashboard tell. */
+
+.inst__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s5); }
+.inst__now { font-family: var(--grot); font-size: 26px; font-weight: 600; letter-spacing: -0.02em; }
+.inst__now small { font-family: var(--grot); font-size: 17px; font-weight: 400; color: var(--ink-55); letter-spacing: 0; margin-left: var(--s3); }
+.inst__do { font-family: var(--mono); font-size: var(--t-tech); font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-55); }
+
+/* --- A RAIL. One mark per thing, standing on a datum that runs past both ends. ------ */
+.rail { position: relative; display: flex; align-items: flex-end; gap: 5px; padding-bottom: 9px; }
+.rail::after { content: ''; position: absolute; left: -8px; right: -8px; bottom: 4px; height: 1px; background: var(--ink-24); }
+.rail i { display: block; width: 5px; height: 22px; background: var(--ink-40); }
+.rail i.sold { height: 8px; background: var(--ink-16); }
+.rail i.on { height: 38px; background: var(--red); }
+/* The building rail is coarser than the suite rail, so the two scales never read as the
+   same list at different lengths. */
+.rail--b i { width: 12px; height: 26px; }
+.rail--b i.on { height: 40px; }
+
+/* AN INSTRUMENT IS ALIGNED OR IT IS NOT AN INSTRUMENT. Flex with space-between let the
+   two rails start at different x because their labels differ in width — the one detail
+   that turns a machined device back into a bar with things on it. Fixed columns. */
+.railrow { display: grid; grid-template-columns: 92px 1fr 104px; align-items: flex-end; gap: var(--s5); }
+.railrow__n { text-align: right; }
+.railrow__lbl { font-family: var(--mono); font-size: var(--t-tech); font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-55); padding-bottom: 12px; }
+.railrow__n { font-family: var(--grot); font-size: 17px; color: var(--ink-55); padding-bottom: 10px; font-variant-numeric: tabular-nums; }
+.railrow__n b { color: var(--ink); font-weight: 500; }
+
+/* --- the facts, three of them, only at suite level ---------------------------------- */
+.facts { display: flex; gap: var(--s7); }
+.facts div { display: grid; gap: 3px; }
+.facts .k { font-family: var(--mono); font-size: var(--t-tech); font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-55); }
+.facts .v { font-family: var(--grot); font-size: 19px; color: var(--ink); }
+
+/* --- the act, armed only at suite level --------------------------------------------- */
+.go { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s5); padding-top: var(--s3); border-top: 1px solid var(--ink-16); }
+.go__t { font-family: var(--grot); font-size: 22px; font-weight: 600; color: var(--ink); letter-spacing: -0.01em; }
+.go__t i { font-style: normal; color: var(--red); }
+.go__b { font-family: var(--mono); font-size: var(--t-tech); font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-55); }
+
+/* the instrument names the subject in the scene too, with one short leader */
+.tag { position: absolute; z-index: 4; }
+.tag__dot { position: absolute; width: 7px; height: 7px; border: 1px solid var(--ink); border-radius: 50%; margin: -4px 0 0 -4px; }
+.tag__l { position: absolute; background: var(--ink-40); }
+.tag__t { position: absolute; white-space: nowrap; font-family: var(--mono); font-size: var(--t-tech); font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--ink); }
+.tag--red .tag__dot { border-color: var(--red); }
+.tag--red .tag__l { background: var(--red); }
+.tag--red .tag__t { color: var(--red); }
+</style>
+</head>
+<body>
+
+<div class="deckhead">
+  <h1>C — Precision Navigation Instrument</h1>
+  <p>One device, two rails. Eleven buildings are eleven marks; twenty-three suites are twenty-three marks — the same instrument reading at two scales, so a visitor learns one control and already knows the second. No breadcrumb and no index, because the rail is the index. Deliberately not full width: a device has edges, and a bar that runs edge to edge reads as browser chrome.</p>
+  <p class="note">Static composition board · 1440 × 900 · model plates are real captures of the production Three.js compound</p>
+</div>
+
+<!-- ============================ 1 · COMPOUND ============================ -->
+<div class="cap"><span><b>C1</b> &nbsp; Compound — first five seconds</span><span>Choose a building</span></div>
+<div class="frame">
+  <img class="plate" src="../plates/compound.jpeg" alt="">
+  <div class="layer">
+    <div class="mark">
+      <div class="mark__name">Luxe&nbsp;Corsa</div>
+      <div class="mark__where">Lake Zurich, Illinois</div>
+    </div>
+
+    <div class="tag" style="left:132px; top:648px">
+      <div class="tag__dot"></div>
+      <div class="tag__l" style="left:0; top:-52px; width:1px; height:52px"></div>
+      <div class="tag__t" style="left:10px; top:-64px">Entry</div>
+    </div>
+
+    <div class="inst">
+      <div class="inst__head">
+        <div class="inst__now">The compound<small>121 private suites</small></div>
+        <div class="inst__do">Choose a building</div>
+      </div>
+      <div class="railrow">
+        <div class="railrow__lbl">Buildings</div>
+        <div class="rail rail--b">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+        <div class="railrow__n"><b>98</b> available</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================ 2 · BUILDING ============================ -->
+<div class="cap"><span><b>C2</b> &nbsp; Building 03 selected</span><span>Choose a suite</span></div>
+<div class="frame">
+  <img class="plate" src="../plates/building.jpeg" alt="">
+  <div class="layer">
+    <div class="mark">
+      <div class="mark__name">Luxe&nbsp;Corsa</div>
+      <div class="mark__where">Lake Zurich, Illinois</div>
+    </div>
+
+    <div class="tag" style="left:600px; top:392px">
+      <div class="tag__dot"></div>
+      <div class="tag__l" style="left:0; top:-78px; width:1px; height:78px"></div>
+      <div class="tag__t" style="left:10px; top:-90px">Building 03</div>
+    </div>
+
+    <div class="inst">
+      <div class="inst__head">
+        <div class="inst__now">Building 03<small>23 suites</small></div>
+        <div class="inst__do">Choose a suite</div>
+      </div>
+      <!-- the building rail stays, with 03 struck: the visitor can see where they are
+           among the eleven without a breadcrumb telling them -->
+      <div class="railrow">
+        <div class="railrow__lbl">Buildings</div>
+        <div class="rail rail--b">
+          <i></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+        <div class="railrow__n">03 of 11</div>
+      </div>
+      <div class="railrow">
+        <div class="railrow__lbl">Suites</div>
+        <div class="rail">
+          <i></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i class="sold"></i><i></i><i></i>
+          <i></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+        <div class="railrow__n"><b>19</b> of 23</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================ 3 · SUITE ============================ -->
+<div class="cap"><span><b>C3</b> &nbsp; Suite 03 · 11 selected</span><span>Enter suite</span></div>
+<div class="frame">
+  <img class="plate" src="../plates/suite.jpeg" alt="">
+  <div class="layer">
+    <div class="mark">
+      <div class="mark__name">Luxe&nbsp;Corsa</div>
+      <div class="mark__where">Lake Zurich, Illinois</div>
+    </div>
+
+    <div class="tag tag--red" style="left:614px; top:494px">
+      <div class="tag__dot"></div>
+      <div class="tag__l" style="left:0; top:-86px; width:1px; height:86px"></div>
+      <div class="tag__t" style="left:10px; top:-98px">Suite 03 · 11</div>
+    </div>
+
+    <div class="inst">
+      <div class="inst__head">
+        <div class="inst__now">Suite 03 · 11<small>Building 03</small></div>
+        <div class="inst__do">Ready to enter</div>
+      </div>
+      <div class="railrow">
+        <div class="railrow__lbl">Suites</div>
+        <div class="rail">
+          <i></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i class="sold"></i><i></i><i></i>
+          <i class="on"></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i class="sold"></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+        <div class="railrow__n">11 of 23</div>
+      </div>
+      <div class="facts">
+        <div><span class="k">Type</span><span class="v">B</span></div>
+        <div><span class="k">Area</span><span class="v">1,863 sq ft</span></div>
+        <div><span class="k">From</span><span class="v">$549,000</span></div>
+      </div>
+      <div class="go">
+        <div class="go__t">Enter suite 03 · 11 <i>→</i></div>
+        <div class="go__b">← Building 03</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

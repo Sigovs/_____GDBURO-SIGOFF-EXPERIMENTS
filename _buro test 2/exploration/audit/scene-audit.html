@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Act 02 — scene audit</title>
+<style>
+  html,body{margin:0;height:100%;background:#0A0B0D;color:#F2F4F6;font:13px/1.5 ui-monospace,Consolas,monospace}
+  #mount{position:fixed;inset:0}
+</style>
+</head>
+<body>
+<div id="mount"></div>
+<script type="module">
+/* ======================================================================================
+   SCENE AUDIT — evidence, not opinion.
+
+   The artifacts in Act 02 have to be identified by OBJECT, not by pointing at a
+   screenshot and hiding whatever is under the finger.  This page builds the production
+   compound with the production modules, then walks the scene graph and reports every
+   mesh: what made it, what material it wears, its world-space box, and whether that box
+   intersects a mass it has no business touching.
+
+   It imports src/ read-only and writes nothing.
+   ====================================================================================== */
+import { buildCompound } from '/src/site/compound.js'
+import { initCompound3D } from '/src/site/compound3d.js'
+import * as THREE from 'three'
+
+const mount = document.getElementById('mount')
+const compound = buildCompound(mount)
+const gl = initCompound3D(mount, compound)
+window.__gl = gl
+window.__compound = compound
+window.__THREE = THREE
+
+/* Give every mesh a readable identity: userData.kind if the module set one, otherwise the
+   material's colour + geometry type, which is enough to trace it back to its constructor. */
+const hex = (m) => (m && m.color ? '#' + m.color.getHexString() : (m ? m.type : '—'))
+
+window.__dump = () => {
+  const rows = []
+  const box = new THREE.Box3()
+  gl.scene.traverse((o) => {
+    if (!o.isMesh && !o.isInstancedMesh) return
+    box.setFromObject(o)
+    const s = box.getSize(new THREE.Vector3())
+    const c = box.getCenter(new THREE.Vector3())
+    const mat = Array.isArray(o.material) ? o.material[0] : o.material
+    rows.push({
+      kind: o.userData?.kind || null,
+      num: o.userData?.num || o.userData?.building || null,
+      geo: o.geometry?.type,
+      inst: o.isInstancedMesh ? o.count : null,
+      mat: mat?.type,
+      col: hex(mat),
+      vis: o.visible,
+      size: [+s.x.toFixed(1), +s.y.toFixed(1), +s.z.toFixed(1)],
+      ctr: [+c.x.toFixed(1), +c.y.toFixed(1), +c.z.toFixed(1)],
+      parent: o.parent?.userData?.kind || o.parent?.type,
+    })
+  })
+  return rows
+}
+
+/* THE GAP BETWEEN NEIGHBOURING SUITES, measured rather than inferred from the scale
+   factor.  This is the number that decides whether the facade is a continuous building
+   divided by piers or a row of separate boxes with slots between them. */
+window.__gaps = () => {
+  const byB = new Map()
+  gl.scene.traverse((o) => {
+    if (o.userData?.kind !== 'suite') return
+    const b = o.userData.building
+    if (!byB.has(b)) byB.set(b, [])
+    byB.get(b).push(o)
+  })
+  const out = []
+  const box = new THREE.Box3()
+  for (const [num, meshes] of byB) {
+    const items = meshes.map((m) => {
+      box.setFromObject(m)
+      const s = box.getSize(new THREE.Vector3())
+      const c = box.getCenter(new THREE.Vector3())
+      return { c, s, m }
+    }).sort((a, b) => (a.c.x - b.c.x) || (a.c.z - b.c.z))
+    const gaps = []
+    for (let i = 1; i < items.length; i++) {
+      const d = items[i].c.clone().sub(items[i - 1].c).length()
+      const halfSum = (Math.max(items[i].s.x, items[i].s.z) + Math.max(items[i - 1].s.x, items[i - 1].s.z)) / 2
+      gaps.push(+(d - halfSum).toFixed(3))
+    }
+    const one = items[0]
+    out.push({
+      building: num, bays: items.length,
+      bayW: one ? +Math.max(one.s.x, one.s.z).toFixed(2) : null,
+      bayH: one ? +one.s.y.toFixed(2) : null,
+      bayD: one ? +Math.min(one.s.x, one.s.z).toFixed(2) : null,
+      gapMin: gaps.length ? Math.min(...gaps) : null,
+      gapMax: gaps.length ? Math.max(...gaps) : null,
+      gapMedian: gaps.length ? gaps.sort((a, b) => a - b)[Math.floor(gaps.length / 2)] : null,
+    })
+  }
+  return out
+}
+
+/* Anything whose footprint sits on the site but touches no building and no drive is a
+   candidate artifact.  Reported with its box so it can be found in the frame. */
+window.__orphans = () => {
+  const box = new THREE.Box3()
+  const masses = []
+  gl.scene.traverse((o) => { if (o.userData?.kind === 'suite' || o.userData?.kind === 'building') { box.setFromObject(o); masses.push(box.clone()) } })
+  const out = []
+  gl.scene.traverse((o) => {
+    if (!o.isMesh || o.userData?.kind === 'suite') return
+    box.setFromObject(o)
+    const s = box.getSize(new THREE.Vector3())
+    if (s.x * s.z < 60) return                       /* too small to be the thing we are hunting */
+    const c = box.getCenter(new THREE.Vector3())
+    const touches = masses.some((b) => b.intersectsBox(box))
+    const mat = Array.isArray(o.material) ? o.material[0] : o.material
+    out.push({ geo: o.geometry?.type, col: hex(mat), area: +(s.x * s.z).toFixed(0),
+      size: [+s.x.toFixed(1), +s.y.toFixed(1), +s.z.toFixed(1)], ctr: [+c.x.toFixed(1), +c.y.toFixed(1), +c.z.toFixed(1)],
+      touchesAMass: touches })
+  })
+  return out.sort((a, b) => b.area - a.area)
+}
+
+requestAnimationFrame(() => { gl.setLevel('compound'); window.__ready = true })
+</script>
+</body>
+</html>

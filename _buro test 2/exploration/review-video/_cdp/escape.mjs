@@ -19,6 +19,10 @@ const click = async (sel) => { const p = await ev(`(() => { const b=document.que
   await cdp.send('Input.dispatchMouseEvent', { type:'mousePressed', x:p[0], y:p[1], button:'left', clickCount:1, buttons:1 }); await sleep(70)
   await cdp.send('Input.dispatchMouseEvent', { type:'mouseReleased', x:p[0], y:p[1], button:'left', clickCount:1, buttons:0 }); await sleep(1600)
   return 'clicked' }
+/* Inside the real page act 02 has to be ON SCREEN before any of its controls have a
+   position worth clicking. Without this the first pass clicked empty page and reported
+   the product broken — the failure was the test's. */
+const showAct02 = () => ev("(async () => { const el = document.getElementById('act-02'); if (el) { el.scrollIntoView(); await new Promise(r => setTimeout(r, 1600)) } })()")
 const st = () => ev('(() => { const S=window.__v5.S; return S.level + (S.plan ? " +plan" : "") + (S.entered ? " +entered" : "") })()')
 const goBuilding = () => ev("window.__v5.selectBuilding(window.__v5.compound.byNum.get('07'))")
 const goSuite = () => ev(`(async () => { const v=window.__v5; v.selectBuilding(v.compound.byNum.get('07')); await new Promise(r=>setTimeout(r,900))
@@ -34,6 +38,7 @@ const cases = [
 ]
 console.log('THE GLOBAL ESCAPE')
 for (const [name, setup, act] of cases) {
+  await showAct02()
   await ev('window.__v5.overview()'); await sleep(1200)
   await setup(); await sleep(1600)
   const from = await st()

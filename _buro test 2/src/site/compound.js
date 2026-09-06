@@ -104,20 +104,34 @@ function routeTo(spine, px, py) {
 /* Bay geometry: subdivide a measured row into its bays along the row's own axis.
    The Type A bays are placed at their measured positions; the rest of the run is
    Type B at the verified 23:30 width ratio. */
+/* The two published unit widths, in feet. Everything about premium and standard follows
+   from these two numbers and nothing else needs a legend. */
+const W_TYPE = { A: 30, B: 23 }
+
 function baysFor(row, typeAInRow) {
   const out = []
   const n = row.bays + typeAInRow.length
-  const step = row.length / n
   const r = (row.ang * Math.PI) / 180
   const c = Math.cos(r)
   const s = Math.sin(r)
-  let aLeft = typeAInRow.length
+
+  /* Allocate the run's measured length in the ratio of the real unit widths, rather than
+     in n equal parts. A run of one Type A and ten Type B divides 30 : 23 x 10, so the
+     premium bay is visibly the wider one — in the model, in the drawing and in any
+     control that mirrors them. */
+  const widths = []
+  for (let i = 0; i < n; i++) widths.push(i < typeAInRow.length ? W_TYPE.A : W_TYPE.B)
+  const feet = widths.reduce((a, b) => a + b, 0)
+  const unitsPerFoot = row.length / feet
+
+  let cursor = -row.length / 2
   for (let i = 0; i < n; i++) {
-    const u = -row.length / 2 + step * (i + 0.5)
+    const slotW = widths[i] * unitsPerFoot
+    const u = cursor + slotW / 2
+    cursor += slotW
     /* Type A bays are the wider ones and the plan draws them at the outer ends of the
        runs that carry them; place them first so the widths read correctly. */
-    const isA = aLeft > 0 && i < typeAInRow.length
-    if (isA) aLeft--
+    const isA = i < typeAInRow.length
     out.push({
       cx: row.cx + u * c,
       cy: row.cy + u * s,
@@ -131,8 +145,8 @@ function baysFor(row, typeAInRow) {
 
          The model extrudes `slot`.  The drawing draws `len`.  Both come from the same
          `step`, so they cannot drift. */
-      len: step * 0.92,
-      slot: step,
+      len: slotW * 0.92,
+      slot: slotW,
       dep: row.depth * 0.9,
       depth: row.depth,
       ang: row.ang,
@@ -383,7 +397,7 @@ export function buildCompound(mount) {
       g.appendChild(el('polygon', { class: 'mass-run', points: pts(rTop) }))
 
       for (const b of baysFor(row, share)) {
-        const w = b.type === 'A' ? b.len : b.len * (23 / 30)
+        const w = b.len          /* the bay's true width; the pitch is the unit */
         const top = quad(b.cx, b.cy, w, b.dep, b.ang, EXTRUDE)
 
         /* THE DOOR, and it is the most useful mark on this drawing.

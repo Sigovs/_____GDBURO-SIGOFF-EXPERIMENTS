@@ -75,8 +75,9 @@ const C = {
      the thing every other value is measured against. */
   slabTop: 0x191e24,
   slabSide: 0x191f26,   /* the plinth edge must CATCH light — it is what says "object" */
-  concrete: 0x363d45,   /* aprons, forecourts, the gate threshold */
-  road: 0x1c2128,       /* asphalt: darker than concrete, smoother */
+  concrete: 0x454e58,   /* aprons, forecourts, the gate threshold — lifted, so the
+                           forecourt reads as a different surface from the drive */
+  road: 0x14181d,       /* asphalt: now clearly the darkest paved thing on the site */
   /* BUILT — the cladding is the lightest thing in the compound, which is what makes the
      architecture the figure. The last pass had wall and roof within one step of each
      other and the buildings merged into their own roofs. */
@@ -792,6 +793,26 @@ export function initCompound3D(mount, model, opts = {}) {
       pier.castShadow = true
       site.add(pier)
       if (s > 0) gateAnchor = pier
+      if (s > 0) {
+        /* THE BEAM, spanning both piers at head height. */
+        const beam = new THREE.Mesh(pierGeo, pierMat)
+        beam.scale.set(ROAD_W + ft(11), ft(4.6), ft(3.4))
+        beam.position.set(gx, ft(15.2), gy)
+        beam.rotation.y = -Math.atan2(dy, dx)
+        beam.castShadow = true
+        site.add(beam)
+        /* THE WORDMARK PLATE. Emissive, in the project's red, set on the beam's face —
+           the one saturated thing at the entrance and the reason the interface may use
+           that red for a committed selection at all. */
+        const plate = new THREE.Mesh(pierGeo, new THREE.MeshBasicMaterial({ color: 0xd8453c }))
+        plate.scale.set(ROAD_W * 0.44, ft(1.5), ft(0.4))
+        plate.position.set(gx - px * ft(1.9), ft(15.2), gy - py * ft(1.9))
+        plate.rotation.y = beam.rotation.y
+        site.add(plate)
+        const wash = new THREE.PointLight(0xffd0a4, 5, ft(52), 2)
+        wash.position.set(gx, ft(12), gy)
+        site.add(wash)
+      }
       /* The lamp on the pier. This is the light act 00's photograph is of, and it is the
          first warm thing the eye finds on the model. */
       const lamp = new THREE.Mesh(pierGeo, new THREE.MeshBasicMaterial({ color: 0xffcf94 }))
@@ -802,6 +823,28 @@ export function initCompound3D(mount, model, opts = {}) {
       const glow = new THREE.PointLight(0xffc98a, 9, ft(70), 2)
       glow.position.set(pier.position.x, ft(14), pier.position.z)
       site.add(glow)
+    }
+  }
+
+  /* THE DRIVE'S OWN EDGES. Two concrete upstands offset to either side of the measured
+     centreline, at the road's half width. Without them the asphalt has no boundary and
+     the eye reads a dark shape rather than a carriageway. */
+  if (spine) {
+    for (const side of [1, -1]) {
+      const edge = []
+      for (let i = 0; i < spine.length; i++) {
+        const [x, y] = spine[i]
+        const [nx2, ny2] = spine[Math.min(i + 1, spine.length - 1)]
+        const [px2, py2] = spine[Math.max(i - 1, 0)]
+        let dx = nx2 - px2, dy = ny2 - py2
+        const L = Math.hypot(dx, dy) || 1
+        dx /= L; dy /= L
+        edge.push([x - dy * (ROAD_W / 2) * side, y + dx * (ROAD_W / 2) * side])
+      }
+      const k = new THREE.Mesh(ribbon(edge, ft(1.2)), M.concrete)
+      k.position.y = ROAD_LIFT + 0.04
+      k.receiveShadow = true
+      site.add(k)
     }
   }
 
@@ -1630,6 +1673,11 @@ export function initCompound3D(mount, model, opts = {}) {
      interior light in the model and it appears exactly once. */
   const M_doorLit = new THREE.MeshBasicMaterial({ color: 0xffc98a })
 
+  /* the one light that follows a decision */
+  const focusLight = new THREE.PointLight(0xcfe0ee, 0, ft(150), 2)
+  focusLight.position.set(0, ft(60), 0)
+  site.add(focusLight)
+
   const paint3d = () => {
     for (const B of buildingObjs.values()) {
       const isFocus = B.num === focusNum
@@ -1682,6 +1730,19 @@ export function initCompound3D(mount, model, opts = {}) {
          the light on it, the door behind it and the state in the interface. */
       const cur = o.mesh.position.y - o.baseY
       if (Math.abs(cur) > 0.001) tweenSuiteLift(o, 0)
+    }
+
+    /* THE FOCUS LIGHT. Placed over whichever mass is the subject, off when none is. */
+    {
+      const subject = focusNum || hoverNum
+      const B = subject ? buildingObjs.get(subject) : null
+      if (B && B.roofs[0]) {
+        const p = worldOf(B.roofs[0])
+        focusLight.position.set(p.x, p.y + ft(46), p.z)
+        focusLight.intensity = focusNum ? 26 : 13
+      } else {
+        focusLight.intensity = 0
+      }
     }
 
     /* The civic masses are context once a building is the subject. */

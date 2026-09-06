@@ -22,7 +22,7 @@ const ev = async (e) => {
   if (r.exceptionDetails) throw new Error(r.exceptionDetails.exception?.description || r.exceptionDetails.text)
   return r.result?.value
 }
-await ev("document.getElementById('dock').style.display='none'")
+await ev("document.querySelector('[data-dock]').style.display='none'")
 
 /* how much of the door frontage is turned toward the camera, as a share of all frontage */
 const facing = `(() => {

@@ -72,7 +72,7 @@ await shot('BUILDING-SELECTED', 2200)
 
 /* premium and standard suite hover, from the dock's own controls */
 const bayAt = async (which) => ev(`(() => {
-  const bs=[...document.querySelectorAll('#bays .bay')].filter(b => b.dataset.sold!=='true' && b.dataset.type===${JSON.stringify(which)})
+  const bs=[...document.querySelectorAll('[data-bays] .bay')].filter(b => b.dataset.sold!=='true' && b.dataset.type===${JSON.stringify(which)})
   if(!bs.length) return null
   const r=bs[Math.min(1, bs.length-1)].getBoundingClientRect()
   return [Math.round(r.left+r.width/2), Math.round(r.top+r.height/2)] })()`)

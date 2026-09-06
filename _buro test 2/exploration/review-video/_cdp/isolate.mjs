@@ -68,7 +68,7 @@ await cdp.send('Page.navigate', { url: 'http://localhost:5183/exploration/study/
 for (let i = 0; i < 60; i++) { await sleep(500); const r = await cdp.send('Runtime.evaluate', { expression: '!!window.__v5', returnByValue: true }); if (r.result?.value) break }
 await sleep(6000)
 const ev = async (e) => (await cdp.send('Runtime.evaluate', { expression: e, returnByValue: true })).result?.value
-await ev("document.getElementById('dock').style.display='none'; document.querySelector('.home').style.display='none'; document.querySelector('.mark').style.display='none'")
+await ev("document.querySelector('[data-dock]').style.display='none'; document.querySelector('.nav').style.display='none'")
 
 const grab = async (name) => {
   await sleep(700)

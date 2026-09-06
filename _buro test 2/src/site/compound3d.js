@@ -747,7 +747,13 @@ export function initCompound3D(mount, model, opts = {}) {
     /* The decoder that ships with the installed three, vendored into public/ — the CDN
        path guessed at first simply 404s, and a decoder that is not there fails silently
        into a compound with no planting. */
-    draco.setDecoderPath('./draco/gltf/')
+      /* ROOT-RELATIVE, NOT DOCUMENT-RELATIVE.  './draco/' and './models/' resolve against
+       whatever URL the page happens to sit at, so the whole planting silently vanished
+       on every page that is not the site root — the exploration at /exploration/study/
+       and the integrated review at /exploration/integrated/ both requested
+       .../study/models/tree-1.glb, got index.html back, and logged a JSON parse error
+       nobody was reading. Measured: 0 silhouettes planted at 106 points. */
+    draco.setDecoderPath('/draco/gltf/')
     const loader = new GLTFLoader()
     loader.setDRACOLoader(draco)
 
@@ -761,7 +767,7 @@ export function initCompound3D(mount, model, opts = {}) {
            and then failed to parse the result. Large binary assets belong in `public/`
            and are fetched by path: nothing to analyse, nothing to inline, and the files
            are served exactly as they were exported. */
-        const g = await loader.loadAsync(`./models/${name}.glb`)
+        const g = await loader.loadAsync(`/models/${name}.glb`)
         models.push(g.scene)
       } catch (err) { console.warn('[luxe-corsa] tree', name, 'did not load', err) }
     }
@@ -786,14 +792,18 @@ export function initCompound3D(mount, model, opts = {}) {
         for (const mat of mats) {
           mat.roughness = 1
           mat.metalness = 0
-          mat.envMapIntensity = 0.18
+          mat.envMapIntensity = 0.10
           /* Foliage at dusk is nearly black with a green bias; multiplying the map by a
              dark colour keeps its variation and removes the daylight. */
           /* Well below the architecture. Untextured foliage takes the full key, so a
              mid green renders as a pale pom-pom against a dark site — landscape has to
              sit under the buildings in value or it stops framing them and starts
              competing with them. */
-          mat.color.setRGB(0.085, 0.105, 0.072)
+          /* RE-GRADED FOR THE NEW PRINT. This value was tuned at exposure 1.22 with a 4.6 key;
+             opening the print up to 1.46 / 6.0 to make the garage doors read turned the same
+             foliage back into pale daylight pom-poms, brighter than the buildings they are
+             meant to frame. Scaled by the same factor the exposure moved. */
+          mat.color.setRGB(0.052, 0.064, 0.044)
           if (mat.map) {
             mat.alphaTest = 0.4
             mat.transparent = false

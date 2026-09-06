@@ -1,0 +1,103 @@
+/* ==================================================================================
+   BUILD exploration/integrated/v5-full-site.html — THE REAL HOMEPAGE WITH V5 IN ACT 02.
+
+   GENERATED, NOT COPIED.  A hand-made duplicate of a 743-line index.html is a fork that
+   rots the first time either side is touched, and this review has already been burned
+   once by two representations drifting apart. So the integrated page is BUILT from the
+   real index.html every time: same markup, same images, same video, same stylesheet,
+   same main.js, same motion.js, same GSAP and ScrollTrigger. Nothing is recreated and
+   nothing is a screenshot.
+
+   Exactly three things change:
+
+     1. Every ./ reference becomes /, because the page is served from
+        /exploration/integrated/ and the assets are not.
+
+     2. Act 02's stage is replaced by the V5 mount point, and `data-compound` goes with
+        it. main.js guards its whole act 02 block behind `if (compoundEl)`, so removing
+        that one attribute makes the production interface stand down cleanly while every
+        other act — the rail, the apertures, the pins, act 05's drift, act 03's states —
+        keeps running exactly as it does on the live site.
+
+     3. The V5 stylesheet and a small boot module are added.
+
+   The boot module wires V5's own two handovers into the real page: ENTER moves the
+   camera to the door, and CONTINUE scrolls the visitor into act 03. That is the join
+   the brief asks to be observed, and it can only be observed if it exists.
+   ================================================================================== */
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+const SRC = path.join(ROOT, 'index.html')
+const OUT_DIR = path.join(ROOT, 'exploration/integrated')
+const OUT = path.join(OUT_DIR, 'v5-full-site.html')
+
+let html = fs.readFileSync(SRC, 'utf8')
+
+/* --- 1. paths ------------------------------------------------------------------- */
+html = html.replace(/(["'(])\.\//g, '$1/')
+
+/* --- 2. act 02 ------------------------------------------------------------------- */
+const open = html.indexOf('<section class="act" id="act-02"')
+if (open < 0) throw new Error('act 02 not found in index.html')
+const close = html.indexOf('</section>', html.indexOf('<!-- ===', open + 10) > 0 ? open : open)
+/* find the section's own closing tag by counting nested sections */
+let i = open, depth = 0, end = -1
+while (i < html.length) {
+  const nextOpen = html.indexOf('<section', i + 1)
+  const nextClose = html.indexOf('</section>', i + 1)
+  if (nextClose < 0) break
+  if (nextOpen >= 0 && nextOpen < nextClose) { depth++; i = nextOpen; continue }
+  if (depth === 0) { end = nextClose + '</section>'.length; break }
+  depth--; i = nextClose
+}
+if (end < 0) throw new Error('act 02 closing tag not found')
+void close
+
+const ACT02 = `<!-- ================================================================================
+     02 · COMPOUND / BUILDING / SUITE — the V5.2 guided sales interface.
+
+     The section, its id, its data-act, its data-pin and its heading are the live site's.
+     What is replaced is the STAGE: instead of production's SVG drawing with a record
+     column beside it, this mounts the V5 interface, which is the same module the
+     standalone exploration at /exploration/study/proposed-v5-guided-sales.html mounts.
+     data-compound is deliberately absent so main.js stands its own act 02 down.
+     ================================================================================ -->
+<section class="act" id="act-02" data-act="02" data-register="surveyed"
+         data-pin="compound" aria-labelledby="h-02" style="padding:0">
+  <h2 class="u-visually-hidden" id="h-02">121 private suites, 11 buildings</h2>
+  <div class="v5-host" data-pin-stage data-v5-host></div>
+</section>`
+
+html = html.slice(0, open) + ACT02 + html.slice(end)
+
+/* --- 3. the interface ------------------------------------------------------------ */
+html = html.replace('<link rel="stylesheet" href="/src/site/index.css">',
+  `<link rel="stylesheet" href="/src/site/index.css">
+<link rel="stylesheet" href="/exploration/study/v5/v5.css">
+<style>
+  /* Act 02 becomes a full-height stage inside the real page. It is the only act that
+     owns the whole viewport, which is what a pinned interactive act needs and what the
+     production act 02 already asks for with data-pin. */
+  .v5-host{position:relative;height:100vh;width:100%;background:#060708}
+</style>`)
+
+html = html.replace('<script type="module" src="/src/site/main.js"></script>',
+  `<script type="module" src="/src/site/main.js"></script>
+<script type="module" src="/exploration/integrated/v5-boot.js"></script>`)
+
+fs.mkdirSync(OUT_DIR, { recursive: true })
+fs.writeFileSync(OUT, html)
+
+const acts = [...html.matchAll(/data-act="(\d\d)"/g)].map((m) => m[1])
+console.log('WROTE ' + path.relative(ROOT, OUT))
+console.log('  acts present        ' + acts.join(' '))
+console.log('  footer              ' + (html.includes('<footer class="footer">') ? 'yes' : 'MISSING'))
+console.log('  real main.js        ' + (html.includes('/src/site/main.js') ? 'yes' : 'MISSING'))
+console.log('  real stylesheet     ' + (html.includes('/src/site/index.css') ? 'yes' : 'MISSING'))
+console.log('  v5 mount            ' + (html.includes('data-v5-host') ? 'yes' : 'MISSING'))
+const live = html.replace(/<!--[^]*?-->/g, '')
+console.log('  production act02 UI ' + (live.includes('data-compound') ? 'STILL PRESENT' : 'stood down'))
+console.log('  remaining ./ refs   ' + (html.match(/["'(]\.\//g) || []).length)

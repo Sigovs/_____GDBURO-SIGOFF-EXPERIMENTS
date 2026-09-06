@@ -51,7 +51,7 @@ const readDoor = (idx) => ev(`(() => {
 const cases = [['A', false], ['B', false], ['B', true], ['A', true]]
 for (const [type, sold] of cases) {
   const pt = await ev(`(() => {
-    const bs = [...document.querySelectorAll('#bays .bay')].filter(b => b.dataset.type === '${type}' && b.dataset.sold === '${sold}')
+    const bs = [...document.querySelectorAll('[data-bays] .bay')].filter(b => b.dataset.type === '${type}' && b.dataset.sold === '${sold}')
     if (!bs.length) return null
     const r = bs[0].getBoundingClientRect()
     return [Math.round(r.left + r.width / 2), Math.round(r.top + r.height / 2), bs[0].getAttribute('aria-label')] })()`)
@@ -74,7 +74,7 @@ for (const [type, sold] of cases) {
 }
 
 /* and the selection */
-const pick = await ev(`(() => { const bs=[...document.querySelectorAll('#bays .bay')].filter(b=>b.dataset.sold!=='true')
+const pick = await ev(`(() => { const bs=[...document.querySelectorAll('[data-bays] .bay')].filter(b=>b.dataset.sold!=='true')
   const r=bs[1].getBoundingClientRect(); return [Math.round(r.left+r.width/2), Math.round(r.top+r.height/2)] })()`)
 await move(pick[0], pick[1]); await sleep(200); await click(pick[0], pick[1]); await sleep(1600)
 console.log('after click: ' + JSON.stringify(await ev(`(() => { const S=window.__v5.S; const gl=window.__v5.gl

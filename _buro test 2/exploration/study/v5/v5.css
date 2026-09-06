@@ -1,0 +1,220 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+/* ======================================================================================
+   V5.2 — GUIDED SALES EXPERIENCE
+
+   WHAT CHANGED IN THIS PASS, and each one is a fix to something that failed a real test:
+
+   THE TAG NO LONGER TAKES THE POINTER.  It was an interactive element floating over the
+   canvas, so reaching for "View building" moved the cursor off the model, cleared the
+   hover, hid the tag and left the pointer over nothing.  Measured, that is why buildings
+   07 and 08 could not be selected: their tag lands exactly where the pointer has to be.
+   The BUILDING is the button now — the whole mass, with cursor:pointer on it — and the
+   tag is a label that never intercepts anything.
+
+   THE DOCK IS A CONTROL SURFACE, not a caption.  It carries one job per level: at
+   compound it is a small plate that says what this is and what to do; at building the
+   suite selector takes the middle and dominates; at suite the product and ENTER take the
+   right and dominate.
+
+   THE MINIATURE BAYS ARE GARAGE UNITS.  Head, glazed upper panel, door leaf with its own
+   segment lines, pier between neighbours, apron under them — and their WIDTHS come from
+   the model, so a premium bay is 30:23 wider here exactly as it is in the building.
+   Nothing changes height on hover: a row that grows is a drawer, and a drawer is the
+   effect this pass was told to stop making.
+
+   TWO ESCAPES, AND THEY ARE DIFFERENT THINGS.
+     ← OVERVIEW    the spatial home. One click, same place, always there once you have
+                   left compound, Escape as well. Returns the solved compound camera.
+     SITE PLAN     a utility, not a place. Fit to the whole site on open, its own fixed
+                   BACK TO 3D, Escape too, and it restores the exact state it opened from.
+   ====================================================================================== */
+:root{
+  --void:#060708; --ground:#0A0B0D; --panel:#0B0D10; --panel2:#0E1114;
+  --ink:#F2F4F6; --ink-85:rgb(242 244 246/.85); --ink-70:rgb(242 244 246/.70);
+  --ink-55:rgb(242 244 246/.55); --ink-40:rgb(242 244 246/.40);
+  --ink-24:rgb(242 244 246/.24); --ink-16:rgb(242 244 246/.16); --ink-10:rgb(242 244 246/.10);
+  --red:#D8453C; --red-80:rgb(216 69 60/.80); --red-40:rgb(216 69 60/.40); --red-16:rgb(216 69 60/.16);
+  --sand:#C9BCA8; --sand-70:rgb(201 188 168/.70); --sand-30:rgb(201 188 168/.30); --sand-14:rgb(201 188 168/.14);
+  --steel:#8FA4B4; --steel-55:rgb(143 164 180/.55); --steel-30:rgb(143 164 180/.30); --steel-14:rgb(143 164 180/.14);
+  --grot:'Archivo',ui-sans-serif,system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  --s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--s7:48px;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+.v5 *,.v5 *::before,.v5 *::after{box-sizing:border-box}
+.v5{position:relative;height:100%;color:var(--ink)}
+.v5{font-family:var(--grot);-webkit-font-smoothing:antialiased}
+/* The site-plan overlay is itself a .v5 root, so a descendant-only rule never hid it and
+   it sat over the model swallowing every pointer event. Both forms, deliberately. */
+.v5[hidden],.v5 [hidden]{display:none!important}
+/* The stage fills its HOST, not the viewport: standalone that host is a full-screen
+   shell, inside the site it is act 02's pinned stage. One interface, one stylesheet. */
+.v5 .stage{position:absolute;inset:0;background:var(--ground);isolation:isolate;overflow:hidden}
+.v5 .mount{position:absolute;inset:0}
+.v5 .compound__svg{width:100%;height:100%;display:block;overflow:hidden}
+.v5 .compound__gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y;cursor:grab}
+/* THE MODEL IS THE BUTTON. Every building answers the pointer, so the cursor has to say
+   so on the mass itself rather than on a tag hovering above it. */
+.v5 .stage[data-hot='true'] .compound__gl{cursor:pointer}
+.v5 .stage[data-gl='on'] .compound__svg{visibility:hidden}
+.v5 .cal{display:none}
+/* a very light top scrim only — the sky behind the model is now doing this work */
+.v5 .stage::after{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(to bottom,rgb(6 7 8/.42) 0%,rgb(6 7 8/0) 13%),
+             linear-gradient(to top,rgb(6 7 8/.72) 0%,rgb(6 7 8/.26) 13%,rgb(6 7 8/0) 30%)}
+.v5 .mark{position:absolute;z-index:6;top:var(--s6);left:var(--s7);display:grid;gap:var(--s1);pointer-events:none}
+.v5 .mark b{font-size:15px;font-weight:600;letter-spacing:.10em;text-transform:uppercase}
+.v5 .mark span{font-family:var(--mono);font-size:14px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-55)}
+
+/* ---- THE BUILDING TAG -----------------------------------------------------------------
+   A label, not a control. pointer-events:none is the whole point: it sits over the canvas
+   and the canvas keeps the pointer, so the building underneath stays hovered and stays
+   clickable no matter where the tag lands. Small, grounded on a hairline stem, and it
+   answers the three questions in order — which building, how much of it is left, what
+   happens if I click. */
+.v5 #tag{position:absolute;z-index:5;transform:translate(-50%,0);pointer-events:none;
+  background:var(--sand);color:var(--void);box-shadow:0 0 0 1px rgb(0 0 0/.4),0 10px 26px rgb(0 0 0/.36)}
+.v5 #tag[data-s='on']{background:var(--red);color:#fff}
+.v5 #tag .n{display:flex;align-items:baseline;gap:7px;padding:5px 9px 3px;font-size:17px;font-weight:600;line-height:1;letter-spacing:-.02em}
+.v5 #tag .n i{font-style:normal;font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.04em;opacity:.72}
+.v5 #tag .go{display:block;font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.10em;text-transform:uppercase;
+  padding:4px 9px 3px;border-top:1px solid rgb(0 0 0/.26);background:rgb(0 0 0/.13)}
+.v5 #tag::after{content:'';position:absolute;left:50%;bottom:-10px;width:1px;height:10px;background:var(--sand)}
+.v5 #tag[data-s='on']::after{background:var(--red)}
+
+/* ---- GLOBAL NAVIGATION — one convention, top right ------------------------------------ */
+.v5 .nav{position:absolute;z-index:8;top:var(--s6);right:var(--s7);display:flex;gap:var(--s3)}
+.v5 .nav button{appearance:none;cursor:pointer;background:rgb(8 9 11/.78);border:1px solid var(--ink-40);color:var(--ink);
+  font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;
+  padding:10px 16px 9px;transition:background-color .18s var(--ease),color .18s var(--ease),border-color .18s var(--ease)}
+.v5 .nav button:hover{background:var(--ink);color:var(--void);border-color:var(--ink)}
+.v5 .nav .ctx{background:none;border-color:var(--ink-24);color:var(--ink-70)}
+.v5 .nav .ctx:hover{background:var(--ink-16);border-color:var(--ink-55);color:var(--ink)}
+
+/* ---- THE DECISION DOCK ----------------------------------------------------------------- */
+.v5 .dock{position:absolute;z-index:7;bottom:var(--s6);left:var(--s7);right:var(--s7);
+  background:linear-gradient(to bottom,rgb(13 16 20/.97),rgb(9 11 14/.97));
+  border:1px solid var(--ink-24);backdrop-filter:blur(8px);
+  display:grid;grid-template-columns:minmax(190px,auto) 1fr auto;align-items:stretch}
+.v5 .dock[data-level='compound']{right:auto;grid-template-columns:auto}
+.v5 .dock::before{content:'';position:absolute;left:-1px;top:-1px;bottom:-1px;width:3px;background:var(--red)}
+.v5 .cell{padding:var(--s4) var(--s5);min-width:0}
+.v5 .cell + .cell{border-left:1px solid var(--ink-16)}
+
+.v5 .who__k{font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.20em;text-transform:uppercase;color:var(--ink-55)}
+.v5 .who__f{font-size:36px;font-weight:600;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums;margin:7px 0 5px;white-space:nowrap}
+.v5 .who__s{font-size:15px;color:var(--ink-85)} .v5 .who__s b{color:var(--ink);font-weight:500}
+.v5 .tell{font-size:18px;font-weight:600;letter-spacing:-.01em;margin-top:7px}
+.v5 .tell--go{color:var(--sand)}
+.v5 .chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:14px;font-weight:500;
+  letter-spacing:.12em;text-transform:uppercase;padding:3px 9px 2px;margin-top:var(--s2)}
+.v5 .chip--a{color:var(--void);background:var(--sand)}
+.v5 .chip--b{color:var(--steel);border:1px solid var(--steel-55)}
+/* the quiet secondary at compound: a utility, never competing with CHOOSE A BUILDING */
+.v5 .plink{appearance:none;background:none;border:0;padding:0;margin-top:var(--s4);cursor:pointer;
+  font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-55);border-bottom:1px solid var(--ink-24);line-height:1.5}
+.v5 .plink:hover{color:var(--ink);border-color:var(--ink-55)}
+
+/* ---- MINIATURE GARAGE BAYS -------------------------------------------------------------
+   Each one is a drawn garage unit: head, glazed upper panel, segmented door leaf, apron.
+   Width comes from the model, so premium is visibly the wider unit before anything is
+   hovered. Height NEVER changes — state is carried by value and colour. */
+.v5 .bayswrap{display:flex;flex-direction:column;justify-content:center;gap:var(--s2);padding:var(--s4) var(--s5);overflow:hidden}
+.v5 .bayhead{display:flex;align-items:baseline;gap:var(--s4);font-family:var(--mono);font-size:14px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-55)}
+.v5 .bayhead em{font-style:normal;color:var(--ink-70)}
+.v5 .bayhead i{font-style:normal;display:inline-flex;align-items:center;gap:6px}
+.v5 .bayhead i::before{content:'';width:13px;height:9px;background:var(--sand);display:inline-block}
+.v5 .bayhead i.b::before{background:none;border:1px solid var(--steel-55)}
+.v5 .bayhead i.s::before{background:none;border:1px solid var(--ink-16)}
+.v5 .bays{display:flex;align-items:flex-end;gap:2px;overflow-x:auto;overflow-y:visible;padding-top:26px;scrollbar-width:none}
+.v5 .bays::-webkit-scrollbar{height:0}
+.v5 .bay{appearance:none;flex:0 0 auto;padding:0;position:relative;cursor:pointer;height:52px;
+  background:var(--steel-14);border:0;border-top:2px solid var(--steel-55);
+  transition:background-color .16s var(--ease),border-color .16s var(--ease)}
+/* the glazed upper panel */
+.v5 .bay::before{content:'';position:absolute;left:2px;right:2px;top:5px;height:9px;background:var(--steel-30);
+  transition:background-color .16s var(--ease)}
+/* the door leaf, with its own segment lines */
+.v5 .bay::after{content:'';position:absolute;left:2px;right:2px;top:17px;bottom:4px;
+  background:repeating-linear-gradient(to bottom,var(--steel-30) 0 6px,rgb(0 0 0/.30) 6px 7px);
+  transition:background .16s var(--ease)}
+.v5 .bay[data-type='A']{border-top-color:var(--sand-70)}
+.v5 .bay:hover,.v5 .bay[data-hot='true']{background:var(--sand-14);border-top-color:var(--sand)}
+.v5 .bay:hover::before,.v5 .bay[data-hot='true']::before{background:var(--sand)}
+.v5 .bay:hover::after,.v5 .bay[data-hot='true']::after{background:repeating-linear-gradient(to bottom,var(--sand-70) 0 6px,rgb(0 0 0/.32) 6px 7px)}
+.v5 .bay[data-sold='true']{cursor:not-allowed;background:none;border-top-color:var(--ink-16)}
+.v5 .bay[data-sold='true']::before{background:var(--ink-10)}
+.v5 .bay[data-sold='true']::after{background:repeating-linear-gradient(135deg,var(--ink-10) 0 3px,transparent 3px 7px)}
+.v5 .bay[aria-pressed='true']{background:var(--red-16);border-top-color:var(--red)}
+.v5 .bay[aria-pressed='true']::before{background:#fff}
+.v5 .bay[aria-pressed='true']::after{background:repeating-linear-gradient(to bottom,var(--red) 0 6px,rgb(0 0 0/.34) 6px 7px)}
+.v5 .bay__t{position:absolute;left:50%;top:-24px;transform:translateX(-50%);white-space:nowrap;opacity:0;pointer-events:none;
+  font-family:var(--mono);font-size:14px;font-weight:500;color:var(--void);background:var(--sand);
+  padding:2px 7px 1px;transition:opacity .13s var(--ease)}
+.v5 .bay:hover .bay__t,.v5 .bay[data-hot='true'] .bay__t{opacity:1}
+.v5 .bay[aria-pressed='true'] .bay__t{opacity:1;color:#fff;background:var(--red)}
+.v5 .bay[data-sold='true'] .bay__t{background:var(--ink-24);color:var(--ink)}
+
+/* ---- THE RIGHT CELL: the product, and the next action --------------------------------- */
+.v5 .right{display:flex;align-items:center;gap:var(--s5);padding:var(--s4) var(--s5)}
+.v5 .price{display:grid;gap:2px;white-space:nowrap}
+.v5 .price .k{font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-55)}
+.v5 .price .v{font-size:27px;font-weight:600;letter-spacing:-.02em;line-height:1.05}
+.v5 .price .a{font-size:15px;color:var(--ink-70)}
+.v5 .next{display:grid;gap:3px;white-space:nowrap;max-width:250px}
+.v5 .next .k{font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-55)}
+.v5 .next .v{font-size:18px;font-weight:600;letter-spacing:-.01em;white-space:normal}
+.v5 .next .a{font-size:15px;color:var(--ink-55);white-space:normal}
+/* ENTER — rectangular, architectural, and the only saturated surface on the screen */
+.v5 .enter{appearance:none;cursor:pointer;display:grid;grid-template-columns:auto 56px;align-items:stretch;
+  border:0;padding:0;font:inherit;background:var(--red);color:#fff;
+  box-shadow:0 0 0 1px var(--red-40),0 14px 34px rgb(216 69 60/.20);
+  transition:filter .18s var(--ease),box-shadow .18s var(--ease)}
+.v5 .enter:hover{filter:brightness(1.1);box-shadow:0 0 0 1px var(--red),0 16px 40px rgb(216 69 60/.32)}
+.v5 .enter:active{filter:brightness(.96)}
+.v5 .enter .t{padding:17px var(--s5) 16px;text-align:left;font-size:19px;font-weight:600;letter-spacing:-.005em}
+.v5 .enter .t i{display:block;font-style:normal;font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;opacity:.76;margin-bottom:3px}
+.v5 .enter .a{display:flex;align-items:center;justify-content:center;font-size:22px;border-left:1px solid rgb(255 255 255/.28)}
+
+/* ---- SITE PLAN -------------------------------------------------------------------------- */
+.v5.plan{position:fixed;inset:0;z-index:30;background:var(--panel2);display:grid;grid-template-rows:auto 1fr}
+.v5 .plan__bar{display:flex;align-items:center;justify-content:space-between;gap:var(--s6);padding:var(--s4) var(--s7);border-bottom:1px solid var(--ink-24)}
+.v5 .plan__exit{appearance:none;cursor:pointer;background:var(--ink);border:0;color:var(--void);
+  font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;padding:11px 18px 10px}
+.v5 .plan__exit:hover{background:#fff}
+.v5 .plan__t{display:flex;align-items:baseline;gap:var(--s4)}
+.v5 .plan__t b{font-size:19px;font-weight:600} .v5 .plan__t span{font-family:var(--mono);font-size:14px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-55)}
+.v5 .plan__key{display:flex;gap:var(--s5);font-family:var(--mono);font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-55)}
+.v5 .plan__key i{display:inline-block;width:22px;height:9px;margin-right:7px;font-style:normal}
+.v5 .plan__grid{position:relative;display:grid;grid-template-columns:1fr 340px;overflow:hidden}
+.v5 .plan__map{position:relative;overflow:hidden}
+.v5 .plan__list{border-left:1px solid var(--ink-16);padding:var(--s5) var(--s6);overflow:auto}
+.v5 .plan__list h4{margin:0 0 var(--s4);font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-55)}
+.v5 .prow{display:grid;grid-template-columns:auto 1fr auto;gap:var(--s3);align-items:baseline;width:100%;text-align:left;
+  padding:11px 0;border:0;border-bottom:1px solid var(--ink-10);background:none;color:inherit;font:inherit;cursor:pointer}
+.v5 .prow:hover{color:var(--sand)}
+.v5 .prow b{font-family:var(--mono);font-size:16px;font-weight:500;font-variant-numeric:tabular-nums}
+.v5 .prow span{font-size:15px;color:var(--ink-55);white-space:nowrap}
+.v5 .prow span i{font-style:normal;color:var(--sand-70);margin-left:6px} .v5 .prow em{font-style:normal;font-family:var(--mono);font-size:14px;color:var(--ink-70);white-space:nowrap}
+.v5 .plan__map svg{width:100%;height:100%;display:block;visibility:visible}
+.v5 .plan__map .perimeter{fill:none;stroke:var(--ink-40);stroke-width:1.4;vector-effect:non-scaling-stroke}
+.v5 .plan__map .mass-road-trace,.v5 .plan__map .compound__road{fill:#171d24;stroke:none}
+.v5 .plan__map .mass-road-line{fill:none;stroke:var(--ink-16);stroke-width:1;vector-effect:non-scaling-stroke}
+.v5 .plan__map .mass-run,.v5 .plan__map .mass-side{fill:#232b34;stroke:var(--ink-24);stroke-width:.8;vector-effect:non-scaling-stroke}
+.v5 .plan__map .mass-civic{fill:#3a434e;stroke:var(--ink-40);stroke-width:.8;vector-effect:non-scaling-stroke}
+.v5 .plan__map .bay{stroke:rgb(10 12 15/.9);stroke-width:.6;vector-effect:non-scaling-stroke}
+.v5 .plan__map .bay[data-type='A']{fill:var(--sand)}
+.v5 .plan__map .bay[data-type='B']{fill:#7f93a4}
+.v5 .plan__map .bay[data-sold='true']{fill:none;stroke:var(--ink-24)}
+.v5 .plan__map .door{fill:none;stroke:var(--ink-40);stroke-width:.8;vector-effect:non-scaling-stroke}
+.v5 .plan__map .leader,.v5 .plan__map .route{display:none}
+.v5 .plan__map .pnum{fill:var(--ink);font-size:15px;font-family:var(--mono);font-size:13px;font-weight:500;paint-order:stroke;stroke:rgb(6 7 8/.85);stroke-width:4px}
+
+/* a short stage keeps the dock and the model apart at laptop heights */
+@media (max-height:880px){
+  .v5 .dock{bottom:var(--s5);left:var(--s6);right:var(--s6)}
+  .v5 .who__f{font-size:31px} .v5 .bay{height:46px} .v5 .enter .t{padding:14px var(--s5) 13px;font-size:18px}
+  .v5 .mark{top:var(--s5);left:var(--s6)} .v5 .nav{top:var(--s5);right:var(--s6)}
+}

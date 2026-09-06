@@ -175,7 +175,9 @@ export function mountV5(host, opts = {}) {
     tag.id = tag.id || 'tag'
     tag.dataset.s = on ? 'on' : 'hover'
     tag.style.left = Math.max(96, Math.min(w - 110, topX)) + 'px'
-    tag.style.top = Math.max(56, top - 74) + 'px'
+    /* The tag must clear whatever the HOST puts across the top of the stage: nothing
+       standalone, a fixed site header inside the page. */
+    tag.style.top = Math.max(opts.topSafe ?? 56, top - 74) + 'px'
     tag.innerHTML = `<span class="n">${subject.num}<i>${subject.open} of ${subject.suites.length} available</i></span>`
       + (on ? '' : '<span class="go">Click to view →</span>')
     tag.hidden = false

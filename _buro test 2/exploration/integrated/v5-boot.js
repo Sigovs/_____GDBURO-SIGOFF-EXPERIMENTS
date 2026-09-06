@@ -38,6 +38,8 @@ if (host) {
   }
 
   const api = mountV5(host, {
+    /* the site header is fixed across the top of every act, including this one */
+    topSafe: 96,
     onLevel: (level) => setRailLevel(level),
     onEnter: () => { /* the camera move is the feedback; the page does not jump yet */ },
     onContinue: () => {

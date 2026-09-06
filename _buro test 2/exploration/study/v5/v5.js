@@ -367,14 +367,11 @@ export function mountV5(host, opts = {}) {
     gl.onPickBuilding = (n) => { const b = bldgOf(n); if (b) selectBuilding(b) }
     gl.onPickSuite = (i) => { const s = compound.suites[i]; if (s) selectSuite(s) }
     buildAnchors()
-    let hi = 0
-    gl.site.traverse((o) => {
-      if (o.isMesh && o.userData?.kind === 'suite') {
-        const bb = new THREE.Box3().setFromObject(o)
-        if (bb.max.y > hi) hi = bb.max.y
-      }
-    })
-    gl.roofY = hi / (gl.site.scale.y || 1)
+    /* THE ROOF HEIGHT, IN THE SITE'S OWN UNITS. Measuring a world Box3 and dividing by
+       site.scale gave a WORLD height used as a LOCAL one — about half a foot, so the tag
+       was anchored to the slab and only looked right because it is offset upward in
+       pixels anyway. The model reports its own parapet height now. */
+    gl.roofY = gl.roofTopLocal ?? 0
     const tick = () => { raf = requestAnimationFrame(tick); drawTag() }
     requestAnimationFrame(() => { gl.setLevel('compound'); paint(); tick() })
     opts.onReady?.(api)

@@ -87,6 +87,8 @@ if (pb) { await move(pb[0], pb[1]); await shot('SUITE-HOVER-STANDARD', 900) }
 if (pb) { await click(pb[0], pb[1]); await shot('SUITE-SELECTED', 1800) }
 await move(720, 400)
 await shot('ENTER-VISIBLE', 900)
+const enb = await ev("(() => { const b=document.querySelector('[data-enter]'); if(!b) return null; const r=b.getBoundingClientRect(); return [Math.round(r.left+r.width/2), Math.round(r.top+r.height/2)] })()")
+if (enb) { await move(enb[0], enb[1]); await sleep(200); await click(enb[0], enb[1]); await shot('ENTER-PRESSED', 2600) }
 
 await ev('window.__v5.openPlan()')
 await shot('SITE-PLAN', 1800)

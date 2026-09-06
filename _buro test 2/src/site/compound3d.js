@@ -371,6 +371,14 @@ export function initCompound3D(mount, model, opts = {}) {
     terrain: new THREE.MeshStandardMaterial({ color: 0x11161b, roughness: 1, metalness: 0 }),
   }
 
+  /* FEET TO WORLD UNITS. The measured geometry is built at source scale inside `site`
+     and the SCALE IS ON ITS PARENT — site.scale is 1, root.scale is S. Three separate
+     offsets in this file multiplied by `site.scale.y || 1`, got 1, and were therefore
+     fifty times too large: the ENTER camera aimed a hundred and fifty feet above the
+     door it was meant to be standing at, and the apron pool light sat four hundred feet
+     out in a field. One conversion now, and it is the right one. */
+  const wft = (f) => ft(f) * S
+
   /* --- THE MODEL GROUP. Everything measured lives in here, at source scale. ------- */
   const root = new THREE.Group()
   root.scale.setScalar(S)
@@ -1484,10 +1492,19 @@ export function initCompound3D(mount, model, opts = {}) {
     compound: [13, 34],
     building: [5.5, 22],
     suite: [3.2, 16],
+    /* ENTER IS THE ONE CAMERA THAT IS NOT A MODEL-VIEWER'S.
+       Everything above is a distance at which a person is looking AT the compound; this
+       is the distance at which they are standing IN FRONT OF ONE DOOR. The scene is
+       built at 0.751 local units per foot and scaled by 0.02, so a world unit is about
+       67 feet: the suite level's 3.2 floor is 213 feet back, which is why pressing ENTER
+       put the visitor in an empty field with a light on the ground. This range starts at
+       roughly forty feet, which is where a car would be. */
+    entered: [0.42, 4],
   }
+  let entered = false
 
   const applyCamera = () => {
-    const [lo, hi] = RANGE[level] || RANGE.compound
+    const [lo, hi] = (entered ? RANGE.entered : RANGE[level]) || RANGE.compound
     cam.dist = Math.max(lo, Math.min(hi, cam.dist))
     const { az, el, target } = cam
     const dist = cam.dist * fit()
@@ -1844,7 +1861,7 @@ export function initCompound3D(mount, model, opts = {}) {
 
   const tweenGroupLift = (B, to, dur = 0.5) => {
     const g = gsapRef.lib
-    if (!g) { B.group.position.y = to; B.lift = to; return }
+    if (!g || wantsStill()) { B.group.position.y = to; B.lift = to; return }
     g.to(B, {
       lift: to, duration: dur, ease: 'door', overwrite: true,
       onUpdate: () => { B.group.position.y = B.lift },
@@ -1924,7 +1941,17 @@ export function initCompound3D(mount, model, opts = {}) {
   /* THE DOOR, LIT FROM INSIDE. The one detail that says a suite is OCCUPIED rather than
      available: warm light behind the opening of the selected suite. It is the only warm
      interior light in the model and it appears exactly once. */
-  const M_doorLit = new THREE.MeshBasicMaterial({ color: 0xffc98a })
+  /* A LIT DOOR IS STILL A DOOR. As an unlit basic material it was a flat cream card —
+     fine as a marker at compound distance, a blank panel once ENTER puts a visitor three
+     feet from it. Standard material, so the leaf keeps its segments, its reveal shadow
+     and its sheen, with a warm emissive strong enough to stay the brightest thing on the
+     run from across the site. */
+  const M_doorLit = M.door.clone()
+  M_doorLit.color.setHex(0x5a4f41)
+  M_doorLit.emissive = new THREE.Color(0xffc27a)
+  M_doorLit.emissiveIntensity = 0.62
+  M_doorLit.roughness = 0.62
+  M_doorLit.metalness = 0.12
 
   /* --- THE ARCHITECTURAL HOVER LANGUAGE ------------------------------------------
      A hover is not a fill change. What arrives on the subject is the set of things
@@ -2048,8 +2075,7 @@ export function initCompound3D(mount, model, opts = {}) {
       if (o && o.door) {
         const p = worldOf(o.door)
         const n = o.suite.faceNormal || [0, 0]
-        const sc = site.scale.x || 1
-        suiteLight.position.set(p.x + n[0] * ft(9) * sc, p.y + ft(7) * sc, p.z + n[1] * ft(9) * sc)
+        suiteLight.position.set(p.x + n[0] * wft(9), p.y + wft(7), p.z + n[1] * wft(9))
         suiteLight.intensity = selectedSuite ? 15 : 11
       } else {
         suiteLight.intensity = 0
@@ -2067,7 +2093,15 @@ export function initCompound3D(mount, model, opts = {}) {
      read only by RESET. */
   let composed = null
 
+  const wantsStill = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
   const flyTo = (to, dur = 1.0) => {
+    /* REDUCED MOTION IS AN AUTHORED STILL, NOT A SLOWER FLIGHT. A visitor who has asked
+       for no motion still gets every level of this act — they are simply PUT there. The
+       framing is identical, because the framing is the content; only the travel is
+       removed. Read live rather than captured, so a change of setting takes effect
+       without a reload. */
+    if (wantsStill()) dur = 0
     composed = {
       az: to.az ?? cam.az,
       el: to.el ?? cam.el,
@@ -2075,7 +2109,12 @@ export function initCompound3D(mount, model, opts = {}) {
       target: (to.target || cam.target).clone(),
     }
     const g = gsapRef.lib
-    if (!g) { Object.assign(cam, { az: to.az ?? cam.az, el: to.el ?? cam.el, dist: to.dist ?? cam.dist }); if (to.target) cam.target.copy(to.target); return }
+    if (!g || dur === 0) {
+      g?.killTweensOf(cam); g?.killTweensOf(cam.target)
+      Object.assign(cam, { az: to.az ?? cam.az, el: to.el ?? cam.el, dist: to.dist ?? cam.dist })
+      if (to.target) cam.target.copy(to.target)
+      return
+    }
     g.killTweensOf(cam); g.killTweensOf(cam.target)
     g.to(cam, { az: to.az ?? cam.az, el: to.el ?? cam.el, dist: to.dist ?? cam.dist, duration: dur, ease: 'door', overwrite: true })
     if (to.target) g.to(cam.target, { x: to.target.x, y: to.target.y, z: to.target.z, duration: dur, ease: 'door', overwrite: true })
@@ -2092,6 +2131,13 @@ export function initCompound3D(mount, model, opts = {}) {
   /* --- PUBLIC API. main.js owns the STATE; this file owns the picture. ------------ */
   const api = {
     renderer, scene, camera, root, site,
+    /* the site's own units per foot, and the world units a foot is worth — so a host
+       page never has to guess which group carries the scale */
+    unitsPerFoot: U,
+    worldPerFoot: U * S,
+    /* the top of a suite parapet, in the site's own local units: what a projected
+       overlay needs to sit a label on a roof rather than on a slab */
+    roofTopLocal: H_SUITE + H_PARAPET,
     /* one bay, by suite index — what a test needs to ask the model a direct question */
     bayOf: (i) => suiteObjs[i] || null,
     /* Author's handle on the rest pose: set the azimuth, refit, and land there. Used to
@@ -2226,6 +2272,7 @@ export function initCompound3D(mount, model, opts = {}) {
     },
 
     setLevel(next, num, suiteIndex) {
+      entered = false
       level = next
       focusNum = next === 'compound' ? null : num
       selectedSuite = next === 'suite' && suiteIndex != null ? suiteObjs[suiteIndex]?.suite || null : null
@@ -2266,10 +2313,14 @@ export function initCompound3D(mount, model, opts = {}) {
     enterSuite(index) {
       const o = suiteObjs[index]
       if (!o) return
+      entered = true
       const p = worldOf(o.door)
+      /* Stand on the apron, on the door's own outward side, at about a person's height,
+         looking at the middle of the leaf. The azimuth is the door's normal turned by
+         whatever the site is currently turned by, so it is right at any orientation. */
       const n = o.suite.faceNormal || [0, 1]
       const az = Math.atan2(n[0], n[1]) + site.rotation.y
-      flyTo({ az, el: 0.085, dist: 3.4, target: new THREE.Vector3(p.x, p.y + ft(2) * (site.scale.y || 1), p.z) }, 1.5)
+      flyTo({ az, el: 0.11, dist: 0.98, target: new THREE.Vector3(p.x, p.y - wft(1.5), p.z) }, 1.6)
     },
 
     setHoverBuilding(num) {

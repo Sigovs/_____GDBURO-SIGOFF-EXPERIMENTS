@@ -34,7 +34,12 @@
   --ink:#F2F4F6; --ink-85:rgb(242 244 246/.85); --ink-70:rgb(242 244 246/.70);
   --ink-55:rgb(242 244 246/.55); --ink-40:rgb(242 244 246/.40);
   --ink-24:rgb(242 244 246/.24); --ink-16:rgb(242 244 246/.16); --ink-10:rgb(242 244 246/.10);
-  --red:#D8453C; --red-80:rgb(216 69 60/.80); --red-40:rgb(216 69 60/.40); --red-16:rgb(216 69 60/.16);
+  /* MEASURED, NOT CHOSEN. White on #D8453C is 4.34:1 on the composited render, which
+     fails AA for the 19px ENTER label — and ENTER is the one control on this screen that
+     must never be hard to read. Deepened until it measures 4.89:1 with the same ink.
+     The architectural red on the model keeps 0xD8453C: that is a material, not a ground
+     for type, and it carries no text. */
+  --red:#CE3B32; --red-80:rgb(206 59 50/.80); --red-40:rgb(206 59 50/.40); --red-16:rgb(206 59 50/.16);
   --sand:#C9BCA8; --sand-70:rgb(201 188 168/.70); --sand-30:rgb(201 188 168/.30); --sand-14:rgb(201 188 168/.14);
   --steel:#8FA4B4; --steel-55:rgb(143 164 180/.55); --steel-30:rgb(143 164 180/.30); --steel-14:rgb(143 164 180/.14);
   --grot:'Archivo',ui-sans-serif,system-ui,sans-serif;
@@ -85,12 +90,15 @@
 
 /* ---- GLOBAL NAVIGATION — one convention, top right ------------------------------------ */
 .v5 .nav{position:absolute;z-index:8;top:var(--s6);right:var(--s7);display:flex;gap:var(--s3)}
-.v5 .nav button{appearance:none;cursor:pointer;background:rgb(8 9 11/.78);border:1px solid var(--ink-40);color:var(--ink);
+/* The nav sits over a live scene. At .78 the model showed through brightly enough to
+   lift the measured GROUND to rgb(75,79,83) and drop the label to 4.10:1 — a translucent
+   control cannot promise a contrast ratio it does not control. */
+.v5 .nav button{appearance:none;cursor:pointer;background:rgb(8 9 11/.93);border:1px solid var(--ink-40);color:var(--ink);
   font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;
   padding:10px 16px 9px;transition:background-color .18s var(--ease),color .18s var(--ease),border-color .18s var(--ease)}
 .v5 .nav button:hover{background:var(--ink);color:var(--void);border-color:var(--ink)}
-.v5 .nav .ctx{background:none;border-color:var(--ink-24);color:var(--ink-70)}
-.v5 .nav .ctx:hover{background:var(--ink-16);border-color:var(--ink-55);color:var(--ink)}
+.v5 .nav .ctx{background:rgb(8 9 11/.86);border-color:var(--ink-40);color:var(--ink-85)}
+.v5 .nav .ctx:hover{background:var(--ink);border-color:var(--ink);color:var(--void)}
 
 /* ---- THE DECISION DOCK ----------------------------------------------------------------- */
 /* THE DOCK'S COLUMNS ARE FIXED, AND THIS IS NOT A STYLING PREFERENCE.

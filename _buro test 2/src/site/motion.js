@@ -1023,7 +1023,7 @@ export function initMotion({ compound, selectSuite, setLevel, state, cam } = {})
 
       /* lastLevel is gone with the scroll-driven levels it tracked. */
 
-      ScrollTrigger.create({
+      const act02Pin = ScrollTrigger.create({
         trigger: act02,
         start: 'top top',
         end: '+=160%',                  /* 1.6 + the act's own 1.0 = the 2.6vh budget */
@@ -1043,7 +1043,12 @@ export function initMotion({ compound, selectSuite, setLevel, state, cam } = {})
           const clearK = clamp01((p - 0.72) / 0.10)
           if (head) head.style.opacity = String(gsap.utils.interpolate(1, 0.40, yieldK) * (1 - clearK))
           if (h2) h2.style.opacity = String(gsap.utils.interpolate(1, 0.55, yieldK) * (1 - clearK))
-          if (record) record.style.opacity = String(clamp01((p - 0.24) / 0.12) * (1 - clearK))
+          /* The record used to arrive at 24% of the pin, which left the first quarter
+             of the act inviting an interaction whose controls were not on screen yet.
+             It now arrives at 8% and is complete by 16% — still after the compound has
+             resolved, so the drawing is never read through a live column of text, but
+             comfortably before the hint has finished being read. */
+          if (record) record.style.opacity = String(clamp01((p - 0.08) / 0.08) * (1 - clearK))
 
           indexIn.progress(clamp01((p - 0.28) / 0.14))
 
@@ -1121,6 +1126,15 @@ export function initMotion({ compound, selectSuite, setLevel, state, cam } = {})
           }
         },
       })
+
+      /* THE PIN'S REAL SCROLL RANGE, published for the ENTER control.
+
+         ENTER has to drive this choreography rather than jump past it, and only the
+         trigger knows where its own range actually is — the pin's spacer, the act's
+         height and the 160% end are all resolved at refresh time. Exposing the numbers
+         means there is still exactly ONE transition implementation: the scrub. The
+         button moves the scroll through it; it does not reimplement it. */
+      window.__lc_enterRange = () => ({ start: act02Pin.start, end: act02Pin.end })
     }
 
     /* ------------------------------------------------------------------------------

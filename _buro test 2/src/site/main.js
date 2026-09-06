@@ -193,6 +193,42 @@ const camera = (() => {
 const prefersReduced = () =>
   window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
 
+/* MOVE THE SCROLL, at a chosen pace, through a scroll-bound choreography.
+
+   `scrollIntoView({behavior:'smooth'})` cannot be used for this: its duration is the
+   browser's, it varies by distance and platform, and on a 1400px pinned range it
+   arrives long before the threshold has played. This drives `window.scrollTo` on a
+   fixed clock instead, so the beats land at the pace they were composed at.
+
+   It yields the moment the visitor touches the wheel or a key — the page is animating
+   the transport on their behalf, and the instant they want it back they have it
+   (`SC1`, `MJ6`). */
+function scrollThrough(target, ms = 2200) {
+  const from = window.scrollY
+  const dist = target - from
+  if (Math.abs(dist) < 4) return
+  let cancelled = false
+  const stop = () => { cancelled = true }
+  /* Wheel, touch and keys hand the transport straight back.  is NOT in
+     this list: a click is how the visitor STARTS this move, and cancelling on the next
+     pointerdown meant an incidental click halfway through aborted the very transition
+     the visitor had just asked for. */
+  for (const ev of ['wheel', 'touchstart', 'keydown']) {
+    window.addEventListener(ev, stop, { once: true, passive: true })
+  }
+  const t0 = performance.now()
+  const tick = (now) => {
+    if (cancelled) return
+    const t = Math.min(1, (now - t0) / ms)
+    /* The page's own door curve: resists starting, settles rather than stopping. */
+    const e = t < 0.5 ? 4 * t * t * t : 1 - ((-2 * t + 2) ** 3) / 2
+    window.scrollTo(0, from + dist * e)
+    if (t < 1) requestAnimationFrame(tick)
+    else for (const ev of ['wheel', 'touchstart', 'keydown']) window.removeEventListener(ev, stop)
+  }
+  requestAnimationFrame(tick)
+}
+
 /* ---------------------------------------------------------------------------------
    THE RECORD.
    --------------------------------------------------------------------------------- */
@@ -754,10 +790,25 @@ if (compoundEl) {
 
   $('[data-nav-enter]')?.addEventListener('click', () => {
     if (!state.suite) return
-    /* ENTER is the consequence of the illuminated door: it takes the visitor to the act
-       that IS that door's interior. The threshold choreography belongs to scroll, so
-       this hands over to the page's own anchor rather than inventing a second route. */
-    document.querySelector('#act-03')?.scrollIntoView({ behavior: prefersReduced() ? 'auto' : 'smooth', block: 'start' })
+    /* ENTER DRIVES THE THRESHOLD; it does not skip it.
+
+       A first pass called `scrollIntoView` on act 03, which jumped the page past the
+       entire 02 -> 03 choreography — the visitor pressed the one control the whole act
+       has been building toward and got a scroll. The threshold is scroll-bound, so the
+       honest fix is to move the SCROLL through it at the choreography's own pace rather
+       than to build a second, unrelated transition that would immediately drift out of
+       step with the first.
+
+       The act's pin owns the range; `enterRange` reports it, so this scrolls from
+       wherever the visitor is to the far end of that range over the page's own door
+       duration. Every beat plays, in order, at a speed somebody chose. The visitor can
+       still interrupt by scrolling — the transport is never taken away (`SC1`). */
+    const range = window.__lc_enterRange?.()
+    if (!range || prefersReduced()) {
+      document.querySelector('#act-03')?.scrollIntoView({ behavior: prefersReduced() ? 'auto' : 'smooth', block: 'start' })
+      return
+    }
+    scrollThrough(range.end)
   })
 
   /* The composed frame is solved against the stage's real box, so it has to be

@@ -514,15 +514,15 @@ export function initCompound3D(mount, model, opts = {}) {
      darker and far rougher than concrete, and the difference between the two is what
      finally gives the site a surface instead of a silhouette. */
   {
-    const grassGeo = new THREE.CircleGeometry(1, 40)
+    /* Each zone is now a traced polygon rather than a scaled disc, so its edge follows
+       the kerb, the setback or the parcel line it actually sits against. The shapes
+       come from `site-visual.js`, which reads them off the civil render. */
     for (const z of SV.landscape) {
-      const g = new THREE.Mesh(grassGeo, M.grass)
-      g.rotation.x = -Math.PI / 2
-      /* Elliptical and turned, deterministically per zone. A landscaped area drawn as a
-         true circle reads as a compass mark on the plan rather than as ground. */
-      g.rotation.z = (z.cx % 7) * 0.42
-      g.scale.set(z.r * 1.22, z.r * (0.62 + (z.cy % 5) * 0.08), 1)
-      g.position.set(z.cx, ROAD_LIFT * 0.25, z.cy)
+      const shape = new THREE.Shape(z.outline.map(([x, y]) => v2(x, y)))
+      const geo = new THREE.ShapeGeometry(shape, 6)
+      geo.rotateX(Math.PI / 2)
+      const g = new THREE.Mesh(geo, M.grass)
+      g.position.y = ROAD_LIFT * 0.25
       g.receiveShadow = true
       site.add(g)
     }
@@ -586,81 +586,170 @@ export function initCompound3D(mount, model, opts = {}) {
     site.add(water)
   }
 
-  /* --- PLANTING. -------------------------------------------------------------------
+  /* --- PLANTING — THE REAL TREES. --------------------------------------------------
 
-     The last pass planted single icosahedrons and they read as moss balls, because a
-     tree is not a blob: it is a dark vertical with a mass held above it, and the GAP
-     between the two is what the eye identifies. So every tree here is a trunk plus a
-     canopy, and the canopies come in three families with different silhouettes —
-     upright, spreading and columnar — assigned deterministically so the planting has
-     variety without ever being random.
+     The procedural trunk-and-icosahedron was honest about being a placeholder and it
+     looked like one. These are the source library's own chestnuts: the FBX turned out
+     to hold FIVE distinct trees, so they are exported one per file and the site plants
+     different trees rather than one tree a hundred times.
 
-     Foliage is very dark olive, well below the architecture in value. Landscape frames
-     buildings; the moment planting competes with a facade it has stopped being
-     landscape and started being scenery. */
-  const trunkMat = new THREE.MeshStandardMaterial({ color: 0x14171a, roughness: 0.95, metalness: 0 })
-  const leafMat = new THREE.MeshStandardMaterial({ color: 0x1e2a22, roughness: 1, metalness: 0, flatShading: true })
-  const trunkGeo = new THREE.CylinderGeometry(0.16, 0.24, 1, 6)
-  const canopyGeo = [
-    new THREE.IcosahedronGeometry(1, 1),                 /* upright — the common one */
-    new THREE.DodecahedronGeometry(1, 0),                /* spreading, flatter crown */
-    new THREE.ConeGeometry(0.72, 2.1, 7, 1),             /* columnar, for the edges */
-  ]
-  const treeGeo = canopyGeo[0]
-  const treeMat = leafMat
+     Loaded asynchronously and added when they arrive. The compound is complete without
+     them and simply gains its planting a moment later, so a slow connection gets a
+     finished model rather than a broken one.
+
+     Placement is unchanged and still derived — sampled along the measured parcel line,
+     stepped inward, rejected unless the point clears every building and the drive, and
+     now also drawn toward the landscaped zones, which is where planting belongs. What
+     changed is what gets planted.
+
+     Blue hour: the loaded materials are overridden to the site's own foliage value.
+     A daylight-green tree at dusk is the single fastest way to break the hour. */
+  const treeSpots = []
   {
     const occupied = []
-    for (const row of data.rows) occupied.push([row.cx, row.cy, Math.max(row.length, row.depth) * 0.7])
-    for (const c of data.civic) occupied.push([c.cx, c.cy, Math.max(c.length, c.depth) * 0.7])
-
+    for (const row of data.rows) occupied.push([row.cx, row.cy, Math.max(row.length, row.depth) * 0.62])
+    for (const c of data.civic) occupied.push([c.cx, c.cy, Math.max(c.length, c.depth) * 0.62])
     const clear = (x, y) => {
       for (const [ox, oy, rad] of occupied) if (Math.hypot(x - ox, y - oy) < rad) return false
-      if (spine) { const n = nearestOnSpine(spine, x, y); if (n.d < ROAD_W * 1.9) return false }
+      if (spine) { const n = nearestOnSpine(spine, x, y); if (n.d < ROAD_W * 1.55) return false }
       return true
     }
 
-    /* Walk the measured parcel line and step inward. A tree is planted only where the
-       point survives every test, so the planting reads the site's own leftover ground
-       instead of being scattered over it. */
+    /* Along the parcel line, stepped inward. */
     const per = data.perimeter
-    let planted = 0
-    for (let i = 0; i < per.length && planted < 120; i++) {
+    for (let i = 0; i < per.length; i++) {
       const [px, py] = per[i]
       const [qx, qy] = per[(i + 1) % per.length]
-      const mx = (px + qx) / 2
-      const my = (py + qy) / 2
+      const mx = (px + qx) / 2, my = (py + qy) / 2
       const toC = [cX - mx, cY - my]
       const l = Math.hypot(toC[0], toC[1]) || 1
-      for (const inset of [22, 46, 74]) {
+      for (const inset of [24, 52]) {
         const x = mx + (toC[0] / l) * inset
         const y = my + (toC[1] / l) * inset
-        if (!clear(x, y)) continue
+        if (clear(x, y)) treeSpots.push([x, y, i])
+      }
+    }
 
-        /* Family, height and rotation all derive from the vertex index: the planting is
-           varied and completely deterministic, so it is the same compound on every load
-           and in every screenshot. */
-        const fam = (i + (inset > 40 ? 1 : 0)) % 3
-        const h = ft(15) + ((i * 37) % 9) * ft(1.6)
-        const trunkH = h * (fam === 2 ? 0.34 : 0.44)
-        const crown = h - trunkH
-
-        const trunk = new THREE.Mesh(trunkGeo, trunkMat)
-        trunk.scale.set(ft(1.5), trunkH, ft(1.5))
-        trunk.position.set(x, trunkH / 2, y)
-        trunk.castShadow = true
-        site.add(trunk)
-
-        const canopy = new THREE.Mesh(canopyGeo[fam], leafMat)
-        const spread = fam === 1 ? 0.78 : fam === 2 ? 0.42 : 0.62
-        canopy.scale.set(crown * spread, crown * (fam === 2 ? 0.62 : 0.55), crown * spread)
-        canopy.position.set(x, trunkH + crown * 0.44, y)
-        canopy.rotation.set((i % 5) * 0.06, i * 1.7, (i % 3) * 0.05)
-        canopy.castShadow = true
-        site.add(canopy)
-        planted++
+    /* And clustered inside the landscaped zones — a planted area with no planting in it
+       is just a differently coloured floor. Three per zone, at its own vertices pulled
+       toward its centroid, so the group sits inside the shape rather than on its edge. */
+    for (const [zi, z] of SV.landscape.entries()) {
+      const pts = z.outline
+      const cx2 = pts.reduce((a, q) => a + q[0], 0) / pts.length
+      const cy2 = pts.reduce((a, q) => a + q[1], 0) / pts.length
+      for (let k = 0; k < pts.length; k += 2) {
+        const x = cx2 + (pts[k][0] - cx2) * 0.55
+        const y = cy2 + (pts[k][1] - cy2) * 0.55
+        if (clear(x, y)) treeSpots.push([x, y, zi * 7 + k])
       }
     }
   }
+
+  /* The library, loaded once and instanced by cloning. Draco-compressed GLB, ~1.3 MB
+     each, three silhouettes — enough variation that no two neighbours match. */
+  const TREES = ['tree-1', 'tree-2', 'tree-3', 'tree-4', 'tree-5']
+  const foliage = new THREE.MeshStandardMaterial({ color: 0x1c2620, roughness: 1, metalness: 0 })
+  const barkMat = new THREE.MeshStandardMaterial({ color: 0x14161a, roughness: 0.95, metalness: 0 })
+
+  const plantTrees = async () => {
+    const [{ GLTFLoader }, { DRACOLoader }] = await Promise.all([
+      import('three/examples/jsm/loaders/GLTFLoader.js'),
+      import('three/examples/jsm/loaders/DRACOLoader.js'),
+    ])
+    const draco = new DRACOLoader()
+    /* The decoder that ships with the installed three, vendored into public/ — the CDN
+       path guessed at first simply 404s, and a decoder that is not there fails silently
+       into a compound with no planting. */
+    draco.setDecoderPath('./draco/gltf/')
+    const loader = new GLTFLoader()
+    loader.setDRACOLoader(draco)
+
+    const models = []
+    for (const name of TREES) {
+      try {
+        /* A PLAIN RUNTIME PATH, not a bundler URL.
+
+           `new URL(..., import.meta.url)` makes Vite's import-analysis try to resolve
+           the whole family at build time — it globbed every GLB into the module graph
+           and then failed to parse the result. Large binary assets belong in `public/`
+           and are fetched by path: nothing to analyse, nothing to inline, and the files
+           are served exactly as they were exported. */
+        const g = await loader.loadAsync(`./models/${name}.glb`)
+        models.push(g.scene)
+      } catch (err) { console.warn('[luxe-corsa] tree', name, 'did not load', err) }
+    }
+    console.info('[luxe-corsa] planting', models.length, 'silhouettes at', treeSpots.length, 'points')
+    if (!models.length) return
+
+    /* KEEP THE GLB'S OWN MATERIALS, and grade them.
+
+       A first pass replaced every tree material with two of our own, which threw away
+       the leaf alpha the whole silhouette depends on — the export renames meshes to
+       'Mesh'/'Mesh_1', so a name-based leaf test matched nothing and both halves of the
+       tree became opaque dark bark. Invisible against a dark site.
+
+       The imported materials already carry the source's bark and leaf maps. So they are
+       kept and TUNED instead: alpha cut-out enabled wherever a map has transparency,
+       roughness pushed up, and the colour multiplied down toward the site's foliage
+       value so a daylight-green tree reads at blue hour. */
+    for (const m of models) {
+      m.traverse((n) => {
+        if (!n.isMesh || !n.material) return
+        const mats = Array.isArray(n.material) ? n.material : [n.material]
+        for (const mat of mats) {
+          mat.roughness = 1
+          mat.metalness = 0
+          mat.envMapIntensity = 0.18
+          /* Foliage at dusk is nearly black with a green bias; multiplying the map by a
+             dark colour keeps its variation and removes the daylight. */
+          /* Well below the architecture. Untextured foliage takes the full key, so a
+             mid green renders as a pale pom-pom against a dark site — landscape has to
+             sit under the buildings in value or it stops framing them and starts
+             competing with them. */
+          mat.color.setRGB(0.085, 0.105, 0.072)
+          if (mat.map) {
+            mat.alphaTest = 0.4
+            mat.transparent = false
+            mat.side = THREE.DoubleSide
+          }
+          mat.needsUpdate = true
+        }
+        n.castShadow = true
+        n.receiveShadow = false
+      })
+    }
+
+    /* NORMALISE ON THE MODEL THAT ACTUALLY ARRIVED.
+
+       The export normalises each tree to one unit tall in Blender, but glTF carries
+       Blender's own unit conversion on the scene root — so the model that reaches the
+       browser was about 1/6000th of a unit, and multiplying it by a height in feet gave
+       trees three thousandths of a unit tall. Invisible, and the geometry probe still
+       reported a tidy 0..1 local box because the shrink lives on an ancestor.
+
+       So each silhouette is measured once, here, and every clone is scaled by the
+       ratio that actually puts it at the height we want. Whatever any exporter does to
+       the transform, the tree ends up the size the site asked for. */
+    const unit = models.map((m) => {
+      const box = new THREE.Box3().setFromObject(m)
+      return Math.max(1e-6, box.max.y - box.min.y)
+    })
+
+    for (const [x, y, seed] of treeSpots) {
+      const pick = seed % models.length
+      const src = models[pick]
+      const t = src.clone(true)
+      const h = ft(26) + ((seed * 37) % 11) * ft(2.2)
+      t.scale.setScalar(h / unit[pick])
+      t.position.set(x, 0, y)
+      t.rotation.y = seed * 1.31
+      site.add(t)
+      if (!window.__lcTree) { window.__lcTree = t }
+    }
+    console.info('[luxe-corsa] planted', treeSpots.length)
+  }
+  plantTrees()
+
 
   let gateAnchor = null
   /* --- THE GATE. Two piers and a threshold at the entry the route starts from. ---- */

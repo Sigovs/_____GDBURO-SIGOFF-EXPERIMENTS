@@ -69,11 +69,52 @@ export const pond = {
    site a second material and to hold the planting masses that frame the architecture.
    Radii are generous and deliberately soft-edged. */
 export const landscape = [
-  { provenance: PROVENANCE, cx: 470, cy: 150, r: 92 },   /* between the club and 04/05 */
-  { provenance: PROVENANCE, cx: 355, cy: 300, r: 74 },   /* the island inside the loop */
-  { provenance: PROVENANCE, cx: 690, cy: 330, r: 88 },   /* south of the roundabout */
-  { provenance: PROVENANCE, cx: 175, cy: 175, r: 96 },   /* the western verge */
-  { provenance: PROVENANCE, cx: 120, cy: 330, r: 72 },   /* dealership frontage */
-  { provenance: PROVENANCE, cx: 620, cy: 470, r: 104 },  /* the southern edge */
-  { provenance: PROVENANCE, cx: 980, cy: 400, r: 86 },   /* east of 09/11 */
+  /* POLYGONS, NOT CIRCLES.
+
+     A first pass used discs, and they read exactly as what they were: compass marks on
+     a plan. Planted ground on a real site is bounded by the things around it — the kerb
+     line on one side, a building's setback on another, the parcel edge on a third — so
+     these are irregular closed forms traced against the road network, the building
+     footprints and the parcel line on the civil render. Still visual, still derived,
+     but now the SHAPE carries information instead of contradicting it. */
+  {
+    provenance: PROVENANCE,
+    note: 'the wedge between the clubhouse and the 04/05 pair, bounded by the drive',
+    outline: [[400, 96], [498, 78], [556, 118], [548, 186], [470, 214], [408, 176], [386, 132]],
+  },
+  {
+    provenance: PROVENANCE,
+    note: 'the island inside the western loop',
+    outline: [[300, 268], [372, 250], [416, 286], [400, 340], [332, 352], [292, 318]],
+  },
+  {
+    provenance: PROVENANCE,
+    note: 'south of the roundabout, between the drive and building 06',
+    outline: [[612, 296], [706, 282], [770, 322], [762, 388], [676, 404], [610, 366]],
+  },
+  {
+    provenance: PROVENANCE,
+    note: 'the western verge along the parcel line',
+    outline: [[86, 118], [190, 92], [258, 130], [250, 208], [162, 238], [92, 206], [66, 160]],
+  },
+  {
+    provenance: PROVENANCE,
+    note: 'dealership frontage, between the turning head and the boundary',
+    outline: [[52, 292], [140, 276], [186, 312], [176, 372], [104, 390], [46, 352]],
+  },
+  {
+    provenance: PROVENANCE,
+    note: 'the southern edge below buildings 01 and 06',
+    outline: [[452, 448], [590, 424], [724, 448], [746, 508], [640, 542], [498, 528], [438, 492]],
+  },
+  {
+    provenance: PROVENANCE,
+    note: 'east of 09 and 11, running down to the parcel edge',
+    outline: [[906, 356], [1006, 340], [1062, 386], [1046, 452], [960, 470], [898, 424]],
+  },
+  {
+    provenance: PROVENANCE,
+    note: 'the north verge behind 07 and 08, tying the basin into the site',
+    outline: [[736, 46], [812, 20], [878, 54], [872, 118], [796, 142], [730, 108]],
+  },
 ]

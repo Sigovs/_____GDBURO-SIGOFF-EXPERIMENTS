@@ -1131,9 +1131,35 @@ ul, ol { list-style: none; padding: 0; }
   font-family: var(--face-mono); font-size: var(--t-micro); letter-spacing: .06em;
   transition: color var(--dur-quick) var(--ease-enter), border-color var(--dur-quick) var(--ease-enter);
 }
-.bldg-index__num { color: var(--ink); font-variant-numeric: tabular-nums; }
+/* THE IDENTITY TOKEN.
+
+   The row and the model's callout must be obviously about the same object, and the
+   thing they share is the NUMBER — so it is set identically in both: the grotesque, at
+   a size that reads as a figure rather than as a label, with a hairline under it. The
+   callout's own key line uses the same face and the same rule, so a visitor scanning
+   from the model to the record recognises 03 before they read a word of either. */
+.bldg-index__num {
+  font-family: var(--face-grotesque);
+  font-size: 1.0625rem;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+.bldg-index__btn[aria-current='true'] .bldg-index__num,
+.bldg-index__btn[data-hot='true'] .bldg-index__num { color: var(--ink); }
 .bldg-index__meta { color: var(--ink-55); font-variant-numeric: tabular-nums; }
 .bldg-index__btn:hover { color: var(--ink); border-bottom-color: var(--ink-40); }
+/* Keyboard focus reads as a stronger version of hover rather than as a browser
+   outline, and it drives the same 3D response — the physical building lights when the
+   row is focused, which is what makes the keyboard route feel like the pointer one. */
+.bldg-index__btn:focus-visible,
+.bay-list__btn:focus-visible {
+  outline: none;
+  color: var(--ink);
+  border-bottom: var(--rule-boundary);
+}
 .bldg-index__btn:hover .bldg-index__meta { color: var(--ink-70); }
 .bldg-index__btn[aria-current='true'] { color: var(--ink); border-bottom-color: var(--ink-70); }
 .bldg-index__btn[aria-current='true'] .bldg-index__meta { color: var(--ink-70); }

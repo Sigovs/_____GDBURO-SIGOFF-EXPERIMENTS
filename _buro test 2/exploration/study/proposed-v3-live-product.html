@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Act 02 — V3 · Live product</title>
+<style>
+/* ======================================================================================
+   V3 — LIVE PRODUCT.  This one RUNS.
+
+   It imports the production compound and the production Three.js model read-only and
+   drives the real state machine.  Everything below the canvas is this file's own, so the
+   exploration cannot leak into production and production's Act 02 cannot leak in here.
+
+   Three things are new, and each answers a named failure:
+
+   1. THE LEADER IS PROJECTED, NOT PLACED.  Every tag is drawn from the real world-space
+      anchor of the building it names, re-projected every frame, so it stays attached
+      while the model turns.  The path is not one L-shape repeated nine times: the rise
+      length is derived from the building's own screen height and the jog goes OUTWARD
+      from the compound's centre, so the nine paths differ because the nine buildings do.
+      On hover the line DRAWS — a light runs along it — rather than simply changing value.
+
+   2. THE BAYS ARE BAYS.  The old rail was a barcode: 5px marks a visitor had to be told
+      the meaning of.  Each suite is now a schematic garage bay wide enough to read as a
+      unit, with a door panel and a glazed head, echoing the elevation directly above it.
+
+   3. THE CONSOLE HAS THREE JOBS.  Left: where am I. Centre: what can I choose. Right:
+      what do I do next.  The primary act never moves.
+   ====================================================================================== */
+
+:root {
+  --void:#060708; --ground:#0A0B0D; --panel:#0B0D10;
+  --ink:#F2F4F6;
+  --ink-85:rgb(242 244 246/.85); --ink-70:rgb(242 244 246/.70); --ink-55:rgb(242 244 246/.55);
+  --ink-40:rgb(242 244 246/.40); --ink-24:rgb(242 244 246/.24); --ink-16:rgb(242 244 246/.16);
+  --ink-10:rgb(242 244 246/.10);
+
+  /* THE COLOUR SYSTEM, all three derived from the project rather than chosen.
+     RED     the illuminated wordmark on the entry portal and the corner-pier reveal.
+             The strongest signal in the interface: SELECTED, and NEXT ACTION.
+     SAND    the precast panel and the concrete apron the buildings stand on.
+             Warmth, and the hover state — so hover and selection never look alike.
+     STEEL   the roof cladding and the glazing.  Neutral selectable, technical labels. */
+  --red:#D8453C; --red-70:rgb(216 69 60/.70); --red-24:rgb(216 69 60/.24);
+  --sand:#C9BCA8; --sand-55:rgb(201 188 168/.55); --sand-20:rgb(201 188 168/.20);
+  --steel:#8FA4B4; --steel-40:rgb(143 164 180/.40);
+
+  --grot:'Archivo',ui-sans-serif,system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--void);color:var(--ink);overflow:hidden}
+body{font-family:var(--grot);-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+
+.stage{position:fixed;inset:0;background:var(--ground);isolation:isolate}
+.mount{position:absolute;inset:0}
+.compound__svg{width:100%;height:100%;display:block;overflow:hidden}
+.compound__gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y;cursor:grab}
+.compound__gl:active{cursor:grabbing}
+.stage[data-gl='on'] .compound__svg{visibility:hidden}
+.cal{display:none}                       /* V3 draws its own annotation */
+.stage::after{
+  content:'';position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(to bottom,rgb(6 7 8/.62) 0%,rgb(6 7 8/0) 14%),
+             linear-gradient(to top,rgb(6 7 8/.92) 0%,rgb(6 7 8/.55) 12%,rgb(6 7 8/0) 34%);
+}
+
+.mark{position:absolute;z-index:6;top:var(--s6);left:var(--s7);display:grid;gap:var(--s1)}
+.mark b{font-size:15px;font-weight:600;letter-spacing:.10em;text-transform:uppercase}
+.mark span{font-family:var(--mono);font-size:14px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-55)}
+
+/* ======================================================================================
+   THE LEADER LAYER — one SVG over the canvas, redrawn every frame from world anchors.
+   ====================================================================================== */
+#leaders{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:visible}
+#leaders .path{fill:none;stroke:var(--ink-24);stroke-width:1;vector-effect:non-scaling-stroke;transition:stroke .3s var(--ease)}
+#leaders .ring{fill:none;stroke:var(--ink-40);stroke-width:1;transition:stroke .3s var(--ease)}
+/* the drawn light: a short dash travelling the path, only while hovered */
+#leaders .spark{fill:none;stroke:var(--sand);stroke-width:1.6;stroke-linecap:round;opacity:0}
+#leaders g[data-s='hover'] .path{stroke:var(--sand-55)}
+#leaders g[data-s='hover'] .ring{stroke:var(--sand)}
+#leaders g[data-s='hover'] .spark{opacity:.95;animation:draw .62s var(--ease) forwards}
+#leaders g[data-s='on'] .path{stroke:var(--red-70)}
+#leaders g[data-s='on'] .ring{stroke:var(--red)}
+#leaders g[data-s='dim'] .path{stroke:var(--ink-10)}
+#leaders g[data-s='dim'] .ring{stroke:var(--ink-16)}
+@keyframes draw{from{stroke-dashoffset:var(--len)}to{stroke-dashoffset:0}}
+@media (prefers-reduced-motion:reduce){#leaders g[data-s='hover'] .spark{animation:none;opacity:.7;stroke-dashoffset:0}}
+
+#tags{position:absolute;inset:0;z-index:4;pointer-events:none}
+.tag{
+  position:absolute;transform:translate(-50%,-50%);white-space:nowrap;pointer-events:auto;cursor:pointer;
+  font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.12em;
+  color:var(--ink-70);background:rgb(8 9 11/.66);border:1px solid var(--ink-16);
+  padding:4px 8px 3px;font-variant-numeric:tabular-nums;
+  transition:color .28s var(--ease),background-color .28s var(--ease),border-color .28s var(--ease);
+}
+.tag[data-s='hover']{color:var(--void);background:var(--sand);border-color:var(--sand)}
+.tag[data-s='on']{color:#fff;background:var(--red);border-color:var(--red)}
+.tag[data-s='dim']{color:var(--ink-40);background:rgb(8 9 11/.4);border-color:var(--ink-10)}
+.tag small{display:block;margin-top:3px;padding-top:3px;border-top:1px solid rgb(0 0 0/.28);font-size:14px;letter-spacing:.08em;text-transform:uppercase}
+
+/* ======================================================================================
+   THE CONSOLE
+   ====================================================================================== */
+.con{position:absolute;z-index:7;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--ink-24)}
+.con::before{content:'';position:absolute;left:0;top:-2px;height:3px;width:132px;background:var(--red)}
+.con__row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:var(--s7);padding:var(--s5) var(--s7)}
+
+.who{display:flex;align-items:baseline;gap:var(--s5)}
+.who__fig{font-size:50px;font-weight:600;line-height:.82;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.who__id{display:grid;gap:2px}
+.who__k{font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.20em;text-transform:uppercase;color:var(--ink-55)}
+.who__v{font-size:17px;color:var(--ink-85)}
+.who__v b{color:var(--ink);font-weight:500}
+
+.tell{font-size:21px;font-weight:600;letter-spacing:-.01em;color:var(--ink);justify-self:start}
+.tell em{font-style:normal;color:var(--sand)}
+
+.acts{display:flex;align-items:center;gap:var(--s5)}
+.back{appearance:none;background:none;border:0;cursor:pointer;font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-55);padding:10px 0;transition:color .25s var(--ease)}
+.back:hover{color:var(--ink)}
+.go{appearance:none;display:inline-grid;grid-template-columns:auto 48px;align-items:stretch;border:1px solid var(--red-24);background:none;padding:0;cursor:not-allowed;font:inherit;transition:background-color .3s var(--ease),border-color .3s var(--ease)}
+.go__t{padding:12px var(--s5) 11px;text-align:left;font-size:17px;font-weight:600;color:var(--ink-40);display:flex;align-items:center;transition:color .3s var(--ease)}
+.go__t>span{display:block}
+.go__t span{display:block;font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:rgb(255 255 255/.6);margin-bottom:1px}
+.go__a{display:flex;align-items:center;justify-content:center;border-left:1px solid var(--red-24);color:var(--ink-40);font-size:17px;transition:color .3s var(--ease),border-color .3s var(--ease)}
+.go[data-ready='true']{border-color:var(--red);cursor:pointer}
+.go[data-ready='true'] .go__t{color:var(--red)}
+.go[data-ready='true'] .go__a{color:var(--red);border-left-color:var(--red)}
+.go[data-ready='true']:hover{background:var(--red)}
+.go[data-ready='true']:hover .go__t,.go[data-ready='true']:hover .go__a{color:#fff}
+.go[data-ready='true']:hover .go__a{border-left-color:rgb(255 255 255/.34)}
+
+/* --- THE BAYS.  Not a rail: a row of schematic garage bays. --------------------------- */
+.bays{border-top:1px solid var(--ink-16);padding:var(--s4) var(--s7) var(--s5);display:grid;grid-template-columns:auto 1fr auto;align-items:end;gap:var(--s5)}
+.bays__lead{display:grid;gap:3px;padding-bottom:6px}
+.bays__lead b{font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--red)}
+.bays__lead span{font-size:15px;color:var(--ink-55)}
+.bays__strip{display:flex;gap:3px;align-items:flex-end}
+.bay{
+  appearance:none;padding:0;cursor:pointer;position:relative;
+  width:30px;height:38px;background:var(--ink-10);border:1px solid var(--ink-24);border-bottom:2px solid var(--ink-24);
+  transition:background-color .22s var(--ease),border-color .22s var(--ease),height .22s var(--ease);
+}
+/* the door panel and its glazed head — the two marks that make it a bay, not a bar */
+.bay::before{content:'';position:absolute;left:3px;right:3px;top:9px;bottom:3px;background:var(--ink-16);transition:background-color .22s var(--ease)}
+.bay::after{content:'';position:absolute;left:3px;right:3px;top:3px;height:5px;background:var(--steel-40);transition:background-color .22s var(--ease)}
+.bay:hover,.bay[data-hot='true']{height:46px;border-color:var(--sand);background:var(--sand-20)}
+.bay:hover::before,.bay[data-hot='true']::before{background:var(--sand-55)}
+.bay:hover::after,.bay[data-hot='true']::after{background:var(--sand)}
+.bay[data-sold='true']{cursor:not-allowed;height:26px;border-color:var(--ink-10);background:transparent}
+.bay[data-sold='true']::before{background:var(--ink-10)}
+.bay[data-sold='true']::after{background:var(--ink-10)}
+.bay[aria-pressed='true']{height:52px;border-color:var(--red);background:var(--red-24)}
+.bay[aria-pressed='true']::before{background:var(--red)}
+.bay[aria-pressed='true']::after{background:#fff}
+.bay__n{position:absolute;left:50%;top:-24px;transform:translateX(-50%);font-family:var(--mono);font-size:14px;font-weight:500;color:var(--ink);background:rgb(8 9 11/.92);border:1px solid var(--ink-40);padding:2px 6px 1px;opacity:0;transition:opacity .18s var(--ease);pointer-events:none}
+.bay:hover .bay__n,.bay[data-hot='true'] .bay__n{opacity:1}
+.bay[aria-pressed='true'] .bay__n{opacity:1;color:#fff;background:var(--red);border-color:var(--red)}
+.bays__n{font-size:16px;color:var(--ink-55);padding-bottom:8px;text-align:right;font-variant-numeric:tabular-nums}
+.bays__n b{color:var(--ink);font-weight:500}
+
+.spec{display:flex;align-items:baseline;gap:var(--s7)}
+.spec div{display:grid;gap:1px}
+.spec .k{font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-55)}
+.spec .v{font-size:19px;color:var(--ink)}
+.spec .v.price{font-size:25px;font-weight:600;letter-spacing:-.02em}
+.spec .more{appearance:none;background:none;border:0;border-bottom:1px solid var(--ink-24);cursor:pointer;font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-55);padding:0 0 3px}
+
+.con:not([data-level='building']):not([data-level='suite']) .bays{display:none}
+.con:not([data-level='suite']) .spec{display:none}
+.nogl{position:absolute;z-index:6;left:var(--s7);top:50%;font-family:var(--mono);font-size:14px;color:var(--red)}
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <div class="mount" id="mount"></div>
+  <svg id="leaders"></svg>
+  <div id="tags"></div>
+
+  <div class="mark"><b>Luxe&nbsp;Corsa</b><span>Lake Zurich, Illinois</span></div>
+
+  <div class="con" id="con" data-level="compound">
+    <div class="con__row">
+      <div class="who">
+        <div class="who__fig" id="fig">121</div>
+        <div class="who__id"><div class="who__k" id="who-k">The compound</div><div class="who__v" id="who-v"></div></div>
+      </div>
+      <div class="tell" id="tell">Choose a building.</div>
+      <div class="acts">
+        <button class="back" id="back" type="button" hidden>← Compound</button>
+        <button class="go" id="go" type="button" data-ready="false" hidden>
+          <span class="go__t"><span id="go-t">Select a suite</span></span><span class="go__a">→</span>
+        </button>
+      </div>
+    </div>
+    <div class="bays">
+      <div class="bays__lead"><b id="bays-k">Select a suite</b><span>Each bay is one suite</span></div>
+      <div class="bays__strip" id="strip" role="group" aria-label="Suites in this building"></div>
+      <div class="bays__n" id="bays-n"></div>
+    </div>
+    <div class="bays spec" style="grid-template-columns:none" id="spec"></div>
+  </div>
+</div>
+
+<script type="module">
+import { buildCompound, TYPE_SPEC } from '/src/site/compound.js'
+
+const $ = (id) => document.getElementById(id)
+const stage = $('stage'), mount = $('mount'), con = $('con')
+const compound = buildCompound(mount)
+let gl = null
+
+const state = { level: 'compound', building: null, suite: null, hover: null, hoverSuite: null }
+const available = compound.suites.filter((s) => !s.sold).length
+const say = (s) => String(s).replace(/\bSQ FT\b/g, 'sq ft').replace(/\bTYPE\b/g, 'Type').replace(/\bFROM\b/g, 'from')
+
+/* ---- state, through the production entry points ---------------------------------- */
+function hoverBuilding(b) { if (state.hover === b) return; state.hover = b; gl?.setHoverBuilding(b ? b.num : null); paint() }
+function hoverSuite(s) { if (state.hoverSuite === s) return; state.hoverSuite = s; gl?.setHoverSuite(s || null); paint() }
+function selectBuilding(b) {
+  if (!b) return
+  Object.assign(state, { building: b, suite: null, hover: null, hoverSuite: null, level: 'building' })
+  gl?.setLevel('building', b.num); renderBays(); paint()
+}
+function selectSuite(s) {
+  if (!s || s.sold) return
+  Object.assign(state, { suite: s, building: s.bldg, hoverSuite: null, level: 'suite' })
+  gl?.setLevel('suite', s.bldg.num, s.index); paint()
+}
+function toCompound() {
+  Object.assign(state, { level: 'compound', building: null, suite: null, hover: null, hoverSuite: null })
+  gl?.setLevel('compound'); paint()
+}
+function back() {
+  if (state.level === 'suite' && state.building) {
+    const b = state.building; state.suite = null; state.level = 'building'
+    gl?.setLevel('building', b.num); paint()
+  } else if (state.level === 'building') toCompound()
+}
+
+/* ======================================================================================
+   THE LEADER LAYER.  Anchors are WORLD positions on the real geometry, projected every
+   frame, so a tag stays on its building while the model turns under it.
+   ====================================================================================== */
+const svg = $('leaders'), tagsEl = $('tags')
+const leaders = new Map()          /* num -> { g, path, ring, spark, tag } */
+
+function makeLeader(num) {
+  const NS = 'http://www.w3.org/2000/svg'
+  const g = document.createElementNS(NS, 'g')
+  const ring = document.createElementNS(NS, 'circle'); ring.setAttribute('r', '4'); ring.setAttribute('class', 'ring')
+  const path = document.createElementNS(NS, 'polyline'); path.setAttribute('class', 'path')
+  const spark = document.createElementNS(NS, 'polyline'); spark.setAttribute('class', 'spark')
+  g.append(path, spark, ring); svg.appendChild(g)
+  const tag = document.createElement('button')
+  tag.type = 'button'; tag.className = 'tag'; tag.dataset.num = num
+  tag.addEventListener('pointerenter', () => hoverBuilding(compound.byNum.get(num)))
+  tag.addEventListener('pointerleave', () => hoverBuilding(null))
+  tag.addEventListener('click', () => selectBuilding(compound.byNum.get(num)))
+  tagsEl.appendChild(tag)
+  const rec = { g, path, ring, spark, tag, num }
+  leaders.set(num, rec)
+  return rec
+}
+
+/* THE PATH IS DERIVED, NOT REPEATED.  Rise is a function of the building's own projected
+   height, so a big near mass gets a long leader and a small far one a short one; the jog
+   goes OUTWARD from the compound's centre of mass, so the nine paths fan rather than
+   stack into a web. */
+function layoutLeaders() {
+  if (!gl) return
+  const w = innerWidth, h = innerHeight
+  const conH = con.getBoundingClientRect().height
+  const pts = []
+  for (const [num, B] of glBuildings) {
+    const p = B.anchor.clone(); p.project(gl.camera)
+    if (p.z > 1) { const L = leaders.get(num); if (L) { L.g.style.display = 'none'; L.tag.style.display = 'none' } continue }
+    pts.push([num, (p.x * .5 + .5) * w, (-p.y * .5 + .5) * h, B])
+  }
+  if (!pts.length) return
+  const cx = pts.reduce((a, p) => a + p[1], 0) / pts.length
+  const cy = pts.reduce((a, p) => a + p[2], 0) / pts.length
+  /* nearer buildings first, so short leaders are placed before long ones and the
+     collision pass has the easy cases settled */
+  pts.sort((a, b) => a[2] - b[2])
+  const taken = []
+  for (const [num, x, y, B] of pts) {
+    const L = leaders.get(num) || makeLeader(num)
+    L.g.style.display = ''; L.tag.style.display = ''
+    /* A LEADER GOES WHERE THERE IS ROOM, and in this composition the room is the sky
+       above the compound and the dark ground in front of it. A building in the upper
+       half sends its tag UP; one in the lower half sends it DOWN into the foreground.
+       That single rule is what stops nine leaders converging into a web over the middle
+       of the model, and it is why the paths differ: the buildings do. */
+    const dirX = x < cx ? -1 : 1
+    const dirY = y < cy ? -1 : 1
+    const rise = state.building ? Math.max(150, Math.min(260, B.screenH * 0.8)) : Math.max(46, Math.min(132, B.screenH * 1.05))
+    const jog = 30 + Math.min(46, B.screenH * 0.35)
+    let ty = y + dirY * rise
+    /* collision avoidance: if a tag would land on one already placed, step the rise */
+    for (let guard = 0; guard < 12; guard++) {
+      const clash = taken.some((t) => Math.abs(t[0] - (x + dirX * jog)) < 108 && Math.abs(t[1] - ty) < 32)
+      if (!clash) break
+      ty += dirY * 32
+    }
+    const tx = Math.max(96, Math.min(w - 96, x + dirX * jog))
+    ty = Math.max(96, Math.min(h - conH - 26, ty))
+    taken.push([tx, ty])
+    const pathPts = `${x},${y} ${x},${ty} ${tx},${ty}`
+    L.path.setAttribute('points', pathPts)
+    L.spark.setAttribute('points', pathPts)
+    L.ring.setAttribute('cx', x); L.ring.setAttribute('cy', y)
+    const len = Math.abs(y - ty) + Math.abs(tx - x)
+    L.spark.style.setProperty('--len', len)
+    L.spark.style.strokeDasharray = `${Math.min(46, len * 0.42)} ${len}`
+    L.tag.style.left = (tx + dirX * 4) + 'px'
+    L.tag.style.top = ty + 'px'
+    L.tag.style.transform = `translate(${dirX < 0 ? '-100%' : '0'},-50%)`
+  }
+}
+
+let glBuildings = new Map()        /* num -> { anchor: Vector3, screenH } */
+
+function paintLeaders() {
+  for (const [num, L] of leaders) {
+    const isOn = state.building?.num === num
+    const mute = !!state.building && !isOn
+    L.g.style.opacity = mute ? '0' : '1'
+    L.tag.style.opacity = mute ? '0' : '1'
+    L.tag.style.pointerEvents = mute ? 'none' : 'auto'
+    if (mute) continue
+    const isHover = state.hover?.num === num && !state.building
+    const dim = (state.building && !isOn) || (state.hover && !isHover && !state.building)
+    const s = isOn ? 'on' : isHover ? 'hover' : dim ? 'dim' : 'rest'
+    if (L.g.dataset.s !== s) {
+      L.g.dataset.s = s; L.tag.dataset.s = s
+      if (s === 'hover') { L.spark.style.animation = 'none'; void L.spark.offsetWidth; L.spark.style.animation = '' }
+    }
+    const b = compound.byNum.get(num)
+    L.tag.innerHTML = isHover || isOn
+      ? `${num}<small>${b.suites.length} suites · ${b.open} available</small>` : num
+  }
+}
+
+/* ======================================================================================
+   THE BAYS
+   ====================================================================================== */
+const strip = $('strip')
+function renderBays() {
+  strip.replaceChildren()
+  for (const s of state.building?.suites || []) {
+    const b = document.createElement('button')
+    b.type = 'button'; b.className = 'bay'
+    b.dataset.sold = s.sold ? 'true' : 'false'
+    b.setAttribute('aria-label', `Suite ${s.ref}, type ${s.type}${s.sold ? ', sold' : ''}`)
+    b.innerHTML = `<span class="bay__n">${s.ordinal}</span>`
+    b.addEventListener('pointerenter', () => hoverSuite(s))
+    b.addEventListener('pointerleave', () => hoverSuite(null))
+    b.addEventListener('focus', () => hoverSuite(s))
+    b.addEventListener('click', () => selectSuite(s))
+    b._s = s
+    strip.appendChild(b)
+  }
+}
+
+/* ======================================================================================
+   PAINT
+   ====================================================================================== */
+const fig = $('fig'), whoK = $('who-k'), whoV = $('who-v'), tell = $('tell')
+const backBtn = $('back'), go = $('go'), goT = $('go-t'), specEl = $('spec')
+
+function paint() {
+  con.dataset.level = state.level
+  const b = state.building, s = state.suite
+
+  if (state.level === 'suite' && s) {
+    const t = TYPE_SPEC[s.type]
+    fig.textContent = s.ref; whoK.textContent = 'Suite — selected'
+    whoV.innerHTML = `Building ${b.num} · <b>available now</b>`
+    tell.textContent = ''
+    specEl.innerHTML = `
+      <div><span class="k">Type</span><span class="v">${s.type}</span></div>
+      <div><span class="k">Area</span><span class="v">${say(t.total)}</span></div>
+      <div><span class="k">From</span><span class="v price">${t.price.replace('FROM ', '')}</span></div>
+      <button class="more" type="button">Full specification →</button>`
+  } else if (state.level === 'building' && b) {
+    const hs = state.hoverSuite
+    fig.textContent = hs ? hs.ordinal : b.num
+    whoK.textContent = hs ? 'Suite — under the pointer' : 'Building'
+    whoV.innerHTML = hs
+      ? `${say(TYPE_SPEC[hs.type].label)} · ${say(TYPE_SPEC[hs.type].total)}${hs.sold ? ' · sold' : ' · <b>available</b>'}`
+      : `${b.suites.length} suites · <b>${b.open} available</b>`
+    tell.innerHTML = hs && !hs.sold ? 'Click to choose it.' : 'Choose a suite.'
+  } else {
+    const h = state.hover
+    fig.textContent = h ? h.num : String(available)
+    whoK.textContent = h ? 'Building — under the pointer' : 'The compound'
+    whoV.innerHTML = h
+      ? `${h.suites.length} suites · <b>${h.open} available</b>`
+      : `11 buildings · <b>${available} suites available</b>`
+    tell.innerHTML = h ? `Click to open <em>building ${h.num}</em>.` : 'Choose a building.'
+  }
+
+  backBtn.hidden = state.level === 'compound'
+  backBtn.textContent = state.level === 'suite' ? `← Building ${b?.num ?? ''}` : '← Compound'
+  go.hidden = state.level === 'compound'
+  const ready = !!s
+  go.dataset.ready = ready ? 'true' : 'false'
+  goT.innerHTML = ready ? `<span>Next</span>Enter suite ${s.ref}` : 'Select a suite'
+  $('bays-k').textContent = s ? 'Selected' : 'Select a suite'
+  if (b) $('bays-n').innerHTML = `<b>${b.open}</b> of ${b.suites.length} available`
+  for (const el of strip.children) {
+    el.setAttribute('aria-pressed', el._s === s ? 'true' : 'false')
+    if (el._s === state.hoverSuite && el._s !== s) el.setAttribute('data-hot', 'true'); else el.removeAttribute('data-hot')
+  }
+  paintLeaders()
+}
+
+backBtn.addEventListener('click', back)
+go.addEventListener('click', () => { if (state.suite) go.dataset.entered = 'true' })
+addEventListener('keydown', (e) => { if (e.key === 'Escape') back() })
+
+/* ======================================================================================
+   THE MODEL — production's own.
+   ====================================================================================== */
+import('/src/site/compound3d.js').then(async ({ initCompound3D }) => {
+  gl = initCompound3D(mount, compound)
+  if (!gl) throw new Error('no webgl')
+  stage.setAttribute('data-gl', 'on')
+  window.__v3 = { state, compound, selectBuilding, selectSuite, hoverBuilding, hoverSuite, back, gl }
+
+  const bldgOf = (n) => compound.byNum.get(n)
+  gl.onHoverBuilding = (n) => hoverBuilding(n ? bldgOf(n) : null)
+  gl.onHoverSuite = (i) => hoverSuite(i == null ? null : compound.suites[i])
+  gl.onPickBuilding = (n) => { const b = bldgOf(n); if (b) selectBuilding(b) }
+  gl.onPickSuite = (i) => { const s = compound.suites[i]; if (s) selectSuite(s) }
+
+  /* THE ANCHOR IS REAL GEOMETRY.  The roof mesh of each building, in world space, so the
+     leader starts on the building rather than at a remembered screen position. */
+  const THREE = await import('three')
+  const box = new THREE.Box3(), v = new THREE.Vector3()
+  gl.scene.traverse((o) => {
+    if (o.userData?.kind !== 'building') return
+  })
+  for (const b of compound.buildings) {
+    let top = null
+    gl.site.traverse((o) => {
+      if (!o.isMesh || o.userData?.kind !== 'suite' || o.userData.building !== b.num) return
+      box.setFromObject(o)
+      if (!top || box.max.y > top.y) top = { y: box.max.y, c: box.getCenter(new THREE.Vector3()) }
+    })
+    if (!top) continue
+    const all = new THREE.Box3()
+    gl.site.traverse((o) => { if (o.isMesh && o.userData?.kind === 'suite' && o.userData.building === b.num) all.expandByObject(o) })
+    all.getCenter(v)
+    glBuildings.set(b.num, { anchor: new THREE.Vector3(v.x, all.max.y, v.z), box: all, screenH: 60 })
+  }
+
+  const tick = () => {
+    requestAnimationFrame(tick)
+    if (!gl) return
+    /* the projected height of each mass, which is what makes each leader its own length */
+    for (const [num, B] of glBuildings) {
+      const a = B.box.min.clone().project(gl.camera), c = B.box.max.clone().project(gl.camera)
+      B.screenH = Math.abs((a.y - c.y) * 0.5 * innerHeight)
+    }
+    layoutLeaders()
+  }
+  requestAnimationFrame(() => { gl.setLevel('compound'); paint(); tick() })
+}).catch((err) => {
+  console.warn('[v3] the model did not stand', err)
+  const n = document.createElement('div'); n.className = 'nogl'
+  n.textContent = 'Model unavailable — controls still work; the fallback drawing is unpainted in this prototype.'
+  stage.appendChild(n)
+})
+
+paint()
+</script>
+</body>
+</html>

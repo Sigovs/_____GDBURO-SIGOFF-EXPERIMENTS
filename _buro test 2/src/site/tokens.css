@@ -24,7 +24,28 @@
   --mass-sold: #101317;   /* a bay that can never take light — SOLD. 1.11:1 under --mass
                              at rest, and 4.35:1 under --bay-lit once its neighbours
                              illuminate. The absence IS the signal (§3). */
+  --mass-rest: #252B31;   /* a building face at COMPOUND level, where every building is
+                             the subject. Added 2026-09-05. §2's ladder had one unlit
+                             value for two different truths: "this mass is subordinate
+                             to another" and "this mass is part of what you are being
+                             shown". Drawn on the surveyed deck the second one measured
+                             1.03:1 — eleven buildings at literally the ground's own
+                             value, which is why act 02 read as an outline with texture
+                             in it rather than as a compound. This is --mass stepped 35%
+                             toward --mass-lit and nothing else: 1.40:1 on the site
+                             field, and it leaves --mass-lit a full 1.40:1 above it so
+                             the focus step is still an event. Subordinated buildings
+                             fall back to --mass, so the level change now separates two
+                             ways at once. */
   --mass-lit:  #3A424B;   /* a building face, focused */
+  --bay-hover: #4F5963;   /* ONE bay, under consideration. Added 2026-09-05 with the
+                             pointer model: inside a focused building the roof is
+                             already --mass-lit, so the old hover value WAS the roof and
+                             the bay under the pointer changed by nothing at all. This
+                             is the 40% step from --mass-lit toward --bay-lit: 1.43:1
+                             above the roof it sits on, and --bay-lit still stands
+                             1.67:1 above it, so considering a bay and choosing one stay
+                             two different events. */
   --bay-lit:   #6E7C88;   /* ONE bay, illuminated — the selection state */
 
   /* --- INK. One near-white, never #fff. ------------------------------------------ */

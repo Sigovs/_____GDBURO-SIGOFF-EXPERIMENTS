@@ -208,7 +208,39 @@ ul, ol { list-style: none; padding: 0; }
 }
 .rail__svg { width: 100%; height: 100%; overflow: visible; }
 .rail__line { fill: none; stroke: var(--ink-16); stroke-width: 1; vector-effect: non-scaling-stroke; }
-.rail__mark { fill: none; stroke: var(--ink-40); stroke-width: 1; vector-effect: non-scaling-stroke; }
+/* The rail's drawn fragment. It sits at partition weight for the whole page — it is a
+   fragment of a drawing and it has always been information — and it LIFTS for one beat
+   in act 02, while the compound's own centreline is drawn beneath it. `--rail-k` is that
+   beat and nothing else touches it; at 0 the rail is exactly what it has always been. */
+.rail__mark {
+  fill: none;
+  /* One rank, exactly as the trace moves one rank: --ink-40 (partition) to --ink-70
+     (boundary) at the peak of the beat. 26% was a fraction of a rank and it was not
+     perceptible at the page edge, which makes it an event that did not happen. */
+  stroke: color-mix(in srgb, var(--ink) calc(var(--rail-k, 0) * 50%), var(--ink-40));
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+/* THE TICKS REPORT THE LEVEL, in act 02 and nowhere else.
+
+   `--rail-level` is the index of the level the visitor has reached: 0 compound, 1
+   building, 2 suite. A tick at or above that depth is lit to boundary weight; the ones
+   below it stay exactly the construction-weight marks they are on every other act. So
+   the rail fills downward as the visitor goes in and empties as they come back out,
+   which is the one fact it is in a position to state. Unset outside act 02, where the
+   variable does not exist and every tick inherits --rail-k's behaviour unchanged. */
+.rail__tick { transition: stroke var(--dur-base) var(--ease-enter), stroke-width var(--dur-base) var(--ease-enter); }
+.rail[data-rail-level] .rail__tick { stroke: var(--ink-16); }
+.rail[data-rail-level='0'] .rail__tick[data-rail-tick='compound'],
+.rail[data-rail-level='1'] .rail__tick[data-rail-tick='compound'],
+.rail[data-rail-level='1'] .rail__tick[data-rail-tick='building'],
+.rail[data-rail-level='2'] .rail__tick[data-rail-tick='compound'],
+.rail[data-rail-level='2'] .rail__tick[data-rail-tick='building'],
+.rail[data-rail-level='2'] .rail__tick[data-rail-tick='suite'] {
+  stroke: var(--ink-70);
+  stroke-width: 2;
+}
 
 /* The marker is an instrument, so it moves linearly with scroll — no easing, no lag.
    It is the only element on the page that moves continuously. */
@@ -389,36 +421,314 @@ ul, ol { list-style: none; padding: 0; }
 .plate__v strong { font-weight: 600; }
 
 /* Dated figures carry their date in the render. The ledger is not the reader's. */
-.dated { color: var(--ink-40); font-family: var(--face-mono); font-size: var(--t-micro); letter-spacing: .06em; }
+/* --ink-55, not --ink-40, and this is a correction rather than a preference.
+
+   `.dated` was set at --ink-40, which the token file itself describes as the weight for
+   "rules that carry information" — a LINE value. Measured on the composited render it
+   is 3.44:1 at 14px, under the 4.5 floor, and every string wearing this class is a
+   dated figure or a provenance note: the two kinds of small print a reader is most
+   entitled to be able to read. --ink-55 is the token that is documented as "the dimmest
+   ink allowed to carry meaning" and measures 5.33:1 here.
+
+   It is quieter than the record it sits under either way — the hierarchy the class
+   exists for is intact; it was the floor that was not. */
+.dated { color: var(--ink-55); font-family: var(--face-mono); font-size: var(--t-micro); letter-spacing: .06em; }
 
 /* ---------------------------------------------------------------------------------
    ACT 02 — THE COMPOUND. The surveyed register.
    --------------------------------------------------------------------------------- */
 
-.compound { position: relative; }
-.compound__stage { position: relative; width: 100%; }
+/* THE DRAWING'S LINE SCALE — `--plan-k`, and it is the camera's, not a taste knob.
+
+   Every line in this drawing carries `vector-effect: non-scaling-stroke`, which pins
+   stroke width to SCREEN pixels while the viewBox scales the subject. At rest that is
+   exactly right. During act 02's opening the camera is 2.94x in, so the masses are
+   three times the size they will settle at and the lines holding them are still 1px:
+   the same drawing with a third of the line per unit area, which is the whole of why
+   the opening frame reads faint. It is not a brightness problem, and brightening it
+   would only wash the ground.
+
+   A draughtsman enlarging a drawing re-weights it — line follows the scale of the
+   drawing, not the size of the paper. So the three weights are multiplied by one
+   camera-derived factor, sqrt(full width / current width): 1.72 at the opening crop,
+   1.00 at full extent. The square root rather than the ratio, because doubling a
+   drawing's scale does not double its lines; it is the standard draughting compromise
+   and it keeps the heavy weight off fat at close range.
+
+   The RATIOS between the three weights never move, so this stays three weights drawn at
+   the scale the camera is at, rather than a fourth kind of edge (§11). At rest it
+   resolves to exactly the approved 1 / 1 / 2 and nothing about the resting frame
+   changes. Set by act 02's pin, which already owns the viewBox — one owner per property
+   (`G6`). Unset everywhere else, so mobile, reduced motion and the no-JS baseline all
+   get the resting weights. */
+.compound { position: relative; --plan-k: 1; --perim-k: 1; }
+
+/* THE STAGE IS A BOX, and the drawing is composed into it.
+
+   It used to have no height at all: the SVG set its own from a 2.13:1 viewBox, which
+   in a seven-column stage came to 350px inside a 600px opening. A quarter of act 02
+   was empty ground under the drawing, and empty ground under a picture does not read
+   as air — it reads as the composition having stopped early (`C11`). The frame is
+   re-solved against this box in `restFrame()`, so the compound grows to fill it and
+   the crop stays the composed one.
+
+   svh, not vh: the pin holds this act still while a mobile browser's chrome collapses,
+   and a stage measured in vh would resize under a drawing that is not moving. */
+/* The box is the COMPOSED CROP's own shape, so the drawing fills it exactly and there
+   is no letterbox in either direction. A stage sized by viewport instead put a 2.13:1
+   picture in a 1.53:1 box and the difference — about 180 units of empty ground above
+   and below the compound — read as the act having nothing to say there.
+
+   The height that follows from this is real air under the drawing, at the bottom of
+   the act, where the house rule already wants its weight. It is not a gap inside the
+   picture. */
+.compound__stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 976 / 458;
+  max-height: 62svh;
+}
+@media (max-width: 1024px) {
+  /* MOBILE IS A DIFFERENT COMPOSITION, not the desktop one scaled (`M4`, `G5`).
+
+     The compound is a 2.13:1 diagonal band. Held at that ratio across a 350px column
+     it is 164px tall — a thumbnail, with buildings too small to be a tap target of any
+     size. Turned fully upright it is worse: the frame pads to 976 x 1074 and the
+     compound becomes a thin strip floating in its own empty ground.
+
+     5:4 is the resolved compromise, and the reason it works is that a phone reads this
+     act at BUILDING level: the whole compound is present and understandable, the nine
+     masses are the tap targets, and choosing one reframes the camera until its bays are
+     the size of a finger. The air above and below the band at this level is not waste —
+     it is the room the camera moves through. */
+  .compound__stage { aspect-ratio: 5 / 4; max-height: 46svh; }
+}
 /* The viewBox is a camera and it crops. `overflow: visible` would let all 121 bays
    paint outside the frame the camera is looking through, which is not a reframe — it
    is the drawing escaping its column. */
-.compound__svg { width: 100%; height: auto; display: block; overflow: hidden; }
+.compound__svg { width: 100%; height: 100%; display: block; overflow: hidden; }
 .compound__stage { overflow: hidden; }
+
+/* ---------------------------------------------------------------------------------
+   THE MODEL.
+
+   Act 02's subject is a presentation model on a slab, rendered in WebGL. The drawing
+   does not go away — it becomes the reduced-motion path, the no-WebGL path and the
+   accessibility floor — but once the model is standing, the model is the hero.
+
+   `touch-action: pan-y` is the whole of the mobile scroll contract, and it is the
+   browser that enforces it rather than a heuristic in JS: a vertical swipe scrolls the
+   page and a horizontal one turns the model. The wheel is never captured at all
+   (`SC1`, `MJ6` — the reader keeps the transport).
+   --------------------------------------------------------------------------------- */
+.compound__gl {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  display: block;
+  touch-action: pan-y;
+  cursor: grab;
+}
+.compound__gl:active { cursor: grabbing; }
+
+/* ---------------------------------------------------------------------------------
+   CALLOUTS — the exhibit label.
+
+   A fine leader from a real point on the model out to clear air, and a small block of
+   type at the end of it. Everything about the styling is chosen against the thing this
+   must not become: no card, no panel, no border-radius, no drop shadow, no arrow, no
+   background — a tooltip is a box that appears over a thing, and this is a line drawn
+   from a thing. The type is the page's own mono at the 14px floor, so a callout on the
+   model reads as the same document as the record beside it.
+   --------------------------------------------------------------------------------- */
+/* The annotation layer stops where the record begins. The stage runs UNDER the record
+   column, so without this a callout could be drawn behind 14px mono and neither would
+   be readable — the label has the left two-thirds, which is the part of the stage the
+   composition keeps clear. */
+.cal { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+@media (min-width: 1025px) { .cal { right: 34%; } }
+.cal__lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+/* The leader is INFORMATION, not decoration: it is the line that binds a word to a
+   building, and at --ink-40 over a lit roof it was neither visible nor authoritative.
+   Partition weight, and it holds. */
+.cal__leader {
+  fill: none;
+  stroke: var(--ink-70);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  transition: opacity var(--dur-base) var(--ease-enter);
+}
+/* The anchor. A 3px ring on a real point of the geometry — the smallest mark that
+   still reads as "here", and deliberately not a pin, a pill or a dot with a number. */
+.cal__dot {
+  position: absolute; top: 0; left: 0;
+  width: 5px; height: 5px; margin: -3px 0 0 -3px;
+  border: 1px solid var(--ink-70);
+  border-radius: 50%;
+  transition: opacity var(--dur-base) var(--ease-enter);
+}
+.cal__box {
+  position: absolute; top: 0; left: 0;
+  display: grid; gap: 1px;
+  padding-bottom: var(--s-2);
+  white-space: nowrap;
+  transform-origin: 0 100%;
+  transition: opacity var(--dur-base) var(--ease-enter);
+  /* the label sits ON the leader's end, so it lifts by its own height */
+  translate: 0 -100%;
+}
+.cal__box[data-side='left'] { text-align: right; translate: -100% -100%; }
+/* THE HIERARCHY IS THE WHOLE DESIGN.
+
+   A competition board's annotation is a FIGURE and a legend: the number is set large in
+   the grotesque and the words under it are small mono in caps. Two lines that were the
+   same size in the same face is a debug label — it has no first read, so the eye has to
+   parse it instead of taking it in.
+
+   So the key line steps up to the h3 scale and changes voice to the grotesque, the
+   value line drops to mono caps at the floor, and a hairline rule between them does the
+   work a box would otherwise be asked to do. */
+.cal__k {
+  font-family: var(--face-grotesque);
+  font-size: clamp(1.25rem, 1.5vw, 1.7rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.cal__v {
+  font-family: var(--face-mono); font-size: var(--t-micro);
+  letter-spacing: .14em; text-transform: uppercase; color: var(--ink-70);
+  padding-top: var(--s-2);
+  margin-top: var(--s-2);
+  border-top: var(--rule-partition);
+}
+/* The rule under the figure runs to the label's own width on the outward side, so the
+   annotation reads as one block hung off the leader rather than as two loose lines. */
+.cal__box[data-side='left'] .cal__v { border-top-color: var(--ink-40); }
+/* One column has no room for four annotations and a drawing. The model keeps its
+   labels for the subject only — the record directly below says everything else. */
+@media (max-width: 1024px) {
+  .cal__box { font-size: 13px; }
+  .cal { display: none; }
+}
+
+/* The drawing steps back the moment the model reports it took hold. It stays in the
+   document — focusable, named, and the thing a screen reader and the reduced-motion
+   path read — it just stops being the picture. `visibility` rather than `display`,
+   because a hidden SVG has no getBBox and the record's leader line still needs one. */
+.compound[data-gl='on'] .compound__svg { visibility: hidden; }
+.compound[data-gl='on'] .compound__stage { background: transparent; }
+
+/* THE STAGE IS RE-PROPORTIONED FOR THE MODEL.
+
+   2.13:1 is the SVG crop's own aspect — the shape of a plan. A three-quarter view of a
+   physical object needs height: the model has a slab under it, masses standing on it
+   and shadows thrown across it, and all three of those live in the vertical. This is
+   the taller box that lets the object be an object. */
+.compound[data-gl='on'] .compound__stage { aspect-ratio: 4 / 3; max-height: 76svh; }
+@media (max-width: 1024px) {
+  /* The compound is a horizontal band. A tall portrait box wastes two thirds of itself
+     on empty sky above and below it, which is what a cropped desktop renderer looks
+     like. 5:4 is the shallowest box a phone can give it while still reading as a scene
+     rather than a strip. */
+  .compound[data-gl='on'] .compound__stage { aspect-ratio: 5 / 4; max-height: 46svh; }
+}
+
+/* THE MODEL BREAKS ITS COLUMN.
+
+   The compound is the reason the visitor is in this act, and it was sitting inside seven
+   of twelve columns with the record beside it — an object of that importance given half
+   the page. It now runs from the page's left margin out UNDER the record column, and the
+   record sits over it as an editorial layer rather than beside it as a second panel.
+
+   That is a deliberate change of relationship: the record stops being a column and
+   becomes an overlay on the drawing it describes, which is what an architectural board
+   does. The stage keeps a clear left two-thirds so no annotation or mass is ever read
+   through the type. */
+@media (min-width: 1025px) {
+  /* Four of the record's five columns, not five: the stage runs under the record and
+     stops at the page's own right margin. Overshooting it by a hair put 15px of
+     horizontal scroll on the document, which is the one thing a full-bleed break may
+     never do (`D`). The act clips, so a rounding error can never become a scrollbar. */
+  .compound[data-gl='on'] {
+    width: calc(100% + ((100vw - var(--margin) * 2) * 4 / 12));
+  }
+  .act[data-act='02'] { overflow-x: clip; }
+  /* The record floats over the model's right end on a scrim of the act's own ground, so
+     14px mono never has to hold contrast against a lit roof. */
+  .act[data-act='02'] .span-record {
+    position: relative;
+    z-index: 2;
+    padding-left: var(--s-6);
+    background: linear-gradient(to right, transparent, var(--deck) 14%, var(--deck));
+  }
+}
+
+/* No model, no WebGL, or a visitor who asked for stillness: the drawing is the act,
+   exactly as it was. */
+@media (prefers-reduced-motion: reduce) {
+  .compound__gl { display: none; }
+  .compound[data-gl='on'] .compound__svg { visibility: visible; }
+}
+
+/* THE SITE FIELD — the ground the compound stands on.
+
+   --void is "outside the compound; the black point of every photograph", and that is
+   exactly what it is being used for: everything the parcel line encloses is BELOW the
+   surveyed deck the act is drawn on, the way a site is below the sheet it is drawn on.
+   1.16:1 under --deck — a plane change, not a panel — and it is what gives every mass
+   above it something to be figure against. */
+.site { fill: var(--void); stroke: none; }
 
 /* State is light, plus the record, plus a word. Never a pin, a dot, a pill or a
    coloured marker — availability dots are the Zillow tell. */
 .bay {
   fill: var(--mass);
-  stroke: var(--ink-40);
-  stroke-width: .6;
+  /* Rank, not presence. At level 01 a bay division is not yet information — the
+     compound is the subject, and 121 cells at the same weight as the masses they sit in
+     read as a mesh rather than as eleven buildings. It sits at construction weight here
+     and is promoted to partition inside the FOCUSED mass at level 02, which is what
+     `P6` asks for and what gives the drawing two legible ranks at the opening crop. */
+  stroke: var(--ink-16);
+  /* 1px, not .6px. §11 is explicit that a hairline is 1px at every DPR, because chasing
+     a sub-pixel produces a line that disappears on half the devices that see it — and
+     .6px was doing exactly that, at reduced alpha, on the most numerous element in the
+     drawing. This is the floor the system already specified, not a new weight. */
+  stroke-width: calc(1px * var(--plan-k));
   vector-effect: non-scaling-stroke;
   transition: fill var(--dur-base) var(--ease-enter);
   cursor: pointer;
 }
-.bay:hover { fill: var(--mass-lit); }
-.bay[data-state='focused'] { fill: var(--mass-lit); }
+/* A bay is only pointer-reachable as a BAY once its building is the subject. At
+   compound level the pointer is choosing between eleven buildings, not 121 cells, and
+   a per-cell hover there is a mesh reacting to the mouse rather than a compound being
+   explored — so the bays hand their pointer events up to the building group and the
+   whole mass answers as one object. This is the interaction model in one declaration. */
+.compound[data-level='compound'] .bay { pointer-events: none; }
+.compound[data-level='compound'] .bldg { pointer-events: auto; cursor: pointer; }
+
+/* At BUILDING and SUITE level the bays inside the SUBJECT are individually reachable;
+   the bays of every other building are not, because clicking one of those means "take
+   me to that building", which is the group's job. */
+.compound[data-level='building'] .bldg:not([data-focus='true']) .bay,
+.compound[data-level='suite']    .bldg:not([data-focus='true']) .bay { pointer-events: none; }
+
+.compound[data-level='building'] .bldg[data-focus='true'] .bay:hover,
+.compound[data-level='suite']    .bldg[data-focus='true'] .bay:hover,
+.bay[data-state='focused'] { fill: var(--bay-hover); }
 /* Selection is illumination, not decoration. No glow, no bloom, no emissive edge, no
    outline — a selected surface is a surface with light falling on it, and it measures
-   3.91:1 against its unlit neighbour and 4.45:1 against the ground. */
-.bay[aria-pressed='true'], .bay[data-state='lit'] { fill: var(--bay-lit); }
+   4.68:1 against the site field and 2.38:1 against the lit roof it sits in.
+
+   The `.bldg` prefixes are not decoration either: the focused building now lights its
+   own bays to --mass-lit, and that selector is more specific than a bare `.bay`, so
+   without them the one chosen bay would have been repainted by the building it is in —
+   selection silently erased by focus, in exactly the state where it matters most. */
+.bldg .bay[aria-pressed='true'],
+.bldg .bay[data-state='lit'],
+.bldg[data-focus='true'] .bay[aria-pressed='true'],
+.bldg[data-focus='true'] .bay[data-state='lit'] { fill: var(--bay-lit); }
 /* SOLD = the absence of light, and nothing else on the drawing.
    A sold bay can never take light: it sits one step BELOW --mass at rest and stays
    there while its neighbours lift, so at building level it is the only dark thing in a
@@ -430,29 +740,249 @@ ul, ol { list-style: none; padding: 0; }
   stroke: var(--ink-16);
   cursor: default;
 }
-.bay[data-sold='true']:hover { fill: var(--mass-sold); }
+/* A sold bay can never take light, and "never" has to survive every state that lights
+   the mass around it — hover included, which the level-scoped rules below did not
+   cover. Without this the compound answered a pointer by illuminating twenty-three
+   bays it has already sold. */
+.bay[data-sold='true']:hover,
+.bldg[data-hover='true'] .bay[data-sold='true'],
+.bldg[data-focus='true'] .bay[data-sold='true'],
 .compound[data-level='building'] .bldg[data-focus='true'] .bay[data-sold='true'],
 .compound[data-level='suite']    .bldg[data-focus='true'] .bay[data-sold='true'] {
   fill: var(--mass-sold);
 }
 
-.mass-run { fill: var(--mass); stroke: var(--ink-40); stroke-width: 1; vector-effect: non-scaling-stroke; }
-.mass-civic { fill: var(--mass); stroke: var(--ink-40); stroke-width: 1; vector-effect: non-scaling-stroke; }
+/* The run outline is the dominant line of the drawing at level 01: it is what makes a
+   building read as one mass rather than as a row of cells. Partition weight — and with
+   the bays now subordinate, it stands a full rank above them. */
+/* THE THREE MASS RANKS, and a building is only ever in one of them.
+
+     rest        --mass-rest   every building, at compound level. All eleven are the
+                               subject, so all eleven are figure on the site field.
+     focused     --mass-lit    the one under the pointer, or the one selected.
+     subordinate --mass        every other building once one has been chosen.
+
+   The level change therefore separates TWICE — the subject rises 1.40:1 and everything
+   else falls 1.40:1 — which is what makes hovering a building read as the compound
+   answering rather than as a cell changing colour. Fill only: nothing is faded, nothing
+   is overlaid, and every mass is fully present at every stop (`MJ4`). */
+.mass-run, .bay { fill: var(--mass-rest); }
+.mass-run { stroke: var(--ink-40); stroke-width: calc(1px * var(--plan-k)); vector-effect: non-scaling-stroke; }
+.mass-civic { fill: var(--mass-rest); stroke: var(--ink-40); stroke-width: calc(1px * var(--plan-k)); vector-effect: non-scaling-stroke; }
+
+/* THE SUBJECT. Hover and selection reach the same state by design — considering a
+   building and having chosen one differ in the RECORD and in the camera, not in the
+   light, because a compound does not light differently depending on your intent. */
+.bldg[data-focus='true'] .mass-run,
+.bldg[data-hover='true'] .mass-run,
+.bldg[data-focus='true'] .bay,
+.bldg[data-hover='true'] .bay { fill: var(--mass-lit); }
+
+/* …and the run outline of the subject rises to boundary rank. §11 reserves 2px on
+   --ink-70 for "the compound perimeter, the SELECTED OBJECT'S OUTLINE, the focus ring",
+   and a selected building is a selected object. This is the line that makes the mass
+   read as one enclosed thing rather than as a run of cells — no new style, the rank
+   the system already holds for exactly this. */
+.bldg[data-focus='true'] .mass-run,
+.bldg[data-hover='true'] .mass-run {
+  stroke: var(--ink-70);
+  stroke-width: calc(2px * var(--plan-k));
+}
+
+/* SUBORDINATION. Everything that is not the subject falls to the unlit value —
+   including the civic masses, which at compound level are part of the picture and at
+   building level are context. Light, never opacity: a mass that fades is a mass that
+   left. */
+.compound[data-level='building'] .mass-civic,
+.compound[data-level='suite']    .mass-civic { fill: var(--mass); }
+.compound[data-level='building'] .bldg:not([data-focus='true']):not([data-hover='true']) .mass-run,
+.compound[data-level='suite']    .bldg:not([data-focus='true']):not([data-hover='true']) .mass-run { fill: var(--mass); }
+
+.mass-run, .mass-civic, .bay {
+  transition: fill var(--dur-base) var(--ease-enter),
+              stroke var(--dur-base) var(--ease-enter),
+              stroke-width var(--dur-base) var(--ease-enter);
+}
 /* The roadway reads as a lifted plane, so it is a wide soft stroke rather than a
-   filled polygon — a road has a width, not an outline. */
-.mass-road-line { stroke: var(--roadway); stroke-width: 34; stroke-linecap: round; stroke-linejoin: round; opacity: .85; }
+   filled polygon — a road has a width, not an outline.
+
+   Full opacity now, on the site field rather than on the deck. At .85 over a ground it
+   nearly matched, the one piece of circulation in the drawing was the least visible
+   thing in it — and circulation is what organises this compound. Against --void it
+   reads as a made surface at 1.28:1, which is a plane change of the same order as the
+   field's own, and it is now the first thing the eye follows. */
+.mass-road-line { stroke: var(--roadway); stroke-width: 34; stroke-linecap: round; stroke-linejoin: round; opacity: 1; }
 /* The extruded side walls. Value, not shadow. */
-.mass-side { fill: var(--void); stroke: var(--ink-16); stroke-width: .5; vector-effect: non-scaling-stroke; }
-.perimeter { fill: none; stroke: var(--ink-70); stroke-width: 2; vector-effect: non-scaling-stroke; }
+/* The extruded faces draw the mass. .5px put them under the sub-pixel threshold at
+   every DPR, so at the opening crop — where these faces are the largest areas on
+   screen — the buildings had no edge at all and read as flat patches of near-black.
+   1px construction weight is the floor §11 already set. */
+.mass-side { fill: var(--void); stroke: var(--ink-16); stroke-width: calc(1px * var(--plan-k)); vector-effect: non-scaling-stroke; }
+
+/* THE COMPOUND PERIMETER — boundary rank, exactly as §11 sets it: 2px on --ink-70,
+   8.28:1, the same rank it already reserved for "the compound perimeter, the selected
+   object's outline, the focus ring". No new style is invented here.
+
+   `--perim-k` is PRESENCE, and it defaults to 1. The line is the compound's own edge,
+   and an edge is information only when the frame holds enough of the thing it is the
+   edge of. At act 02's opening the camera is 2.94x in and standing INSIDE the compound,
+   so the boundary crosses the view as two disconnected fragments — at the loudest rank
+   in the drawing, describing nothing. That is not a perimeter reading as architecture,
+   it is two bright marks in a frame whose subject is the buildings, and a stoppable
+   frame with unexplained marks in it is not a designed frame (`MJ4`).
+
+   So it resolves with the camera, and it is the ONLY element whose presence the camera
+   drives — the masses are never faded, the camera is their resolve, and that stands.
+   Defaulting to 1 means the phone, the reduced-motion path and the no-JS baseline all
+   get the whole perimeter, because none of them has a camera for it to arrive on. */
+.perimeter {
+  fill: none;
+  /* PARTITION WEIGHT, not boundary — revised 2026-09-05 when the field arrived.
+
+     §11 gave the perimeter boundary rank because it was the top of the drawing's
+     hierarchy: nothing else stated where the compound ended. It now has a filled site
+     field under it, and a plane states an edge far better than a line does. Left at
+     2px on --ink-70 over that fill the parcel read as a cartoon outline — the loudest
+     mark in the act, drawn around the least interesting fact in it, and its derived
+     shape (a morphological envelope, not a surveyed parcel line) is not good enough to
+     carry the drawing's top rank.
+
+     So the rank moves to where the subject is: a SELECTED BUILDING'S outline now holds
+     boundary weight, which is what §11 reserved it for in the first place, and the
+     parcel keeps the partition weight that matches what it is — the edge of a ground
+     that is already visible. */
+  stroke: var(--ink-40);
+  stroke-width: calc(1px * var(--plan-k));
+  vector-effect: non-scaling-stroke;
+  /* two independent factors: the camera's arrival, and the level's subordination.
+     `--perim-k` is set inline by act 02's pin and would otherwise win outright, so the
+     level term is a separate variable rather than an override of the same one. */
+  opacity: calc(var(--perim-k, 1) * var(--perim-level, 1));
+}
+
+/* SUBORDINATION BY LEVEL — the same rule the masses already obey.
+
+   The perimeter is LEVEL 01 information: level 01's truth is scale and organisation,
+   and the compound's own edge is what states it. At level 02 the subject is one
+   building and at level 03 it is one bay, and at neither is the site boundary the
+   subject any more — a boundary still shouting while a single bay is being lit is the
+   drawing arguing with itself about what the reader is looking at.
+
+   It loses light rather than presence, exactly as a subordinated mass does, and by the
+   step the drawing already uses: a subordinated bay stroke goes --ink-40 to --ink-16,
+   a factor of 0.4. This is that same step, not a new one. */
+.compound[data-level='building'] .perimeter,
+.compound[data-level='suite']    .perimeter { --perim-level: .4; }
 
 /* Subordination is by light, never by an overlay: masses lose light, not presence. */
 .bldg { transition: opacity var(--dur-base) var(--ease-enter); }
-.compound[data-level='building'] .bldg:not([data-focus='true']) .bay,
-.compound[data-level='suite']    .bldg:not([data-focus='true']) .bay { fill: var(--mass); stroke: var(--ink-16); }
+.compound[data-level='building'] .bldg:not([data-focus='true']):not([data-hover='true']) .bay,
+.compound[data-level='suite']    .bldg:not([data-focus='true']):not([data-hover='true']) .bay { fill: var(--mass); stroke: var(--ink-16); }
+
+/* …and INSIDE the subject they carry information, so they meet the 3:1 boundary
+   contract. This is the only place in the drawing where a bay division is promoted, and
+   the promotion is the level's whole content (`P6`).
+
+   It is keyed to the SUBJECT rather than to the level, so it also fires under the
+   pointer at compound level. That is the whole of what the brief means by a building
+   becoming spatially legible on hover: the run rises to boundary weight, the mass takes
+   light, and the bays inside it stop being a texture and start being countable rooms —
+   three ranks moving together, on the drawing, with no chrome anywhere. */
+.bldg[data-focus='true'] .bay,
+.bldg[data-hover='true'] .bay { stroke: var(--ink-40); }
+
+/* THE ROAD CENTRELINE — the object act 02's recognition is about.
+
+   The same measured points as the road surface, drawn as a line instead of as a plane.
+   Dark until the recognition beat draws it; holds at partition weight while the beat
+   lands; recedes to construction weight as the levels begin, because once the
+   recognition has happened it is a road centreline, and a road centreline is a
+   construction line. Leaving it at information weight would be CAD furniture on a
+   drawing that does not need any (`P8`).
+
+   `--trace-k` is the RANK — 1 information, 0 construction — and opacity is the
+   PRESENCE. Driven by act 02's pin alongside the rail's own `--rail-k`, because the two
+   are one event. */
+.mass-road-trace {
+  fill: none;
+  stroke: color-mix(in srgb, var(--ink-40) calc(var(--trace-k, 0) * 100%), var(--ink-16));
+  stroke-width: calc(1px * var(--plan-k));
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
 
 /* No floating labels over a building. All text lives in the record column, keyed by a
    hairline leader to a real anchor point that stays anchored for the whole act. */
 .leader { stroke: var(--ink-40); stroke-width: 1; fill: none; vector-effect: non-scaling-stroke; }
+
+/* ---------------------------------------------------------------------------------
+   THE ROUTE, AND THE DOORS — act 02's argument, drawn.
+
+   This compound sells a drive, not a shed: a gated road with your own door at the end
+   of it. So the road stops being the grey smudge the masses stand on and becomes the
+   line the whole act is organised by, and every suite gets the one opening that makes
+   it a drive-in room.
+   --------------------------------------------------------------------------------- */
+
+/* The drive, from the gate to whatever is under consideration.
+
+   --lume-cold is the compound's own verified light — LED, the reason this palette is
+   cool at all (`§2`) — and this is the only place in the drawing it is spent. It is
+   spent on a relationship rather than on an object, which is the distinction that
+   keeps it from being a highlight: the light is not saying "this building", it is
+   saying "this is the way in to it".
+
+   `--route-k` is the draw. 0 is a road nobody is driving; 1 is the full route standing
+   on screen. It travels by stroke-dashoffset on the line's own length, so it draws
+   FROM THE GATE outward every time, in the direction a car would actually go. */
+.route {
+  stroke: var(--lume-cold);
+  stroke-width: calc(1.5px * var(--plan-k));
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  opacity: calc(var(--route-k, 0) * .92);
+  transition: opacity var(--dur-base) var(--ease-enter);
+  pointer-events: none;
+}
+
+/* The overhead door. One per suite, on the edge that faces the drive.
+
+   Absent at compound level — 121 door marks on a whole-site frame is a texture, and a
+   texture is not information (`P6`). It arrives with BUILDING level, which is exactly
+   the truth that level owes: this mass is made of individually owned rooms, and here
+   is the one thing that makes each of them a room you drive into.
+
+   Boundary weight, because at building level the door IS the subject's grain, and it
+   sits on top of the bay it belongs to rather than replacing any line the bay already
+   had. No fill, no arrow, no swing arc — a threshold, drawn. */
+.door {
+  stroke: var(--ink-70);
+  stroke-width: calc(2px * var(--plan-k));
+  stroke-linecap: butt;
+  vector-effect: non-scaling-stroke;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-base) var(--ease-enter),
+              stroke var(--dur-base) var(--ease-enter);
+}
+/* Doors appear only inside the subject. A neighbouring building at building level is
+   context — its mass is the fact, not its ironmongery. */
+.bldg[data-focus='true'] .door,
+.bldg[data-hover='true'] .door { opacity: .8; }
+.bay[data-sold='true'] + .door { opacity: .28; }
+
+/* THE ONE DOOR. At suite level the route has arrived here, and this is where it ends:
+   the brightest mark in the drawing, at the compound's own light, on the opening the
+   visitor has just chosen. It is what makes ENTER mean something before act 03 opens
+   — the page has walked them to a door. */
+.bldg .bay[aria-pressed='true'] + .door,
+.bldg[data-focus='true'] .bay[aria-pressed='true'] + .door {
+  opacity: 1;
+  stroke: var(--lume-cold);
+  stroke-width: calc(3px * var(--plan-k));
+}
 
 /* The key is typographic. It used to be four colour swatches — 18x10 chips, one of
    them oxide — which is a pill cluster reading state by hue, and it broke both `§10 P9`
@@ -463,28 +993,151 @@ ul, ol { list-style: none; padding: 0; }
 .legend__term { color: var(--ink-70); }
 .legend__gloss { color: var(--ink-40); }
 
-/* The level control. A real control with real states, not a mood chapter about
-   exclusivity — and the same control the keyboard reaches. */
-.levels { display: flex; gap: var(--s-4); flex-wrap: wrap; }
+/* THE LEVEL INSTRUMENT — where the visitor is in the compound, and the way back out.
+
+   This was a row of three tabs reading `01 COMPOUND 02 BUILDING 03 SUITE`, which is a
+   generic segmented control: it named three levels that were always all available and
+   never said which building or which suite, so it reported nothing the drawing had not
+   already said. It is now the rail's own instrument, brought inside the record where
+   the 14px floor can be met (`I7` — the rail's column is 100px wide and COMPOUND at a
+   legible size does not fit in it).
+
+   The form is the rail's: a vertical spine with a tick per stop. A stop exists only
+   once the visitor has reached it, so the stack IS the path taken — descending it is
+   going in, clicking up it is coming out. No chevrons, no slashes, no "Home /" — a
+   breadcrumb is a file path and this is a place. */
+.levels {
+  display: grid;
+  gap: 0;
+  position: relative;
+  padding-left: var(--s-5);
+}
+/* The spine. One construction line between the stops, terminating on a tick at each
+   end rather than trailing off into nothing.
+
+   It exists only once there are two stops to join. At compound level there is one, and
+   a spine there was a 4px orphan mark to the left of the word COMPOUND — a line joining
+   nothing to nothing, which reads as a rendering fault rather than as an instrument. */
+.levels::before { content: none; }
+.levels:has(.level-btn[data-level-btn='building']:not([hidden]))::before {
+  content: '';
+  position: absolute;
+  left: 3px; top: 16px; bottom: 16px;
+  border-left: var(--rule-construction);
+}
 .level-btn {
   appearance: none; background: none; color: var(--ink-55);
-  border: 0; border-bottom: 1px solid transparent;
-  padding: var(--s-2) 0;
+  border: 0; padding: var(--s-2) 0 var(--s-2) var(--s-4);
+  position: relative; text-align: left; cursor: pointer;
   font-family: var(--face-mono); font-size: var(--t-micro);
-  letter-spacing: .12em; text-transform: uppercase; cursor: pointer;
-  transition: color var(--dur-quick) var(--ease-enter), border-color var(--dur-quick) var(--ease-enter);
+  letter-spacing: .12em; text-transform: uppercase;
+  min-height: 32px; display: flex; align-items: center; gap: var(--s-3);
+  transition: color var(--dur-quick) var(--ease-enter);
+}
+/* The tick. Construction weight for a stop already passed, boundary weight for the one
+   the visitor is standing on — the same two ranks the drawing uses, so the instrument
+   and the plan are speaking one language. */
+.level-btn::before {
+  content: '';
+  position: absolute; left: -4px; top: 50%;
+  width: 11px; height: 0;
+  border-top: var(--rule-construction);
+  transition: border-color var(--dur-quick) var(--ease-enter), width var(--dur-quick) var(--ease-enter);
 }
 .level-btn:hover { color: var(--ink-70); }
-.level-btn[aria-current='true'] { color: var(--ink); border-bottom-color: var(--ink-70); }
+.level-btn:hover::before { border-top-color: var(--ink-40); }
+.level-btn[aria-current='true'] { color: var(--ink); }
+.level-btn[aria-current='true']::before {
+  width: 15px;
+  border-top: var(--rule-boundary);
+}
+/* A level not yet reached is not offered. It is absent rather than disabled: a control
+   greyed out for the whole of level 01 is three-quarters of an instrument that does
+   nothing, and the stack has to read as the path actually taken. */
+/* `hidden` is a presentation hint and any `display` declaration outranks it. Every
+   element this act toggles is a grid or a flex container, so all three of them stayed
+   on screen while reporting `hidden === true` — the building index and the suite list
+   were visible at the same time, one of them contradicting the other. The attribute is
+   the state; this makes the attribute win. */
+[hidden] { display: none !important; }
+.level-btn[hidden] { display: none; }
+.level-btn__val { color: var(--ink-70); font-variant-numeric: tabular-nums; }
+.level-btn[aria-current='true'] .level-btn__val { color: var(--ink); }
+
+/* ONE CONTROL, TWO PLACEMENTS. The inline copy sits above the drawing on one column,
+   where the way out has to be visible without scrolling; the record copy sits in the
+   record on two. Exactly one is ever in the document's rendered tree, so there is never
+   a duplicated control for a screen reader to announce twice. */
+.levels--inline { display: none; }
+@media (max-width: 1024px) {
+  .record > .levels { display: none; }
+  .levels--inline {
+    display: flex; flex-wrap: wrap; align-items: center;
+    /* No row gap. Each stop already carries a 44px touch height, so a row gap on top of
+       it opened a 44px band of nothing between two lines of the same control when the
+       third stop wrapped — internal space larger than the space around the component
+       it belongs to. The column gap is the only one this needs. */
+    gap: 0 var(--s-5);
+    padding-left: 0; margin-top: var(--s-6);
+  }
+  /* The spine is vertical by construction and there is nothing for it to join up when
+     the stops sit in a row, so it goes and the ticks carry the state on their own. */
+  .levels--inline::before { display: none; }
+  .levels--inline .level-btn { padding-left: var(--s-4); min-height: 44px; }
+  .levels--inline .level-btn::before { left: 0; top: 50%; }
+}
+
+/* THE BUILDING INDEX — eleven rows where there were 121.
+
+   The old list put every suite in the compound in one scrolling column, which is a
+   spreadsheet: 121 near-identical mono rows, the great majority of them for buildings
+   the visitor is not looking at. The index now matches the drawing's own structure —
+   choose a building, then choose inside it — so the record answers the same question
+   the plan does, at the same level, at the same time. */
+.bldg-index { display: grid; gap: 0; }
+.bldg-index__btn {
+  appearance: none; background: none; color: var(--ink-70);
+  border: 0; border-bottom: var(--rule-construction);
+  display: grid; grid-template-columns: 4ch 1fr auto; gap: var(--s-4);
+  align-items: baseline; text-align: left; cursor: pointer;
+  padding: var(--s-3) 0; min-height: 44px;
+  font-family: var(--face-mono); font-size: var(--t-micro); letter-spacing: .06em;
+  transition: color var(--dur-quick) var(--ease-enter), border-color var(--dur-quick) var(--ease-enter);
+}
+.bldg-index__num { color: var(--ink); font-variant-numeric: tabular-nums; }
+.bldg-index__meta { color: var(--ink-55); font-variant-numeric: tabular-nums; }
+.bldg-index__btn:hover { color: var(--ink); border-bottom-color: var(--ink-40); }
+.bldg-index__btn:hover .bldg-index__meta { color: var(--ink-70); }
+.bldg-index__btn[aria-current='true'] { color: var(--ink); border-bottom-color: var(--ink-70); }
+.bldg-index__btn[aria-current='true'] .bldg-index__meta { color: var(--ink-70); }
 
 /* The accessible list beneath the drawing. Not a substitute control — the same one.
    The rail's meaning is never carried by the drawing alone. */
 /* Bounded on desktop: a pinned act must not change height, and 121 rows would make it
    five viewports tall. Every suite is present and reachable — the region is a labelled
    list, not a truncation. On one column the pin is gone and the bound is lifted. */
+/* THE RECORD YIELDS TO THE MODEL.
+
+   The compound is the subject of this act and the record was out-weighing it: two full
+   plates and a long scrolling list of mono rows, all at full ink, against a dark
+   architectural render. A board's caption block does not compete with the drawing it
+   captions.
+
+   So on two columns the record sits at 82% ink until the pointer is in it, the legend
+   drops to a footnote, and the index and the suite list are both bounded. Nothing is
+   removed — every row is still there and still reachable; it stops shouting. */
+@media (min-width: 1025px) {
+  .act[data-act='02'] .record { opacity: .82; transition: opacity var(--dur-base) var(--ease-enter); }
+  .act[data-act='02'] .record:hover,
+  .act[data-act='02'] .record:focus-within { opacity: 1; }
+  /* The legend recedes by INK, never by size — 14px is a floor, not a starting point. */
+  .act[data-act='02'] .legend { opacity: .72; }
+  .bldg-index { max-height: 30svh; overflow-y: auto; overscroll-behavior: contain; }
+}
+
 .bay-list {
   display: grid; gap: var(--s-2);
-  max-height: 34svh; overflow-y: auto; overscroll-behavior: contain;
+  max-height: 26svh; overflow-y: auto; overscroll-behavior: contain;
   padding-right: var(--s-3);
 }
 @media (max-width: 1024px) {
@@ -556,16 +1209,43 @@ ul, ol { list-style: none; padding: 0; }
    air between them doing the work the empty half of the act used to do badly. Three
    equal columns would be a claim that these are parallel and equal in rank (`DNA9`);
    they are a sequence. */
+/* A DESCENT, at scale. Revised in the art-direction pass.
+
+   The stagger was right in principle and far too small in practice: three frames at a
+   third of the column each, floating in a 120svh act, read as a contact sheet with
+   captions. Act 04's argument is INTIMACY — you are close enough to touch this — and
+   intimacy is a function of how much of the screen the thing occupies.
+
+   So the three frames now step DOWN and ACROSS at increasing size: a half-column plate,
+   then a wider one crossing the centre, then one that runs out of the grid entirely at
+   the right and is cropped by the page edge. The sequence gets closer as it descends,
+   which is the act's whole shape, and the last frame's committed crop is what stops the
+   act reading as three objects on a shelf (`C9`). */
 .macro--stagger {
   grid-template-columns: repeat(12, minmax(0, 1fr));
   align-items: start;
+  row-gap: clamp(3rem, 8vw, 7rem);
 }
-.macro--stagger > :nth-child(1) { grid-column: 1 / span 4;  grid-row: 1; }
-.macro--stagger > :nth-child(2) { grid-column: 6 / span 5;  grid-row: 1; margin-block-start: clamp(1.25rem, 2.5vw, 2rem); }
-.macro--stagger > :nth-child(3) { grid-column: 2 / span 5;  grid-row: 2; margin-block-start: var(--s-5); }
-.macro--stagger > :nth-child(1) .macro__frame { aspect-ratio: 3 / 2; }
+.macro--stagger > :nth-child(1) { grid-column: 1 / span 6;  grid-row: 1; }
+.macro--stagger > :nth-child(2) { grid-column: 5 / span 8;  grid-row: 2; }
+.macro--stagger > :nth-child(3) { grid-column: 2 / span 11; grid-row: 3; }
+.macro--stagger > :nth-child(1) .macro__frame { aspect-ratio: 4 / 3; }
 .macro--stagger > :nth-child(2) .macro__frame { aspect-ratio: 16 / 9; }
 .macro--stagger > :nth-child(3) .macro__frame { aspect-ratio: 21 / 9; }
+/* The third frame breaks the grid at the right and is cropped by the viewport. A
+   partial break is what makes a grid read as decoration behind content; this one is
+   committed. */
+.macro--stagger > :nth-child(3) { margin-right: calc(var(--margin) * -1); }
+
+/* The caption sits UNDER the frame it belongs to and is held to a measure, so the act
+   reads as three annotated plates rather than as text that happens to be near pictures. */
+.macro--stagger figcaption { max-width: 46ch; padding-top: var(--s-4); }
+
+@media (max-width: 1024px) {
+  .macro--stagger > :nth-child(1),
+  .macro--stagger > :nth-child(2),
+  .macro--stagger > :nth-child(3) { grid-column: 1 / -1; margin-right: 0; }
+}
 
 /* ACT 05 — one dominant and two subordinates (`C1`), which is a different composition
    from act 04's stagger and from anything else on the page. The lead frame is the one
@@ -622,7 +1302,10 @@ ul, ol { list-style: none; padding: 0; }
 .ab__dim { stroke: var(--ink-40); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .ab__dim-locked { stroke: var(--ink-70); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .ab__car { fill: none; stroke: var(--ink-16); stroke-width: 1; vector-effect: non-scaling-stroke; }
-.ab__t { font-family: var(--face-mono); font-size: 13px; letter-spacing: .08em; fill: var(--ink-55); text-transform: uppercase; }
+/* 14px, not 13.  sets a hard floor under functional text and a dimension label on
+   a drawing is the most functional text on the page — it is the number the buyer
+   checks. */
+.ab__t { font-family: var(--face-mono); font-size: var(--t-micro); letter-spacing: .08em; fill: var(--ink-55); text-transform: uppercase; }
 .ab__t--locked { fill: var(--ink-70); }
 
 /* An expandable schedule that does not move the list it lives in. */

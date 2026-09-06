@@ -44,8 +44,14 @@ CustomEase.create('door', 'M0,0 C0.12,0 0.20,0.28 0.36,0.62 0.52,0.90 0.70,1 1,1
 const DUR = { instant: 0.09, quick: 0.18, base: 0.32, door: 0.64, settle: 1.2 }
 const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-export function initMotion({ compound, selectSuite, setLevel, state } = {}) {
+export function initMotion({ compound, selectSuite, setLevel, state, cam } = {}) {
   const root = document.documentElement
+
+  /* The camera is main.js's, because the static page has to be able to reach all three
+     levels without this file ever loading. What the motion layer contributes is the
+     TRAVEL: handing GSAP over turns an instant reframe into the page's signature move,
+     and changes nothing about which frames exist (`MJ5`, `G7`). */
+  cam?.useGsap(gsap)
 
   /* ------------------------------------------------------------------------------
      SCROLL AUTHORITY — native, and there is only one.
@@ -120,8 +126,29 @@ export function initMotion({ compound, selectSuite, setLevel, state } = {}) {
       const intro = gsap.timeline({ defaults: { ease: 'none' } })
 
       if (field00) {
-        gsap.set(field00, { opacity: 0.34 })
-        intro.to(field00, { opacity: 1, duration: DUR.settle * 1.15 }, 0)
+        /* THE ENTRANCE EVENT — the gate light comes on.
+
+           A dimmer coming up across the whole plate is a fade with a better name: the
+           frame gets uniformly brighter and nothing has happened in it. What act 00's
+           photograph actually shows is one lit opening in a long dark wall, so the
+           light should ARRIVE THERE and spread out from it.
+
+           A radial mask, centred on the gatehouse at 52%/44% of the frame, opens from
+           nothing to the full plate. Because it is a clip and not an opacity, the wall
+           does not brighten — it is DISCOVERED, in the order light would actually find
+           it, and the composition's own subject is the origin of the reveal. The dimmer
+           still runs underneath, half its old depth, so the plate settles rather than
+           snapping once the mask has passed.
+
+           Slower than anything else on the page and it happens once, on load. This is
+           the moment the visitor is admitted. */
+        gsap.set(field00, { opacity: 0.55, clipPath: 'circle(0% at 52% 44%)' })
+        intro.to(field00, {
+          clipPath: 'circle(125% at 52% 44%)',
+          duration: DUR.settle * 1.5,
+          ease: 'door',
+        }, 0)
+        intro.to(field00, { opacity: 1, duration: DUR.settle * 1.4 }, 0.15)
       }
 
       if (h00) {
@@ -318,6 +345,147 @@ export function initMotion({ compound, selectSuite, setLevel, state } = {}) {
       gsap.set(node, { y: 12 })
     }
 
+    /* ==============================================================================
+       THE FRAME REVEAL — one device, every photographic frame on the page.
+
+       Every image on this page used to arrive by opacity, which is the generic fade-up
+       the direction bans by name and which makes seven acts feel like one template with
+       different pictures in it. This replaces it with the language the system actually
+       declares: a HARD MASK and a SCALE.
+
+       A frame opens as a shutter opens — an inset clip travelling off the bottom edge
+       on the page's own door ease — while the picture inside it settles from 1.10 to
+       1.0 on a longer curve. The two are deliberately not the same length: the mask
+       finishes and the image is still arriving, so the frame lands and the picture
+       keeps moving fractionally under it, which is what a plate settling in a gate does
+       and what a fade can never do.
+
+       Bound to a ROLE (`SC5`) — every `.macro__frame` on the page, in any act, present
+       or future — rather than to a list of instances. Once, never on scroll-back: a
+       re-triggering entrance is the most reliable way a cinematic page starts feeling
+       cheap (`T5`).
+       ============================================================================== */
+    for (const frame of gsap.utils.toArray('.macro__frame')) {
+      const img = frame.querySelector('img')
+      if (reduced()) { frame.style.clipPath = 'none'; if (img) img.style.transform = 'none'; continue }
+      const tl = gsap.timeline({
+        scrollTrigger: { trigger: frame, start: 'top 86%', once: true },
+      })
+      tl.fromTo(frame,
+        { clipPath: 'inset(0% 0% 100% 0%)' },
+        { clipPath: 'inset(0% 0% 0% 0%)', duration: DUR.door, ease: 'door' }, 0)
+      if (img) {
+        tl.fromTo(img,
+          { scale: 1.10 },
+          { scale: 1, duration: DUR.settle, ease: 'power2.out' }, 0)
+      }
+    }
+
+    /* THE SLOW DRIFT. Large photographic plates get a scroll-BOUND scale across their
+       whole travel through the viewport — 1.0 to 1.045, which is under the threshold at
+       which the eye reads it as a zoom and over the threshold at which a still image
+       reads as dead. Scrubbed, so it is the visitor moving rather than the page playing
+       (`MJ6`), and applied only to the frames big enough for it to be a camera rather
+       than a wobble. */
+    for (const frame of gsap.utils.toArray('.macro__frame')) {
+      const img = frame.querySelector('img')
+      if (!img || reduced()) continue
+      if (frame.getBoundingClientRect().width < 380) continue
+      gsap.fromTo(img, { yPercent: -2.2 }, {
+        yPercent: 2.2,
+        ease: 'none',
+        scrollTrigger: { trigger: frame, start: 'top bottom', end: 'bottom top', scrub: 0.8 },
+      })
+    }
+
+    /* ==============================================================================
+       ACT 06 — THE DRAWING CONSTRUCTS ITSELF.
+
+       The A/B diagram is the page's only true technical drawing and it was arriving as
+       a finished picture at full opacity, which wastes the one thing a drawing can do
+       that a photograph cannot: be watched being made.
+
+       So it is drawn, in the order a draughtsman would draw it — the locked depth
+       dimension first, because that is the axis the whole comparison is anchored on,
+       then the unit outline, then the mezzanine line, then the width that is the only
+       thing that differs between the two types. Standard stroke-dash construction, no
+       plugin. The labels arrive after their lines, never with them.
+
+       This is a TRIGGERED beat, not a scrubbed one (`MJ` role split): the drawing is a
+       statement, and a statement lands once at its own pace rather than being smeared
+       across whatever scroll distance the visitor happens to use.
+       ============================================================================== */
+    const abStage = document.querySelector('.ab__stage svg')
+    if (abStage && !reduced()) {
+      const order = [
+        ...abStage.querySelectorAll('.ab__dim-locked'),
+        abStage.querySelector('.ab__unit'),
+        ...abStage.querySelectorAll('.ab__dim'),
+        ...abStage.querySelectorAll('.ab__car'),
+      ].filter(Boolean)
+      const labels = abStage.querySelectorAll('.ab__t')
+      const mezz = abStage.querySelector('.ab__mezz')
+
+      /* ONE trigger. The timeline is built paused and a single ScrollTrigger starts it;
+         giving the timeline its own `scrollTrigger` as well would create a second
+         trigger on the same element, which is both a duplicate and a race about who
+         owns playback. */
+      const tl = gsap.timeline({ paused: true })
+      for (const [i, node] of order.entries()) {
+        const len = node.getTotalLength ? node.getTotalLength() : 0
+        if (!len) continue
+        gsap.set(node, { strokeDasharray: len, strokeDashoffset: len })
+        tl.to(node, { strokeDashoffset: 0, duration: 0.42, ease: 'power2.inOut' }, i * 0.075)
+      }
+      /* The mezzanine is a FILL, so it cannot be drawn — it wipes, on the same axis the
+         real mezzanine sits on. */
+      if (mezz) {
+        tl.fromTo(mezz, { opacity: 0 }, { opacity: 0.5, duration: DUR.base, ease: 'power1.out' }, 0.34)
+      }
+      tl.fromTo(labels, { opacity: 0 }, { opacity: 1, duration: DUR.quick, stagger: 0.05, ease: 'none' }, 0.5)
+      ScrollTrigger.create({ trigger: abStage, start: 'top 78%', once: true, onEnter: () => tl.play() })
+    }
+
+    /* ==============================================================================
+       ACT 07 — THE HOLD.
+
+       The page closes on a photograph of an open door with light coming through it, and
+       the beat it needs is the opposite of every other beat: something that comes to
+       REST. So the plate pushes very slightly — 1.06 over the act's whole travel — and
+       then stops, because the visitor has arrived and the invitation should not be
+       moving while they read it.
+
+       The push is scrubbed and tiny; what makes it land is that it is the only motion
+       left. Everything else in this act is already still. */
+    const act07 = document.querySelector('[data-act="07"]')
+    const img07 = act07?.querySelector('.field__img')
+    if (img07 && !reduced()) {
+      gsap.fromTo(img07, { scale: 1.06 }, {
+        scale: 1, ease: 'none',
+        scrollTrigger: { trigger: act07, start: 'top bottom', end: 'top 20%', scrub: 0.9 },
+      })
+    }
+
+    /* ==============================================================================
+       ACT 06 — THE SCHEDULE COMMITS.
+
+       The diagram draws itself; the list under it should not merely appear. Each line
+       of what is included in every suite arrives on a precise stagger with its own rule
+       drawn from the left — the gesture of a schedule being signed off line by line.
+       Transform and opacity only, so it costs nothing.
+       ============================================================================== */
+    const sched = gsap.utils.toArray('[data-act="06"] .spec-list li, [data-act="06"] .disclose')
+    if (sched.length && !reduced()) {
+      gsap.from(sched, {
+        opacity: 0,
+        xPercent: -1.5,
+        duration: DUR.base,
+        ease: 'power2.out',
+        stagger: 0.035,
+        scrollTrigger: { trigger: sched[0], start: 'top 88%', once: true },
+      })
+    }
+
     /* ----------------------------------------------------------------------------
        ACT 01 — the dolly, and the beats do not land together.
 
@@ -333,8 +501,19 @@ export function initMotion({ compound, selectSuite, setLevel, state } = {}) {
     const dollyAct = document.querySelector('[data-dolly]')
     const dolly = dollyAct?.querySelector('.field__img')
     if (dolly && !reduced()) {
-      gsap.fromTo(dolly, { xPercent: 0 }, {
-        xPercent: -9, ease: 'none',
+      /* REVISED — ARRIVAL IS A PUSH, NOT A PAN.
+
+         A lateral pass says "you are going past this place". Act 01's whole job is to
+         say the compound is AHEAD of you and you are closing on it, so the plate now
+         moves toward the viewer: a scrubbed 1.0 -> 1.18 scale with a slight lateral
+         drift, on the frontage photograph whose own vanishing point is dead ahead down
+         the drive. The scale does the arriving; the residual pan keeps it from reading
+         as a mechanical zoom.
+
+         Linear, because a dolly runs at the rate the visitor scrolls rather than at the
+         rate an ease would prefer, and the visitor keeps the transport throughout. */
+      gsap.fromTo(dolly, { scale: 1, xPercent: 0 }, {
+        scale: 1.18, xPercent: -3.5, ease: 'none',
         scrollTrigger: {
           trigger: dollyAct, start: 'top bottom', end: 'bottom top',
           scrub: true, invalidateOnRefresh: true,
@@ -533,12 +712,96 @@ export function initMotion({ compound, selectSuite, setLevel, state } = {}) {
     const svg = compound?.svg
     const compoundEl = document.querySelector('[data-compound]')
 
+    /* Assigned inside the act-02 block below, where the resting frame is known, and
+       called from this handler's cleanup — which sits outside that block and therefore
+       cannot see its locals. */
+    let restCamera = null
+
     if (act02 && svg && compoundEl) {
-      const vb = svg.viewBox.baseVal
-      const full = { x: vb.x, y: vb.y, w: vb.width, h: vb.height }
+      /* THE OPENING FRAME. The act has to be ON this crop before the pin engages, so it
+         is defined once and used by both the setup and the scrub — a crop defined in two
+         places is a crop that will disagree with itself. The anchor that goes with it
+         (0.16 / 0.74, the entry road) lives with the camera in main.js now, beside the
+         resting frame it is a fraction of. */
+      const CROP = 0.34
+
+      restCamera = () => {
+        /* Hand the wheel back and return to the composed frame. `release()` first: the
+           camera refuses a scroll-driven resolve while the visitor owns it, and this
+           cleanup runs precisely when the visitor has left the act. */
+        cam?.release()
+        cam?.toLevel('compound', false)
+        compoundEl.style.removeProperty('--plan-k')
+        compoundEl.style.removeProperty('--perim-k')
+        compoundEl.style.removeProperty('--trace-k')
+        /* The rail belongs to the whole page, not to this act, so a beat left lit here
+           would light it for every act on the way out. It is the one piece of act-02
+           state that lives outside act 02. */
+        railEl?.style.removeProperty('--rail-k')
+        if (roadTrace) {
+          roadTrace.setAttribute('opacity', '0')
+          roadTrace.style.strokeDashoffset = String(traceLen)
+        }
+      }
+
+      /* THE RESOLVE, and it is no longer this file's viewBox.
+
+         The camera moved to main.js when act 02 got three real framings, because a
+         level the visitor chooses has to work with this file absent (`G7`). What is
+         left here is the RESOLVE — the opening crop widening to the composed frame —
+         and it is handed to the same object every other framing goes through, so there
+         is exactly one writer of the viewBox and one writer of --plan-k (`G6`).
+
+         `cam.resolve` refuses the call once the visitor has selected anything, which is
+         what keeps the scrub from dragging the frame back off a building the visitor
+         chose. Scroll introduces the compound; it does not steer it. */
+      const camera = (k) => {
+        cam?.resolve(k, CROP)
+
+        /* The perimeter arrives ON the camera, and finishes before the record starts.
+           k 0.40 -> 0.80 is pin progress 0.12 -> 0.24, and the record begins at 0.24,
+           so the compound's edge and the reading matter never land on one beat. It is
+           absent while the frame is inside the compound because a boundary you can
+           only see two fragments of describes nothing; it is whole by the time the
+           frame can hold what it encloses. */
+        compoundEl.style.setProperty('--perim-k', clamp01((k - 0.40) / 0.40).toFixed(3))
+      }
+
+      /* THE ACT MUST BE ON ITS OPENING FRAME BEFORE THE PIN ENGAGES.
+
+         ScrollTrigger does not run onUpdate until the scroll is inside the trigger's
+         range, so on a FIRST visit the compound sat at its resting viewBox — the whole
+         compound, fully revealed — for the entire approach, and then snapped to the 34%
+         fragment the instant the pin took hold and opened out to the same picture again.
+         The visitor was shown the ending, then shown it being assembled.
+
+         It only ever reproduced on a cold load, because once the trigger has been active
+         it holds progress 0 on the way back up, which is why a scroll-back sweep found
+         nothing. Applying progress 0 at setup is what makes the approach and the scrub
+         the same state.
+
+         Inside the desktop matchMedia by construction, so the phone and the
+         reduced-motion path — neither of which has this pin — keep the resting frame and
+         the full compound. The cleanup below puts it back if the query stops matching. */
+      camera(0)
       const head = act02.querySelector('.span-stage > .t-label')
       const h2 = act02.querySelector('#h-02')
       const record = act02.querySelector('[data-record]')
+
+      /* THE RECOGNITION'S TWO OBJECTS.
+
+         The rail's drawn fragment, which has been at the edge of the page since act 00,
+         and the compound's own road centreline, which is the same kind of object at a
+         different crop. The beat below draws the second one and lifts the first, once,
+         so the visitor sees them as one thing. Both already exist; neither is created
+         for the occasion. */
+      const railEl = document.querySelector('[data-rail]')
+      const roadTrace = compound?.roadTrace || null
+      const traceLen = roadTrace ? roadTrace.getTotalLength() : 0
+      if (roadTrace) {
+        roadTrace.style.strokeDasharray = String(traceLen)
+        roadTrace.style.strokeDashoffset = String(traceLen)
+      }
 
       /* The masses resolve on their own timeline so the stagger is real rather than a
          function of scroll distance. Driven by progress, not played. */
@@ -571,7 +834,7 @@ export function initMotion({ compound, selectSuite, setLevel, state } = {}) {
         })
       }
 
-      let lastLevel = null
+      /* lastLevel is gone with the scroll-driven levels it tracked. */
 
       ScrollTrigger.create({
         trigger: act02,
@@ -599,27 +862,72 @@ export function initMotion({ compound, selectSuite, setLevel, state } = {}) {
 
           /* The camera. A drawing being unrolled on a table: even, unhurried, and it
              stops opening well before the levels begin so the two never move together. */
-          const k = clamp01(p / 0.30)
-          const w = gsap.utils.interpolate(full.w * 0.34, full.w, k)
-          const h = gsap.utils.interpolate(full.h * 0.34, full.h, k)
-          const ax = 0.16, ay = 0.74      /* opens from the entry road */
-          svg.setAttribute('viewBox',
-            `${full.x + (full.w - w) * ax} ${full.y + (full.h - h) * ay} ${w} ${h}`)
+          camera(clamp01(p / 0.30))
 
-          /* 0.38–0.52 is a HOLD. The recognition needs a beat where nothing moves, or
-             it is just another thing that happened on the way past. */
+          /* ------------------------------------------------------------------------
+             0.42–0.49 · RECOGNISE.   0.49–0.52 · HOLD.
 
-          /* Levels advance with the pin; SELECTION never does. Binding a choice to
-             scroll takes the choice away from the visitor (`SC1`, `DM7`). */
-          const level = p < 0.52 ? 'compound' : p < 0.62 ? 'building' : 'suite'
-          if (level !== lastLevel && !state?.suite) {
-            lastLevel = level
-            setLevel ? setLevel(level) : compoundEl.setAttribute('data-level', level)
+             The act exists to land one sentence — *the line that has been following me
+             is this place* — and until now that sentence was carried by absence. A hold
+             with nothing authored in it is not a pause, it is a gap, and the visitor
+             reads a gap as the page having run out of things to say (`MJ4`).
+
+             So: one event, on two objects that already exist. The compound's road
+             centreline draws itself from the entry road outward — the same direction
+             act 00's gate faced and the same direction the camera opened from — while
+             the rail's own fragment lifts to meet it. They are the same kind of drawing
+             at two crops, so showing them together states a fact rather than performing
+             a transition. Nothing translates, nothing reframes, the camera has been
+             still since 0.30, and the record has been settled since 0.36: the only thing
+             that changes is which lines are lit.
+
+             Then it stops. 0.49–0.52 is a true hold with the recognition standing on
+             screen — the still beat the sequence needs before the levels take over —
+             and the trace recedes to construction weight as level 02 begins, because by
+             then it is just the road again.
+
+             The beat starts at 0.42 rather than at 0.38 because the index finishes
+             there, and beats do not land together (`P6`, and the act's own five-beat
+             ledger above). Everything is a pure function of `p`, so a reverse scroll
+             un-draws it in the same order it drew (`SC6`). */
+          const rec = clamp01((p - 0.42) / 0.07)
+          const settle = 1 - clamp01((p - 0.52) / 0.06)
+
+          if (roadTrace) {
+            roadTrace.setAttribute('opacity', rec > 0 ? '1' : '0')
+            roadTrace.style.strokeDashoffset = String(traceLen * (1 - rec))
           }
+          /* Rank, not presence: the line stays, its weight drops back to construction. */
+          compoundEl.style.setProperty('--trace-k', settle.toFixed(3))
+          /* The rail answers for exactly as long as the beat lasts, then goes back to
+             being the quiet instrument it is for the other seven acts. */
+          if (railEl) railEl.style.setProperty('--rail-k', (rec * settle).toFixed(3))
 
+          /* NOTHING ADVANCES A LEVEL HERE ANY MORE.
+
+             The pin used to walk the act through compound -> building -> suite on
+             scroll progress, choosing a building for the visitor and then a suite,
+             which is the defect `SC1` and `DM7` name: a choice bound to scroll is not a
+             choice. It also made the drawing's three states read as a cutscene, so
+             arriving at the act and pointing at something felt like interrupting it.
+
+             The levels are the visitor's, entirely, and they are reached by pointing at
+             the compound. What scroll still owns is the RESOLVE above — the frame
+             opening from the entry road — and the recognition beat. Scroll introduces
+             the compound and then gets out of the way. */
           enter.update(p)
         },
-        onLeaveBack: () => { enter.hide() },
+        onLeaveBack: () => {
+          enter.hide()
+          /* onUpdate does not necessarily fire again above the start, and a rail left
+             lit outside the act it belongs to is the page's only permanent state — the
+             same class of defect `SC6` caught in the ENTER's opacity. */
+          if (railEl) railEl.style.setProperty('--rail-k', '0')
+          if (roadTrace) {
+            roadTrace.setAttribute('opacity', '0')
+            roadTrace.style.strokeDashoffset = String(traceLen)
+          }
+        },
       })
     }
 
@@ -682,7 +990,14 @@ export function initMotion({ compound, selectSuite, setLevel, state } = {}) {
       })
     }
 
-    return () => { enter.hide() }
+    return () => {
+      enter.hide()
+      /* matchMedia reverts what GSAP created; the viewBox and the line scale are raw
+         attributes on an element GSAP does not own, so they are handed back by hand.
+         Without this, crossing to a phone width mid-session would leave the compound
+         cropped to a fragment with no pin left to open it. */
+      restCamera?.()
+    }
   })
 
   /* --------------------------------------------------------------------------------

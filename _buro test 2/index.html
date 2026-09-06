@@ -48,7 +48,17 @@
   <div class="rail__progress" data-rail-progress></div>
   <svg class="rail__svg" viewBox="0 0 40 900" fill="none" preserveAspectRatio="xMidYMin meet">
     <path class="rail__line" data-rail-spine d="M20 0 V900"></path>
-    <path class="rail__mark" data-rail-draw d="M8 120 H32 M20 120 V300 M10 300 H30 M20 300 V520 M12 520 H28"></path>
+    <!-- The rail's fragment has always been a spine with three ticks coming off it,
+         which is the same instrument act 02's three levels are. Splitting the one path
+         into its ticks costs nothing outside act 02 — the geometry is identical and
+         --rail-k still lifts the whole thing for the recognition beat — and inside act
+         02 each tick can report a level. This is what makes the rail functional rather
+         than decorative, and it does it as line, with no label: the record names the
+         level, the rail says how deep in it you are. -->
+    <path class="rail__mark" data-rail-draw d="M20 120 V300 M20 300 V520"></path>
+    <path class="rail__mark rail__tick" data-rail-tick="compound" d="M8 120 H32"></path>
+    <path class="rail__mark rail__tick" data-rail-tick="building" d="M10 300 H30"></path>
+    <path class="rail__mark rail__tick" data-rail-tick="suite" d="M12 520 H28"></path>
     <rect class="rail__marker" data-rail-marker x="16" y="0" width="8" height="2"></rect>
   </svg>
 </div>
@@ -143,7 +153,28 @@
            and from the record beside it. -->
       <h2 class="t-h3" id="h-02">121 private suites, 11 buildings</h2>
 
-      <div class="compound" data-compound data-level="compound" style="margin-top:var(--s-7)">
+      <!-- The level instrument, second copy, and it exists ONLY for one column.
+           In the record column it sits below the drawing, which on a phone means the
+           way back out is off-screen the moment you tap into a building — the one
+           control a visitor needs most, placed where they cannot see it. Here it is
+           directly above the plan it steers, and it runs horizontally because vertical
+           space above a drawing on a 844px screen is the scarcest thing on the page.
+
+           Exactly one of the two is ever rendered (`display:none` removes the other
+           from the accessibility tree as well as the picture), and both are wired by
+           the same `data-level-btn` selector, so there is one control with two
+           authored placements rather than two controls. -->
+      <nav class="levels levels--inline" data-levels aria-label="Where you are in the compound">
+        <button class="level-btn" type="button" data-level-btn="compound" aria-current="true">Compound</button>
+        <button class="level-btn" type="button" data-level-btn="building" hidden>
+          Bldg <span class="level-btn__val" data-level-building></span>
+        </button>
+        <button class="level-btn" type="button" data-level-btn="suite" hidden>
+          Suite <span class="level-btn__val" data-level-suite></span>
+        </button>
+      </nav>
+
+      <div class="compound" data-compound data-level="compound" style="margin-top:var(--s-5)">
         <div class="compound__stage" data-compound-mount></div>
       </div>
 
@@ -158,11 +189,19 @@
         </p>
       </div>
 
-      <div class="levels" role="group" aria-label="Level of detail">
-        <button class="level-btn" type="button" data-level-btn="compound" aria-current="true">01 Compound</button>
-        <button class="level-btn" type="button" data-level-btn="building">02 Building</button>
-        <button class="level-btn" type="button" data-level-btn="suite">03 Suite</button>
-      </div>
+      <!-- The level instrument. Three stops on one spine, and a stop appears only once
+           the visitor has reached it, so the stack is the path in and clicking up it is
+           the way out. This is the rail's drawing brought into the record, where a
+           14px label fits; the rail itself reports the same state as pure line. -->
+      <nav class="levels" data-levels aria-label="Where you are in the compound">
+        <button class="level-btn" type="button" data-level-btn="compound" aria-current="true">Compound</button>
+        <button class="level-btn" type="button" data-level-btn="building" hidden>
+          Building <span class="level-btn__val" data-level-building></span>
+        </button>
+        <button class="level-btn" type="button" data-level-btn="suite" hidden>
+          Suite <span class="level-btn__val" data-level-suite></span>
+        </button>
+      </nav>
 
       <!-- A typographic key. The drawing carries no swatch, chip or coloured marker;
            the key names what the light is doing instead of sampling it. -->
@@ -186,9 +225,21 @@
            both write the same state. Bounded on desktop so it cannot inflate a pinned
            act's height; on mobile, where tapping a 121-bay drawing is not realistic,
            this is where selection actually happens and it runs full length. -->
+      <!-- The index, at the level the drawing is at. At COMPOUND it lists the measured
+           buildings; once one is chosen it lists that building's suites. Both are real
+           controls writing the same state the drawing writes, so a visitor who cannot
+           see the plan loses none of what it reports — that is this act's
+           accessibility floor and it has not moved, only stopped being a 121-row
+           spreadsheet. -->
       <div>
-        <h3 class="t-label" style="margin-bottom:var(--s-3)">All 121 suites</h3>
-        <div class="bay-list" data-bay-list role="group" aria-label="Select a suite"></div>
+        <h3 class="t-label" data-index-head style="margin-bottom:var(--s-3)">Buildings</h3>
+        <div class="bldg-index" data-bldg-index role="group" aria-label="Select a building"></div>
+        <p class="dated" data-index-gap hidden></p>
+        <div class="bay-list" data-bay-list role="group" aria-label="Select a suite" hidden></div>
+        <p class="dated" data-index-note hidden>
+          Bay numbers reference this drawing only — the published material numbers
+          buildings, not suites.
+        </p>
       </div>
 
       <!-- Dated figures carry their date in the render. The ledger is not the reader's. -->
@@ -314,7 +365,7 @@
      page's deliberate non-selling act: it asks for nothing.
      ================================================================================ -->
 <section class="act" id="act-04" data-act="04" data-register="photographic"
-         data-aperture="glazed" data-aperture-into="act-05" aria-labelledby="h-04" style="min-height:120svh; display:grid; align-content:center">
+         data-aperture="glazed" data-aperture-into="act-05" aria-labelledby="h-04">
   <div class="act__grid">
     <div class="span-full">
       <p class="t-label">04 — Machine / space</p>

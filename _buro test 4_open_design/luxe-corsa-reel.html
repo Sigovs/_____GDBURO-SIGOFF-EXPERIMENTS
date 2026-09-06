@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Luxe Corsa · 11-Frame Reel — Hyperframes storyboard</title>
+<meta name="description" content="Hyperframes / Remotion-compatible 11-frame reel for Luxe Corsa Auto Suites. 1920x1080, autoplay, 43s runtime. Every figure sourced from the Luxe Corsa site." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+/* ─── tokens — bound to the LUXE CORSA design system (see luxe-corsa.html) ── */
+:root{
+  --bg:          #0e0e10;
+  --surface:     #ffffff;
+  --fg:          #e8e8e8;
+  --fg-quiet:    #a8a8a8;
+  --muted:       #8a8a8a;
+  --accent:      #3a8170;   /* display type only — large text */
+  --accent-live: #28a588;   /* small text, rules, ticks */
+  --border:      rgba(255,255,255,0.16);
+  --border-soft: rgba(255,255,255,0.08);
+  --panel:       #161619;
+  --panel-hi:    #1e1e23;
+
+  --font-display:'Degular Display','Degular','Figtree',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-body:   'Roboto',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+
+  /* type scale authored for a 1920x1080 frame, not a web page */
+  --fs-hook:   146px;
+  --fs-shot:   104px;
+  --fs-mid:    76px;
+  --fs-lead:   32px;
+  --fs-label:  19px;
+  --fs-fine:   17px;
+
+  --ease: cubic-bezier(.22,.61,.36,1);
+  --pad: 132px;
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  margin:0; background:#000; color:var(--fg);
+  font-family:var(--font-body); -webkit-font-smoothing:antialiased;
+  overflow:hidden;
+}
+img{ display:block; }
+
+/* ─── stage: a true 1920x1080 canvas, scaled to fit whatever it is viewed in ─ */
+#viewport{ position:fixed; inset:0; overflow:hidden; background:#000; }
+#stage{
+  position:absolute; top:0; left:0;
+  width:1920px; height:1080px;
+  transform-origin:top left;
+  background:var(--bg);
+}
+
+/* ─── frame ────────────────────────────────────────────────────────────── */
+.frame{
+  position:absolute; inset:0; overflow:hidden;
+  opacity:0; visibility:hidden;
+  transition:opacity .62s var(--ease), visibility 0s linear .62s;
+}
+.frame.active{
+  opacity:1; visibility:visible;
+  transition:opacity .62s var(--ease), visibility 0s;
+}
+
+/* backgrounds are deliberately croppable decorative fills */
+.bg{ position:absolute; inset:0; }
+.bg img{ width:100%; height:100%; object-fit:cover; }
+.frame.active .bg img{ animation:kenburns 9s linear both; }
+@keyframes kenburns{ from{ transform:scale(1.045); } to{ transform:scale(1); } }
+
+.scrim{ position:absolute; inset:0; }
+.scrim.v{ background:linear-gradient(180deg,rgba(14,14,16,.34) 0%,rgba(14,14,16,.72) 58%,rgba(14,14,16,.94) 100%); }
+.scrim.deep{ background:linear-gradient(180deg,rgba(14,14,16,.78) 0%,rgba(14,14,16,.88) 100%); }
+.scrim.left{ background:linear-gradient(90deg,rgba(14,14,16,.94) 0%,rgba(14,14,16,.72) 46%,rgba(14,14,16,.30) 100%); }
+
+.body{
+  position:absolute; inset:0; z-index:2;
+  padding:var(--pad);
+  display:flex; flex-direction:column; justify-content:center;
+}
+.body.center{ align-items:center; text-align:center; }
+
+/* ─── type ─────────────────────────────────────────────────────────────── */
+h1,h2{ margin:0; font-family:var(--font-display); font-weight:400; letter-spacing:-.022em; line-height:1.03; text-wrap:balance; }
+.hook h1{ font-size:var(--fs-hook); letter-spacing:-.03em; }
+.shot h2{ font-size:var(--fs-shot); }
+.mid  h2{ font-size:var(--fs-mid); }
+.hl{ color:var(--accent); }
+
+.lead{
+  margin:34px 0 0; font-size:var(--fs-lead); line-height:1.5;
+  color:var(--fg-quiet); max-width:34ch; text-wrap:pretty;
+}
+.body.center .lead{ margin-inline:auto; }
+
+.eyebrow{
+  display:inline-flex; align-items:center; gap:16px;
+  font-size:var(--fs-label); letter-spacing:.24em; text-transform:uppercase;
+  color:var(--fg); margin:0 0 30px;
+}
+.eyebrow::before{ content:""; width:1px; height:20px; background:var(--accent-live); flex:none; }
+.body.center .eyebrow::before{ display:none; }
+.tick{ display:block; width:34px; height:1px; background:var(--accent-live); margin:0 auto 26px; }
+
+.fine{ margin:0; font-size:var(--fs-fine); line-height:1.6; color:var(--muted); max-width:96ch; }
+
+/* ─── chrome — production overlays, stripped at render time ────────────── */
+.slug{
+  position:absolute; top:56px; left:56px; z-index:6;
+  font-size:14px; letter-spacing:.28em; text-transform:uppercase;
+  color:var(--fg); opacity:.5;
+}
+#progress{ position:fixed; top:0; left:0; height:3px; width:0; background:var(--accent-live); z-index:60; transition:width .12s linear; }
+#controls{
+  position:fixed; bottom:26px; left:50%; transform:translateX(-50%); z-index:60;
+  display:flex; align-items:center; gap:16px;
+  padding:10px 20px; border-radius:60px;
+  background:rgba(14,14,16,.72); border:1px solid var(--border);
+  backdrop-filter:blur(14px);
+  font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--fg);
+}
+#controls button{
+  font:inherit; font-family:var(--font-body); cursor:pointer;
+  min-width:34px; height:34px; padding:0 10px;
+  background:transparent; color:var(--fg);
+  border:1px solid transparent; border-radius:60px;
+  transition:background .18s var(--ease), border-color .18s var(--ease);
+}
+#controls button:hover{ background:rgba(255,255,255,.12); border-color:var(--border); color:#fff; }
+#controls button:focus-visible{ outline:2px solid var(--accent-live); outline-offset:2px; }
+#counter{ color:var(--fg-quiet); font-variant-numeric:tabular-nums; }
+body.no-chrome .slug,
+body.no-chrome #controls,
+body.no-chrome #progress{ display:none; }
+
+/* ─── frame 04 · counters ──────────────────────────────────────────────── */
+.counters{ display:grid; grid-template-columns:repeat(4,1fr); gap:0; width:100%; margin-top:64px; }
+.counters > div{ padding:0 40px; border-left:1px solid var(--border-soft); }
+.counters > div:first-child{ border-left:0; padding-left:0; }
+.counters b{
+  display:block; font-family:var(--font-display); font-weight:400;
+  font-size:112px; line-height:1; letter-spacing:-.03em; color:var(--fg);
+  font-variant-numeric:tabular-nums;
+}
+.counters span{
+  display:block; margin-top:18px;
+  font-size:var(--fs-label); letter-spacing:.2em; text-transform:uppercase; color:var(--muted);
+}
+
+/* ─── frame 05 / 10 · letterboxed bands (native ratio preserved) ───────── */
+.band{ width:1560px; margin:0 auto; }
+.band img{ width:100%; height:auto; }
+
+/* ─── frame 06 · the two floorplans ────────────────────────────────────── */
+.plans{ display:grid; grid-template-columns:1fr 1fr; gap:44px; width:100%; margin-top:38px; }
+.plan{ background:var(--panel); border:1px solid var(--border-soft); border-radius:14px; overflow:hidden; text-align:left; }
+.plan img{ width:100%; height:auto; }
+.plan-txt{ padding:28px 34px 32px; }
+.plan h3{
+  margin:0; font-family:var(--font-display); font-weight:400;
+  font-size:46px; line-height:1.06; letter-spacing:-.02em;
+}
+.plan .tier{ display:block; margin-top:12px; font-size:var(--fs-label); letter-spacing:.2em; text-transform:uppercase; color:var(--muted); }
+.plan .price{ margin:26px 0 0; font-family:var(--font-display); font-size:40px; letter-spacing:-.02em; color:var(--accent); }
+.plan dl{ margin:24px 0 0; display:grid; grid-template-columns:auto 1fr; gap:12px 26px; font-size:21px; }
+.plan dt{ color:var(--muted); }
+.plan dd{ margin:0; color:var(--fg); }
+
+/* ─── frame 07 · amenities ─────────────────────────────────────────────── */
+.amenities{ display:grid; grid-template-columns:repeat(3,1fr); gap:56px 60px; width:100%; margin-top:56px; text-align:left; }
+.amenity{ display:flex; align-items:center; gap:24px; }
+.amenity .ico{
+  width:44px; height:44px; flex:none;
+  background-color:var(--accent-live);
+  -webkit-mask:var(--ico) center / contain no-repeat;
+          mask:var(--ico) center / contain no-repeat;
+}
+.amenity p{
+  margin:0; font-family:var(--font-display); font-size:34px;
+  line-height:1.18; letter-spacing:-.01em; color:var(--fg);
+}
+
+/* ─── frame 08 · split ─────────────────────────────────────────────────── */
+.split{ display:grid; grid-template-columns:1fr 637px; gap:96px; align-items:center; width:100%; }
+.split .shot img{ width:637px; height:auto; border-radius:14px; }
+.split .lead{ max-width:none; }
+
+/* ─── frame 09 · member story ──────────────────────────────────────────── */
+.quote{ max-width:1180px; }
+.quote blockquote{
+  margin:0; font-family:var(--font-display); font-weight:300;
+  font-size:64px; line-height:1.22; letter-spacing:-.018em; text-wrap:balance;
+}
+.attrib{ margin-top:52px; display:flex; align-items:center; justify-content:center; gap:26px; }
+.attrib img{ width:104px; height:104px; border-radius:50%; object-fit:cover; }
+.attrib .who{ text-align:left; }
+.attrib b{ display:block; font-family:var(--font-display); font-weight:500; font-size:28px; letter-spacing:.01em; }
+.attrib span{ display:block; margin-top:7px; font-size:var(--fs-fine); letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
+
+/* ─── frame 10 · facts row ─────────────────────────────────────────────── */
+.facts{ display:flex; justify-content:center; gap:0; margin-top:46px; }
+.facts > div{ padding:0 56px; border-left:1px solid var(--border-soft); }
+.facts > div:first-child{ border-left:0; }
+.facts b{ display:block; font-family:var(--font-display); font-weight:400; font-size:38px; letter-spacing:-.01em; }
+.facts span{ display:block; margin-top:10px; font-size:var(--fs-fine); letter-spacing:.2em; text-transform:uppercase; color:var(--muted); }
+
+/* ─── frame 11 · close ─────────────────────────────────────────────────── */
+.wordmark{ width:520px; height:auto; margin:0 auto 54px; opacity:.94; }
+.cta{
+  display:inline-flex; align-items:center; gap:14px;
+  margin-top:52px; padding:22px 52px; border-radius:60px;
+  background:var(--surface); color:var(--bg);
+  font-family:var(--font-display); font-weight:600; font-size:24px;
+  letter-spacing:.06em; text-transform:uppercase;
+}
+.cta svg{ width:22px; height:22px; }
+.contact{ margin-top:44px; display:flex; justify-content:center; gap:0; }
+.contact > div{ padding:0 44px; border-left:1px solid var(--border-soft); }
+.contact > div:first-child{ border-left:0; }
+.contact b{ display:block; font-family:var(--font-display); font-weight:400; font-size:32px; letter-spacing:-.005em; }
+.contact span{ display:block; margin-top:9px; font-size:var(--fs-fine); letter-spacing:.2em; text-transform:uppercase; color:var(--muted); }
+
+/* ─── entrance choreography — transform + opacity only ─────────────────── */
+.rise{ opacity:0; }
+.frame.active .rise{ animation:rise .78s var(--ease) both; animation-delay:var(--d,0ms); }
+@keyframes rise{ from{ opacity:0; transform:translate3d(0,30px,0); } to{ opacity:1; transform:none; } }
+
+.wipe{ opacity:0; }
+.frame.active .wipe{ animation:wipe .9s var(--ease) both; animation-delay:var(--d,0ms); }
+@keyframes wipe{ from{ opacity:0; transform:scale(1.03); } to{ opacity:1; transform:none; } }
+
+@media (prefers-reduced-motion:reduce){
+  .frame,.frame.active{ transition:opacity .01ms linear, visibility 0s; }
+  .frame.active .bg img,
+  .frame.active .rise,
+  .frame.active .wipe{ animation:none; }
+  .rise,.wipe{ opacity:1; }
+}
+</style>
+</head>
+<body>
+
+<div id="progress" aria-hidden="true"></div>
+
+<div id="viewport">
+<div id="stage" role="region" aria-label="Luxe Corsa eleven-frame reel">
+
+<!-- ══ 01 · hook ═════════════════════════════════════════════════════════ -->
+<section class="frame active hook" data-duration="3400" data-transition="fade">
+  <div class="bg"><img src="assets/hero-bg.jpg" alt="" width="1920" height="960" /></div>
+  <div class="scrim v"></div>
+  <div class="slug">Frame 01 / 11 · Hook</div>
+  <div class="body center">
+    <span class="tick rise" aria-hidden="true"></span>
+    <p class="eyebrow rise" style="--d:60ms">Lake Zurich, Illinois</p>
+    <h1 class="rise" style="--d:140ms">121 suites.<br />75 still <span class="hl">unclaimed</span>.</h1>
+    <p class="lead rise" style="--d:280ms">Luxe Corsa Auto Suites</p>
+  </div>
+  <!-- frame:1 duration:3400 transition:fade -->
+</section>
+
+<!-- ══ 02 · title ════════════════════════════════════════════════════════ -->
+<section class="frame hook" data-duration="3000" data-transition="fade">
+  <div class="slug">Frame 02 / 11 · Title</div>
+  <div class="body center">
+    <img class="wordmark wipe" src="assets/logo-word.svg" alt="Luxe Corsa" width="339" height="44" />
+    <h1 class="rise" style="--d:180ms; font-size:126px">Where Passion<br />Meets Space</h1>
+    <p class="lead rise" style="--d:340ms; max-width:44ch">Private, climate-controlled suites for prized collections.</p>
+  </div>
+  <!-- frame:2 duration:3000 transition:fade -->
+</section>
+
+<!-- ══ 03 · what it is ═══════════════════════════════════════════════════ -->
+<section class="frame shot" data-duration="3600" data-transition="fade">
+  <div class="bg"><img src="assets/whatis-bg.jpg" alt="" width="1297" height="724" /></div>
+  <div class="scrim v"></div>
+  <div class="slug">Frame 03 / 11</div>
+  <div class="body center">
+    <span class="tick rise" aria-hidden="true"></span>
+    <p class="eyebrow rise" style="--d:60ms">What is Luxe Corsa?</p>
+    <h2 class="rise" style="--d:140ms">A private clubhouse<br />for automotive <span class="hl">legacy</span></h2>
+    <p class="lead rise" style="--d:300ms; max-width:52ch">A secured, climate-controlled community of auto suites tailored for collectors and enthusiasts.</p>
+  </div>
+  <!-- frame:3 duration:3600 transition:fade -->
+</section>
+
+<!-- ══ 04 · the campus, in figures ═══════════════════════════════════════ -->
+<section class="frame mid" data-duration="4000" data-transition="fade">
+  <div class="slug">Frame 04 / 11</div>
+  <div class="body">
+    <p class="eyebrow rise">By the numbers</p>
+    <h2 class="rise" style="--d:100ms">One address.<br />Everything <span class="hl">accounted for</span>.</h2>
+    <div class="counters">
+      <div class="rise" style="--d:300ms"><b>121</b><span>Luxury suites</span></div>
+      <div class="rise" style="--d:400ms"><b>24/7</b><span>Owner access</span></div>
+      <div class="rise" style="--d:500ms"><b>100%</b><span>Secure entry</span></div>
+      <div class="rise" style="--d:600ms"><b>15</b><span>Acres secured</span></div>
+    </div>
+  </div>
+  <!-- frame:4 duration:4000 transition:fade -->
+</section>
+
+<!-- ══ 05 · the campus, in frame ═════════════════════════════════════════ -->
+<section class="frame shot" data-duration="3600" data-transition="fade">
+  <div class="slug">Frame 05 / 11</div>
+  <div class="body center" style="padding-block:96px">
+    <h2 class="rise" style="font-size:88px">Eleven buildings.<br />Fifteen secured <span class="hl">acres</span>.</h2>
+    <div class="band wipe" style="--d:220ms; margin-top:44px; width:1360px">
+      <img src="assets/gallery-car-condos.jpg" alt="Exterior of the Luxe Corsa car condo buildings with owner vehicles parked at the drive-in doors" width="1297" height="450" />
+    </div>
+    <p class="lead rise" style="--d:420ms; margin-top:36px; max-width:78ch">A drive-in door at every suite, on a gated campus with dedicated personnel.</p>
+  </div>
+  <!-- frame:5 duration:3600 transition:fade -->
+</section>
+
+<!-- ══ 06 · the two floorplans ═══════════════════════════════════════════ -->
+<section class="frame mid" data-duration="5000" data-transition="fade">
+  <div class="slug">Frame 06 / 11</div>
+  <div class="body center" style="padding-block:70px">
+    <p class="eyebrow rise">Two floorplans</p>
+    <h2 class="rise" style="--d:90ms; font-size:58px">Pick the <span class="hl">footprint</span>. The rest is yours.</h2>
+    <div class="plans">
+      <article class="plan wipe" style="--d:280ms">
+        <img src="assets/unit-type-a.jpg" alt="Interior of a Type A suite: double-height mezzanine, glass frontage and a red supercar on the polished floor" width="928" height="480" />
+        <div class="plan-txt">
+          <h3>Type A<span class="tier">Premium · 26 units · 15 available</span></h3>
+          <p class="price">From $699,000</p>
+          <dl>
+            <dt>Area</dt><dd>2,430 sq ft</dd>
+            <dt>Bay</dt><dd>30&rsquo; &times; 50&rsquo; + mezzanine 30&rsquo; &times; 31&rsquo;</dd>
+            <dt>Holds</dt><dd>Approx. 6 cars and 3 motorcycles</dd>
+          </dl>
+        </div>
+      </article>
+      <article class="plan wipe" style="--d:400ms">
+        <img src="assets/unit-type-b.jpg" alt="Interior of a Type B suite: bright single-volume bay with sports cars parked side by side" width="936" height="480" />
+        <div class="plan-txt">
+          <h3>Type B<span class="tier">Standard · 95 units · 60 available</span></h3>
+          <p class="price">From $549,000</p>
+          <dl>
+            <dt>Area</dt><dd>1,863 sq ft</dd>
+            <dt>Bay</dt><dd>23&rsquo; &times; 50&rsquo; + mezzanine 23&rsquo; &times; 31&rsquo;</dd>
+            <dt>Holds</dt><dd>Approx. 4 cars and 2 motorcycles</dd>
+          </dl>
+        </div>
+      </article>
+    </div>
+  </div>
+  <!-- frame:6 duration:5000 transition:fade -->
+</section>
+
+<!-- ══ 07 · what ownership includes ══════════════════════════════════════ -->
+<section class="frame mid" data-duration="4400" data-transition="fade">
+  <div class="slug">Frame 07 / 11</div>
+  <div class="body">
+    <p class="eyebrow rise">Ownership includes</p>
+    <h2 class="rise" style="--d:90ms">Six reasons it is<br />not a <span class="hl">garage</span>.</h2>
+    <div class="amenities">
+      <div class="amenity rise" style="--d:300ms"><span class="ico" style="--ico:url(assets/icon-gated.svg)" aria-hidden="true"></span><p>Gated Community</p></div>
+      <div class="amenity rise" style="--d:370ms"><span class="ico" style="--ico:url(assets/icon-surveillance.svg)" aria-hidden="true"></span><p>State-of-the-Art<br />Surveillance</p></div>
+      <div class="amenity rise" style="--d:440ms"><span class="ico" style="--ico:url(assets/icon-simulators.svg)" aria-hidden="true"></span><p>Racing &amp; Golf<br />Simulators</p></div>
+      <div class="amenity rise" style="--d:510ms"><span class="ico" style="--ico:url(assets/icon-wellness.svg)" aria-hidden="true"></span><p>Wellness + Fitness<br />Studio</p></div>
+      <div class="amenity rise" style="--d:580ms"><span class="ico" style="--ico:url(assets/icon-events.svg)" aria-hidden="true"></span><p>Business &amp; Event<br />Space</p></div>
+      <div class="amenity rise" style="--d:650ms"><span class="ico" style="--ico:url(assets/icon-detail.svg)" aria-hidden="true"></span><p>Detail &amp;<br />Customization</p></div>
+    </div>
+  </div>
+  <!-- frame:7 duration:4400 transition:fade -->
+</section>
+
+<!-- ══ 08 · the clubhouse ════════════════════════════════════════════════ -->
+<section class="frame mid" data-duration="4000" data-transition="fade">
+  <div class="slug">Frame 08 / 11</div>
+  <div class="body">
+    <div class="split">
+      <div>
+        <p class="eyebrow rise">Your Cars&rsquo; Private Kingdom</p>
+        <h2 class="rise" style="--d:90ms">Drive-in <span class="hl">prestige</span></h2>
+        <p class="lead rise" style="--d:240ms">Ownership includes access to common areas, a members-only state-of-the-art Clubhouse, and exclusive invites to monthly social events held by Luxe Corsa.</p>
+      </div>
+      <div class="shot wipe" style="--d:340ms">
+        <img src="assets/prestige.jpg" alt="The Luxe Corsa clubhouse and suite frontage illuminated at blue hour" width="637" height="524" />
+      </div>
+    </div>
+  </div>
+  <!-- frame:8 duration:4000 transition:fade -->
+</section>
+
+<!-- ══ 09 · member story ═════════════════════════════════════════════════ -->
+<section class="frame" data-duration="4000" data-transition="fade">
+  <div class="bg"><img src="assets/testimonial-bg.jpg" alt="" width="1919" height="960" /></div>
+  <div class="scrim deep"></div>
+  <div class="slug">Frame 09 / 11</div>
+  <div class="body center">
+    <p class="eyebrow rise">Member story</p>
+    <div class="quote">
+      <blockquote class="rise" style="--d:120ms">&ldquo;The suite gives my collection room to grow&mdash;plus, the climate control means less time worrying about <span class="hl">preservation</span>.&rdquo;</blockquote>
+      <div class="attrib rise" style="--d:340ms">
+        <img src="assets/avatar-david.png" alt="David Martinez" width="264" height="264" />
+        <div class="who">
+          <b>David Martinez</b>
+          <span>Founding Buyer · 1967 Shelby GT500 · 2022 McLaren 720S</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- frame:9 duration:4000 transition:fade -->
+</section>
+
+<!-- ══ 10 · Monaco ═══════════════════════════════════════════════════════ -->
+<section class="frame mid" data-duration="4400" data-transition="fade">
+  <div class="slug">Frame 10 / 11</div>
+  <div class="body center" style="padding-block:80px">
+    <span class="tick rise" aria-hidden="true"></span>
+    <p class="eyebrow rise" style="--d:60ms">Exclusive opportunity</p>
+    <h2 class="rise" style="--d:140ms; font-size:52px; max-width:40ch">The first 50 buyers are automatically entered for a chance to win a trip to the <span class="hl">2026 Monaco Grand Prix</span>.</h2>
+    <div class="band wipe" style="--d:320ms; margin-top:40px; width:1300px">
+      <img src="assets/monaco.jpg" alt="Grand Prix cars racing past the terraces of Monte Carlo during the Monaco Grand Prix" width="1297" height="343" />
+    </div>
+    <div class="facts rise" style="--d:480ms; margin-top:40px">
+      <div><b>May 2026</b><span>Date</span></div>
+      <div><b>Monte Carlo, Monaco</b><span>Location</span></div>
+      <div><b>VIP Experience</b><span>Access</span></div>
+    </div>
+    <p class="fine rise" style="--d:600ms; margin-top:30px">Approximate retail value $100,000. Open to residents 18+. Void where prohibited by law. Odds depend on eligible entries. See official rules.</p>
+  </div>
+  <!-- frame:10 duration:4400 transition:fade -->
+</section>
+
+<!-- ══ 11 · close + CTA ══════════════════════════════════════════════════ -->
+<section class="frame shot" data-duration="3600" data-transition="fade">
+  <div class="bg"><img src="assets/hero-bg.jpg" alt="" width="1920" height="960" /></div>
+  <div class="scrim deep"></div>
+  <div class="slug">Frame 11 / 11 · CTA</div>
+  <div class="body center">
+    <img class="wordmark wipe" src="assets/logo-word.svg" alt="Luxe Corsa" width="339" height="44" style="width:420px; margin-bottom:44px" />
+    <h2 class="rise" style="--d:160ms; font-size:88px">Check availability<br />&amp; schedule a <span class="hl">tour</span></h2>
+    <div class="contact rise" style="--d:320ms">
+      <div><b>(224) 662-0000</b><span>Sales office</span></div>
+      <div><b>Lake Zurich, IL</b><span>21591 N Rand Rd</span></div>
+      <div><b>South Florida</b><span>Coming soon</span></div>
+    </div>
+    <span class="cta rise" style="--d:460ms">
+      Reserve your suite
+      <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 8h7.3M8.6 4.9 11.7 8l-3.1 3.1" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </span>
+  </div>
+  <!-- frame:11 duration:3600 transition:fade -->
+</section>
+
+</div>
+</div>
+
+<div id="controls">
+  <button id="prev" title="Previous frame" aria-label="Previous frame">&lsaquo;</button>
+  <button id="play" title="Play or pause" aria-label="Pause">Pause</button>
+  <button id="next" title="Next frame" aria-label="Next frame">&rsaquo;</button>
+  <span id="counter">01 / 11</span>
+  <button id="chrome" title="Hide overlays (C)" aria-label="Hide overlays">Clean</button>
+</div>
+
+<!-- HYPERFRAMES_META: {
+  "name": "luxe-corsa-reel",
+  "width": 1920, "height": 1080, "fps": 30,
+  "durationMs": 43000,
+  "source": "luxe-corsa.html",
+  "assetsRoot": "assets/",
+  "frames": [
+    {"i":1,"duration":3400,"transition":"fade","scene":"Hook — aerial campus. 121 suites, 75 still unclaimed. Lake Zurich, Illinois.","media":"assets/hero-bg.jpg"},
+    {"i":2,"duration":3000,"transition":"fade","scene":"Title card — wordmark, 'Where Passion Meets Space', product line.","media":null},
+    {"i":3,"duration":3600,"transition":"fade","scene":"Definition — a private clubhouse for automotive legacy.","media":"assets/whatis-bg.jpg"},
+    {"i":4,"duration":4000,"transition":"fade","scene":"Figures — 121 suites / 24-7 access / 100% secure entry / 15 acres.","media":null},
+    {"i":5,"duration":3600,"transition":"fade","scene":"Campus in frame — eleven buildings, fifteen secured acres, drive-in doors.","media":"assets/gallery-car-condos.jpg"},
+    {"i":6,"duration":5000,"transition":"fade","scene":"Floorplans — Type A Premium from $699,000 vs Type B Standard from $549,000.","media":"assets/unit-type-a.jpg, assets/unit-type-b.jpg"},
+    {"i":7,"duration":4400,"transition":"fade","scene":"Ownership includes — the six amenities.","media":"assets/icon-*.svg"},
+    {"i":8,"duration":4000,"transition":"fade","scene":"Clubhouse — drive-in prestige, members-only common areas and monthly events.","media":"assets/prestige.jpg"},
+    {"i":9,"duration":4000,"transition":"fade","scene":"Member story — David Martinez, Founding Buyer.","media":"assets/testimonial-bg.jpg, assets/avatar-david.png"},
+    {"i":10,"duration":4400,"transition":"fade","scene":"Monaco — first 50 buyers entered for the 2026 Monaco Grand Prix, with fine print.","media":"assets/monaco.jpg"},
+    {"i":11,"duration":3600,"transition":"fade","scene":"CTA — check availability and schedule a tour. (224) 662-0000.","media":"assets/hero-bg.jpg (bookend on frame 1)"}
+  ],
+  "chromeSelectors": ["#progress", "#controls", ".slug"]
+} -->
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── fit the 1920x1080 stage into whatever is viewing it ─────────────── */
+  var stage = document.getElementById('stage');
+  function fit() {
+    var s = Math.min(innerWidth / 1920, innerHeight / 1080);
+    stage.style.transform =
+      'translate(' + ((innerWidth - 1920 * s) / 2) + 'px,' +
+                     ((innerHeight - 1080 * s) / 2) + 'px) scale(' + s + ')';
+  }
+  addEventListener('resize', fit);
+  fit();
+
+  /* ── playback ────────────────────────────────────────────────────────── */
+  var frames  = [].slice.call(document.querySelectorAll('.frame'));
+  var total   = frames.length;
+  var counter = document.getElementById('counter');
+  var playBtn = document.getElementById('play');
+  var bar     = document.getElementById('progress');
+  var i = 0, playing = true, start = Date.now(), timer = null;
+
+  function dur(n) { return Number(frames[n].dataset.duration) || 3000; }
+
+  function show(n) {
+    i = (n + total) % total;
+    for (var k = 0; k < total; k++) {
+      // dropping .active tears the entrance animations down; re-adding replays them
+      frames[k].classList.toggle('active', k === i);
+    }
+    counter.textContent =
+      ('0' + (i + 1)).slice(-2) + ' / ' + ('0' + total).slice(-2);
+    start = Date.now();
+    schedule();
+  }
+
+  function schedule() {
+    clearTimeout(timer);
+    if (!playing) return;
+    timer = setTimeout(function () { show(i + 1); }, dur(i));
+  }
+
+  function tick() {
+    bar.style.width = Math.min(1, (Date.now() - start) / dur(i)) * 100 + '%';
+    requestAnimationFrame(tick);
+  }
+
+  function setPlaying(v) {
+    playing = v;
+    playBtn.textContent = v ? 'Pause' : 'Play';
+    playBtn.setAttribute('aria-label', v ? 'Pause' : 'Play');
+    if (v) { start = Date.now(); schedule(); } else { clearTimeout(timer); }
+  }
+
+  document.getElementById('prev').onclick = function () { show(i - 1); };
+  document.getElementById('next').onclick = function () { show(i + 1); };
+  playBtn.onclick = function () { setPlaying(!playing); };
+  document.getElementById('chrome').onclick = function () {
+    // hides the slug / progress / transport so the frame is render-clean
+    document.body.classList.toggle('no-chrome');
+  };
+
+  addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight') { show(i + 1); e.preventDefault(); }
+    else if (e.key === 'ArrowLeft') { show(i - 1); e.preventDefault(); }
+    else if (e.key === ' ') { setPlaying(!playing); e.preventDefault(); }
+    else if (e.key === 'c' || e.key === 'C') { document.body.classList.toggle('no-chrome'); }
+  });
+
+  show(0);
+  tick();
+})();
+</script>
+</body>
+</html>

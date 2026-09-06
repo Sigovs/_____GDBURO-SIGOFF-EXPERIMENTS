@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Paid Creative &middot; Luxe Corsa Auto Suites</title>
+<meta name="description" content="Meta and Google Search ad creative for Luxe Corsa Auto Suites, with live character counts and a claims ledger." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+/* --- tokens: the locked LUXE CORSA contract, same as the site ----------- */
+:root{
+  --bg:            #0e0e10;
+  --surface:       #ffffff;
+  --fg:            #e8e8e8;
+  --fg-quiet:      #a8a8a8;
+  --muted:         #8a8a8a;
+  --accent:        #3a8170;
+  --accent-live:   #28a588;
+  --marque:        #d34d4d;
+  --surface-hover: #e4e6e5;
+
+  --panel:         #1e1e23;
+  --hairline:      #464646;
+  --live:          #00e8a0;
+  --sold:          #ec5c60;
+  --link:          #8abef5;   /* Type A / Premium */
+  --gold:          #feb76a;   /* Type B / Standard */
+
+  --border:        rgba(255,255,255,0.16);
+  --border-soft:   rgba(255,255,255,0.08);
+  --field:         rgba(255,255,255,0.05);
+  --strip-top:     #17171b;
+  /* ad headlines sit on photography and want pure white, unlike the site's
+     --fg, which is softened for long-form reading on the dark ground */
+  --ad-ink:        #ffffff;
+
+  --font-display: 'Degular Display','Degular','Figtree',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-body:    'Roboto',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+
+  --fs-display: clamp(30px, 3.6vw, 44px);
+  --fs-h3:      clamp(20px, 1.9vw, 25px);
+  --fs-body:    16px;
+  --fs-meta:    14px;
+
+  --container: 1300px;
+  --gutter: clamp(20px, 4.2vw, 40px);
+  --radius-sm: 6px;
+  --radius: 10px;
+  --pill: 60px;
+
+  --ease:      cubic-bezier(.22,.61,.36,1);
+  --dur-press: 140ms;
+  --dur-state: 200ms;
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+html{ -webkit-text-size-adjust:100%; }
+body{
+  margin:0; background:var(--bg); color:var(--fg);
+  font-family:var(--font-body); font-size:var(--fs-body); line-height:1.6;
+  overflow-x:hidden; -webkit-font-smoothing:antialiased;
+}
+img{ display:block; max-width:100%; }
+p{ margin:0; text-wrap:pretty; }
+h1,h2,h3{ margin:0; font-weight:400; text-wrap:balance; }
+button{ font:inherit; cursor:pointer; }
+:focus-visible{ outline:2px solid var(--accent-live); outline-offset:3px; border-radius:4px; }
+
+.container{ width:100%; max-width:var(--container); margin-inline:auto; padding-inline:var(--gutter); }
+.section{ padding-block:clamp(44px,5vw,72px); }
+.section + .section{ border-top:1px solid var(--border-soft); }
+
+.display{ font-family:var(--font-display); font-size:var(--fs-display); line-height:1.08; letter-spacing:-.015em; }
+.h3{ font-family:var(--font-display); font-size:var(--fs-h3); line-height:1.15; letter-spacing:-.01em; }
+.eyebrow{
+  display:inline-flex; align-items:center; gap:14px; margin-bottom:14px;
+  font-size:var(--fs-meta); letter-spacing:.2em; text-transform:uppercase; color:var(--fg);
+}
+.eyebrow::before{ content:""; width:1px; height:16px; background:var(--accent-live); flex:none; }
+.lead{ font-size:var(--fs-body); line-height:1.7; color:var(--fg-quiet); max-width:68ch; }
+.num{ font-variant-numeric:tabular-nums; }
+
+/* --- page head ---------------------------------------------------------- */
+.sheet-head{ background:linear-gradient(180deg,var(--strip-top) 0%, var(--bg) 100%); padding-block:clamp(48px,6vw,80px); }
+.sheet-head h1{ margin:16px 0 20px; }
+.sheet-head .brandline{ display:flex; align-items:center; gap:14px; margin-bottom:30px; }
+.sheet-head .brandline img{ height:26px; width:auto; }
+.meta-row{ margin-top:30px; display:flex; flex-wrap:wrap; gap:12px 34px; font-size:var(--fs-meta); color:var(--muted); }
+.meta-row b{ color:var(--fg); font-weight:500; }
+
+/* --- concept row -------------------------------------------------------- */
+.concept{ display:grid; grid-template-columns:340px 1fr; gap:clamp(28px,4vw,56px); align-items:start; }
+.concept + .concept{ margin-top:clamp(40px,5vw,68px); padding-top:clamp(40px,5vw,68px); border-top:1px solid var(--border-soft); }
+
+/* a real 4:5 feed unit, not a mockup of one */
+.ad{ position:relative; aspect-ratio:4/5; border-radius:var(--radius); overflow:hidden; background:var(--panel); }
+.ad > img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.ad::after{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(14,14,16,.72) 0%, rgba(14,14,16,.12) 34%, rgba(14,14,16,.93) 100%);
+}
+.ad-inner{ position:absolute; inset:0; z-index:2; display:flex; flex-direction:column; justify-content:space-between; padding:22px; }
+/* align-self + flex:none, or the column's default stretch overrides width:auto
+   and scales the wordmark to the full frame */
+.ad-mark{ height:20px; width:auto; opacity:.95; align-self:flex-start; flex:none; }
+.ad-copy .kicker{ font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--live); margin-bottom:10px; }
+.ad-copy .line{ font-family:var(--font-display); font-size:26px; line-height:1.12; letter-spacing:-.015em; color:var(--ad-ink); }
+.ad-copy .sub{ margin-top:10px; font-size:13px; color:rgba(255,255,255,.82); }
+.ad-cta{
+  margin-top:16px; display:inline-flex; align-items:center; justify-content:center;
+  min-height:38px; padding:8px 18px; border-radius:var(--radius-sm);
+  background:var(--surface); color:var(--bg);
+  font-family:var(--font-display); font-size:13px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+}
+.ad-spec{ margin-top:10px; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); text-align:center; }
+
+/* --- copy fields -------------------------------------------------------- */
+.concept-head{ margin-bottom:22px; }
+.concept-head .angle{ font-size:var(--fs-meta); color:var(--fg-quiet); margin-top:8px; max-width:60ch; }
+.field{ padding:14px 0; border-top:1px solid var(--border-soft); }
+.field:first-of-type{ border-top:0; padding-top:0; }
+.field-top{ display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:7px; }
+.field-label{ font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
+.field-right{ display:flex; align-items:center; gap:12px; }
+.count{ font-size:12px; color:var(--fg-quiet); font-variant-numeric:tabular-nums; letter-spacing:.04em; }
+.count.over{ color:var(--sold); font-weight:500; }
+.copy-btn{
+  min-height:26px; padding:3px 11px; border-radius:var(--pill);
+  background:transparent; color:var(--fg-quiet); border:1px solid var(--border-soft);
+  font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  transition:color var(--dur-state) var(--ease), border-color var(--dur-state) var(--ease), background var(--dur-state) var(--ease);
+}
+.copy-btn:hover{ color:var(--fg); border-color:var(--border); background:rgba(255,255,255,.05); }
+.copy-btn.done{ color:var(--bg); background:var(--live); border-color:var(--live); }
+.val{ font-size:var(--fs-body); line-height:1.6; color:var(--fg); }
+.val.small{ font-size:var(--fs-meta); color:var(--fg-quiet); }
+
+/* --- RSA asset lists ---------------------------------------------------- */
+.rsa{ display:grid; grid-template-columns:1fr 1fr; gap:clamp(28px,4vw,56px); align-items:start; }
+.rsa h3{ margin-bottom:6px; }
+.rsa .cap{ font-size:var(--fs-meta); color:var(--muted); margin-bottom:18px; }
+.asset{ display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:11px 0; border-top:1px solid var(--border-soft); }
+.asset .t{ font-size:var(--fs-body); color:var(--fg); }
+.asset .r{ display:flex; align-items:center; gap:12px; flex:none; }
+
+/* --- claims ledger ------------------------------------------------------ */
+.ledger{ width:100%; border-collapse:collapse; font-size:var(--fs-meta); }
+.ledger caption{ text-align:left; color:var(--fg-quiet); margin-bottom:18px; max-width:70ch; line-height:1.7; }
+.ledger th, .ledger td{ text-align:left; padding:11px 14px 11px 0; border-bottom:1px solid var(--border-soft); vertical-align:top; }
+.ledger th{ font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); font-weight:400; }
+.ledger td:first-child{ color:var(--fg); width:34%; }
+.ledger td:nth-child(2){ color:var(--live); font-variant-numeric:tabular-nums; white-space:nowrap; width:22%; }
+.ledger td:last-child{ color:var(--fg-quiet); }
+
+.note{
+  margin-top:26px; padding:18px 20px; border-radius:var(--radius);
+  background:rgba(211,77,77,.10); border:1px solid rgba(211,77,77,.42);
+  font-size:var(--fs-meta); line-height:1.7; color:var(--fg);
+}
+.note b{ color:var(--marque); font-weight:500; }
+.note.open{ background:rgba(138,190,245,.09); border-color:rgba(138,190,245,.38); }
+.note.open b{ color:var(--link); }
+
+.footbar{ border-top:1px solid var(--border-soft); padding-block:26px; font-size:var(--fs-meta); color:var(--muted); }
+
+@media (max-width:900px){
+  .concept{ grid-template-columns:1fr; }
+  .ad{ max-width:340px; }
+  .rsa{ grid-template-columns:1fr; }
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{ transition-duration:.01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="sheet-head" data-od-id="sheet-head">
+  <div class="container">
+    <div class="brandline">
+      <img src="assets/logo-mark.svg" alt="" width="46" height="64" style="height:30px" />
+      <img src="assets/logo-word.svg" alt="Luxe Corsa" width="339" height="44" />
+    </div>
+    <p class="eyebrow">Paid Creative &middot; Round 1</p>
+    <h1 class="display">Four angles, one<br />substantiated fact base</h1>
+    <p class="lead">Meta feed units and a Google Search asset set for Luxe Corsa Auto Suites. Every number below is pulled from the live availability page &mdash; nothing here is estimated or rounded for effect. Character counts run live against each platform&rsquo;s limit, so the copy can be edited in place and stays shippable.</p>
+    <div class="meta-row">
+      <span><b>Product</b> &nbsp;121 private auto suites</span>
+      <span><b>Market</b> &nbsp;Lake Zurich, IL 60047</span>
+      <span><b>Price</b> &nbsp;From <span class="num">$549,000</span></span>
+      <span><b>Objective</b> &nbsp;Private tour bookings</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ══ Meta concepts ═════════════════════════════════════════════════════ -->
+<section class="section" data-od-id="meta-concepts">
+  <div class="container">
+    <p class="eyebrow">Meta &middot; Feed &amp; Reels, 4:5</p>
+    <h2 class="display" style="font-size:var(--fs-h3);font-family:var(--font-display)">Four concepts</h2>
+    <p class="lead" style="margin-top:12px">Each unit is shown at its delivered ratio with real project photography. Limits shown are Meta&rsquo;s current published guidance &mdash; primary text truncates around 125 characters on most placements.</p>
+
+    <div style="margin-top:clamp(34px,4vw,52px)">
+
+      <!-- Concept A -->
+      <article class="concept" data-od-id="concept-inventory">
+        <div>
+          <div class="ad">
+            <img src="assets/hero-bg.jpg" alt="Aerial view of the Luxe Corsa campus in Lake Zurich, Illinois" width="1920" height="960" />
+            <div class="ad-inner">
+              <img class="ad-mark" src="assets/logo-word.svg" alt="Luxe Corsa" width="339" height="44" />
+              <div class="ad-copy">
+                <p class="kicker">Lake Zurich, Illinois</p>
+                <p class="line">75 of 121 suites remain</p>
+                <p class="sub">Private, climate-controlled auto suites from $549,000</p>
+                <span class="ad-cta">Learn more</span>
+              </div>
+            </div>
+          </div>
+          <p class="ad-spec">A &middot; Inventory</p>
+        </div>
+        <div>
+          <div class="concept-head">
+            <h3 class="h3">Scarcity, stated plainly</h3>
+            <p class="angle">The strongest asset this product has is a real, dwindling number. No urgency language is invented &mdash; the count does the work, and it is checkable against the availability page on the same day the ad runs.</p>
+          </div>
+          <div class="field">
+            <div class="field-top"><span class="field-label">Primary text</span>
+              <span class="field-right"><span class="count" data-limit="125"></span><button class="copy-btn" type="button">Copy</button></span></div>
+            <p class="val" data-copy>121 private auto suites in Lake Zurich. 46 are already sold. The remaining 75 are gated, climate-controlled, customizable.</p>
+          </div>
+          <div class="field">
+            <div class="field-top"><span class="field-label">Headline</span>
+              <span class="field-right"><span class="count" data-limit="40"></span><button class="copy-btn" type="button">Copy</button></span></div>
+            <p class="val" data-copy>75 of 121 suites remain</p>
+          </div>
+          <div class="field">
+            <div class="field-top"><span class="field-label">Description</span>
+              <span class="field-right"><span class="count" data-limit="30"></span><button class="copy-btn" type="button">Copy</button></span></div>
+            <p class="val" data-copy>From $549,000 &middot; Lake Zurich</p>
+          </div>
+          <div class="field">
+            <div class="field-top"><span class="field-label">Call to action</span></div>
+            <p class="val small">Learn more &rarr; suites-availability.html</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- Concept B -->
+      <article class="concept" data-od-id="concept-spec">
+        <div>
+          <div class="ad">
+            <img src="assets/unit-type-a.jpg" alt="Interior of a Type A suite with a double-height mezzanine and a red supercar" width="928" height="480" />
+            <div class="ad-inner">
+              <img class="ad-mark" src="assets/logo-word.svg" alt="Luxe Corsa" width="339" height="44" />
+              <div class="ad-copy">
+                <p class="kicker">Type A &middot; Premium</p>
+                <p class="line">Six cars.<br />One private address.</p>
+                <p class="sub">2,430 sq ft with mezzanine &middot; from $699,000</p>
+                <span class="ad-cta">Learn more</span>
+              </div>
+            </div>
+          </div>
+          <p class="ad-spec">B &middot; Product spec</p>
+        </div>
+        <div>
+          <div class="concept-head">
+            <h3 class="h3">The spec is the sell</h3>
+            <p class="angle">Buyers at this price point read dimensions before they read adjectives. Leading with square footage and capacity qualifies the click and filters out storage-unit shoppers.</p>
+          </div>
+          <div class="field">
+            <div class="field-top"><span class="field-label">Primary text</span>
+              <span class="field-right"><span class="count" data-limit="125"></span><button class="copy-btn" type="button">Copy</button></span></div>
+            <p class="val" data-copy>2,430 sq ft. A 30-foot drive-in bay, a mezzanine above it, room for roughly six cars and three motorcycles.</p>
+          </div>
+          <div class="field">
+            <div class="field-top"><span class="field-label">Headline</span>
+              <span class="field-right"><span class="count" data-limit="40"></span><button class="copy-btn" type="button">Copy</button></span></div>
+            <p class="val" data-copy>Six cars. One private address.</p>
+          </div>
+          <div class="field">
+            <div class="field-top"><span class="field-label">Description</span>
+              <span class="field-right"><span class="count" data-limit="30"></span><button class="copy-btn" type="button">Copy</button></span></div>
+            <p class="val" data-copy>Type A &middot; from $699,000</p>
+          </div>
+          <div class="field">
+            <div class="field-top"><span class="field-label">Call to action</span></div>
+            <p class="val small">Learn more &rarr; suites-availability.html#units</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- Concept C -->
+      <article class="concept" data-od-id="concept-positioning">
+        <div>
+          <div class="ad">
+            <img src="assets/prestige.jpg" alt="The Luxe Corsa clubhouse and suite frontage at blue hour" width="637" height="524" />
+            <div class="ad-inner">
+              <img class="ad-mark" src="assets/logo-word.svg" alt="Luxe Corsa" width="339" height="44" />
+              <div class="ad-copy">
+                <p class="kicker">Ownership, not rental</p>
+                <p class="line">Stop renting space for the cars you own</p>
+                <p class="sub">Gated &middot; 24/7 access &middot; members-only clubhouse</p>
+                <span class="ad-cta">Book now</span>
+              </div>
+            </div>
+          </div>
+          <p class="ad-spec">C &middot; Positioning</p>
+        </div>
+        <div>
+          <div class="concept-head">
+            <h3 class="h3">Against the status quo</h3>
+            <p class="angle">The real competitor is not another development &mdash; it is a rented unit across town, or a crowded home garage. This concept names that directly, which is the one angle a competitor cannot copy without conceding the point.</p>
+          </div>
+          <div class="field">
+            <div class="field-top"><span class="field-label">Primary text</span>
+              <span class="field-right"><span class="count" data-limit="125"></span><button class="copy-btn" type="button">Copy</button></span></div>
+            <p class="val" data-copy>Your collection deserves better than a rented unit across town. Own it: climate control, 100-amp service, 24/7 access.</p>
+          </div>
+          <div class="field">
+            <div class="field-top"><span class="field-label">Headline</span>
+              <span class="field-right"><span class="count" data-limit="40"></span><button class="copy-btn" type="button">Copy</button></span></div>
+            <p class="val" data-copy>Stop renting space for cars you own</p>
+          </div>
+          <div class="field">
+            <div class="field-top"><span class="field-label">Description</span>
+              <span class="field-right"><span class="count" data-limit="30"></span><button class="copy-btn" type="button">Copy</button></span></div>
+            <p class="val" data-copy>Book a private tour</p>
+          </div>
+          <div class="field">
+            <div class="field-top"><span class="field-label">Call to action</span></div>
+            <p class="val small">Book now &rarr; suites-availability.html#contact</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- Concept D -->
+      <article class="concept" data-od-id="concept-monaco">
+        <div>
+          <div class="ad">
+            <img src="assets/monaco.jpg" alt="Grand Prix cars racing past the terraces of Monte Carlo" width="1297" height="343" />
+            <div class="ad-inner">
+              <img class="ad-mark" src="assets/logo-word.svg" alt="Luxe Corsa" width="339" height="44" />
+              <div class="ad-copy">
+                <p class="kicker">Exclusive opportunity</p>
+                <p class="line">Buy a suite.<br />See Monaco.</p>
+                <p class="sub">First 50 buyers entered &middot; May 2026 &middot; Monte Carlo</p>
+                <span class="ad-cta">Learn more</span>
+              </div>
+            </div>
+          </div>
+          <p class="ad-spec">D &middot; Promotion</p>
+        </div>
+        <div>
+          <div class="concept-head">
+            <h3 class="h3">The prize, with its paperwork</h3>
+            <p class="angle">Highest attention of the four, and the highest compliance load. Sweepstakes creative carries platform rules that sit outside design &mdash; this one should not go live until the items flagged below are cleared.</p>
+          </div>
+          <div class="field">
+            <div class="field-top"><span class="field-label">Primary text</span>
+              <span class="field-right"><span class="count" data-limit="125"></span><button class="copy-btn" type="button">Copy</button></span></div>
+            <p class="val" data-copy>The first 50 buyers at Luxe Corsa are entered to win a VIP trip to the 2026 Monaco Grand Prix. 121 suites, 75 available.</p>
+          </div>
+          <div class="field">
+            <div class="field-top"><span class="field-label">Headline</span>
+              <span class="field-right"><span class="count" data-limit="40"></span><button class="copy-btn" type="button">Copy</button></span></div>
+            <p class="val" data-copy>Buy a suite. See Monaco.</p>
+          </div>
+          <div class="field">
+            <div class="field-top"><span class="field-label">Description</span>
+              <span class="field-right"><span class="count" data-limit="30"></span><button class="copy-btn" type="button">Copy</button></span></div>
+            <p class="val" data-copy>May 2026 &middot; Monte Carlo</p>
+          </div>
+          <div class="field">
+            <div class="field-top"><span class="field-label">Required disclosure</span>
+              <span class="field-right"><button class="copy-btn" type="button">Copy</button></span></div>
+            <p class="val small" data-copy>First 50 eligible purchases automatically entered. Void where prohibited by law. Open to residents 18+ or older. Prize: Trip to 2026 Monaco Grand Prix; approximate retail value $100,000. Odds of winning depend on eligible entries. See official rules for details.</p>
+          </div>
+          <div class="note" data-od-id="monaco-compliance">
+            <b>Do not launch without clearing:</b> official rules hosted at a public URL; a statement that the promotion is not sponsored, endorsed or administered by the platform; sponsor name and address; entry period start and end dates; and state registration or bonding where the prize value requires it. Prize ARV is stated as $100,000, which is above the threshold that triggers registration in some US states.
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══ Google RSA ════════════════════════════════════════════════════════ -->
+<section class="section" data-od-id="google-rsa">
+  <div class="container">
+    <p class="eyebrow">Google &middot; Responsive Search Ads</p>
+    <h2 class="h3">Search asset set</h2>
+    <p class="lead" style="margin-top:12px;margin-bottom:clamp(30px,3.4vw,44px)">Twelve headlines and four descriptions, all inside limits. Pin nothing except the brand headline; let the system combine the rest. Counts below are computed from the strings themselves, not typed by hand.</p>
+
+    <div class="rsa">
+      <div>
+        <h3 class="h3" style="font-size:18px">Headlines</h3>
+        <p class="cap">30-character limit &middot; up to 15 assets</p>
+        <div id="rsaHeadlines">
+          <div class="asset"><span class="t" data-copy>Auto Suites in Lake Zurich</span><span class="r"><span class="count" data-limit="30"></span><button class="copy-btn" type="button">Copy</button></span></div>
+          <div class="asset"><span class="t" data-copy>75 of 121 Suites Remain</span><span class="r"><span class="count" data-limit="30"></span><button class="copy-btn" type="button">Copy</button></span></div>
+          <div class="asset"><span class="t" data-copy>Private Car Condos</span><span class="r"><span class="count" data-limit="30"></span><button class="copy-btn" type="button">Copy</button></span></div>
+          <div class="asset"><span class="t" data-copy>Suites From $549,000</span><span class="r"><span class="count" data-limit="30"></span><button class="copy-btn" type="button">Copy</button></span></div>
+          <div class="asset"><span class="t" data-copy>2,430 Sq Ft Drive-In Suite</span><span class="r"><span class="count" data-limit="30"></span><button class="copy-btn" type="button">Copy</button></span></div>
+          <div class="asset"><span class="t" data-copy>Own Your Garage</span><span class="r"><span class="count" data-limit="30"></span><button class="copy-btn" type="button">Copy</button></span></div>
+          <div class="asset"><span class="t" data-copy>Climate-Controlled Suites</span><span class="r"><span class="count" data-limit="30"></span><button class="copy-btn" type="button">Copy</button></span></div>
+          <div class="asset"><span class="t" data-copy>Gated, 24/7 Owner Access</span><span class="r"><span class="count" data-limit="30"></span><button class="copy-btn" type="button">Copy</button></span></div>
+          <div class="asset"><span class="t" data-copy>Members-Only Clubhouse</span><span class="r"><span class="count" data-limit="30"></span><button class="copy-btn" type="button">Copy</button></span></div>
+          <div class="asset"><span class="t" data-copy>Type A Fits About 6 Cars</span><span class="r"><span class="count" data-limit="30"></span><button class="copy-btn" type="button">Copy</button></span></div>
+          <div class="asset"><span class="t" data-copy>11 Buildings, 15 Acres</span><span class="r"><span class="count" data-limit="30"></span><button class="copy-btn" type="button">Copy</button></span></div>
+          <div class="asset"><span class="t" data-copy>Book A Private Tour</span><span class="r"><span class="count" data-limit="30"></span><button class="copy-btn" type="button">Copy</button></span></div>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="h3" style="font-size:18px">Descriptions</h3>
+        <p class="cap">90-character limit &middot; up to 4 assets</p>
+        <div id="rsaDescriptions">
+          <div class="asset"><span class="t" data-copy>121 private auto suites in Lake Zurich, IL. 75 still available, from $549,000.</span><span class="r"><span class="count" data-limit="90"></span><button class="copy-btn" type="button">Copy</button></span></div>
+          <div class="asset"><span class="t" data-copy>Climate-controlled and gated, with a mezzanine, full bath and 100-amp service.</span><span class="r"><span class="count" data-limit="90"></span><button class="copy-btn" type="button">Copy</button></span></div>
+          <div class="asset"><span class="t" data-copy>Type A fits about 6 cars at 2,430 sq ft. Type B starts at $549,000.</span><span class="r"><span class="count" data-limit="90"></span><button class="copy-btn" type="button">Copy</button></span></div>
+          <div class="asset"><span class="t" data-copy>Book a private walkthrough of the clubhouse and the suites still available.</span><span class="r"><span class="count" data-limit="90"></span><button class="copy-btn" type="button">Copy</button></span></div>
+        </div>
+
+        <h3 class="h3" style="font-size:18px;margin-top:34px">Sitelinks</h3>
+        <p class="cap">25-character limit on link text</p>
+        <div>
+          <div class="asset"><span class="t" data-copy>See Availability</span><span class="r"><span class="count" data-limit="25"></span><button class="copy-btn" type="button">Copy</button></span></div>
+          <div class="asset"><span class="t" data-copy>Site Plan &amp; Units</span><span class="r"><span class="count" data-limit="25"></span><button class="copy-btn" type="button">Copy</button></span></div>
+          <div class="asset"><span class="t" data-copy>Compare Suite Types</span><span class="r"><span class="count" data-limit="25"></span><button class="copy-btn" type="button">Copy</button></span></div>
+          <div class="asset"><span class="t" data-copy>Schedule A Tour</span><span class="r"><span class="count" data-limit="25"></span><button class="copy-btn" type="button">Copy</button></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ Claims ledger ═════════════════════════════════════════════════════ -->
+<section class="section" data-od-id="claims-ledger">
+  <div class="container">
+    <p class="eyebrow">Substantiation</p>
+    <table class="ledger">
+      <caption>Every figure that appears in the creative above, with where it comes from. Anything a reviewer cannot trace here should not run. Inventory figures are point-in-time and need re-checking before each flight.</caption>
+      <thead>
+        <tr><th scope="col">Claim</th><th scope="col">Value</th><th scope="col">Source</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Total suites</td><td>121</td><td>Release status &mdash; 26 Type A + 95 Type B</td></tr>
+        <tr><td>Available now</td><td>75</td><td>Release status &mdash; 15 Type A + 60 Type B</td></tr>
+        <tr><td>Sold</td><td>46</td><td>Release status &mdash; 11 Type A + 35 Type B</td></tr>
+        <tr><td>Buildings</td><td>11</td><td>&ldquo;Across 11 Buildings&rdquo;, release status</td></tr>
+        <tr><td>Campus area</td><td>15 acres</td><td>Home page counter, &ldquo;acres secured&rdquo;</td></tr>
+        <tr><td>Type A entry price</td><td>$699,000</td><td>Unit card &mdash; &ldquo;Starting: $699,000&rdquo;</td></tr>
+        <tr><td>Type B entry price</td><td>$549,000</td><td>Unit card &mdash; &ldquo;Starting: $549,000&rdquo;</td></tr>
+        <tr><td>Type A area</td><td>2,430 sq ft</td><td>30&prime;&times;50&prime; + mezzanine 30&prime;&times;31&prime;</td></tr>
+        <tr><td>Type A capacity</td><td>~6 cars, 3 bikes</td><td>Unit spec, stated as approximate</td></tr>
+        <tr><td>Electrical service</td><td>100 AMP</td><td>Standard inclusions list</td></tr>
+        <tr><td>Address</td><td>Lake Zurich, IL 60047</td><td>21591 N Rand Rd, property map</td></tr>
+        <tr><td>Prize value</td><td>$100,000 ARV</td><td>Monaco promotion fine print</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note open" data-od-id="open-question">
+      <b>One open question, and it is the best hook on the page.</b> The promotion enters &ldquo;the first 50 buyers&rdquo;, and 46 suites are sold. If one buyer equals one suite, four entries remain &mdash; a far sharper line than anything written above. I have not used it, because a single buyer may hold more than one suite and the file does not say. Confirm the buyer count and Concept D gets materially stronger.
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footbar">
+  <div class="container">Luxe Corsa Auto Suites &middot; paid creative, round 1 &middot; inventory figures current as of the availability page at time of writing</div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  // Counts are computed from the rendered strings, so an edit in the file
+  // updates the count and the over-limit flag without touching the script.
+  function textOf(el) { return (el.textContent || '').replace(/\s+/g, ' ').trim(); }
+
+  [].slice.call(document.querySelectorAll('.count[data-limit]')).forEach(function (badge) {
+    var limit = parseInt(badge.getAttribute('data-limit'), 10);
+    var scope = badge.closest('.field') || badge.closest('.asset');
+    var src = scope && scope.querySelector('[data-copy]');
+    if (!src) return;
+    var n = textOf(src).length;
+    badge.textContent = n + ' / ' + limit;
+    if (n > limit) {
+      badge.classList.add('over');
+      badge.setAttribute('title', 'Over the platform limit by ' + (n - limit) + ' characters');
+      src.setAttribute('aria-invalid', 'true');
+    }
+  });
+
+  [].slice.call(document.querySelectorAll('.copy-btn')).forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var scope = btn.closest('.field') || btn.closest('.asset');
+      var src = scope && scope.querySelector('[data-copy]');
+      if (!src) return;
+      var text = textOf(src);
+      var done = function () {
+        var was = btn.textContent;
+        btn.textContent = 'Copied';
+        btn.classList.add('done');
+        window.setTimeout(function () { btn.textContent = was; btn.classList.remove('done'); }, 1400);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { fallback(text, done); });
+      } else {
+        fallback(text, done);
+      }
+    });
+  });
+
+  function fallback(text, done) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) { /* clipboard unavailable */ }
+    document.body.removeChild(ta);
+  }
+})();
+</script>
+</body>
+</html>

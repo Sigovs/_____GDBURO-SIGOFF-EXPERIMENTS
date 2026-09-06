@@ -1,0 +1,13 @@
+import { connect, sleep } from './cdp.mjs'
+const t = await (await fetch('http://127.0.0.1:9334/json/list')).json()
+console.log('targets:', t.filter(x=>x.type==='page').map(x=>x.url).join(' | '))
+const cdp = await connect(t.find(x => x.type === 'page').webSocketDebuggerUrl)
+await cdp.send('Runtime.enable'); await cdp.send('Log.enable')
+cdp.on('Log.entryAdded', p => console.log('[log]', p.entry.level, p.entry.text.slice(0,180)))
+cdp.on('Runtime.exceptionThrown', p => console.log('[exc]', (p.exceptionDetails.exception?.description||p.exceptionDetails.text||'').slice(0,300)))
+await cdp.send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false })
+await cdp.send('Page.navigate', { url: 'http://localhost:5183/exploration/study/proposed-v5-guided-sales.html' })
+await sleep(14000)
+const r = await cdp.send('Runtime.evaluate', { expression: 'typeof window.__v5 + " | gl=" + (document.getElementById("stage")?.getAttribute("data-gl"))', returnByValue: true })
+console.log('after 14s:', r.result?.value)
+process.exit(0)

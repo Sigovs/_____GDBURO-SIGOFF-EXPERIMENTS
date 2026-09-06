@@ -1,0 +1,1283 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Luxe Corsa · Private Auto Suites — Lake Zurich, Illinois</title>
+<meta name="description" content="Eleven buildings. 121 private, climate-controlled auto suites on fifteen secured acres in Lake Zurich, Illinois. Fly the site, then pick your bay." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..500&display=swap" rel="stylesheet" />
+<style>
+/* ═══ tokens ═══════════════════════════════════════════════════════════════
+   Cooler and deeper than the brochure page on purpose: the ground is the same
+   value the WebGL fog dissolves into, so the campus never sits in a box - it
+   bleeds into the page. Brand teal stays the single accent; the tier blue and
+   amber are data encodings, never decoration, and appear only where they mean
+   Premium and Standard. */
+:root{
+  --void:      #07080b;
+  --bg:        #0b0d12;
+  --bg-2:      #101319;
+  --bg-3:      #161a22;
+  --fg:        #e9ecf1;   /* 15.4:1 on --bg */
+  --fg-2:      #a3abb8;   /*  8.2:1 */
+  --fg-3:      #7b8492;   /*  5.0:1 - floor for micro labels */
+  --line:      rgba(233,236,241,.13);
+  --line-2:    rgba(233,236,241,.06);
+  --field:     rgba(233,236,241,.05);
+
+  --accent:      #3a8170;  /* 4.1:1 - display type only, never below 24px */
+  --accent-live: #31c39a;  /* 8.5:1 - small text, ticks, focus, signals */
+  --tier-a:      #5b93cf;  /* Type A Premium  - data only */
+  --tier-b:      #b07f3e;  /* Type B Standard - data only */
+  --warn:        #e07a5f;
+
+  --font-display:'Archivo',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-body:   'Newsreader',Georgia,'Times New Roman',serif;
+
+  --fs-hero:  clamp(42px, 7.4vw, 118px);
+  --fs-h2:    clamp(32px, 5vw, 84px);
+  --fs-h3:    clamp(21px, 2.1vw, 28px);
+  --fs-lead:  clamp(17px, 1.35vw, 21px);
+  --fs-body:  16px;
+  --fs-meta:  13px;
+
+  --maxw: 1440px;
+  --gutter: clamp(20px, 4vw, 64px);
+  --rail: 152px;   /* reserved strip for the chapter rail - never overlaps copy */
+
+  --ease: cubic-bezier(.22,.61,.36,1);
+  --ease-out: cubic-bezier(.16,1,.3,1);
+  --d-fast: 160ms;
+  --d-state: 240ms;
+  --d-move: 720ms;
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+html{ -webkit-text-size-adjust:100%; scroll-behavior:smooth; }
+body{
+  margin:0; background:var(--bg); color:var(--fg);
+  font-family:var(--font-body); font-size:var(--fs-body); line-height:1.65;
+  overflow-x:hidden; -webkit-font-smoothing:antialiased;
+}
+img,svg,canvas{ display:block; max-width:100%; }
+a{ color:inherit; text-decoration:none; }
+button{ font:inherit; cursor:pointer; }
+p{ margin:0; text-wrap:pretty; }
+h1,h2,h3{ margin:0; font-weight:400; }
+:focus-visible{ outline:2px solid var(--accent-live); outline-offset:3px; border-radius:2px; }
+.sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+a.sr-only:focus{
+  position:fixed; top:14px; left:14px; z-index:120; width:auto; height:auto; clip:auto; margin:0;
+  padding:12px 22px; background:var(--fg); color:var(--bg);
+  font-family:var(--font-display); font-weight:600; text-transform:uppercase; letter-spacing:.08em;
+}
+
+/* ═══ type ════════════════════════════════════════════════════════════════ */
+.display{
+  font-family:var(--font-display); font-weight:600;
+  font-stretch:78%; font-variation-settings:'wdth' 78;
+  line-height:.98; letter-spacing:-.03em; text-wrap:balance;
+}
+h1.display{ font-size:var(--fs-hero); }
+h2.display{ font-size:var(--fs-h2); }
+.hl{ color:var(--accent); }
+.lead{ font-size:var(--fs-lead); line-height:1.62; color:var(--fg-2); max-width:56ch; }
+.mark{
+  display:flex; align-items:center; gap:14px;
+  font-family:var(--font-display); font-size:11px; font-weight:600;
+  letter-spacing:.26em; text-transform:uppercase; color:var(--fg-3);
+}
+.mark::before{ content:""; width:26px; height:1px; background:var(--accent-live); flex:none; }
+.mark.plain::before{ display:none; }
+.num{ font-family:var(--font-display); font-variant-numeric:tabular-nums; font-weight:600; }
+
+/* ═══ layout ══════════════════════════════════════════════════════════════ */
+.wrap{ width:100%; max-width:var(--maxw); margin-inline:auto; padding-inline:var(--gutter); }
+.sec{ position:relative; padding-block:clamp(88px,11vw,196px); }
+.sec-head{ display:grid; gap:22px; margin-bottom:clamp(36px,4.4vw,68px); }
+.sec-head .lead{ max-width:52ch; }
+
+/* ═══ chrome ══════════════════════════════════════════════════════════════ */
+.topbar{
+  position:fixed; inset:0 0 auto; z-index:80;
+  display:flex; align-items:center; gap:22px;
+  padding:16px var(--gutter);
+  background:transparent; border-bottom:1px solid transparent;
+  transition:background var(--d-state) var(--ease), border-color var(--d-state) var(--ease), padding var(--d-state) var(--ease);
+}
+body.scrolled .topbar{
+  background:rgba(7,8,11,.82); backdrop-filter:blur(16px);
+  border-bottom-color:var(--line-2); padding-block:11px;
+}
+.brand{ display:flex; align-items:center; gap:12px; }
+.brand img{ height:34px; width:auto; }
+.brand .mk{ height:38px; }
+.topbar .spacer{ margin-left:auto; }
+.tel{
+  font-family:var(--font-display); font-size:11px; font-weight:600;
+  letter-spacing:.12em; color:var(--fg-2); font-variant-numeric:tabular-nums;
+  transition:color var(--d-state) var(--ease);
+}
+.tel:hover{ color:var(--fg); }
+@media (max-width:640px){ .tel{ display:none; } }
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:10px;
+  min-height:46px; padding:11px 26px;
+  font-family:var(--font-display); font-size:14px; font-weight:600;
+  letter-spacing:.09em; text-transform:uppercase; white-space:nowrap;
+  border:1px solid var(--line); background:transparent; color:var(--fg);
+  transition:background var(--d-state) var(--ease), border-color var(--d-state) var(--ease), color var(--d-state) var(--ease), transform var(--d-fast) var(--ease);
+}
+.btn:hover{ background:rgba(233,236,241,.09); border-color:rgba(233,236,241,.34); color:#fff; }
+.btn:active{ transform:translateY(1px); }
+.btn-solid{ background:var(--fg); color:var(--void); border-color:var(--fg); min-height:54px; padding:14px 34px; }
+.btn-solid:hover{ background:#fff; border-color:#fff; color:var(--void); }
+.btn svg{ width:15px; height:15px; flex:none; transition:transform var(--d-state) var(--ease); }
+.btn:hover svg{ transform:translateX(4px); }
+
+.link{
+  display:inline-flex; align-items:center; gap:10px;
+  font-family:var(--font-display); font-size:14px; font-weight:600;
+  letter-spacing:.09em; text-transform:uppercase; color:var(--accent-live);
+  padding-bottom:5px; border-bottom:1px solid rgba(49,195,154,.4);
+  transition:color var(--d-state) var(--ease), border-color var(--d-state) var(--ease);
+}
+.link:hover{ color:#5fe0bb; border-bottom-color:#5fe0bb; }
+.link svg{ width:15px; height:15px; transition:transform var(--d-state) var(--ease); }
+.link:hover svg{ transform:translateX(4px); }
+
+/* scroll progress + chapter rail */
+.prog{ position:fixed; inset:0 auto auto 0; height:2px; width:0; background:var(--accent-live); z-index:90; }
+.rail{
+  position:fixed; left:0; top:50%; transform:translateY(-50%); z-index:70;
+  width:var(--rail); padding-left:26px;
+  display:flex; flex-direction:column; gap:3px;
+}
+/* The rail is chrome, so it gets a column of its own rather than floating over
+   the page. Everything else is inset past it, and a hairline says where the
+   page actually starts. */
+@media (min-width:1181px){
+  body{ padding-left:var(--rail); }
+  .topbar{ left:var(--rail); }
+  body::before{
+    content:""; position:fixed; inset:0 auto 0 calc(var(--rail) - 1px);
+    width:1px; background:var(--line-2); z-index:60; pointer-events:none;
+  }
+}
+.rail a{
+  display:flex; align-items:center; gap:12px; padding:7px 0; white-space:nowrap;
+  font-family:var(--font-display); font-size:11px; font-weight:600;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--fg-3);
+  transition:color var(--d-state) var(--ease);
+}
+.rail a::before{
+  content:""; width:16px; height:1px; background:currentColor; flex:none;
+  transition:width var(--d-state) var(--ease), background var(--d-state) var(--ease);
+}
+.rail a:hover{ color:var(--fg); }
+.rail a[aria-current="true"]{ color:var(--fg); }
+.rail a[aria-current="true"]::before{ width:30px; background:var(--accent-live); }
+@media (max-width:1180px){ .rail{ display:none; } }
+
+/* ═══ 01 · the reel — the scroll spine ════════════════════════════════════
+   Photography carries this section, not geometry. 420vh of scroll cross-
+   dissolves four plates behind four arguments. The plate is held at its own
+   ratio and never runs edge to edge - it is a print, not a wallpaper - and the
+   copy crosses its left edge so type and image read as one composition. */
+.cinema{ position:relative; height:420vh; }
+.cin-stage{ position:sticky; top:0; height:100vh; overflow:hidden; background:var(--void); }
+
+.cin-plates{
+  position:absolute; top:47%; right:0; transform:translateY(-50%);
+  width:66%; aspect-ratio:16/9; overflow:hidden;
+}
+.pl{ position:absolute; inset:0; opacity:0; transition:opacity 900ms var(--ease); }
+.pl.on{ opacity:1; }
+.pl video{ width:100%; height:100%; object-fit:cover; display:block; }
+.pl img{ width:100%; height:100%; object-fit:cover; transform:scale(1.07); transition:transform 7000ms linear; }
+.pl.on img{ transform:scale(1); }
+/* the copy zone is guaranteed dark, whatever the plate underneath is doing */
+.cin-plates::after{
+  content:""; position:absolute; inset:0; z-index:3; pointer-events:none;
+  background:linear-gradient(90deg, var(--bg) 0%, rgba(11,13,18,.9) 20%, rgba(11,13,18,.55) 40%, transparent 66%);
+}
+/* one gesture on load: the frame opens like a shutter, then never moves again */
+.cin-shutter{
+  position:absolute; inset:0; z-index:4; background:var(--void);
+  transform-origin:top; transform:scaleY(1);
+  transition:transform 1100ms var(--ease-out) 200ms;
+}
+.cinema.opened .cin-shutter{ transform:scaleY(0); }
+
+.cin-grain{
+  position:absolute; inset:0; pointer-events:none; opacity:.05; z-index:5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.cin-chapters{ position:absolute; inset:0; z-index:6; }
+.chap{
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; justify-content:center;
+  padding-inline:var(--gutter);
+  opacity:0; visibility:hidden; pointer-events:none;
+  transform:translate3d(0,22px,0);
+  transition:opacity 620ms var(--ease), transform 620ms var(--ease-out), visibility 0s linear 620ms;
+}
+.chap.on{
+  opacity:1; visibility:visible; pointer-events:auto; transform:none;
+  transition:opacity 620ms var(--ease), transform 720ms var(--ease-out), visibility 0s;
+}
+.chap-in{ width:100%; max-width:min(880px,74%); }
+.chap .mark{ margin-bottom:22px; }
+.chap .lead{ margin-top:24px; max-width:44ch; }
+
+/* line reveal — transform only, no layout property inside the tween */
+.ln{ display:block; overflow:hidden; }
+.ln > i{ display:block; font-style:normal; transform:translate3d(0,108%,0); transition:transform 1000ms var(--ease-out) var(--dl,0ms); }
+.chap.on .ln > i{ transform:none; }
+
+.cue{
+  position:absolute; left:var(--gutter); bottom:38px; z-index:7;
+  display:flex; align-items:center; gap:14px;
+  font-family:var(--font-display); font-size:11px; font-weight:600;
+  letter-spacing:.26em; text-transform:uppercase; color:var(--fg-3);
+  transition:opacity 500ms var(--ease);
+}
+.cue i{ display:block; width:1px; height:34px; background:linear-gradient(var(--accent-live),transparent); }
+.cinema.past-hero .cue{ opacity:0; }
+
+/* ═══ the grade ══════════════════════════════════════════════════════════
+   The renders come from different sources and do not agree with one another -
+   some warm, some cool, some flat. One grade across all of them (cool multiply
+   in the shadows, warm screen through the centre) is what makes the imagery
+   read as a single authored world instead of a folder of stock. Applied to a
+   wrapper that holds nothing but the image, so captions stay ungraded. */
+.graded{ position:relative; display:block; isolation:isolate; }
+.graded > img,.graded > video{ filter:saturate(.84) contrast(1.07) brightness(.95); }
+.graded::before,.graded::after{ content:""; position:absolute; inset:0; pointer-events:none; }
+.graded::before{ background:radial-gradient(76% 64% at 50% 40%, rgba(255,190,132,.13), transparent 72%); mix-blend-mode:screen; }
+.graded::after{ background:linear-gradient(178deg, rgba(24,46,72,.32), rgba(9,11,17,.48)); mix-blend-mode:multiply; }
+
+@media (max-width:1024px){
+  .cin-plates{ width:74%; }
+  .chap-in{ max-width:none; }
+}
+
+/* figures inside chapter 01 */
+.figs{ display:flex; flex-wrap:wrap; gap:0; margin-top:38px; }
+.figs > div{ padding:0 30px; border-left:1px solid var(--line-2); }
+.figs > div:first-child{ border-left:0; padding-left:0; }
+.figs b{ display:block; font-family:var(--font-display); font-weight:600; font-size:clamp(28px,3vw,44px); letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+.figs span{ display:block; margin-top:8px; font-family:var(--font-display); font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--fg-3); }
+
+/* tier rows inside chapter 02 */
+.tiers{ margin-top:34px; max-width:660px; }
+.tier-row{ display:flex; align-items:baseline; gap:16px; padding:15px 0; border-top:1px solid var(--line-2); }
+.tier-row:last-child{ border-bottom:1px solid var(--line-2); }
+.sw{ width:22px; height:8px; flex:none; align-self:center; }
+.sw.a{ background:var(--tier-a); } .sw.b{ background:var(--tier-b); }
+.tier-row b{ font-family:var(--font-display); font-weight:600; font-size:15px; letter-spacing:.1em; text-transform:uppercase; min-width:172px; }
+.tier-row span{ color:var(--fg-2); font-size:15px; }
+.tier-row .rt{ margin-left:auto; color:var(--fg-3); font-family:var(--font-display); font-size:13px; letter-spacing:.08em; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.note{ margin-top:16px; font-family:var(--font-display); font-size:12px; letter-spacing:.06em; color:var(--fg-3); }
+@media (max-width:720px){
+  .tier-row{ flex-wrap:wrap; gap:6px 14px; }
+  .tier-row b{ min-width:0; }
+  .tier-row .rt{ margin-left:0; width:100%; }
+}
+
+/* meters — filled encoding, scaleX so nothing lays out mid-animation */
+.meters{ margin-top:32px; display:grid; gap:22px; max-width:560px; }
+.meter-l{ display:flex; justify-content:space-between; align-items:baseline; gap:16px; margin-bottom:10px;
+  font-family:var(--font-display); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--fg-3); }
+.meter-l b{ color:var(--fg); font-variant-numeric:tabular-nums; letter-spacing:.06em; }
+.meter{ height:4px; background:rgba(233,236,241,.1); overflow:hidden; }
+.meter i{ display:block; height:100%; transform:scaleX(0); transform-origin:left; transition:transform 1100ms var(--ease-out) 120ms; }
+.on .meter i, .in .meter i{ transform:scaleX(var(--pct,0)); }
+.meter i.a{ background:var(--tier-a); } .meter i.b{ background:var(--tier-b); }
+
+/* ═══ reveal (everything outside the cinema) ═════════════════════════════ */
+.rv{ opacity:0; transform:translate3d(0,26px,0); transition:opacity 700ms var(--ease), transform 780ms var(--ease-out); transition-delay:var(--dl,0ms); }
+.rv.in{ opacity:1; transform:none; }
+
+/* ═══ 02 · gallery — horizontal pan driven by vertical scroll ════════════ */
+.gallery{ position:relative; height:340vh; }
+.gal-stage{ position:sticky; top:0; height:100vh; display:flex; flex-direction:column; justify-content:center; overflow:hidden; }
+.gal-head{ width:100%; max-width:var(--maxw); margin:0 auto 34px; padding-inline:var(--gutter); display:flex; align-items:flex-end; justify-content:space-between; gap:24px; flex-wrap:wrap; }
+.gal-track{ display:flex; gap:clamp(16px,2vw,32px); padding-inline:var(--gutter); will-change:transform; }
+.plate{ flex:none; position:relative; }
+.plate .graded{ display:inline-block; vertical-align:top; }
+.plate img{ width:auto; height:clamp(300px,52vh,540px); object-fit:contain; background:var(--bg-2); }
+.plate figcaption{ display:flex; gap:14px; margin-top:14px; font-family:var(--font-display); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--fg-3); }
+.plate figcaption b{ color:var(--accent-live); font-weight:600; }
+.gal-hint{ font-family:var(--font-display); font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--fg-3); }
+
+/* ═══ 03 · suites ════════════════════════════════════════════════════════ */
+.suites{ display:grid; grid-template-columns:repeat(2,1fr); gap:clamp(20px,2.4vw,40px); }
+.suite{ background:var(--bg-2); border:1px solid var(--line-2); display:flex; flex-direction:column; }
+.suite .graded{ display:block; }
+.suite .graded > img{ width:100%; height:auto; }
+.suite-b{ padding:clamp(24px,2.6vw,38px); display:flex; flex-direction:column; flex:1; }
+.suite h3{ font-family:var(--font-display); font-weight:600; font-size:var(--fs-h3); letter-spacing:-.01em; }
+.suite .tag{ display:inline-flex; align-items:center; gap:9px; margin-top:12px; font-family:var(--font-display); font-size:11px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:var(--fg-3); }
+.suite dl{ margin:26px 0 0; display:grid; grid-template-columns:auto 1fr; gap:11px 26px; font-size:15px; }
+.suite dt{ font-family:var(--font-display); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--fg-3); align-self:center; }
+.suite dd{ margin:0; color:var(--fg-2); }
+.suite .price{ margin-top:26px; font-family:var(--font-display); font-weight:600; font-size:clamp(26px,2.6vw,36px); letter-spacing:-.02em; color:var(--accent); font-variant-numeric:tabular-nums; }
+.suite .price small{ display:block; font-size:12px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:var(--fg-3); margin-bottom:7px; }
+.suite .foot{ margin-top:auto; padding-top:28px; }
+@media (max-width:860px){ .suites{ grid-template-columns:1fr; } }
+
+/* ── the picker: the massing study as an instrument ─────────────────────
+   Deliberately not the hero. A volume study answers "where in the campus does
+   this tier sit" and nothing else, so it lives beside the specs it explains,
+   at panel scale, clearly labelled as a study rather than a rendering. */
+.picker{ margin-top:clamp(52px,6.4vw,110px); padding-top:clamp(40px,4.4vw,76px); border-top:1px solid var(--line-2); }
+.picker-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:26px 48px; flex-wrap:wrap; }
+.picker-head h3{
+  margin-top:16px; font-family:var(--font-display); font-weight:600;
+  font-stretch:78%; font-variation-settings:'wdth' 78;
+  font-size:clamp(26px,3.6vw,56px); line-height:1; letter-spacing:-.025em;
+}
+/* No frame, no plate, no ground. The canvas is transparent, so the campus sits
+   on the page itself rather than inside a viewport, and it is sized to bleed
+   past the text column - a volume study drawn small is only a diagram. */
+.picker-view{
+  position:relative;
+  width:calc(100% + var(--gutter) * 2); margin-inline:calc(var(--gutter) * -1);
+  aspect-ratio:2.35/1; margin-top:clamp(10px,1.6vw,24px);
+}
+.picker-view:focus-visible{ outline:2px solid var(--accent-live); outline-offset:6px; }
+.picker-view canvas{ cursor:grab; }
+.picker-view canvas:active{ cursor:grabbing; }
+.picker-fallback{ position:absolute; inset:0; display:grid; place-items:center; padding:24px; text-align:center;
+  font-family:var(--font-display); font-size:13px; letter-spacing:.06em; color:var(--fg-3); }
+.picker-view.is-live .picker-fallback{ display:none; }
+/* the filter is type, not chrome */
+.picker-tools{ display:flex; flex-wrap:wrap; gap:2px 30px; }
+.picker-tools button{
+  display:inline-flex; align-items:center; gap:11px;
+  min-height:44px; padding:8px 0;
+  background:transparent; border:0; border-bottom:1px solid transparent; color:var(--fg-3);
+  font-family:var(--font-display); font-size:13px; font-weight:600; letter-spacing:.16em; text-transform:uppercase;
+  transition:color var(--d-state) var(--ease), border-color var(--d-state) var(--ease);
+}
+.picker-tools button:hover{ color:var(--fg); border-bottom-color:var(--line); }
+.picker-tools button[aria-pressed="true"]{ color:var(--fg); border-bottom-color:var(--accent-live); }
+.picker-foot{ display:flex; align-items:baseline; justify-content:space-between; gap:20px 48px; flex-wrap:wrap;
+  margin-top:clamp(16px,2vw,30px); }
+.picker-note{ font-family:var(--font-display); font-size:12px; line-height:1.7; color:var(--fg-3); max-width:64ch; }
+@media (max-width:820px){ .picker-view{ aspect-ratio:4/3; } }
+
+/* ═══ 04 · the club ══════════════════════════════════════════════════════ */
+.club{ display:grid; grid-template-columns:1fr 1fr; gap:clamp(28px,4vw,80px); align-items:start; }
+.club-list{ display:grid; }
+.club-item{ display:grid; grid-template-columns:auto 30px 1fr; gap:20px; align-items:start; padding:22px 0; border-top:1px solid var(--line-2); }
+.club-item:last-child{ border-bottom:1px solid var(--line-2); }
+.club-item .n{ font-family:var(--font-display); font-size:12px; font-weight:600; letter-spacing:.14em; color:var(--fg-3); padding-top:5px; font-variant-numeric:tabular-nums; }
+.ico{ width:26px; height:26px; flex:none; margin-top:2px; background-color:var(--accent-live);
+  -webkit-mask:var(--ico) center / contain no-repeat; mask:var(--ico) center / contain no-repeat; }
+.club-item h3{ font-family:var(--font-display); font-weight:600; font-size:18px; letter-spacing:.005em; }
+.club-item p{ margin-top:7px; color:var(--fg-2); font-size:15px; max-width:44ch; }
+.club-shot img{ width:100%; height:auto; }
+.club-shot figcaption{ margin-top:14px; font-family:var(--font-display); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--fg-3); }
+@media (max-width:960px){ .club{ grid-template-columns:1fr; } .club-shot{ order:-1; } }
+
+/* ═══ 05 · monaco ════════════════════════════════════════════════════════ */
+.monaco{ background:var(--bg-2); }
+.mon-band{ position:relative; margin-top:clamp(34px,4vw,58px); }
+.mon-band img{ width:100%; height:auto; }
+.facts{ display:flex; flex-wrap:wrap; margin-top:clamp(28px,3vw,46px); }
+.facts > div{ padding:0 34px; border-left:1px solid var(--line-2); }
+.facts > div:first-child{ border-left:0; padding-left:0; }
+.facts b{ display:block; font-family:var(--font-display); font-weight:600; font-size:clamp(19px,1.9vw,26px); letter-spacing:-.01em; }
+.facts span{ display:block; margin-top:8px; font-family:var(--font-display); font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--fg-3); }
+.fine{ margin-top:26px; font-family:var(--font-display); font-size:12px; line-height:1.7; color:var(--fg-3); max-width:96ch; }
+
+/* ═══ 06 · stories ═══════════════════════════════════════════════════════ */
+.story{ display:grid; grid-template-columns:auto 1fr; gap:clamp(24px,3vw,52px); align-items:start; }
+.story-pick{ display:flex; flex-direction:column; gap:4px; }
+.story-pick button{
+  display:flex; align-items:center; gap:14px; padding:12px 16px 12px 0;
+  background:transparent; border:0; border-left:1px solid var(--line-2); padding-left:18px;
+  font-family:var(--font-display); font-size:13px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--fg-3); text-align:left; transition:color var(--d-state) var(--ease), border-color var(--d-state) var(--ease);
+}
+.story-pick button:hover{ color:var(--fg); border-left-color:var(--line); }
+.story-pick button[aria-selected="true"]{ color:var(--fg); border-left-color:var(--accent-live); }
+.story-pick img{ width:38px; height:38px; border-radius:50%; object-fit:cover; flex:none; }
+/* The three quotes share one grid cell, so the container is always the height
+   of the tallest of them and switching never reflows the section. Visibility is
+   delayed behind the fade, so the outgoing quote leaves the accessibility tree
+   only once it has finished leaving the screen. */
+.story-panels{ display:grid; }
+.story-panel{
+  grid-area:1 / 1;
+  opacity:0; visibility:hidden; pointer-events:none;
+  transform:translate3d(0,10px,0);
+  transition:opacity 190ms var(--ease), transform 260ms var(--ease-out), visibility 0s linear 260ms;
+}
+.story-panel.on{
+  opacity:1; visibility:visible; pointer-events:auto; transform:none;
+  /* the 70ms hold lets the outgoing quote clear before this one arrives, so the
+     two are never both sitting at half opacity on top of each other */
+  transition:opacity 240ms var(--ease) 70ms, transform 300ms var(--ease-out) 70ms, visibility 0s;
+}
+.story-panel blockquote{ margin:0; font-size:clamp(23px,2.9vw,42px); line-height:1.32; font-weight:300; text-wrap:balance; }
+.story-panel .who{ margin-top:30px; display:flex; align-items:center; gap:16px; }
+.story-panel .who img{ width:54px; height:54px; border-radius:50%; object-fit:cover; }
+.story-panel .who b{ display:block; font-family:var(--font-display); font-weight:600; font-size:15px; letter-spacing:.02em; }
+.story-panel .who span{ display:block; margin-top:5px; font-family:var(--font-display); font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--fg-3); }
+@media (max-width:820px){ .story{ grid-template-columns:1fr; } .story-pick{ flex-direction:row; overflow-x:auto; } .story-pick button{ border-left:0; border-bottom:1px solid var(--line-2); padding:10px 4px; white-space:nowrap; } .story-pick button[aria-selected="true"]{ border-bottom-color:var(--accent-live); } }
+
+/* ═══ 07 · reserve ═══════════════════════════════════════════════════════ */
+.reserve{ position:relative; overflow:hidden; }
+.reprise{ font-size:clamp(38px,6.6vw,104px); }
+.res-grid{ margin-top:clamp(38px,4.4vw,72px); display:grid; grid-template-columns:1fr 1fr; gap:clamp(32px,5vw,96px); align-items:start; }
+.detail{ display:grid; grid-template-columns:130px 1fr; gap:12px 20px; margin-top:34px; padding-top:26px; border-top:1px solid var(--line-2); font-size:15px; }
+.detail dt{ font-family:var(--font-display); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--fg-3); }
+.detail dd{ margin:0; color:var(--fg-2); }
+.detail dd a:hover{ color:var(--fg); }
+.socials{ display:flex; gap:6px; margin-top:30px; }
+.socials a{ display:grid; place-items:center; width:44px; height:44px; border:1px solid var(--line-2); color:var(--fg-3); transition:color var(--d-state) var(--ease), border-color var(--d-state) var(--ease), background var(--d-state) var(--ease); }
+.socials a:hover{ color:var(--fg); border-color:var(--line); background:rgba(233,236,241,.06); }
+.socials .ico{ background-color:currentColor; width:19px; height:19px; }
+/* The card owns the chrome; the form and the confirmation share one grid cell
+   inside it. Submitting therefore swaps the contents without the column
+   collapsing and shoving the rest of the section around. */
+.form-card{
+  display:grid; background:var(--bg-2); border:1px solid var(--line-2);
+  padding:clamp(24px,2.8vw,40px);
+}
+.form-card > form,.form-card > .form-done{ grid-area:1 / 1; }
+form{
+  display:grid; gap:14px; align-content:start;
+  transition:opacity 200ms var(--ease), transform 280ms var(--ease-out), visibility 0s;
+}
+.form-card.is-done > form{
+  opacity:0; visibility:hidden; pointer-events:none; transform:translate3d(0,-10px,0);
+  transition:opacity 200ms var(--ease), transform 280ms var(--ease-out), visibility 0s linear 280ms;
+}
+.input,.select,.textarea{
+  width:100%; min-height:52px; padding:14px 16px;
+  background:var(--field); border:1px solid var(--line-2); color:var(--fg);
+  font-family:var(--font-display); font-size:15px;
+  transition:border-color var(--d-state) var(--ease), background var(--d-state) var(--ease);
+}
+.textarea{ min-height:112px; resize:vertical; line-height:1.6; }
+.input::placeholder,.textarea::placeholder{ color:var(--fg-3); }
+.input:hover,.select:hover,.textarea:hover{ border-color:var(--line); background:rgba(233,236,241,.08); }
+.input:focus,.select:focus,.textarea:focus{ outline:none; border-color:var(--accent-live); background:rgba(233,236,241,.08); }
+.select{ appearance:none; color:var(--fg); }
+.select option{ background:var(--bg-3); color:var(--fg); }
+.fld{ position:relative; }
+.fld .chev{ position:absolute; right:16px; top:19px; width:14px; height:14px; pointer-events:none; background-color:var(--fg-3); -webkit-mask:url(assets/chevron-down.svg) center/contain no-repeat; mask:url(assets/chevron-down.svg) center/contain no-repeat; }
+.err{ display:none; margin-top:7px; font-family:var(--font-display); font-size:12px; letter-spacing:.04em; color:var(--warn); }
+.err.show{ display:block; }
+.form-note{ font-family:var(--font-display); font-size:12px; color:var(--fg-3); }
+.form-done{
+  align-self:center; justify-self:center; max-width:32ch; text-align:center;
+  color:var(--fg); font-size:15px; line-height:1.65;
+  opacity:0; visibility:hidden; transform:translate3d(0,14px,0);
+  transition:opacity 240ms var(--ease), transform 320ms var(--ease-out), visibility 0s linear 320ms;
+}
+/* the same hairline the section marks use — no new device for one state */
+.form-done::before{ content:""; display:block; width:32px; height:1px; background:var(--accent-live); margin:0 auto 22px; }
+.form-card.is-done > .form-done{
+  opacity:1; visibility:visible; transform:none;
+  transition:opacity 280ms var(--ease) 140ms, transform 360ms var(--ease-out) 140ms, visibility 0s;
+}
+.form-done:focus-visible{ outline:2px solid var(--accent-live); outline-offset:8px; }
+@media (max-width:900px){ .res-grid{ grid-template-columns:1fr; } }
+
+/* ═══ footer ═════════════════════════════════════════════════════════════ */
+.footbar{ border-top:1px solid var(--line-2); padding-block:34px; }
+.footbar .wrap{ display:flex; flex-wrap:wrap; gap:14px 30px; align-items:center; justify-content:space-between;
+  font-family:var(--font-display); font-size:12px; letter-spacing:.06em; color:var(--fg-3); }
+.footbar a:hover{ color:var(--fg); }
+
+/* ═══ reduced motion / no WebGL — a designed static page, not a broken one ═ */
+@media (prefers-reduced-motion:reduce){
+  html{ scroll-behavior:auto; }
+  .rv,.chap,.ln > i,.meter i,.gal-track,.pl,.pl img,.cin-shutter{ transition:none !important; }
+  .rv{ opacity:1; transform:none; }
+  .ln > i{ transform:none; }
+  .pl img{ transform:none; }
+  .cin-shutter{ display:none; }
+  .meter i{ transform:scaleX(var(--pct,0)); }
+  /* the state change still has to be perceivable, so opacity survives and only
+     the travel is stripped - a hard cut would lose the change entirely */
+  .story-panel,.story-panel.on,
+  form,.form-card.is-done > form,
+  .form-done,.form-card.is-done > .form-done{
+    transform:none !important;
+    transition:opacity 120ms linear, visibility 0s !important;
+  }
+}
+.cinema.stack,.gallery.stack{ height:auto; }
+.cinema.stack .cin-stage{ position:static; height:auto; padding-bottom:clamp(56px,7vw,110px); }
+.cinema.stack .cin-plates{ position:relative; top:auto; right:auto; transform:none; width:100%; }
+.cinema.stack .cin-plates::after{ background:linear-gradient(180deg, transparent 44%, rgba(11,13,18,.9) 100%); }
+.cinema.stack .cin-shutter,.cinema.stack .cin-grain,.cinema.stack .cue{ display:none; }
+.cinema.stack .cin-chapters{ position:static; }
+.cinema.stack .chap{
+  position:static; opacity:1; visibility:visible; pointer-events:auto; transform:none;
+  padding:clamp(40px,5vw,76px) var(--gutter) 0; min-height:0;
+}
+.cinema.stack .chap-in{ max-width:none; }
+.gallery.stack .gal-stage{ position:static; height:auto; padding-block:clamp(48px,6vw,90px); }
+.gallery.stack .gal-track{ overflow-x:auto; scroll-snap-type:x mandatory; padding-bottom:18px; transform:none !important; }
+.gallery.stack .plate{ scroll-snap-align:start; }
+@media (max-width:820px){
+  .cinema{ height:auto; }
+  .cinema .cin-stage{ position:static; height:auto; padding-bottom:56px; }
+  .cinema .cin-plates{ position:relative; top:auto; right:auto; transform:none; width:100%; }
+  .cinema .cin-plates::after{ background:linear-gradient(180deg, transparent 44%, rgba(11,13,18,.9) 100%); }
+  .cinema .cin-shutter,.cinema .cin-grain,.cinema .cue{ display:none; }
+  .cinema .cin-chapters{ position:static; }
+  .cinema .chap{ position:static; opacity:1; visibility:visible; pointer-events:auto; transform:none; padding:44px var(--gutter) 0; }
+  .cinema .chap-in{ max-width:none; }
+  .picker{ grid-template-columns:1fr; }
+  .picker-view{ aspect-ratio:4/3; }
+  .gallery{ height:auto; }
+  .gallery .gal-stage{ position:static; height:auto; padding-block:64px; }
+  .gallery .gal-track{ overflow-x:auto; scroll-snap-type:x mandatory; padding-bottom:18px; transform:none !important; }
+  .gallery .plate{ scroll-snap-align:start; }
+  .figs > div{ padding:0 20px; }
+}
+</style>
+</head>
+<body>
+
+<a class="sr-only" href="#content">Skip to content</a>
+<div class="prog" id="prog" aria-hidden="true"></div>
+
+<header class="topbar" data-od-id="topbar">
+  <a class="brand" href="#top" aria-label="Luxe Corsa — home">
+    <img class="mk" src="assets/logo-mark.svg" alt="" width="46" height="64" />
+    <img src="assets/logo-word.svg" alt="Luxe Corsa" width="339" height="44" />
+  </a>
+  <span class="spacer"></span>
+  <a class="tel" href="tel:+12246620000">(224) 662-0000</a>
+  <a class="btn" href="#reserve" data-od-id="nav-reserve">Reserve</a>
+</header>
+
+<nav class="rail" aria-label="Section" data-od-id="chapter-rail">
+  <a href="#site"    data-rail="site">01 &nbsp;Site</a>
+  <a href="#gallery" data-rail="gallery">02 &nbsp;Gallery</a>
+  <a href="#suites"  data-rail="suites">03 &nbsp;Suites</a>
+  <a href="#club"    data-rail="club">04 &nbsp;Club</a>
+  <a href="#monaco"  data-rail="monaco">05 &nbsp;Monaco</a>
+  <a href="#stories" data-rail="stories">06 &nbsp;Stories</a>
+  <a href="#reserve" data-rail="reserve">07 &nbsp;Reserve</a>
+</nav>
+
+<main id="content">
+
+<!-- ═══ 01 · the site — pinned WebGL flight ══════════════════════════════ -->
+<section class="cinema" id="site" data-od-id="site-reel">
+  <div class="cin-stage" id="top">
+    <div class="cin-plates">
+      <div class="pl graded on" data-plate="0">
+        <video src="assets/film-day.mp4" poster="assets/film-day-poster.jpg" width="1600" height="800"
+               muted loop playsinline preload="auto"
+               aria-label="Film of the Luxe Corsa campus: an aerial pass over the suite buildings, the clubhouse frontage and the entry drive"></video>
+      </div>
+      <div class="pl graded" data-plate="1">
+        <img src="assets/hero-bg.jpg" alt="Aerial view of the Luxe Corsa auto suite campus in Lake Zurich, Illinois" width="1920" height="960" loading="lazy" />
+      </div>
+      <div class="pl graded" data-plate="2">
+        <img src="assets/suite-collection.jpg" alt="Interior of a Luxe Corsa suite: marque crests on the wall, a blue and a white supercar and a motorcycle on the polished floor" width="1900" height="1266" loading="lazy" />
+      </div>
+      <div class="pl graded" data-plate="3">
+        <video src="assets/film-night.mp4" poster="assets/film-night-poster.jpg" width="1600" height="800"
+               muted loop playsinline preload="none"
+               aria-label="Film of the Luxe Corsa campus after dark: the illuminated suite buildings and clubhouse"></video>
+      </div>
+      <div class="cin-shutter" aria-hidden="true"></div>
+    </div>
+    <div class="cin-grain" aria-hidden="true"></div>
+
+    <div class="cin-chapters">
+
+      <article class="chap on" data-band="0" data-od-id="chapter-hero">
+        <div class="chap-in">
+          <p class="mark">Lake Zurich, Illinois</p>
+          <h1 class="display">
+            <span class="ln"><i>Eleven buildings.</i></span>
+            <span class="ln" style="--dl:90ms"><i>121 private rooms.</i></span>
+            <span class="ln" style="--dl:180ms"><i>One <span class="hl">gate</span>.</i></span>
+          </h1>
+          <p class="lead">Luxe Corsa Auto Suites — climate-controlled, drive-in suites on fifteen secured acres in Lake Zurich.</p>
+        </div>
+      </article>
+
+      <article class="chap" data-band="1" data-od-id="chapter-campus">
+        <div class="chap-in">
+          <p class="mark">The campus</p>
+          <h2 class="display">Fifteen acres,<br />laid out as a <span class="hl">private street</span>.</h2>
+          <p class="lead">Eleven suite buildings, a members-only clubhouse and an on-site dealership, all inside one secured perimeter with dedicated personnel and 24/7 surveillance.</p>
+          <div class="figs">
+            <div><b class="num" data-count="11">11</b><span>Buildings</span></div>
+            <div><b class="num" data-count="15">15</b><span>Acres secured</span></div>
+            <div><b class="num">24/7</b><span>Owner access</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="chap" data-band="2" data-od-id="chapter-tiers">
+        <div class="chap-in">
+          <p class="mark">The tiers</p>
+          <h2 class="display">Two rooms.<br />One is <span class="hl">wider</span>.</h2>
+          <p class="lead">Thirty-foot Premium bays anchor the ends of every row; twenty-three-foot Standard bays fill the runs between them. Both arrive with a mezzanine, a drive-in door and 100 AMP service.</p>
+          <div class="tiers">
+            <div class="tier-row">
+              <span class="sw a" aria-hidden="true"></span>
+              <b>Type A · Premium</b>
+              <span>30&prime; &times; 50&prime; + mezzanine — 2,430 sq ft</span>
+              <span class="rt">26 released</span>
+            </div>
+            <div class="tier-row">
+              <span class="sw b" aria-hidden="true"></span>
+              <b>Type B · Standard</b>
+              <span>23&prime; &times; 50&prime; + mezzanine — 1,863 sq ft</span>
+              <span class="rt">95 released</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="chap" data-band="3" data-od-id="chapter-availability">
+        <div class="chap-in">
+          <p class="mark">Availability</p>
+          <h2 class="display"><span class="hl">75</span> of 121 remain.</h2>
+          <p class="lead">Forty-six suites are spoken for. The live plan shows which buildings still have bays, and which tier they belong to.</p>
+          <div class="meters">
+            <div>
+              <div class="meter-l"><span>Type A · Premium</span><b>15 of 26 available</b></div>
+              <div class="meter" role="img" aria-label="15 of 26 Type A Premium units available — 58 percent"><i class="a" style="--pct:.577"></i></div>
+            </div>
+            <div>
+              <div class="meter-l"><span>Type B · Standard</span><b>60 of 95 available</b></div>
+              <div class="meter" role="img" aria-label="60 of 95 Type B Standard units available — 63 percent"><i class="b" style="--pct:.632"></i></div>
+            </div>
+          </div>
+          <p style="margin-top:34px">
+            <a class="link" href="suites-availability.html" data-od-id="cta-live-plan">
+              Open the live site plan
+              <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 8h7.3M8.6 4.9 11.7 8l-3.1 3.1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </p>
+        </div>
+      </article>
+
+    </div>
+
+    <p class="cue" aria-hidden="true"><i></i>Scroll</p>
+  </div>
+</section>
+
+<!-- ═══ 02 · gallery — horizontal pan ═══════════════════════════════════ -->
+<section class="gallery" id="gallery" data-od-id="gallery">
+  <div class="gal-stage">
+    <div class="gal-head">
+      <div>
+        <p class="mark rv">Plates</p>
+        <h2 class="display rv" style="--dl:80ms; margin-top:18px">Built for arrival.</h2>
+      </div>
+      <p class="gal-hint rv" style="--dl:160ms">Five plates &nbsp;·&nbsp; scroll to pan</p>
+    </div>
+    <div class="gal-track" id="galTrack">
+      <figure class="plate">
+        <span class="graded"><img src="assets/gallery-car-condos.jpg" alt="Exterior of the Luxe Corsa car condo buildings with owner vehicles parked at the drive-in doors" width="1297" height="450" loading="lazy" /></span>
+        <figcaption><b>01</b> Car condos — a drive-in door at every suite</figcaption>
+      </figure>
+      <figure class="plate">
+        <span class="graded"><img src="assets/whatis-bg.jpg" alt="The Luxe Corsa clubhouse entrance at dusk with owner vehicles arriving" width="1297" height="724" loading="lazy" /></span>
+        <figcaption><b>02</b> Clubhouse arrival at dusk</figcaption>
+      </figure>
+      <figure class="plate">
+        <span class="graded"><img src="assets/club-living.jpg" alt="The clubhouse living room: kitchen island, lounge seating and a pool table beside full-height glazing" width="1600" height="1065" loading="lazy" /></span>
+        <figcaption><b>03</b> The clubhouse living room</figcaption>
+      </figure>
+      <figure class="plate">
+        <span class="graded"><img src="assets/gallery-entry-gate.jpg" alt="The Luxe Corsa branded entry gate at golden hour" width="522" height="360" loading="lazy" /></span>
+        <figcaption><b>04</b> The gate — one controlled way in</figcaption>
+      </figure>
+      <figure class="plate">
+        <span class="graded"><img src="assets/club-business.jpg" alt="The clubhouse business suite: a glass-walled meeting room beside the bar" width="1900" height="1265" loading="lazy" /></span>
+        <figcaption><b>05</b> Business &amp; event space</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 03 · suites ═════════════════════════════════════════════════════ -->
+<section class="sec" id="suites" data-od-id="suites">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="mark rv">Two footprints</p>
+      <h2 class="display rv" style="--dl:80ms">Pick the room.<br />The rest is yours to specify.</h2>
+      <p class="lead rv" style="--dl:150ms">Both types are delivered as a finished shell with a mezzanine, 100 AMP service and a drive-in door. What happens inside is the owner&rsquo;s.</p>
+    </div>
+
+    <div class="suites">
+      <article class="suite rv" data-od-id="suite-type-a">
+        <span class="graded"><img src="assets/suite-mezzanine.jpg" alt="Interior of a Type A suite: supercars on the floor below and a mezzanine lounge with a bar and pool table above" width="1900" height="1265" loading="lazy" /></span>
+        <div class="suite-b">
+          <h3>Type A</h3>
+          <p class="tag"><span class="sw a" aria-hidden="true"></span>Premium · 26 released</p>
+          <dl>
+            <dt>Main bay</dt><dd>30&prime; &times; 50&prime;</dd>
+            <dt>Mezzanine</dt><dd>30&prime; &times; 31&prime;</dd>
+            <dt>Total</dt><dd>2,430 sq ft</dd>
+            <dt>Holds</dt><dd>Approx. 6 cars and 3 motorcycles</dd>
+          </dl>
+          <p class="price"><small>Starting at</small>$699,000</p>
+          <div class="foot">
+            <div class="meter-l"><span>Availability</span><b>15 of 26</b></div>
+            <div class="meter" role="img" aria-label="15 of 26 Type A units available"><i class="a" style="--pct:.577"></i></div>
+            <p style="margin-top:24px">
+              <a class="link" href="suites-availability.html#units">
+                Reserve a Type A
+                <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 8h7.3M8.6 4.9 11.7 8l-3.1 3.1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            </p>
+          </div>
+        </div>
+      </article>
+
+      <article class="suite rv" style="--dl:110ms" data-od-id="suite-type-b">
+        <span class="graded"><img src="assets/unit-type-b.jpg" alt="Interior of a Type B suite: bright single-volume bay with sports cars parked side by side" width="936" height="480" loading="lazy" /></span>
+        <div class="suite-b">
+          <h3>Type B</h3>
+          <p class="tag"><span class="sw b" aria-hidden="true"></span>Standard · 95 released</p>
+          <dl>
+            <dt>Main bay</dt><dd>23&prime; &times; 50&prime;</dd>
+            <dt>Mezzanine</dt><dd>23&prime; &times; 31&prime;</dd>
+            <dt>Total</dt><dd>1,863 sq ft</dd>
+            <dt>Holds</dt><dd>Approx. 4 cars and 2 motorcycles</dd>
+          </dl>
+          <p class="price"><small>Starting at</small>$549,000</p>
+          <div class="foot">
+            <div class="meter-l"><span>Availability</span><b>60 of 95</b></div>
+            <div class="meter" role="img" aria-label="60 of 95 Type B units available"><i class="b" style="--pct:.632"></i></div>
+            <p style="margin-top:24px">
+              <a class="link" href="suites-availability.html#units">
+                Reserve a Type B
+                <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 8h7.3M8.6 4.9 11.7 8l-3.1 3.1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            </p>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div class="picker rv" data-od-id="suite-picker">
+      <div class="picker-head">
+        <div>
+          <p class="mark">Where they sit</p>
+          <h3>The whole campus,<br />to scale.</h3>
+        </div>
+        <div class="picker-tools" role="group" aria-label="Highlight a tier">
+          <button type="button" data-tier="" aria-pressed="true">All 121</button>
+          <button type="button" data-tier="a" aria-pressed="false"><span class="sw a" aria-hidden="true"></span>Type A</button>
+          <button type="button" data-tier="b" aria-pressed="false"><span class="sw b" aria-hidden="true"></span>Type B</button>
+        </div>
+      </div>
+
+      <div class="picker-view" id="pickerView" tabindex="0" role="img"
+           aria-label="Three-dimensional massing study of the Luxe Corsa campus: eleven suite buildings made of 26 wider Type A Premium bays and 96 narrower Type B Standard bays, plus the Luxe Corsa Club and the on-site dealership. Footprints and tiers are to scale; building heights are indicative.">
+        <p class="picker-fallback">The massing study needs WebGL, which this browser has turned off. The full site plan is on the availability page.</p>
+      </div>
+
+      <div class="picker-foot">
+        <p class="picker-note">Extruded from the site plan — footprints, bay widths and the Premium / Standard split are to scale; heights are indicative, because the plan carries no elevation. Drag to orbit, or use the arrow keys.</p>
+        <a class="link" href="suites-availability.html">
+          See every bay on the plan
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 8h7.3M8.6 4.9 11.7 8l-3.1 3.1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 04 · the club ═══════════════════════════════════════════════════ -->
+<section class="sec" id="club" data-od-id="club">
+  <div class="wrap club">
+    <div>
+      <div class="sec-head">
+        <p class="mark rv">Ownership includes</p>
+        <h2 class="display rv" style="--dl:80ms">It is not a garage.</h2>
+      </div>
+      <div class="club-list">
+        <div class="club-item rv" data-od-id="club-gated">
+          <span class="n">01</span><span class="ico" style="--ico:url(assets/icon-gated.svg)" aria-hidden="true"></span>
+          <div><h3>Gated Community</h3><p>Dedicated personnel and premium security for complete peace of mind.</p></div>
+        </div>
+        <div class="club-item rv" style="--dl:70ms" data-od-id="club-surveillance">
+          <span class="n">02</span><span class="ico" style="--ico:url(assets/icon-surveillance.svg)" aria-hidden="true"></span>
+          <div><h3>State-of-the-Art Surveillance</h3><p>Advanced monitoring systems protecting your investment 24/7.</p></div>
+        </div>
+        <div class="club-item rv" style="--dl:140ms" data-od-id="club-simulators">
+          <span class="n">03</span><span class="ico" style="--ico:url(assets/icon-simulators.svg)" aria-hidden="true"></span>
+          <div><h3>Racing &amp; Golf Simulators</h3><p>Professional-grade simulators for the ultimate entertainment experience.</p></div>
+        </div>
+        <div class="club-item rv" style="--dl:210ms" data-od-id="club-wellness">
+          <span class="n">04</span><span class="ico" style="--ico:url(assets/icon-wellness.svg)" aria-hidden="true"></span>
+          <div><h3>Wellness + Fitness Studio</h3><p>Modern gym, spa, and recovery suites nurture health and performance.</p></div>
+        </div>
+        <div class="club-item rv" style="--dl:280ms" data-od-id="club-events">
+          <span class="n">05</span><span class="ico" style="--ico:url(assets/icon-events.svg)" aria-hidden="true"></span>
+          <div><h3>Business &amp; Event Space</h3><p>Flexible boardrooms and lounge areas elevate meetings, launches, and celebrations.</p></div>
+        </div>
+        <div class="club-item rv" style="--dl:350ms" data-od-id="club-detail">
+          <span class="n">06</span><span class="ico" style="--ico:url(assets/icon-detail.svg)" aria-hidden="true"></span>
+          <div><h3>Detail &amp; Customization</h3><p>Onsite artisans offer bespoke detailing, upgrades, and personalized suite finishes.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <figure class="club-shot rv" style="--dl:120ms">
+      <span class="graded"><img src="assets/club-lounge.jpg" alt="The members-only clubhouse lounge: bar seating, armchairs and a pool table under full-height windows" width="1900" height="1265" loading="lazy" /></span>
+      <figcaption>The members-only clubhouse — monthly social events for owners</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ═══ 05 · monaco ═════════════════════════════════════════════════════ -->
+<section class="sec monaco" id="monaco" data-od-id="monaco">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="mark rv">Exclusive opportunity</p>
+      <h2 class="display rv" style="--dl:80ms">The first 50 buyers are entered to win a trip to the <span class="hl">2026 Monaco Grand Prix</span>.</h2>
+    </div>
+    <figure class="mon-band rv" style="--dl:150ms">
+      <span class="graded"><img src="assets/monaco.jpg" alt="Grand Prix cars racing past the terraces of Monte Carlo during the Monaco Grand Prix" width="1297" height="343" loading="lazy" /></span>
+    </figure>
+    <div class="facts rv" style="--dl:210ms">
+      <div><b>May 2026</b><span>Date</span></div>
+      <div><b>Monte Carlo, Monaco</b><span>Location</span></div>
+      <div><b>VIP Experience</b><span>Access</span></div>
+    </div>
+    <p class="fine rv" style="--dl:260ms">First 50 eligible purchases automatically entered. Void where prohibited by law. Open to residents 18 or older. Prize: trip to the 2026 Monaco Grand Prix; approximate retail value $100,000. Odds of winning depend on eligible entries. See official rules for details.</p>
+  </div>
+</section>
+
+<!-- ═══ 06 · stories ════════════════════════════════════════════════════ -->
+<section class="sec" id="stories" data-od-id="stories">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="mark rv">Member stories</p>
+      <h2 class="display rv" style="--dl:80ms">From the first buyers.</h2>
+    </div>
+    <div class="story rv" style="--dl:140ms">
+      <div class="story-pick" role="tablist" aria-label="Member stories">
+        <button role="tab" id="tab-david" aria-controls="p-david" aria-selected="true" tabindex="0" data-story="david">
+          <img src="assets/avatar-david.png" alt="" width="264" height="264" loading="lazy" />David Martinez
+        </button>
+        <button role="tab" id="tab-marcus" aria-controls="p-marcus" aria-selected="false" tabindex="-1" data-story="marcus">
+          <img src="assets/avatar-marcus.png" alt="" width="264" height="264" loading="lazy" />Marcus K.
+        </button>
+        <button role="tab" id="tab-elena" aria-controls="p-elena" aria-selected="false" tabindex="-1" data-story="elena">
+          <img src="assets/avatar-elena.png" alt="" width="264" height="264" loading="lazy" />Elena Rousseau
+        </button>
+      </div>
+
+      <div class="story-panels">
+        <div class="story-panel on" id="p-david" role="tabpanel" aria-labelledby="tab-david">
+          <blockquote>&ldquo;The suite gives my collection room to grow&mdash;plus, the climate control means less time worrying about preservation.&rdquo;</blockquote>
+          <div class="who">
+            <img src="assets/avatar-david.png" alt="David Martinez" width="264" height="264" loading="lazy" />
+            <div><b>David Martinez</b><span>Founding Buyer · 1967 Shelby GT500 · 2022 McLaren 720S</span></div>
+          </div>
+        </div>
+        <div class="story-panel" id="p-marcus" role="tabpanel" aria-labelledby="tab-marcus">
+          <blockquote>&ldquo;The clubhouse energy and 24/7 access mean spontaneous night drives start and finish at my own doors&mdash;no compromises.&rdquo;</blockquote>
+          <div class="who">
+            <img src="assets/avatar-marcus.png" alt="Marcus K." width="264" height="264" loading="lazy" />
+            <div><b>Marcus K.</b><span>Early Buyer · 2020 Porsche 911 GT3 RS · 2012 Nissan GT-R</span></div>
+          </div>
+        </div>
+        <div class="story-panel" id="p-elena" role="tabpanel" aria-labelledby="tab-elena">
+          <blockquote>&ldquo;I locked in early because the location and security are unmatched.&rdquo;</blockquote>
+          <div class="who">
+            <img src="assets/avatar-elena.png" alt="Elena Rousseau" width="264" height="264" loading="lazy" />
+            <div><b>Elena Rousseau</b><span>Early Buyer · 2019 Ferrari 488 Pista</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 07 · reserve ════════════════════════════════════════════════════ -->
+<section class="sec reserve" id="reserve" data-od-id="reserve">
+  <div class="wrap">
+    <p class="mark rv">Get started</p>
+    <h2 class="display reprise rv" style="--dl:70ms">Seventy-five rooms<br />are still <span class="hl">unclaimed</span>.</h2>
+
+    <div class="res-grid">
+    <div>
+      <p class="lead rv" style="--dl:150ms">Tell us what you drive and how much room it needs. An advisor calls back within one business day.</p>
+      <dl class="detail rv" style="--dl:200ms">
+        <dt>Address</dt><dd>21591 N Rand Rd, Lake Zurich, IL 60047</dd>
+        <dt>Phone</dt><dd><a href="tel:+12246620000">(224) 662-0000</a></dd>
+        <dt>Next release</dt><dd>South Florida — coming soon</dd>
+      </dl>
+      <div class="socials rv" style="--dl:250ms">
+        <a href="#" aria-label="Luxe Corsa on Facebook"><span class="ico" style="--ico:url(assets/social-facebook.svg)"></span></a>
+        <a href="#" aria-label="Luxe Corsa on YouTube"><span class="ico" style="--ico:url(assets/social-youtube.svg)"></span></a>
+        <a href="#" aria-label="Luxe Corsa on X"><span class="ico" style="--ico:url(assets/social-x.svg)"></span></a>
+        <a href="#" aria-label="Luxe Corsa on Instagram"><span class="ico" style="--ico:url(assets/social-instagram.svg)"></span></a>
+        <a href="#" aria-label="Luxe Corsa on LinkedIn"><span class="ico" style="--ico:url(assets/social-linkedin.svg)"></span></a>
+        <a href="#" aria-label="Luxe Corsa on TikTok"><span class="ico" style="--ico:url(assets/social-tiktok.svg)"></span></a>
+      </div>
+    </div>
+
+    <div class="form-card rv" id="formCard" style="--dl:120ms">
+      <form id="inquiry" novalidate data-od-id="inquiry-form">
+        <div class="fld">
+          <label class="sr-only" for="f-name">Your name</label>
+          <input class="input" id="f-name" name="name" type="text" placeholder="Your name" autocomplete="name" required />
+          <p class="err" data-for="f-name">Please tell us your name.</p>
+        </div>
+        <div class="fld">
+          <label class="sr-only" for="f-email">Your email</label>
+          <input class="input" id="f-email" name="email" type="email" placeholder="Your email" autocomplete="email" required />
+          <p class="err" data-for="f-email">Please enter a valid email address.</p>
+        </div>
+        <div class="fld">
+          <label class="sr-only" for="f-phone">Phone</label>
+          <input class="input" id="f-phone" name="phone" type="tel" placeholder="Phone" autocomplete="tel" />
+        </div>
+        <div class="fld">
+          <label class="sr-only" for="f-suite">Preferred suite</label>
+          <select class="select" id="f-suite" name="suite" required>
+            <option value="" selected disabled>Preferred suite</option>
+            <option value="type-a">Type A — 2,430 sq ft (approx. 6 cars + 3 motorcycles)</option>
+            <option value="type-b">Type B — 1,863 sq ft (approx. 4 cars + 2 motorcycles)</option>
+            <option value="undecided">Not sure yet — advise me</option>
+          </select>
+          <span class="chev" aria-hidden="true"></span>
+          <p class="err" data-for="f-suite">Choose a suite so we can check availability.</p>
+        </div>
+        <div class="fld">
+          <label class="sr-only" for="f-msg">Tell us about your collection</label>
+          <textarea class="textarea" id="f-msg" name="message" placeholder="Tell us about your collection…"></textarea>
+        </div>
+        <button class="btn btn-solid" type="submit" data-od-id="submit-inquiry">
+          Request a tour
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 8h7.3M8.6 4.9 11.7 8l-3.1 3.1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <p class="form-note">Prototype form — submissions are not sent anywhere.</p>
+      </form>
+      <div class="form-done" id="formDone" role="status" tabindex="-1">
+        Thank you — your inquiry is logged. A Luxe Corsa advisor will call the number provided within one business day.
+      </div>
+    </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footbar" data-od-id="footer">
+  <div class="wrap">
+    <p>&copy; 2025 Luxe Corsa &nbsp;·&nbsp; <a href="#">Privacy</a> &nbsp;·&nbsp; <a href="#">Terms</a> &nbsp;·&nbsp; <a href="suites-availability.html">Availability</a></p>
+    <p>Powered by All Auto Network</p>
+  </div>
+</footer>
+
+<script src="assets/three.min.js"></script>
+<script src="assets/site-data.js"></script>
+<script src="assets/site-planting.js"></script>
+<script src="assets/site-selector.js"></script>
+<script>
+(function () {
+  'use strict';
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var small  = window.matchMedia('(max-width: 820px)');
+
+  /* ── the cinema ─────────────────────────────────────────────────────────
+     The pin only earns its 520vh if the scene is actually flying. If motion is
+     reduced, or WebGL is off, or the viewport is small, the section collapses
+     to a stacked layout where every chapter is simply readable. */
+  var cinema = document.getElementById('site');
+  var chaps  = [].slice.call(document.querySelectorAll('.chap'));
+  var plates = [].slice.call(document.querySelectorAll('.pl'));
+
+  function stackCinema() {
+    cinema.classList.add('stack');
+    // stacked means every chapter is simply present, so the states that the
+    // pinned version hands out one at a time - revealed lines, filled meters -
+    // have to be handed out to all of them at once
+    chaps.forEach(function (el) { el.classList.add('on'); });
+  }
+  if (reduce || small.matches) stackCinema();
+
+  // the shutter opens once, after the first plate has had a chance to decode
+  if (reduce) { cinema.classList.add('opened'); }
+  else { window.addEventListener('load', function () { cinema.classList.add('opened'); }); }
+
+  /* Only the plate on screen is allowed to be a running video. Reduced motion
+     gets the poster frame and nothing else - the films are the developer's own
+     brand footage, so the still is still the real place. */
+  function syncPlates(c) {
+    plates.forEach(function (el, i) {
+      var on = i === c;
+      el.classList.toggle('on', on);
+      var v = el.querySelector('video');
+      if (!v) return;
+      if (on && !reduce) {
+        if (v.getAttribute('preload') === 'none') { v.setAttribute('preload', 'auto'); v.load(); }
+        var q = v.play();
+        if (q && q.catch) q.catch(function () {});   // autoplay refused: poster stands
+      } else {
+        v.pause();
+      }
+    });
+  }
+  if (!reduce) syncPlates(0);
+
+  // nothing decodes while the reel is off screen
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (es) {
+      if (es[0].isIntersecting) {
+        if (!reduce) syncPlates(lastChap >= 0 ? lastChap : 0);
+      } else {
+        plates.forEach(function (el) {
+          var v = el.querySelector('video'); if (v) v.pause();
+        });
+      }
+    }, { rootMargin: '100px' }).observe(cinema);
+  }
+
+  // chapter bands, with gaps so the drawing gets a beat between arguments
+  var BANDS = [[0, .17], [.20, .43], [.47, .71], [.75, 1.01]];
+  function chapterAt(p) {
+    for (var i = 0; i < BANDS.length; i++) {
+      if (p >= BANDS[i][0] && p < BANDS[i][1]) return i;
+    }
+    return -1;
+  }
+
+  /* ── the gallery pan ─────────────────────────────────────────────────── */
+  var gallery = document.getElementById('gallery');
+  var track   = document.getElementById('galTrack');
+  if (reduce || small.matches) gallery.classList.add('stack');
+
+  /* ── one rAF-throttled scroll pass drives everything ─────────────────── */
+  var prog = document.getElementById('prog');
+  var railLinks = [].slice.call(document.querySelectorAll('.rail a'));
+  var sections = railLinks.map(function (a) {
+    return document.getElementById(a.getAttribute('data-rail'));
+  });
+  var ticking = false, lastChap = -1;
+
+  function progressOf(el) {
+    var r = el.getBoundingClientRect();
+    var span = el.offsetHeight - window.innerHeight;
+    if (span <= 0) return r.top <= 0 ? 1 : 0;
+    return Math.max(0, Math.min(1, -r.top / span));
+  }
+
+  function frame() {
+    ticking = false;
+    var y = window.pageYOffset || document.documentElement.scrollTop;
+
+    document.body.classList.toggle('scrolled', y > 40);
+
+    var doc = document.documentElement.scrollHeight - window.innerHeight;
+    prog.style.width = (doc > 0 ? (y / doc) * 100 : 0) + '%';
+
+    // cinema
+    if (!cinema.classList.contains('stack')) {
+      var p = progressOf(cinema);
+      cinema.classList.toggle('past-hero', p > 0.04);
+      var c = chapterAt(p);
+      if (c !== lastChap) {
+        lastChap = c;
+        chaps.forEach(function (el, i) { el.classList.toggle('on', i === c); });
+        // the copy is allowed to go dark between chapters; the picture is not,
+        // so the plate holds the last valid frame through the gap
+        if (c >= 0) syncPlates(c);
+        countIn(chaps[c]);
+      }
+    }
+
+    // gallery: vertical scroll becomes horizontal travel
+    if (!gallery.classList.contains('stack')) {
+      var gp = progressOf(gallery);
+      // the stage is narrower than the viewport once the rail has its column
+      var travel = Math.max(0, track.scrollWidth - gallery.clientWidth);
+      track.style.transform = 'translate3d(' + (-travel * gp) + 'px,0,0)';
+    }
+
+    // chapter rail
+    var active = -1;
+    for (var i = 0; i < sections.length; i++) {
+      if (sections[i] && sections[i].getBoundingClientRect().top <= window.innerHeight * 0.42) active = i;
+    }
+    railLinks.forEach(function (a, i) { a.setAttribute('aria-current', String(i === active)); });
+  }
+
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(frame);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+
+  /* ── the suite picker ───────────────────────────────────────────────────
+     The massing study is an instrument, not an image: it sits beside the specs
+     it explains and answers one question - where does this tier sit. */
+  var pView = document.getElementById('pickerView');
+  var pLive = false;
+  if (window.LuxeSelector && window.LuxeSelector.supported()) {
+    pLive = window.LuxeSelector.mount(pView);
+    if (pLive) pView.classList.add('is-live');
+  }
+  if (!pLive) {
+    pView.removeAttribute('role');
+    pView.removeAttribute('aria-label');
+    pView.removeAttribute('tabindex');
+  } else if ('IntersectionObserver' in window) {
+    // nothing renders while the instrument is off screen
+    new IntersectionObserver(function (es) {
+      window.LuxeSelector.setActive(es[0].isIntersecting);
+    }, { rootMargin: '160px' }).observe(pView);
+  }
+
+  var tierBtns = [].slice.call(document.querySelectorAll('.picker-tools button'));
+  tierBtns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      var t = b.getAttribute('data-tier') || null;
+      tierBtns.forEach(function (o) { o.setAttribute('aria-pressed', String(o === b)); });
+      if (pLive) window.LuxeSelector.setTier(t);
+    });
+  });
+
+  /* ── reveals ─────────────────────────────────────────────────────────── */
+  var reveals = [].slice.call(document.querySelectorAll('.rv'));
+  if (reduce || !('IntersectionObserver' in window)) {
+    reveals.forEach(function (el) { el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -8%' });
+    reveals.forEach(function (el) { io.observe(el); });
+    // anything already on screen at load should never wait for a scroll
+    window.addEventListener('load', function () {
+      reveals.forEach(function (el) {
+        if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add('in');
+      });
+    });
+  }
+
+  /* ── counters ─────────────────────────────────────────────────────────
+     A figure counts when its chapter actually arrives. In the pinned version
+     every chapter is permanently on screen, so an ordinary observer would fire
+     all of them at load and the count would happen where nobody is looking. */
+  function makeCounter(el) {
+    var target = parseInt(el.getAttribute('data-count'), 10);
+    if (reduce) { el.textContent = target; return function () {}; }
+    var started = false;
+    return function () {
+      if (started) return;
+      started = true;
+      var t0 = null, dur = 620;
+      requestAnimationFrame(function step(ts) {
+        if (t0 === null) t0 = ts;
+        var k = Math.min(1, (ts - t0) / dur);
+        el.textContent = Math.round(target * (1 - Math.pow(1 - k, 3)));
+        if (k < 1) requestAnimationFrame(step);
+      });
+    };
+  }
+  var counters = [].slice.call(document.querySelectorAll('[data-count]')).map(function (el) {
+    el.__run = makeCounter(el);
+    return el;
+  });
+  function countIn(scope) {
+    if (!scope || !counters) return;
+    counters.forEach(function (el) { if (scope.contains(el)) el.__run(); });
+  }
+  if (cinema.classList.contains('stack')) {
+    if (!reduce && 'IntersectionObserver' in window) {
+      var co = new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          e.target.__run(); co.unobserve(e.target);
+        });
+      }, { threshold: 0.5 });
+      counters.forEach(function (el) { co.observe(el); });
+    } else {
+      counters.forEach(function (el) { el.__run(); });
+    }
+  }
+
+  /* ── stories ─────────────────────────────────────────────────────────── */
+  var tabs = [].slice.call(document.querySelectorAll('.story-pick button'));
+  tabs.forEach(function (b, i) {
+    b.addEventListener('click', function () { pick(i); });
+    b.addEventListener('keydown', function (e) {
+      var n = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? i + 1
+            : e.key === 'ArrowLeft'  || e.key === 'ArrowUp'   ? i - 1 : null;
+      if (n === null) return;
+      e.preventDefault();
+      n = (n + tabs.length) % tabs.length;
+      pick(n); tabs[n].focus();
+    });
+  });
+  function pick(n) {
+    tabs.forEach(function (b, i) {
+      var on = i === n;
+      b.setAttribute('aria-selected', String(on));
+      b.tabIndex = on ? 0 : -1;   // roving tabindex, per the tabs pattern
+      document.getElementById(b.getAttribute('aria-controls')).classList.toggle('on', on);
+    });
+  }
+
+  /* ── inquiry form ────────────────────────────────────────────────────── */
+  var form = document.getElementById('inquiry'), done = document.getElementById('formDone');
+  function err(id, on) {
+    var f = document.getElementById(id);
+    var m = form.querySelector('.err[data-for="' + id + '"]');
+    f.setAttribute('aria-invalid', String(on));
+    if (m) m.classList.toggle('show', on);
+  }
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = document.getElementById('f-name').value.trim();
+    var mail = document.getElementById('f-email').value.trim();
+    var suite = document.getElementById('f-suite').value;
+    var okMail = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail);
+    err('f-name', !name); err('f-email', !okMail); err('f-suite', !suite);
+    if (!name || !okMail || !suite) {
+      var bad = form.querySelector('[aria-invalid="true"]');
+      if (bad) bad.focus();
+      return;
+    }
+    document.getElementById('formCard').classList.add('is-done');
+    // visibility flips on the same frame the class lands, so the confirmation is
+    // focusable immediately; waiting two frames only keeps the ring off an
+    // element that is still arriving
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { done.focus(); });
+    });
+  });
+
+  frame();
+})();
+</script>
+</body>
+</html>

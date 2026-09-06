@@ -1,0 +1,1126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Luxe Corsa · Private Auto Suites — Lake Zurich, Illinois</title>
+<meta name="description" content="Luxe Corsa Auto Suites: 121 private, climate-controlled luxury auto suites in Lake Zurich, Illinois. Clubhouse, simulators, 24/7 owner access." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+/* ─── tokens — bound to the LUXE CORSA Figma design system ─────────────── */
+:root{
+  --bg:            #0e0e10;   /* page ground */
+  --surface:       #ffffff;   /* solid pill buttons */
+  --fg:            #e8e8e8;   /* primary text */
+  --fg-quiet:      #a8a8a8;   /* card body */
+  --muted:         #8a8a8a;   /* labels, meta, fine print */
+  --accent:        #3a8170;   /* brand accent — display type only (large text) */
+  --accent-live:   #28a588;   /* same accent, lifted for small text / ticks / focus */
+  --marque:        #d34d4d;   /* menu toggle + error state only */
+  --surface-hover: #e4e6e5;   /* solid button hover — keeps dark-on-light contrast */
+
+  --border:        rgba(255,255,255,0.16);
+  --border-soft:   rgba(255,255,255,0.08);
+  --field:         rgba(255,255,255,0.07);
+  --field-hi:      rgba(255,255,255,0.12);
+  --glass:         rgba(14,14,16,0.24);
+  --glass-solid:   rgba(14,14,16,0.67);
+  --glass-glow:    rgba(0,157,255,0.17);
+  --card-lead:     #1a1b1f;   /* featured story card top stop */
+  --card-top:      #161619;
+  --card-bottom:   #27292d;
+  --strip-top:     #19191c;
+  --contact-mid:   #131317;
+  --contact-low:   #101013;
+  --option-bg:     #17171a;
+
+  --font-display: 'Degular Display','Degular','Figtree',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-body:    'Roboto',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+
+  --fs-hero:    clamp(40px, 6.6vw, 76px);  /* the hero outranks every section head */
+  --fs-display: clamp(34px, 4.6vw, 50px);
+  --fs-counter: clamp(42px, 5.2vw, 60px);
+  --fs-card:    clamp(24px, 2.2vw, 30px);
+  --fs-lead:    clamp(16px, 1.3vw, 18px);
+  --fs-body:    16px;
+  --fs-meta:    14px;
+  --fs-fine:    12px;
+
+  --container: 1300px;
+  --gutter: clamp(20px, 4.2vw, 40px);
+  --nav-h: 96px;
+
+  --radius-sm: 5px;
+  --radius: 10px;
+  --radius-lg: 20px;
+  --pill: 60px;
+
+  --ease: cubic-bezier(.22,.61,.36,1);
+}
+
+/* ─── reset & base ────────────────────────────────────────────────────── */
+*,*::before,*::after{ box-sizing:border-box; }
+html{ -webkit-text-size-adjust:100%; scroll-behavior:smooth; }
+body{
+  margin:0; background:var(--bg); color:var(--fg);
+  font-family:var(--font-body); font-size:var(--fs-body); line-height:1.6;
+  overflow-x:hidden; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+}
+img,svg{ display:block; max-width:100%; }
+a{ color:inherit; text-decoration:none; }
+button{ font:inherit; cursor:pointer; }
+p{ margin:0; text-wrap:pretty; }
+h1,h2,h3{ margin:0; font-weight:400; text-wrap:balance; }
+:focus-visible{ outline:2px solid var(--accent-live); outline-offset:3px; border-radius:4px; }
+.sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+a.sr-only:focus{
+  position:fixed; top:12px; left:12px; z-index:99; width:auto; height:auto; clip:auto; margin:0;
+  padding:12px 20px; background:var(--surface); color:var(--bg); border-radius:var(--pill);
+  font-family:var(--font-display); font-weight:600; text-transform:uppercase;
+}
+
+/* ─── layout primitives ───────────────────────────────────────────────── */
+.container{ width:100%; max-width:var(--container); margin-inline:auto; padding-inline:var(--gutter); }
+.section{ position:relative; padding-block:clamp(64px,7vw,110px); }
+.stack{ display:flex; flex-direction:column; }
+
+/* ─── type ────────────────────────────────────────────────────────────── */
+.display{ font-family:var(--font-display); font-size:var(--fs-display); line-height:1.06; letter-spacing:-.01em; font-weight:400; }
+.display .hl{ color:var(--accent); }
+.lead{ font-size:var(--fs-lead); line-height:1.66; color:var(--fg-quiet); max-width:62ch; }
+.eyebrow{
+  display:inline-flex; align-items:center; gap:14px;
+  font-size:var(--fs-meta); letter-spacing:.2em; text-transform:uppercase;
+  color:var(--fg); line-height:1.4;
+}
+.eyebrow::before{ content:""; width:1px; height:16px; background:var(--accent-live); flex:none; }
+.eyebrow.is-centered{ justify-content:center; }
+.eyebrow.is-centered::before{ display:none; }
+.tick{ display:block; width:24px; height:1px; background:var(--accent-live); margin:0 auto 18px; }
+.meta-label{ font-size:var(--fs-meta); letter-spacing:.2em; text-transform:uppercase; color:var(--muted); }
+
+/* ─── buttons ─────────────────────────────────────────────────────────── */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  min-width:196px; min-height:50px; padding:10px 26px;
+  border-radius:var(--pill); border:1px solid transparent;
+  font-family:var(--font-display); font-size:16px; font-weight:600;
+  letter-spacing:.02em; text-transform:uppercase; white-space:nowrap;
+  transition:background .2s var(--ease), border-color .2s var(--ease), color .2s var(--ease), transform .12s var(--ease);
+}
+.btn:active{ transform:translateY(1px); }
+.btn .arw{ width:16px; height:16px; flex:none; transition:transform .2s var(--ease); }
+.btn:hover .arw{ transform:translateX(3px); }
+
+.btn-solid{ background:var(--surface); color:var(--bg); border-color:var(--surface); }
+.btn-solid:hover{ background:var(--surface-hover); border-color:var(--surface-hover); color:var(--bg); }
+
+.btn-outline{ background:transparent; color:var(--fg); border-color:var(--surface); }
+.btn-outline:hover{ background:var(--surface); color:var(--bg); border-color:var(--surface); }
+
+.btn-row{ display:flex; align-items:center; flex-wrap:wrap; gap:16px 24px; }
+
+/* text-level CTA — for repeat entry points that must not restate a primary */
+.link-cta{
+  display:inline-flex; align-items:center; gap:8px; min-height:44px;
+  font-family:var(--font-display); font-size:16px; font-weight:600;
+  letter-spacing:.02em; text-transform:uppercase; color:var(--fg);
+  box-shadow:inset 0 -1px 0 var(--border);
+  transition:color .2s var(--ease), box-shadow .2s var(--ease);
+}
+.link-cta:hover{ color:var(--surface); box-shadow:inset 0 -1px 0 var(--surface); }
+
+/* ─── topnav ──────────────────────────────────────────────────────────── */
+.topnav{
+  position:fixed; inset:0 0 auto 0; z-index:60; height:var(--nav-h);
+  display:flex; align-items:center;
+  transition:background .3s var(--ease), border-color .3s var(--ease), height .3s var(--ease);
+  border-bottom:1px solid transparent;
+}
+.topnav.is-stuck{ background:rgba(13,13,14,.92); backdrop-filter:blur(14px); border-bottom-color:var(--border-soft); height:72px; }
+.topnav-inner{ display:flex; align-items:center; justify-content:space-between; gap:20px; width:100%; }
+.brand{ display:flex; align-items:center; gap:14px; }
+.brand .mark{ width:30px; height:42px; }
+.brand .word{ width:224px; height:29px; }
+.nav-center{ position:absolute; left:50%; transform:translateX(-50%); }
+.nav-right{ margin-left:auto; }
+
+.menu-toggle{
+  display:flex; flex-direction:column; justify-content:center; gap:8px;
+  width:44px; height:44px; padding:0; background:none; border:0;
+}
+.menu-toggle .bar{ display:block; width:30px; height:1.5px; background:var(--marque); transition:transform .3s var(--ease), opacity .2s var(--ease), width .3s var(--ease); }
+.menu-toggle:hover .bar:nth-child(2){ width:20px; }
+body.menu-open .menu-toggle .bar:nth-child(1){ transform:translateY(9.5px) rotate(45deg); }
+body.menu-open .menu-toggle .bar:nth-child(2){ opacity:0; }
+body.menu-open .menu-toggle .bar:nth-child(3){ transform:translateY(-9.5px) rotate(-45deg); }
+
+/* ─── menu overlay ────────────────────────────────────────────────────── */
+.menu{
+  position:fixed; inset:0; z-index:55;
+  background:linear-gradient(105deg, rgba(13,13,14,.98) 0%, rgba(13,13,14,.94) 40%, rgba(14,14,16,.72) 100%);
+  backdrop-filter:blur(18px);
+  display:flex; align-items:center;
+  opacity:0; visibility:hidden; transition:opacity .4s var(--ease), visibility .4s;
+}
+body.menu-open .menu{ opacity:1; visibility:visible; }
+.menu-inner{ width:100%; max-width:var(--container); margin-inline:auto; padding:var(--nav-h) var(--gutter) 40px; }
+.menu-list{ list-style:none; margin:0 0 44px; padding:0; display:flex; flex-direction:column; gap:6px; }
+.menu-list a{
+  display:inline-block; padding:10px 0;
+  font-family:var(--font-body); font-weight:700; font-size:clamp(15px,1.5vw,18px);
+  letter-spacing:.14em; text-transform:uppercase; color:var(--fg);
+  transition:color .2s var(--ease), transform .3s var(--ease);
+}
+.menu-list a:hover{ color:var(--surface); transform:translateX(8px); }
+.menu-list a[aria-current="page"]{ color:var(--accent-live); }
+.menu-list li{ opacity:0; transform:translateY(14px); transition:opacity .5s var(--ease), transform .5s var(--ease); }
+body.menu-open .menu-list li{ opacity:1; transform:none; }
+body.menu-open .menu-list li:nth-child(1){ transition-delay:.10s }
+body.menu-open .menu-list li:nth-child(2){ transition-delay:.16s }
+body.menu-open .menu-list li:nth-child(3){ transition-delay:.22s }
+body.menu-open .menu-list li:nth-child(4){ transition-delay:.28s }
+body.menu-open .menu-list li:nth-child(5){ transition-delay:.34s }
+body.menu-open .menu-list li:nth-child(6){ transition-delay:.40s }
+
+/* ─── hero ────────────────────────────────────────────────────────────── */
+.hero{
+  position:relative; min-height:min(100svh, 960px);
+  display:flex; align-items:center; justify-content:center;
+  padding:calc(var(--nav-h) + 40px) 0 96px; overflow:hidden;
+}
+.hero-media{ position:absolute; inset:0; z-index:0; }
+.hero-media img{ width:100%; height:100%; object-fit:cover; }
+.hero-media::after{
+  content:""; position:absolute; inset:0;
+  background:
+    linear-gradient(180deg, rgba(14,14,16,.92) 0%, rgba(14,14,16,.30) 34%, rgba(14,14,16,.55) 72%, var(--bg) 100%),
+    radial-gradient(120% 70% at 50% 42%, rgba(14,14,16,0) 20%, rgba(14,14,16,.55) 100%);
+}
+.hero-body{ position:relative; z-index:2; text-align:center; max-width:720px; margin-inline:auto; }
+.hero-body h1{ font-family:var(--font-display); font-size:var(--fs-hero); line-height:1.02; margin:18px 0 24px; }
+.hero-body .lead{ margin-inline:auto; max-width:44ch; color:var(--fg); opacity:.9; }
+.hero-cta{ margin-top:clamp(36px,6vw,90px); display:flex; justify-content:center; flex-wrap:wrap; gap:14px; }
+
+/* mobile-only hero primary — stands in for the topnav button, which is hidden ≤860px */
+.hero-cta .only-narrow{ display:none; }
+
+.scroll-cue{
+  position:absolute; right:calc(var(--gutter) + 6px); bottom:96px; z-index:2;
+  display:flex; flex-direction:column; align-items:center; gap:16px;
+  font-size:11px; letter-spacing:.34em; text-transform:uppercase; color:var(--muted);
+}
+.scroll-cue span{ writing-mode:vertical-rl; }
+.scroll-cue i{ display:block; width:1px; height:86px; background:linear-gradient(180deg,var(--accent-live),transparent); }
+
+/* ─── counters strip ──────────────────────────────────────────────────── */
+.counters{ background:linear-gradient(180deg,var(--strip-top) 0%, var(--bg) 100%); padding-block:clamp(48px,5vw,74px); }
+.counter-grid{ display:grid; grid-template-columns:repeat(4,1fr); }
+.counter{ padding-inline:clamp(16px,2.4vw,40px); border-left:1px solid var(--border-soft); }
+.counter:first-child{ border-left:0; padding-left:0; }
+.counter .num{ font-family:var(--font-display); font-size:var(--fs-counter); line-height:1.1; color:var(--fg); font-variant-numeric:tabular-nums; }
+.counter .lbl{ margin-top:6px; font-size:var(--fs-meta); letter-spacing:.2em; text-transform:uppercase; color:var(--muted); }
+
+/* ─── amenities ───────────────────────────────────────────────────────── */
+.amenities{
+  background:
+    radial-gradient(120% 78% at 58% 62%, rgba(29,29,73,.96) 0%, rgba(21,21,45,.92) 42%, rgba(14,14,16,1) 78%),
+    var(--bg);
+  padding-block:clamp(80px,9vw,150px);
+}
+.amenities-head{ text-align:center; max-width:640px; margin:0 auto clamp(56px,7vw,96px); }
+.amenities-head h2{ margin:16px 0 22px; }
+.amenities-head .lead{ margin-inline:auto; }
+.amenity-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+.amenity{
+  min-height:180px; padding:24px 20px; border-radius:var(--radius);
+  background:var(--glass); backdrop-filter:blur(34px);
+  border:1px solid var(--border-soft);
+  box-shadow:0 4px 22px -3px var(--glass-glow);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:8px;
+  transition:transform .3s var(--ease), border-color .3s var(--ease), box-shadow .3s var(--ease);
+}
+.amenity:hover{ transform:translateY(-3px); border-color:var(--border); box-shadow:0 10px 34px -6px var(--glass-glow); }
+.amenity .ico{ width:24px; height:24px; margin-bottom:4px; }
+.amenity h3{ font-family:var(--font-display); font-size:var(--fs-card); line-height:1.15; color:var(--fg); }
+.amenity p{ font-size:var(--fs-meta); line-height:1.78; color:var(--fg-quiet); max-width:34ch; }
+
+/* ─── what is luxe corsa ──────────────────────────────────────────────── */
+.whatis{
+  background:
+    radial-gradient(58% 120% at 22% 60%, rgba(29,74,66,.55) 0%, rgba(14,14,16,0) 70%),
+    radial-gradient(58% 120% at 78% 62%, rgba(29,74,66,.45) 0%, rgba(14,14,16,0) 70%),
+    var(--bg);
+}
+.panel{ position:relative; border-radius:var(--radius); overflow:hidden; isolation:isolate; }
+.panel > img{ width:100%; height:100%; object-fit:cover; position:absolute; inset:0; z-index:0; }
+/* the reading zone sits over the brightest part of the render — hold it down */
+.panel::after{
+  content:""; position:absolute; inset:0; z-index:1;
+  background:
+    radial-gradient(78% 62% at 50% 46%, rgba(14,14,16,.80) 0%, rgba(14,14,16,.30) 100%),
+    linear-gradient(180deg, rgba(14,14,16,.92) 0%, rgba(14,14,16,.62) 45%, rgba(14,14,16,.90) 100%);
+}
+.panel-body{ position:relative; z-index:2; padding:clamp(40px,5vw,64px) clamp(24px,4vw,56px); text-align:center; }
+.panel-body h2{ margin:16px 0 20px; }
+.panel-body .lead{ margin-inline:auto; max-width:56ch; }
+.panel-foot{
+  margin-top:clamp(48px,7vw,120px);
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:28px;
+}
+.figures{ display:flex; align-items:center; gap:0; flex-wrap:wrap; }
+.figure{ display:flex; align-items:baseline; gap:10px; padding-inline:22px; border-left:1px solid var(--border-soft); }
+.figure:first-child{ border-left:0; padding-left:0; }
+.figure b{ font-family:var(--font-display); font-size:20px; font-weight:600; color:var(--fg); font-variant-numeric:tabular-nums; }
+.figure span{ font-size:var(--fs-meta); letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
+
+/* ─── gallery ─────────────────────────────────────────────────────────── */
+.gallery-head{ margin-bottom:clamp(32px,4vw,48px); }
+.gallery-head h2{ margin-top:16px; }
+.shot{ position:relative; border-radius:var(--radius); overflow:hidden; background:var(--card-top); }
+.shot img{ width:100%; height:auto; }
+.shot button.zoom{
+  position:absolute; inset:0; width:100%; height:100%; padding:0;
+  background:transparent; border:0; transition:background .25s var(--ease);
+}
+.shot button.zoom:hover{ background:rgba(14,14,16,.22); }
+.chip{
+  position:absolute; top:20px; right:20px; z-index:2; pointer-events:none;
+  padding:5px 13px; border-radius:var(--pill);
+  background:rgba(14,14,16,.62); backdrop-filter:blur(10px);
+  border:1px solid var(--border-soft);
+  font-size:13px; color:var(--fg); letter-spacing:.02em;
+}
+.gallery-row{ display:grid; grid-template-columns:747fr 522fr; gap:28px; margin-top:28px; }
+.gallery-cta{ margin-top:clamp(36px,4vw,52px); display:flex; justify-content:center; }
+
+/* ─── lightbox ────────────────────────────────────────────────────────── */
+.lightbox{
+  position:fixed; inset:0; z-index:80; display:none;
+  align-items:center; justify-content:center; padding:clamp(20px,5vw,64px);
+  background:rgba(6,6,7,.94); backdrop-filter:blur(8px);
+}
+.lightbox[open]{ display:flex; }
+.lightbox figure{ margin:0; max-width:1300px; width:100%; }
+.lightbox img{ width:100%; height:auto; max-height:76vh; object-fit:contain; border-radius:var(--radius); }
+.lightbox figcaption{ margin-top:18px; text-align:center; font-size:var(--fs-meta); letter-spacing:.2em; text-transform:uppercase; color:var(--muted); }
+.lb-btn{
+  position:absolute; top:50%; transform:translateY(-50%);
+  width:52px; height:52px; min-width:0; border-radius:50%;
+  display:grid; place-items:center; background:transparent; color:var(--fg);
+  border:1px solid var(--border);
+  transition:background .2s var(--ease), color .2s var(--ease), border-color .2s var(--ease);
+}
+.lb-btn:hover{ background:var(--surface); color:var(--bg); border-color:var(--surface); }
+.lb-btn:active{ transform:translateY(-50%); }
+.lb-prev{ left:clamp(12px,2.5vw,32px); }
+.lb-next{ right:clamp(12px,2.5vw,32px); }
+.lb-close{ position:absolute; top:24px; right:clamp(12px,2.5vw,32px); transform:none; }
+.lb-close:active{ transform:none; }
+
+/* ─── prestige split ──────────────────────────────────────────────────── */
+.split{ display:grid; grid-template-columns:637fr 522fr; gap:clamp(40px,8vw,138px); align-items:start; }
+.split .shot img{ border-radius:var(--radius); }
+.split-body h2{ margin:16px 0 26px; }
+.split-body .lead{ font-size:var(--fs-body); line-height:1.78; }
+.split-body .btn-row{ margin-top:32px; }
+
+/* ─── monaco ──────────────────────────────────────────────────────────── */
+.monaco{ text-align:center; }
+.monaco h2{ max-width:1150px; margin:18px auto 0; }
+.monaco-shot{ margin-top:clamp(32px,4vw,48px); border-radius:var(--radius); overflow:hidden; }
+.monaco-shot img{ width:100%; height:auto; }
+.monaco-foot{
+  margin-top:clamp(28px,3vw,36px);
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:28px; text-align:left;
+}
+.facts{ display:flex; flex-wrap:wrap; }
+.fact{ padding-inline:22px; border-left:1px solid var(--border-soft); }
+.fact:first-child{ padding-left:0; border-left:0; }
+.fact b{ display:block; font-weight:500; font-size:var(--fs-body); color:var(--fg); }
+.fact span{ font-size:var(--fs-meta); letter-spacing:.2em; text-transform:uppercase; color:var(--muted); }
+.fineprint{
+  margin-top:28px; padding-top:26px; border-top:1px solid var(--border-soft);
+  font-size:var(--fs-fine); line-height:1.85; letter-spacing:.02em; text-transform:uppercase; color:var(--muted);
+}
+
+/* ─── testimonials ────────────────────────────────────────────────────── */
+.testimonials{ position:relative; overflow:hidden; padding-block:clamp(80px,9vw,140px); }
+.testimonials .bg{ position:absolute; inset:0; z-index:0; }
+.testimonials .bg img{ width:100%; height:100%; object-fit:cover; }
+.testimonials .bg::after{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(180deg, var(--bg) 0%, rgba(14,14,16,.80) 28%, rgba(14,14,16,.86) 70%, var(--bg) 100%);
+}
+.testimonials .container{ position:relative; z-index:2; }
+.testimonials-head{ text-align:center; margin-bottom:clamp(40px,5vw,64px); }
+.testimonials-head h2{ margin-top:16px; }
+.rail{
+  display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0,1fr); gap:24px;
+  overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none;
+  padding-bottom:4px;
+}
+.rail::-webkit-scrollbar{ display:none; }
+.quote-card{
+  scroll-snap-align:center;
+  background:linear-gradient(180deg,var(--card-top) 0%, var(--card-bottom) 100%);
+  border:1px solid var(--border-soft);
+  border-radius:var(--radius); box-shadow:0 4px 18px 6px rgba(0,0,0,.31);
+  padding:clamp(28px,3vw,40px);
+  display:grid; grid-template-columns:auto 1fr; gap:26px; align-items:start;
+}
+.quote-card .avatar{ width:96px; height:96px; border-radius:50%; overflow:hidden; flex:none; background:var(--card-bottom); }
+.quote-card .avatar img{ width:100%; height:100%; object-fit:cover; }
+.quote-card blockquote{ margin:0; font-size:var(--fs-body); line-height:1.63; color:var(--fg); }
+.quote-card .attrib{ margin-top:22px; padding-left:17px; border-left:1px solid var(--border); }
+.quote-card .attrib b{ display:block; font-weight:500; font-size:var(--fs-body); color:var(--fg); }
+.quote-card .attrib > span{ display:block; font-size:var(--fs-meta); text-transform:uppercase; color:var(--muted); line-height:1.7; }
+.nw{ display:inline; white-space:nowrap; }
+.quote-card.is-lead{ background:linear-gradient(180deg,var(--card-lead) 0%, var(--card-bottom) 100%); border-color:var(--border); }
+.rail-nav{ margin-top:32px; display:flex; align-items:center; justify-content:center; gap:14px; }
+.rail-btn{
+  width:46px; height:46px; min-width:0; border-radius:50%; display:grid; place-items:center;
+  background:transparent; color:var(--fg); border:1px solid var(--border);
+  transition:background .2s var(--ease), color .2s var(--ease), border-color .2s var(--ease);
+}
+.rail-btn:hover{ background:var(--surface); color:var(--bg); border-color:var(--surface); }
+.rail-dots{ display:flex; gap:8px; }
+.rail-dots button{ width:8px; height:8px; padding:0; min-width:0; border:0; border-radius:50%; background:var(--border); transition:background .2s var(--ease), transform .2s var(--ease); }
+.rail-dots button[aria-current="true"]{ background:var(--accent-live); transform:scale(1.35); }
+
+/* ─── contact ─────────────────────────────────────────────────────────── */
+.contact{ position:relative; overflow:hidden; padding-block:clamp(120px,13vw,190px) clamp(40px,5vw,64px); }
+.contact::before{
+  content:""; position:absolute; inset:0; z-index:0;
+  background:linear-gradient(180deg,var(--bg) 0%, var(--contact-mid) 34%, var(--contact-low) 74%, var(--bg) 100%);
+}
+.watermark{
+  position:absolute; z-index:1; left:50%; top:0; transform:translateX(-50%);
+  height:clamp(56px, 8vw, 226px); width:auto; max-width:none;
+  opacity:.5; pointer-events:none;
+}
+.contact .container{ position:relative; z-index:2; }
+.contact-grid{ display:grid; grid-template-columns:1fr 526px; gap:clamp(40px,6vw,96px); align-items:start; }
+.contact-body h2{ margin:18px 0 22px; }
+.contact-body .lead{ max-width:46ch; }
+.contact-body hr{ margin:34px 0 0; border:0; border-top:1px solid var(--border-soft); width:85px; }
+.detail{ margin-top:34px; }
+.detail dt{ font-size:var(--fs-body); font-weight:500; color:var(--fg); }
+.detail dd{ margin:2px 0 0; font-size:var(--fs-body); color:var(--fg-quiet); }
+.detail dd a:hover{ color:var(--accent-live); }
+.socials{ margin-top:38px; }
+.socials p{ font-size:var(--fs-body); color:var(--fg); margin-bottom:14px; }
+.social-row{ display:flex; gap:22px; flex-wrap:wrap; }
+.social-row a{ display:grid; place-items:center; width:44px; height:44px; margin:-10px; transition:transform .2s var(--ease), filter .2s var(--ease); }
+.social-row a:hover{ transform:translateY(-2px); filter:brightness(2.2); }
+.social-row img{ width:24px; height:24px; }
+
+.form-card{
+  background:var(--glass-solid); backdrop-filter:blur(20px);
+  border:1px solid var(--border-soft); border-radius:var(--radius-lg);
+  padding:clamp(28px,3vw,46px);
+}
+.field{ margin-bottom:29px; position:relative; }
+.field:last-of-type{ margin-bottom:34px; }
+.input,.textarea,.select{
+  width:100%; min-height:50px; padding:13px 16px;
+  background:var(--field); border:1px solid transparent; border-radius:var(--radius-sm);
+  color:var(--fg); font:inherit; font-size:var(--fs-body);
+  transition:background .2s var(--ease), border-color .2s var(--ease);
+}
+.textarea{ min-height:117px; resize:vertical; line-height:1.6; }
+.select{ appearance:none; padding-right:46px; color:var(--fg); }
+.select option{ background:var(--option-bg); color:var(--fg); }
+.input::placeholder,.textarea::placeholder{ color:var(--fg); opacity:.72; }
+.input:hover,.textarea:hover,.select:hover{ background:var(--field-hi); }
+.input:focus,.textarea:focus,.select:focus{ background:var(--field-hi); border-color:var(--accent-live); outline:none; }
+.input[aria-invalid="true"],.select[aria-invalid="true"]{ border-color:var(--marque); }
+.field .chev{ position:absolute; right:16px; top:17px; width:16px; height:16px; pointer-events:none; }
+.field .err{ display:none; margin-top:6px; font-size:13px; color:var(--marque); }
+.field .err.show{ display:block; }
+.form-actions{ display:flex; gap:16px; flex-wrap:wrap; }
+.form-actions .btn{ min-width:0; flex:1 1 auto; padding-inline:18px; font-size:15px; }
+.form-note{ margin-top:20px; font-size:13px; color:var(--muted); }
+.form-done{
+  display:none; padding:22px 20px; border-radius:var(--radius-sm);
+  background:rgba(58,129,112,.16); border:1px solid var(--accent);
+  font-size:var(--fs-body); color:var(--fg);
+}
+.form-done.show{ display:block; }
+
+/* ─── footer bar ──────────────────────────────────────────────────────── */
+.footbar{ border-top:1px solid var(--border-soft); padding-block:26px; }
+.footbar .container{ display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap; }
+.footbar, .footbar a{ font-size:var(--fs-meta); color:var(--muted); }
+.footbar a:hover{ color:var(--fg); }
+
+/* ─── scroll reveal ───────────────────────────────────────────────────── */
+.reveal{ opacity:0; transform:translateY(22px); transition:opacity .7s var(--ease), transform .7s var(--ease); }
+.reveal.in{ opacity:1; transform:none; }
+
+/* ─── responsive ──────────────────────────────────────────────────────── */
+@media (max-width:1100px){
+  .contact-grid{ grid-template-columns:1fr; }
+  .form-card{ max-width:560px; }
+}
+@media (max-width:980px){
+  .split{ grid-template-columns:1fr; gap:36px; }
+  .amenity-grid{ grid-template-columns:repeat(2,1fr); }
+  .counter-grid{ grid-template-columns:repeat(2,1fr); row-gap:34px; }
+  .counter:nth-child(odd){ border-left:0; padding-left:0; }
+  .rail{ grid-auto-columns:min(80%,460px); }
+}
+@media (max-width:860px){
+  :root{ --nav-h:65px; }
+  .nav-center{ position:static; transform:none; }
+  .brand .word{ width:150px; height:20px; }
+  .brand .mark{ width:20px; height:29px; }
+  .nav-right .btn{ display:none; }
+  .topnav{ background:rgba(13,13,14,.92); backdrop-filter:blur(14px); border-bottom-color:var(--border-soft); }
+  .menu-toggle{ order:2; }
+  .scroll-cue{ display:none; }
+  .hero{ min-height:100svh; padding-bottom:64px; }
+  .hero-cta{ flex-direction:column; align-items:stretch; }
+  .hero-cta .btn{ width:100%; min-width:0; }
+  .hero-cta .only-narrow{ display:inline-flex; }
+  .gallery-row{ grid-template-columns:1fr; }
+  .panel-foot{ flex-direction:column; align-items:flex-start; }
+  .monaco-foot{ flex-direction:column; align-items:flex-start; }
+  .quote-card{ grid-template-columns:1fr; gap:20px; }
+  .rail{ grid-auto-columns:88%; }
+  .watermark{ width:180%; opacity:.4; }
+}
+@media (max-width:620px){
+  .amenity-grid{ grid-template-columns:1fr; }
+  .counter-grid{ grid-template-columns:1fr; row-gap:28px; }
+  .counter{ border-left:0; padding-left:0; }
+  .figures,.facts{ flex-direction:column; align-items:flex-start; gap:20px; }
+  .figure,.fact{ border-left:0; padding-left:0; }
+  .btn-row .btn,.form-actions .btn{ width:100%; min-width:0; }
+  .lb-btn{ width:44px; height:44px; }
+}
+@media (prefers-reduced-motion:reduce){
+  html{ scroll-behavior:auto; }
+  *,*::before,*::after{ animation-duration:.01ms !important; transition-duration:.01ms !important; }
+  .reveal{ opacity:1; transform:none; }
+}
+</style>
+</head>
+<body>
+
+<a class="sr-only" href="#content">Skip to content</a>
+
+<!-- ══ nav ══════════════════════════════════════════════════════════════ -->
+<header class="topnav" data-od-id="topnav">
+  <div class="container topnav-inner">
+    <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="menu" aria-label="Open menu">
+      <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+    </button>
+    <a class="brand nav-center" href="#top" aria-label="Luxe Corsa — home">
+      <img class="mark" src="assets/logo-mark.svg" alt="" width="46" height="64" />
+      <img class="word" src="assets/logo-word.svg" alt="Luxe Corsa" width="339" height="44" />
+    </a>
+    <div class="nav-right">
+      <a class="btn btn-outline" href="#contact" data-od-id="nav-reserve">Reserve now!</a>
+    </div>
+  </div>
+</header>
+
+<!-- ══ menu overlay ═════════════════════════════════════════════════════ -->
+<nav class="menu" id="menu" aria-label="Primary" data-od-id="menu-overlay">
+  <div class="menu-inner">
+    <ul class="menu-list">
+      <li><a href="suites-availability.html">Suite Availability</a></li>
+      <li><a href="#gallery">Gallery</a></li>
+      <li><a href="#monaco">Events</a></li>
+      <li><a href="suites-availability.html#inventory">Construction Update</a></li>
+      <li><a href="#prestige">Who We Are</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="btn-row">
+      <a class="btn btn-outline" href="suites-availability.html">See suite availability</a>
+      <a class="btn btn-outline" href="tel:+12246620000">Call us: 224.662.0000</a>
+    </div>
+  </div>
+</nav>
+
+<main id="content">
+
+<!-- ══ hero ═════════════════════════════════════════════════════════════ -->
+<section class="hero" id="top" data-od-id="hero">
+  <div class="hero-media">
+    <img src="assets/hero-bg.jpg" alt="Aerial view of the Luxe Corsa auto suite campus in Lake Zurich, Illinois" width="1920" height="960" fetchpriority="high" />
+  </div>
+  <div class="container hero-body">
+    <span class="tick" aria-hidden="true"></span>
+    <p class="eyebrow is-centered">Lake Zurich, Illinois</p>
+    <h1>Where Passion<br />Meets Space</h1>
+    <p class="lead">Private, climate-controlled suites for prized collections.</p>
+    <div class="hero-cta">
+      <a class="btn btn-outline" href="#amenities" data-od-id="hero-whats-inside">What&rsquo;s inside?</a>
+      <a class="btn btn-solid only-narrow" href="#contact" data-od-id="hero-reserve">
+        Reserve yours
+        <svg class="arw" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 8h7.3M8.6 4.9 11.7 8l-3.1 3.1" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+  </div>
+  <div class="scroll-cue" aria-hidden="true"><span>Scroll</span><i></i></div>
+</section>
+
+<!-- ══ counters ═════════════════════════════════════════════════════════ -->
+<section class="counters" data-od-id="counters">
+  <div class="container">
+    <div class="counter-grid" id="counterGrid">
+      <div class="counter"><div class="num" data-count="121">121</div><div class="lbl">Luxury suites</div></div>
+      <div class="counter"><div class="num" data-count="24" data-suffix="/7">24/7</div><div class="lbl">Owner access</div></div>
+      <div class="counter"><div class="num" data-count="100" data-suffix="%">100%</div><div class="lbl">Secure entry</div></div>
+      <div class="counter"><div class="num" data-count="15">15</div><div class="lbl">Acres secured</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ amenities ════════════════════════════════════════════════════════ -->
+<section class="amenities" id="amenities" data-od-id="amenities">
+  <div class="container">
+    <div class="amenities-head reveal">
+      <span class="tick" aria-hidden="true"></span>
+      <p class="eyebrow is-centered">What is Luxe Corsa?</p>
+      <h2 class="display">A private clubhouse<br />for automotive legacy</h2>
+      <p class="lead">Luxe Corsa is a secured, climate-controlled community of auto suites tailored for collectors and enthusiasts.</p>
+    </div>
+
+    <div class="amenity-grid">
+      <article class="amenity reveal" data-od-id="amenity-gated">
+        <img class="ico" src="assets/icon-gated.svg" alt="" width="24" height="24" />
+        <h3>Gated Community</h3>
+        <p>Dedicated personnel and premium security for complete peace of mind.</p>
+      </article>
+      <article class="amenity reveal" data-od-id="amenity-surveillance">
+        <img class="ico" src="assets/icon-surveillance.svg" alt="" width="24" height="24" />
+        <h3>State-of-the-Art Surveillance</h3>
+        <p>Advanced monitoring systems protecting your investment 24/7.</p>
+      </article>
+      <article class="amenity reveal" data-od-id="amenity-simulators">
+        <img class="ico" src="assets/icon-simulators.svg" alt="" width="24" height="24" />
+        <h3>Racing &amp; Golf Simulators</h3>
+        <p>Professional-grade simulators for the ultimate entertainment experience.</p>
+      </article>
+      <article class="amenity reveal" data-od-id="amenity-wellness">
+        <img class="ico" src="assets/icon-wellness.svg" alt="" width="24" height="24" />
+        <h3>Wellness + Fitness Studio</h3>
+        <p>Modern gym, spa, and recovery suites nurture health and performance.</p>
+      </article>
+      <article class="amenity reveal" data-od-id="amenity-events">
+        <img class="ico" src="assets/icon-events.svg" alt="" width="24" height="24" />
+        <h3>Business &amp; Event Space</h3>
+        <p>Flexible boardrooms and lounge areas elevate meetings, launches, and celebrations.</p>
+      </article>
+      <article class="amenity reveal" data-od-id="amenity-detail">
+        <img class="ico" src="assets/icon-detail.svg" alt="" width="24" height="24" />
+        <h3>Detail &amp; Customization</h3>
+        <p>Onsite artisans offer bespoke detailing, upgrades, and personalized suite finishes.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ══ what is luxe corsa ═══════════════════════════════════════════════ -->
+<section class="section whatis" id="whatis" data-od-id="what-is-luxe-corsa">
+  <div class="container">
+    <div class="panel reveal">
+      <img src="assets/whatis-bg.jpg" alt="The Luxe Corsa clubhouse entrance at dusk with owner vehicles arriving" width="1297" height="724" loading="lazy" />
+      <div class="panel-body">
+        <span class="tick" aria-hidden="true"></span>
+        <p class="eyebrow is-centered">What is Luxe Corsa?</p>
+        <h2 class="display">Private, customizable<br /><span class="hl">auto suites</span></h2>
+        <p class="lead">Luxe Corsa Auto Suites isn&rsquo;t just a place to store your cars&mdash;it&rsquo;s a community where speed, style, and sophistication converge. Live the race. Own the lifestyle. Secure your suite today and join the elite at Luxe Corsa.</p>
+
+        <div class="panel-foot">
+          <div class="figures">
+            <div class="figure"><b>500+</b><span>Members</span></div>
+            <div class="figure"><b>12</b><span>Events/Year</span></div>
+            <div class="figure"><b>24/7</b><span>Access</span></div>
+          </div>
+          <div class="btn-row">
+            <a class="btn btn-solid" href="suites-availability.html" data-od-id="whatis-availability">
+              See suite availability
+              <svg class="arw" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 8h7.3M8.6 4.9 11.7 8l-3.1 3.1" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <a class="link-cta" href="tel:+12246620000">Talk to an advisor</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ gallery ══════════════════════════════════════════════════════════ -->
+<section class="section" id="gallery" data-od-id="gallery">
+  <div class="container">
+    <div class="gallery-head reveal">
+      <p class="eyebrow">Gallery</p>
+      <h2 class="display">Experience the<br />difference</h2>
+    </div>
+
+    <div class="shot reveal" data-od-id="gallery-car-condos">
+      <img src="assets/gallery-car-condos.jpg" alt="Exterior rendering of the Luxe Corsa car condo buildings with owner vehicles parked at the drive-in doors" width="1297" height="450" loading="lazy" />
+      <span class="chip">Car Condos</span>
+      <button class="zoom" data-lb="0" aria-label="Enlarge: Car Condos"></button>
+    </div>
+
+    <div class="gallery-row">
+      <div class="shot reveal" data-od-id="gallery-site-plan">
+        <img src="assets/gallery-site-plan.jpg" alt="Luxe Corsa site plan showing 11 buildings, roadways and the clubhouse across the secured campus" width="747" height="360" loading="lazy" />
+        <span class="chip">Site Plan</span>
+        <button class="zoom" data-lb="1" aria-label="Enlarge: Site Plan"></button>
+      </div>
+      <div class="shot reveal" data-od-id="gallery-entry-gate">
+        <img src="assets/gallery-entry-gate.jpg" alt="Rendering of the Luxe Corsa branded entry gate at golden hour" width="522" height="360" loading="lazy" />
+        <span class="chip">Entry gate</span>
+        <button class="zoom" data-lb="2" aria-label="Enlarge: Entry gate"></button>
+      </div>
+    </div>
+
+    <div class="gallery-cta">
+      <button class="btn btn-outline" id="openGallery" data-od-id="gallery-full">Full gallery</button>
+    </div>
+  </div>
+</section>
+
+<!-- ══ prestige ═════════════════════════════════════════════════════════ -->
+<section class="section" id="prestige" data-od-id="prestige">
+  <div class="container split">
+    <div class="shot reveal">
+      <img src="assets/prestige.jpg" alt="The Luxe Corsa clubhouse and suite frontage illuminated at blue hour" width="637" height="524" loading="lazy" />
+    </div>
+    <div class="split-body reveal">
+      <p class="eyebrow">Your Cars&rsquo; Private Kingdom</p>
+      <h2 class="display">Luxe Corsa:<br /><span class="hl">Drive-In Prestige</span></h2>
+      <p class="lead">Luxe Corsa Auto Suites isn&rsquo;t just a place to store your cars&mdash;it&rsquo;s an elite community where speed, style, and sophistication converge. The development features 121 meticulously crafted luxury auto suites, each offering a private, secure, and customizable space to showcase and store your prized vehicles.</p>
+      <p class="lead" style="margin-top:20px;">Whether you&rsquo;re downsizing a home, running out of garage space, or simply desire a secure place to call your own, Luxe Corsa is the answer. Ownership includes access to common areas, a members-only state-of-the-art Clubhouse, and exclusive invites to monthly social events held by Luxe Corsa.</p>
+      <div class="btn-row">
+        <a class="btn btn-outline" href="#contact" data-od-id="prestige-tour">Book a private tour</a>
+        <a class="link-cta" href="suites-availability.html">See what&rsquo;s left</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ monaco ═══════════════════════════════════════════════════════════ -->
+<section class="section monaco" id="monaco" data-od-id="monaco">
+  <div class="container">
+    <div class="reveal">
+      <span class="tick" aria-hidden="true"></span>
+      <p class="eyebrow is-centered">Exclusive Opportunity</p>
+      <h2 class="display">The first 50 buyers will be automatically entered for a chance to win a trip to the <span class="hl">2026 Monaco Grand Prix</span></h2>
+    </div>
+
+    <div class="monaco-shot reveal">
+      <img src="assets/monaco.jpg" alt="Grand Prix cars racing past the terraces of Monte Carlo during the Monaco Grand Prix" width="1297" height="343" loading="lazy" />
+    </div>
+
+    <div class="monaco-foot reveal">
+      <div class="facts">
+        <div class="fact"><b>May 2026</b><span>Date</span></div>
+        <div class="fact"><b>Monte Carlo, Monaco</b><span>Location</span></div>
+        <div class="fact"><b>VIP Experience</b><span>Access</span></div>
+      </div>
+      <div class="btn-row">
+        <a class="btn btn-outline" href="#contact" data-od-id="monaco-claim">Claim an entry</a>
+        <a class="link-cta" href="tel:+12246620000">Call the sales office</a>
+      </div>
+    </div>
+
+    <p class="fineprint">First 50 eligible purchases automatically entered. Void where prohibited by law. Open to residents 18+ or older. Prize: Trip to 2026 Monaco Grand Prix; approximate retail value $100,000. Odds of winning depend on eligible entries. See official rules for details.</p>
+  </div>
+</section>
+
+<!-- ══ testimonials ═════════════════════════════════════════════════════ -->
+<section class="testimonials" id="stories" data-od-id="testimonials">
+  <div class="bg" aria-hidden="true">
+    <img src="assets/testimonial-bg.jpg" alt="" width="1919" height="960" loading="lazy" />
+  </div>
+  <div class="container">
+    <div class="testimonials-head reveal">
+      <span class="tick" aria-hidden="true"></span>
+      <p class="eyebrow is-centered">Member Stories</p>
+      <h2 class="display">What our buyers<br />are saying</h2>
+    </div>
+
+    <div class="rail" id="rail" tabindex="0" role="group" aria-label="Member stories carousel">
+      <article class="quote-card" data-od-id="quote-marcus">
+        <div class="avatar"><img src="assets/avatar-marcus.png" alt="Marcus K." width="264" height="264" loading="lazy" /></div>
+        <div>
+          <blockquote>&ldquo;The clubhouse energy and 24/7 access mean spontaneous night drives start and finish at my own doors&mdash;no compromises.&rdquo;</blockquote>
+          <div class="attrib">
+            <b>Marcus K.</b>
+            <span>Early Buyer</span>
+            <span><span class="nw">2020 Porsche 911 GT3 RS</span> <span class="nw">&middot; 2012 Nissan GT-R</span></span>
+          </div>
+        </div>
+      </article>
+
+      <article class="quote-card is-lead" data-od-id="quote-david">
+        <div class="avatar"><img src="assets/avatar-david.png" alt="David Martinez" width="264" height="264" loading="lazy" /></div>
+        <div>
+          <blockquote>&ldquo;The suite gives my collection room to grow&mdash;plus, the climate control means less time worrying about preservation.&rdquo;</blockquote>
+          <div class="attrib">
+            <b>David Martinez</b>
+            <span>Founding Buyer</span>
+            <span><span class="nw">1967 Shelby GT500</span> <span class="nw">&middot; 2022 McLaren 720S</span></span>
+          </div>
+        </div>
+      </article>
+
+      <article class="quote-card" data-od-id="quote-elena">
+        <div class="avatar"><img src="assets/avatar-elena.png" alt="Elena Rousseau" width="264" height="264" loading="lazy" /></div>
+        <div>
+          <blockquote>&ldquo;I locked in early because the location and security are unmatched.&rdquo;</blockquote>
+          <div class="attrib">
+            <b>Elena Rousseau</b>
+            <span>Early Buyer</span>
+            <span>2019 Ferrari 488 Pista</span>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div class="rail-nav">
+      <button class="rail-btn" id="railPrev" aria-label="Previous story">
+        <svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="M12 8H4.7M7.4 4.9 4.3 8l3.1 3.1" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="rail-dots" id="railDots"></div>
+      <button class="rail-btn" id="railNext" aria-label="Next story">
+        <svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="M4 8h7.3M8.6 4.9 11.7 8l-3.1 3.1" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ══ contact ══════════════════════════════════════════════════════════ -->
+<section class="contact" id="contact" data-od-id="contact">
+  <img class="watermark" src="assets/wordmark-large.svg" alt="" width="1733" height="226" aria-hidden="true" loading="lazy" />
+  <div class="container contact-grid">
+
+    <div class="contact-body reveal">
+      <p class="eyebrow">Get Started</p>
+      <h2 class="display">Check availability<br />&amp; schedule a tour</h2>
+      <p class="lead">Ready to secure your suite? Contact us to discuss availability and arrange a private tour.</p>
+      <hr />
+
+      <dl class="detail">
+        <dt>Location</dt>
+        <dd>Lake Zurich, IL / South Florida &mdash; Coming Soon</dd>
+      </dl>
+      <dl class="detail">
+        <dt>Phone</dt>
+        <dd><a href="tel:+12246620000">(224) 662-0000</a></dd>
+      </dl>
+
+      <div class="socials">
+        <p>Connect with us</p>
+        <div class="social-row">
+          <a href="#" aria-label="Luxe Corsa on Facebook"><img src="assets/social-facebook.svg" alt="" width="24" height="24" /></a>
+          <a href="#" aria-label="Luxe Corsa on YouTube"><img src="assets/social-youtube.svg" alt="" width="24" height="24" /></a>
+          <a href="#" aria-label="Luxe Corsa on X"><img src="assets/social-x.svg" alt="" width="24" height="24" /></a>
+          <a href="#" aria-label="Luxe Corsa on Instagram"><img src="assets/social-instagram.svg" alt="" width="24" height="24" /></a>
+          <a href="#" aria-label="Luxe Corsa on LinkedIn"><img src="assets/social-linkedin.svg" alt="" width="24" height="24" /></a>
+          <a href="#" aria-label="Luxe Corsa on TikTok"><img src="assets/social-tiktok.svg" alt="" width="24" height="24" /></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card reveal" data-od-id="inquiry-form">
+      <form id="inquiry" novalidate>
+        <div class="field">
+          <label class="sr-only" for="f-name">Your name</label>
+          <input class="input" id="f-name" name="name" type="text" placeholder="Your Name" autocomplete="name" required />
+          <p class="err" data-for="f-name">Please tell us your name.</p>
+        </div>
+        <div class="field">
+          <label class="sr-only" for="f-email">Your email</label>
+          <input class="input" id="f-email" name="email" type="email" placeholder="Your Email" autocomplete="email" required />
+          <p class="err" data-for="f-email">Please enter a valid email address.</p>
+        </div>
+        <div class="field">
+          <label class="sr-only" for="f-phone">Phone</label>
+          <input class="input" id="f-phone" name="phone" type="tel" placeholder="Phone" autocomplete="tel" />
+        </div>
+        <div class="field">
+          <label class="sr-only" for="f-suite">Preferred suite size</label>
+          <select class="select" id="f-suite" name="suite" required>
+            <option value="" selected disabled>Preferred Suite Size</option>
+            <option value="type-a">Type A &mdash; 2,430 sq ft (approx. 6 cars + 3 motorcycles)</option>
+            <option value="type-b">Type B &mdash; 1,863 sq ft (approx. 4 cars + 2 motorcycles)</option>
+            <option value="undecided">Not sure yet &mdash; advise me</option>
+          </select>
+          <img class="chev" src="assets/chevron-down.svg" alt="" width="16" height="16" />
+          <p class="err" data-for="f-suite">Choose a suite size so we can check availability.</p>
+        </div>
+        <div class="field">
+          <label class="sr-only" for="f-msg">Tell us about your collection</label>
+          <textarea class="textarea" id="f-msg" name="message" placeholder="Tell us about your collection..."></textarea>
+        </div>
+
+        <div class="form-actions">
+          <a class="btn btn-outline" href="tel:+12246620000">Call us: 224.662.0000</a>
+          <button class="btn btn-solid" type="submit">
+            Submit inquiry
+            <svg class="arw" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 8h7.3M8.6 4.9 11.7 8l-3.1 3.1" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        <p class="form-note">Prototype form &mdash; submissions are not sent anywhere.</p>
+      </form>
+      <div class="form-done" id="formDone" role="status">
+        Thank you &mdash; your inquiry is logged. A Luxe Corsa advisor will call you at the number provided within one business day.
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</main>
+
+<footer class="footbar" data-od-id="footer">
+  <div class="container">
+    <p>&copy;2025 Luxe Corsa <span aria-hidden="true">|</span> <a href="#">Privacy Policy</a> <span aria-hidden="true">|</span> <a href="#">Terms and Conditions</a> <span aria-hidden="true">|</span> <a href="#">Sitemap</a></p>
+    <p>Powered by All Auto Network</p>
+  </div>
+</footer>
+
+<!-- ══ lightbox ═════════════════════════════════════════════════════════ -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Gallery">
+  <button class="btn lb-btn lb-close" id="lbClose" aria-label="Close gallery">
+    <svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+  </button>
+  <button class="btn lb-btn lb-prev" id="lbPrev" aria-label="Previous image">
+    <svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="M12 8H4.7M7.4 4.9 4.3 8l3.1 3.1" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <figure>
+    <img id="lbImg" src="assets/gallery-car-condos.jpg" alt="" width="1297" height="450" />
+    <figcaption id="lbCap">Car Condos</figcaption>
+  </figure>
+  <button class="btn lb-btn lb-next" id="lbNext" aria-label="Next image">
+    <svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="M4 8h7.3M8.6 4.9 11.7 8l-3.1 3.1" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ── sticky nav ─────────────────────────────────────────────────────── */
+  var nav = document.querySelector('.topnav');
+  function onScroll() { nav.classList.toggle('is-stuck', window.scrollY > 40); }
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  /* ── menu overlay ───────────────────────────────────────────────────── */
+  var toggle = document.getElementById('menuToggle');
+  var menu = document.getElementById('menu');
+  function setMenu(open) {
+    document.body.classList.toggle('menu-open', open);
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    document.body.style.overflow = open ? 'hidden' : '';
+    if (open) { var f = menu.querySelector('a'); if (f) f.focus(); }
+  }
+  toggle.addEventListener('click', function () {
+    setMenu(toggle.getAttribute('aria-expanded') !== 'true');
+  });
+  menu.addEventListener('click', function (e) {
+    if (e.target.closest('a')) setMenu(false);
+  });
+
+  /* ── scroll reveal ──────────────────────────────────────────────────── */
+  var reveals = Array.prototype.slice.call(document.querySelectorAll('.reveal'));
+  if (reduce || !('IntersectionObserver' in window)) {
+    reveals.forEach(function (el) { el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+      });
+    }, { rootMargin: '0px 0px -12% 0px', threshold: 0.12 });
+    reveals.forEach(function (el, i) { el.style.transitionDelay = (i % 3) * 0.08 + 's'; io.observe(el); });
+  }
+  // Motion must never gate content. Anything at or near the first screen resolves
+  // on load, so a missed observer can never leave a block permanently invisible.
+  window.addEventListener('load', function () {
+    reveals.forEach(function (el) {
+      if (el.getBoundingClientRect().top < window.innerHeight * 1.25) el.classList.add('in');
+    });
+  });
+
+  /* ── counters ───────────────────────────────────────────────────────── */
+  var grid = document.getElementById('counterGrid');
+  function runCounters() {
+    Array.prototype.forEach.call(grid.querySelectorAll('.num'), function (el) {
+      var target = parseInt(el.getAttribute('data-count'), 10);
+      var suffix = el.getAttribute('data-suffix') || '';
+      if (reduce) { el.textContent = target + suffix; return; }
+      var start = null, dur = 1400;
+      function step(ts) {
+        if (start === null) start = ts;
+        var p = Math.min((ts - start) / dur, 1);
+        var eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(target * eased) + suffix;
+        if (p < 1) requestAnimationFrame(step);
+      }
+      el.textContent = '0' + suffix;
+      requestAnimationFrame(step);
+    });
+  }
+  if ('IntersectionObserver' in window) {
+    var cio = new IntersectionObserver(function (entries) {
+      if (entries[0].isIntersecting) { runCounters(); cio.disconnect(); }
+    }, { threshold: 0.4 });
+    cio.observe(grid);
+  }
+
+  /* ── testimonial rail ───────────────────────────────────────────────── */
+  var rail = document.getElementById('rail');
+  var cards = Array.prototype.slice.call(rail.children);
+  var dotsWrap = document.getElementById('railDots');
+  cards.forEach(function (c, i) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.setAttribute('aria-label', 'Show story ' + (i + 1) + ' of ' + cards.length);
+    b.addEventListener('click', function () { goTo(i); });
+    dotsWrap.appendChild(b);
+  });
+  var dots = Array.prototype.slice.call(dotsWrap.children);
+  function goTo(i) {
+    var card = cards[Math.max(0, Math.min(i, cards.length - 1))];
+    rail.scrollTo({ left: card.offsetLeft - (rail.clientWidth - card.clientWidth) / 2, behavior: reduce ? 'auto' : 'smooth' });
+  }
+  function activeIndex() {
+    var mid = rail.scrollLeft + rail.clientWidth / 2, best = 0, bd = Infinity;
+    cards.forEach(function (c, i) {
+      var d = Math.abs(c.offsetLeft + c.clientWidth / 2 - mid);
+      if (d < bd) { bd = d; best = i; }
+    });
+    return best;
+  }
+  function syncDots() {
+    var a = activeIndex();
+    dots.forEach(function (d, i) { d.setAttribute('aria-current', String(i === a)); });
+  }
+  rail.addEventListener('scroll', function () {
+    window.clearTimeout(rail._t);
+    rail._t = window.setTimeout(syncDots, 90);
+  }, { passive: true });
+  document.getElementById('railPrev').addEventListener('click', function () { goTo(activeIndex() - 1); });
+  document.getElementById('railNext').addEventListener('click', function () { goTo(activeIndex() + 1); });
+  rail.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight') { e.preventDefault(); goTo(activeIndex() + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(activeIndex() - 1); }
+  });
+  var railNav = document.querySelector('.rail-nav');
+  function syncRailNav() {
+    // the rail only scrolls when the cards overflow — hide dead controls otherwise
+    railNav.style.display = rail.scrollWidth > rail.clientWidth + 4 ? '' : 'none';
+  }
+  syncDots();
+  syncRailNav();
+  window.addEventListener('resize', syncRailNav, { passive: true });
+  window.addEventListener('load', function () {
+    syncRailNav();
+    if (rail.scrollWidth > rail.clientWidth + 4) goTo(1);
+    window.setTimeout(syncDots, 400);
+  });
+
+  /* ── lightbox ───────────────────────────────────────────────────────── */
+  var shots = [
+    { src: 'assets/gallery-car-condos.jpg', w: 1297, h: 450, cap: 'Car Condos', alt: 'Exterior rendering of the Luxe Corsa car condo buildings with owner vehicles parked at the drive-in doors' },
+    { src: 'assets/gallery-site-plan.jpg', w: 747, h: 360, cap: 'Site Plan', alt: 'Luxe Corsa site plan showing 11 buildings, roadways and the clubhouse across the secured campus' },
+    { src: 'assets/gallery-entry-gate.jpg', w: 522, h: 360, cap: 'Entry gate', alt: 'Rendering of the Luxe Corsa branded entry gate at golden hour' },
+    { src: 'assets/prestige.jpg', w: 637, h: 524, cap: 'Clubhouse at blue hour', alt: 'The Luxe Corsa clubhouse and suite frontage illuminated at blue hour' },
+    { src: 'assets/whatis-bg.jpg', w: 1297, h: 724, cap: 'Clubhouse arrival', alt: 'The Luxe Corsa clubhouse entrance at dusk with owner vehicles arriving' }
+  ];
+  var lb = document.getElementById('lightbox');
+  var lbImg = document.getElementById('lbImg');
+  var lbCap = document.getElementById('lbCap');
+  var lbIndex = 0, lastFocus = null;
+
+  function render(i) {
+    lbIndex = (i + shots.length) % shots.length;
+    var s = shots[lbIndex];
+    lbImg.src = s.src; lbImg.alt = s.alt;
+    lbImg.width = s.w; lbImg.height = s.h;
+    lbCap.textContent = s.cap + '  ·  ' + (lbIndex + 1) + ' / ' + shots.length;
+  }
+  function openLb(i) {
+    lastFocus = document.activeElement;
+    render(i);
+    lb.setAttribute('open', '');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('lbClose').focus();
+  }
+  function closeLb() {
+    lb.removeAttribute('open');
+    document.body.style.overflow = '';
+    if (lastFocus) lastFocus.focus();
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.zoom'), function (b) {
+    b.addEventListener('click', function () { openLb(parseInt(b.getAttribute('data-lb'), 10)); });
+  });
+  document.getElementById('openGallery').addEventListener('click', function () { openLb(0); });
+  document.getElementById('lbClose').addEventListener('click', closeLb);
+  document.getElementById('lbPrev').addEventListener('click', function () { render(lbIndex - 1); });
+  document.getElementById('lbNext').addEventListener('click', function () { render(lbIndex + 1); });
+  lb.addEventListener('click', function (e) { if (e.target === lb) closeLb(); });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      if (lb.hasAttribute('open')) closeLb();
+      else if (document.body.classList.contains('menu-open')) setMenu(false);
+    }
+    if (lb.hasAttribute('open')) {
+      if (e.key === 'ArrowRight') render(lbIndex + 1);
+      if (e.key === 'ArrowLeft') render(lbIndex - 1);
+    }
+  });
+
+  /* ── inquiry form ───────────────────────────────────────────────────── */
+  var form = document.getElementById('inquiry');
+  var done = document.getElementById('formDone');
+  function showError(id, on) {
+    var field = document.getElementById(id);
+    var msg = form.querySelector('.err[data-for="' + id + '"]');
+    field.setAttribute('aria-invalid', String(on));
+    if (msg) msg.classList.toggle('show', on);
+  }
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = document.getElementById('f-name');
+    var email = document.getElementById('f-email');
+    var suite = document.getElementById('f-suite');
+    var bad = null;
+
+    var nameBad = name.value.trim().length < 2;
+    var emailBad = !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.value.trim());
+    var suiteBad = !suite.value;
+
+    showError('f-name', nameBad);
+    showError('f-email', emailBad);
+    showError('f-suite', suiteBad);
+
+    if (nameBad) bad = name; else if (emailBad) bad = email; else if (suiteBad) bad = suite;
+    if (bad) { bad.focus(); return; }
+
+    form.style.display = 'none';
+    done.classList.add('show');
+  });
+  ['f-name', 'f-email', 'f-suite'].forEach(function (id) {
+    var el = document.getElementById(id);
+    el.addEventListener('input', function () { showError(id, false); });
+    el.addEventListener('change', function () { showError(id, false); });
+  });
+})();
+</script>
+</body>
+</html>

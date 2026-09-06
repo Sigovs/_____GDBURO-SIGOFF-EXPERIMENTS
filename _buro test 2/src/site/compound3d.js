@@ -84,7 +84,8 @@ const C = {
   wall: 0x6a7683,
   roof: 0x39424d,       /* parapet cap */
   membrane: 0x23292f,   /* the roof field, recessed inside the parapet */
-  trim: 0x161b21,       /* fascia, frames, kerbs, door segments */
+  trim: 0x2c333b,       /* fascia, frames, kerbs, door segments — lifted off black:
+                           at 0x161b21 every frame and segment read as a void */
   civic: 0x7b8794,      /* the clubhouse reads lighter — it is the shared building */
   glass: 0x223243,      /* lifted off black: at 0x0b1119 it returned nothing and read as a hole */
   grass: 0x10150f,      /* planted ground — dark olive, well below the architecture */
@@ -1057,9 +1058,11 @@ export function initCompound3D(mount, model, opts = {}) {
     transom.rotation.y = rot0
     B.group.add(transom)
 
-    /* THE UNIT PLAQUE, beside the opening, where the render puts it. Small, light, and
-       the only thing on the elevation that identifies one bay from another. */
+    /* THE UNIT PLAQUE IS GONE. Eighty-seven near-black rectangles across the facades read
+       as signs stuck to the buildings, and the number on them is unreadable at every
+       authored camera. If an object reads as an artifact, its name does not save it. */
     const plaque = new THREE.Mesh(bayGeo, M.trim)
+    plaque.visible = false
     const plaqueW = Math.min(ft(1.4), (clear - dw) * 0.42)
     plaque.scale.set(plaqueW, ft(0.9), ft(0.14))
     plaque.position.set(
@@ -1256,9 +1259,9 @@ export function initCompound3D(mount, model, opts = {}) {
       }
       /* the surround, proud of the wall — this is the reveal that makes it an opening */
       const frame = new THREE.Mesh(bayGeo, M.trim)
-      frame.scale.set(ax ? ft(0.5) : runL + ft(1.6), bandH + ft(1.6), az ? ft(0.5) : runL + ft(1.6))
+      frame.scale.set(ax ? ft(0.3) : runL + ft(0.8), bandH + ft(1.2), az ? ft(0.3) : runL + ft(0.8))
       frame.castShadow = true
-      put(ft(0.42), frame)
+      put(ft(0.14), frame)
       /* the glass, set back inside it */
       const g2 = new THREE.Mesh(bayGeo, M.glass)
       g2.scale.set(ax ? ft(0.3) : runL, bandH, az ? ft(0.3) : runL)
@@ -1282,8 +1285,8 @@ export function initCompound3D(mount, model, opts = {}) {
          as a slot cut in the wall rather than as a window in it. */
       for (const dy of [bandH / 2 + ft(0.55), -bandH / 2 - ft(0.55)]) {
         const rail = new THREE.Mesh(bayGeo, M.roof)
-        rail.scale.set(ax ? ft(0.62) : runL + ft(1.4), ft(1.1), az ? ft(0.62) : runL + ft(1.4))
-        const lx = ax * (halfL + ft(0.44)), lz = az * (halfD + ft(0.44))
+        rail.scale.set(ax ? ft(0.34) : runL, ft(0.9), az ? ft(0.34) : runL)
+        const lx = ax * (halfL + ft(0.14)), lz = az * (halfD + ft(0.14))
         rail.position.set(c.cx + lx * cs - lz * sn, bandY + dy, c.cy + lx * sn + lz * cs)
         rail.rotation.y = rr
         rail.castShadow = true
@@ -1909,6 +1912,15 @@ export function initCompound3D(mount, model, opts = {}) {
       hoverNum = null
 
       if (next === 'compound') {
+        /* HOME HAS TO BE THE SAME PLACE EVERY TIME.
+           The camera was being restored and the SITE'S OWN ROTATION was not, so every
+           return to the compound landed on a slightly different view: measured, one
+           building crept 37px across the frame over six select-and-return cycles, and a
+           point that hovered on the first pass was open ground by the fourth. The ambient
+           turn is a resting gesture, so coming home resets it along with the camera. */
+        site.rotation.y = 0
+        ambient = 0
+        ambientPhase = 0
         flyTo({ az: cam.az, el: HERO.el, dist: HERO.dist, target: new THREE.Vector3(0, HERO.ty, 0) }, 1.1)
       } else if (next === 'building') {
         const B = buildingObjs.get(num)
@@ -2089,7 +2101,12 @@ export function initCompound3D(mount, model, opts = {}) {
 
     /* Ambient turn — and it is the site that turns. Suspended while a subject is being
        inspected, and for a beat after the visitor lets go. */
-    if (!reduced && !dragging && !focusNum) {
+    /* THE MODEL BREATHES ONLY WHEN NOBODY IS POINTING AT IT.
+       Freezing on hover alone was not enough: a visitor moving toward a building spends
+       half a second over open ground, and the compound kept turning for all of it, so the
+       target had moved by the time the pointer arrived. Any pointer inside the canvas now
+       holds the turn. It resumes the moment the pointer leaves. */
+    if (!reduced && !dragging && !focusNum && !hoverNum && !ptrInside) {
       const idle = (now - idleSince) / 1000
       ambient += ((idle > 1.6 ? 1 : 0) - ambient) * Math.min(1, dt * 1.6)
       ambientPhase += dt

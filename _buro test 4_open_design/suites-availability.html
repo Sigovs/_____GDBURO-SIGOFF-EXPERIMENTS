@@ -1,0 +1,1471 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Suite Availability &amp; Pricing &middot; Luxe Corsa</title>
+<meta name="description" content="Live inventory for Luxe Corsa Auto Suites: 121 units across 11 buildings, 75 available. Type A from $699,000, Type B from $549,000. Lake Zurich, Illinois." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+/* --- tokens - same contract as luxe-corsa.html -------------------------- */
+:root{
+  --bg:            #0e0e10;
+  --surface:       #ffffff;
+  --fg:            #e8e8e8;
+  --fg-quiet:      #a8a8a8;
+  --muted:         #8a8a8a;
+  --accent:        #3a8170;
+  --accent-live:   #28a588;
+  --marque:        #d34d4d;
+  --surface-hover: #e4e6e5;
+
+  /* inventory palette - read off the Suites Availability frame */
+  --panel:         #1e1e23;   /* module surface */
+  --hairline:      #464646;   /* unit-card border */
+  --meter-track:   #121b36;   /* unsold remainder */
+  --live:          #00e8a0;   /* available - small text / headline figure */
+  --sold:          #ec5c60;   /* sold - small text */
+  /* large meter fills: darker steps of the same two hues, so a big area does not
+     glare the way a text-weight colour does. Pair validated for lightness band,
+     chroma floor, CVD separation and 3:1 against --panel. */
+  --fill-avail:    var(--accent-live);
+  --fill-sold:     #b8434e;
+  --link:          #8abef5;   /* unit counts / premium tier */
+  --gold:          #feb76a;   /* standard tier */
+
+  --border:        rgba(255,255,255,0.16);
+  --border-soft:   rgba(255,255,255,0.08);
+  --field:         rgba(255,255,255,0.07);
+  --field-hi:      rgba(255,255,255,0.12);
+  --glass-solid:   rgba(14,14,16,0.67);
+  --strip-top:     #17171b;
+
+  /* SITE PLAN OPTIONS - the plan is inline vector, so these eleven values are
+     the whole drawing. Change one and the roofs, roads, civic blocks or pins
+     follow everywhere, including inside the enlarged map dialog. */
+  --plan-ground:     #0f1420;                 /* plate behind the drawing   */
+  --plan-glow:       rgba(35,86,140,.42);     /* site glow under the campus */
+  --plan-unit:       #7e7e7e;                 /* untiered roof / fallback   */
+  --plan-unit-lt:    #e4e7ea;                 /* highlighted roof           */
+  /* Tier fills. The plan is drawn to scale, so bay WIDTH already carries the
+     tier - 30ft Premium bays measure ~19u, 23ft Standard bays ~15u. These two
+     colours just make that legible. Same hue families as the Premium/Standard
+     badges on the unit cards, dropped to plan weight. Pair validated for
+     lightness band, chroma floor, CVD separation and 3:1 on --plan-ground. */
+  --plan-unit-a:     #5b93cf;                 /* Type A - Premium bay       */
+  --plan-unit-b:     #b07f3e;                 /* Type B - Standard bay      */
+  --plan-civic:      #386488;                 /* dealership + clubhouse     */
+  --plan-civic-edge: rgba(255,255,255,.85);   /* civic outline              */
+  --plan-edge:       rgba(202,202,202,.5);    /* module hairline            */
+  --plan-line:       rgba(255,255,255,.3);    /* roads, kerbs, boundary     */
+  --plan-pin:        rgba(14,14,16,.82);      /* marker disc                */
+  --plan-pin-edge:   rgba(255,255,255,.38);   /* marker ring                */
+  --plan-pin-ink:    #e8e8e8;                 /* marker number              */
+
+  --contact-mid:   #131317;
+  --contact-low:   #101013;
+  --option-bg:     #17171a;
+
+  --font-display: 'Degular Display','Degular','Figtree',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-body:    'Roboto',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+
+  --fs-display: clamp(34px, 4.6vw, 50px);
+  --fs-h3:      clamp(22px, 2.1vw, 28px);
+  --fs-lead:    clamp(16px, 1.3vw, 18px);
+  --fs-body:    16px;
+  --fs-meta:    14px;
+
+  --container: 1300px;
+  --gutter: clamp(20px, 4.2vw, 40px);
+  --nav-h: 96px;
+
+  --radius-sm: 5px;
+  --radius: 10px;
+  --radius-lg: 20px;
+  --pill: 60px;
+  /* MOTION - one curve, four durations. Nothing on this page animates a
+     layout property; everything moves on transform or opacity. */
+  --ease:       cubic-bezier(.22,.61,.36,1);
+  --dur-press:  140ms;   /* press + hover feedback          */
+  --dur-state:  200ms;   /* state confirmation, dialog exit */
+  --dur-enter:  260ms;   /* entering UI: dialogs, sheets    */
+  --dur-reveal: 420ms;   /* content and data reveal         */
+}
+
+/* --- reset & base ------------------------------------------------------ */
+*,*::before,*::after{ box-sizing:border-box; }
+html{ -webkit-text-size-adjust:100%; scroll-behavior:smooth; }
+body{
+  margin:0; background:var(--bg); color:var(--fg);
+  font-family:var(--font-body); font-size:var(--fs-body); line-height:1.6;
+  overflow-x:hidden; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+}
+img,svg{ display:block; max-width:100%; }
+a{ color:inherit; text-decoration:none; }
+button{ font:inherit; cursor:pointer; }
+p{ margin:0; text-wrap:pretty; }
+h1,h2,h3{ margin:0; font-weight:400; text-wrap:balance; }
+:focus-visible{ outline:2px solid var(--accent-live); outline-offset:3px; border-radius:4px; }
+.sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+a.sr-only:focus{
+  position:fixed; top:12px; left:12px; z-index:99; width:auto; height:auto; clip:auto; margin:0;
+  padding:12px 20px; background:var(--surface); color:var(--bg); border-radius:var(--pill);
+  font-family:var(--font-display); font-weight:600; text-transform:uppercase; letter-spacing:.06em;
+}
+
+/* --- icon system --------------------------------------------------------
+   One contract, two families, so weight and colour are set in a single place.
+
+   .ico       library assets from assets/*.svg, painted as a CSS mask. Only the
+              file's alpha is read, so colour comes from `color` and every icon
+              can take a state - which a hardcoded fill inside an <img> cannot.
+   .ico-line  inline monoline glyphs. Stroke, weight and joins live here, never
+              on the paths, so the whole set retunes from one value.
+-------------------------------------------------------------------------- */
+.ico{
+  display:inline-block; flex:none;
+  background-color:currentColor;
+  -webkit-mask:var(--ico) center / contain no-repeat;
+          mask:var(--ico) center / contain no-repeat;
+}
+.ico-line{
+  fill:none; stroke:currentColor;
+  stroke-width:1.25;            /* one weight for every inline glyph */
+  stroke-linecap:round; stroke-linejoin:round;
+}
+
+.container{ width:100%; max-width:var(--container); margin-inline:auto; padding-inline:var(--gutter); }
+.section{ position:relative; padding-block:clamp(56px,6vw,92px); }
+
+/* --- type -------------------------------------------------------------- */
+.display{ font-family:var(--font-display); font-size:var(--fs-display); line-height:1.06; letter-spacing:-.01em; font-weight:400; }
+/* unscoped on purpose: the hero h1 is styled by .a-hero-body h1, not .display,
+   so a descendant-scoped .hl silently dropped the accent word there */
+.hl{ color:var(--accent); }
+.h3{ font-family:var(--font-display); font-size:var(--fs-h3); line-height:1.15; font-weight:400; }
+.lead{ font-size:var(--fs-lead); line-height:1.66; color:var(--fg-quiet); max-width:62ch; }
+.eyebrow{
+  display:inline-flex; align-items:center; gap:14px;
+  font-size:var(--fs-meta); letter-spacing:.2em; text-transform:uppercase; color:var(--fg); line-height:1.4;
+}
+.eyebrow::before{ content:""; width:1px; height:16px; background:var(--accent-live); flex:none; }
+.eyebrow.is-centered{ justify-content:center; }
+.eyebrow.is-centered::before{ display:none; }
+.tick{ display:block; width:24px; height:1px; background:var(--accent-live); margin:0 auto 18px; }
+.num{ font-variant-numeric:tabular-nums; }
+
+/* --- buttons ----------------------------------------------------------- */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  min-width:196px; min-height:50px; padding:10px 26px;
+  border-radius:var(--pill); border:1px solid transparent;
+  font-family:var(--font-display); font-size:16px; font-weight:600;
+  /* uppercase needs 0.06em+ or the counters collide; .02em read cramped */
+  letter-spacing:.06em; text-transform:uppercase; white-space:nowrap;
+  transition:background .2s var(--ease), border-color .2s var(--ease), color .2s var(--ease), transform .12s var(--ease);
+}
+.btn:active{ transform:translateY(1px); }
+.btn .arw{ width:16px; height:16px; flex:none; transition:transform .2s var(--ease); }
+.btn:hover .arw{ transform:translateX(3px); }
+.btn-solid{ background:var(--surface); color:var(--bg); border-color:var(--surface); }
+.btn-solid:hover{ background:var(--surface-hover); border-color:var(--surface-hover); }
+.btn-accent{ background:var(--accent); color:var(--surface); border-color:var(--accent); }
+.btn-accent:hover{ background:var(--accent-live); border-color:var(--accent-live); color:var(--bg); }
+.btn-outline{ background:transparent; color:var(--fg); border-color:var(--surface); }
+.btn-outline:hover{ background:var(--surface); color:var(--bg); border-color:var(--surface); }
+.btn-sm{ min-width:0; min-height:44px; padding:8px 20px; font-size:14px; }
+.btn-row{ display:flex; flex-wrap:wrap; gap:16px; }
+
+/* --- topnav + menu ----------------------------------------------------- */
+.topnav{
+  position:fixed; inset:0 0 auto 0; z-index:60; height:var(--nav-h);
+  display:flex; align-items:center; border-bottom:1px solid transparent;
+  /* the one height tween left on the page: the sticky-nav shrink. It runs on
+     scroll, so it is held to the frequent-animation budget rather than 300ms. */
+  transition:background var(--dur-state) var(--ease), border-color var(--dur-state) var(--ease), height var(--dur-state) var(--ease);
+}
+.topnav.is-stuck{ background:rgba(13,13,14,.92); backdrop-filter:blur(14px); border-bottom-color:var(--border-soft); height:72px; }
+.topnav-inner{ display:flex; align-items:center; justify-content:space-between; gap:20px; width:100%; }
+.brand{ display:flex; align-items:center; gap:14px; }
+.brand .mark{ width:30px; height:42px; }
+.brand .word{ width:224px; height:29px; }
+.nav-center{ position:absolute; left:50%; transform:translateX(-50%); }
+.nav-right{ margin-left:auto; }
+.menu-toggle{ display:flex; flex-direction:column; justify-content:center; gap:8px; width:44px; height:44px; padding:0; background:none; border:0; }
+.menu-toggle .bar{
+  display:block; width:30px; height:1.5px; background:var(--marque); transform-origin:left center;
+  transition:transform var(--dur-state) var(--ease), opacity var(--dur-press) var(--ease);
+}
+/* the middle bar pulls in on hover - scaled, not resized */
+.menu-toggle:hover .bar:nth-child(2){ transform:scaleX(.667); }
+body.menu-open .menu-toggle .bar:nth-child(1){ transform:translateY(9.5px) rotate(45deg); }
+body.menu-open .menu-toggle .bar:nth-child(2){ opacity:0; }
+body.menu-open .menu-toggle .bar:nth-child(3){ transform:translateY(-9.5px) rotate(-45deg); }
+.menu{
+  position:fixed; inset:0; z-index:55;
+  background:linear-gradient(105deg, rgba(13,13,14,.98) 0%, rgba(13,13,14,.94) 40%, rgba(14,14,16,.72) 100%);
+  backdrop-filter:blur(18px); display:flex; align-items:center;
+  opacity:0; visibility:hidden; transition:opacity var(--dur-enter) var(--ease), visibility 0s linear var(--dur-enter);
+}
+/* visible immediately on open so the fade is seen; hidden only after it on close */
+body.menu-open .menu{
+  opacity:1; visibility:visible;
+  transition:opacity var(--dur-enter) var(--ease), visibility 0s;
+}
+.menu-inner{ width:100%; max-width:var(--container); margin-inline:auto; padding:var(--nav-h) var(--gutter) 40px; }
+.menu-list{ list-style:none; margin:0 0 44px; padding:0; display:flex; flex-direction:column; gap:6px; }
+.menu-list a{
+  display:inline-block; padding:10px 0;
+  font-family:var(--font-body); font-weight:700; font-size:clamp(15px,1.5vw,18px);
+  letter-spacing:.14em; text-transform:uppercase; color:var(--fg);
+  transition:color var(--dur-state) var(--ease), transform var(--dur-state) var(--ease);
+}
+.menu-list a:hover{ color:var(--surface); transform:translateX(8px); }
+.menu-list a[aria-current="page"]{ color:var(--accent-live); }
+
+/* --- page hero --------------------------------------------------------- */
+.a-hero{ position:relative; min-height:600px; display:flex; align-items:center; padding:calc(var(--nav-h) + 48px) 0 64px; overflow:hidden; }
+.a-hero-media{ position:absolute; inset:0; z-index:0; }
+.a-hero-media img{ width:100%; height:100%; object-fit:cover; }
+.a-hero-media::after{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(14,14,16,.88) 0%, rgba(14,14,16,.62) 40%, rgba(14,14,16,.94) 100%);
+}
+.a-hero-body{ position:relative; z-index:2; text-align:center; max-width:900px; margin-inline:auto; }
+/* display type at 34-50px wants negative tracking; without it the line reads loose */
+.a-hero-body h1{ font-family:var(--font-display); font-size:var(--fs-display); line-height:1.06; letter-spacing:-.015em; margin:14px 0 24px; }
+.a-hero-body .lead{ margin-inline:auto; max-width:74ch; }
+.a-hero .btn-row{ margin-top:36px; justify-content:center; }
+
+/* --- release status - the dominant mass of the page --------------------- */
+.release{ background:linear-gradient(180deg,var(--strip-top) 0%, var(--bg) 100%); padding-block:clamp(52px,6vw,86px); }
+.release-grid{ display:grid; grid-template-columns:minmax(230px,300px) 1fr; gap:clamp(32px,5vw,76px); align-items:start; }
+
+.release-head .fig{ display:block; font-family:var(--font-display); font-size:clamp(60px,7.4vw,96px); line-height:.92; letter-spacing:-.025em; color:var(--live); font-variant-numeric:tabular-nums; }
+.release-head .k{ display:block; margin-top:10px; font-size:var(--fs-meta); letter-spacing:.2em; text-transform:uppercase; color:var(--live); }
+/* two deliberate lines - never let a figure orphan from its noun */
+.release-head .s{ margin-top:20px; font-size:var(--fs-meta); line-height:1.7; color:var(--fg-quiet); max-width:34ch; text-wrap:balance; }
+.release-head .s-tight{ margin-top:4px; }
+.release-head .s em{ font-style:normal; color:var(--sold); font-variant-numeric:tabular-nums; }
+
+.tier + .tier{ margin-top:clamp(24px,2.6vw,34px); }
+.tier-top{ display:flex; align-items:baseline; justify-content:space-between; gap:14px 24px; margin-bottom:11px; flex-wrap:wrap; }
+.tier-name{ font-family:var(--font-display); font-size:19px; color:var(--fg); }
+.tier-name span{ margin-left:11px; font-family:var(--font-body); font-size:var(--fs-meta); letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
+.tier-nums{ font-size:var(--fs-meta); color:var(--fg-quiet); font-variant-numeric:tabular-nums; }
+.tier-nums b{ font-weight:500; }
+.tier-nums .n-ok{ color:var(--live); }
+.tier-nums .n-no{ color:var(--sold); }
+.tier-nums i{ font-style:normal; color:var(--border); margin:0 8px; }
+/* bar length encodes tier size on one shared 121-unit scale */
+/* The rail takes its width instantly - that width IS the tier-size comparison,
+   not an animation. Only the fill moves, and it scales rather than resizing,
+   so the 2px segment gap and the rounded ends never distort. */
+.tier-bar{ display:flex; gap:2px; height:12px; border-radius:6px; overflow:hidden; }
+.tier-bar i{
+  display:block; height:100%;
+  transform:scaleX(0); transform-origin:left center;
+  transition:transform var(--dur-reveal) var(--ease);
+}
+.tier-bar.in i{ transform:none; }
+.tier-bar.in .s-no{ transition-delay:90ms; }   /* what is left, then what is gone */
+.tier-bar .s-ok{ background:var(--fill-avail); }
+.tier-bar .s-no{ background:var(--fill-sold); }
+
+.release-legend{
+  margin-top:clamp(26px,3vw,38px); padding-top:20px; border-top:1px solid var(--border-soft);
+  display:flex; align-items:center; flex-wrap:wrap; gap:12px 26px;
+}
+.release-legend .li{ display:inline-flex; align-items:center; gap:9px; font-size:var(--fs-meta); color:var(--fg-quiet); }
+.release-legend .sw{ width:14px; height:10px; border-radius:3px; flex:none; }
+.release-legend .sw-ok{ background:var(--fill-avail); }
+.release-legend .sw-no{ background:var(--fill-sold); }
+.release-legend .note{ margin-left:auto; font-size:var(--fs-meta); color:var(--muted); }
+
+/* --- property map ------------------------------------------------------ */
+.map-head{ text-align:center; margin-bottom:clamp(28px,3vw,40px); }
+.map-head .addr{ margin-top:8px; font-size:var(--fs-meta); letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
+/* --- site plan -----------------------------------------------------------
+   The plan is inline vector, so every colour below is a CSS option. Change a
+   value here and the whole drawing - roofs, roads, civic blocks, pins - follows.
+   Nothing is baked into an image. */
+.map-wrap{
+  position:relative; border-radius:var(--radius); overflow:hidden;
+  background:
+    radial-gradient(58% 74% at 50% 52%, var(--plan-glow) 0%, transparent 72%),
+    var(--plan-ground);
+}
+/* Plan <-> Massing is a viewpoint change on one place, so the two views dissolve
+   into each other instead of cutting. Deliberately no slide or scale: nothing is
+   travelling, only the representation changes. Visibility is delayed behind the
+   fade so the hidden view leaves the a11y tree without killing the crossfade. */
+.plan{
+  display:block; width:100%; height:auto;
+  transition:opacity var(--dur-enter) var(--ease), visibility 0s;
+}
+.plan-3d{
+  position:absolute; inset:0;
+  opacity:0; visibility:hidden; pointer-events:none;
+  transition:opacity var(--dur-enter) var(--ease), visibility 0s linear var(--dur-enter);
+}
+.map-wrap.is-3d .plan-3d{
+  opacity:1; visibility:visible; pointer-events:auto;
+  transition:opacity var(--dur-enter) var(--ease), visibility 0s;
+}
+.map-wrap.is-3d .plan{        /* stays in flow, so the box height never changes */
+  opacity:0; visibility:hidden; pointer-events:none;
+  transition:opacity var(--dur-enter) var(--ease), visibility 0s linear var(--dur-enter);
+}
+.plan-3d:focus-visible{ outline:2px solid var(--accent-live); outline-offset:-2px; }
+.plan-3d canvas{ cursor:grab; }
+.plan-3d canvas:active{ cursor:grabbing; }
+.view-switch{ display:flex; gap:8px; margin-bottom:14px; }
+.view-switch button{
+  display:inline-flex; align-items:center; gap:9px;
+  min-height:44px; padding:8px 18px; border-radius:var(--pill);
+  background:transparent; color:var(--fg-quiet); border:1px solid var(--border-soft);
+  font-family:var(--font-display); font-size:14px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+  transition:background var(--dur-state) var(--ease), color var(--dur-state) var(--ease), border-color var(--dur-state) var(--ease);
+}
+.view-switch button:hover{ color:var(--fg); border-color:var(--border); background:rgba(255,255,255,.05); }
+.view-switch button[aria-pressed="true"]{ background:var(--surface); color:var(--bg); border-color:var(--surface); }
+.view-switch button svg{ width:16px; height:16px; flex:none; }
+.view-switch button[disabled]{ opacity:.45; cursor:not-allowed; }
+.view-note{ margin-left:auto; align-self:center; font-size:13px; color:var(--muted); }
+.plan .u  { fill:var(--plan-unit);    stroke:var(--plan-edge); }
+.plan .uw { fill:var(--plan-unit-lt); stroke:var(--plan-edge); }
+.plan .cv { fill:var(--plan-civic);   stroke:var(--plan-civic-edge); }
+.plan .ln { fill:none; stroke:var(--plan-line); }
+/* tier owns the bay fill; the small door marks keep the neutral roof tones so
+   they still read against a coloured roof */
+.plan .ta { fill:var(--plan-unit-a); }
+.plan .tb { fill:var(--plan-unit-b); }
+.plan .u, .plan .uw, .plan .cv, .plan .mk{ transition:opacity var(--dur-state) var(--ease); }
+
+/* markers live in the plan's own coordinate space, so they stay pinned at
+   every width and never need percentage maths */
+.plan .mk-d{ fill:var(--plan-pin); stroke:var(--plan-pin-edge); stroke-width:1.2; transition:fill .18s var(--ease), stroke .18s var(--ease), stroke-width .18s var(--ease); }
+/* CD / AC are caps, so the same 0.06em floor applies; middle anchoring absorbs it */
+.plan .mk-t{ fill:var(--plan-pin-ink); font-family:var(--font-display); font-size:15px; font-weight:600; letter-spacing:.06em; text-anchor:middle; }
+.plan .mk:hover .mk-d{ fill:var(--bg); stroke:var(--accent-live); stroke-width:2.2; }
+
+/* legend filter: dim everything, bring the chosen category back */
+.plan[data-focus] .mk{ opacity:.2; }
+.plan[data-focus] .u, .plan[data-focus] .uw, .plan[data-focus] .cv{ opacity:.4; }
+.plan[data-focus="unit"] .mk[data-cat="unit"],
+.plan[data-focus="cd"]   .mk[data-cat="cd"],
+.plan[data-focus="ac"]   .mk[data-cat="ac"]{ opacity:1; }
+.plan[data-focus="unit"] .u, .plan[data-focus="unit"] .uw{ opacity:1; }
+/* tier focus: bays of that tier hold, and the building numbers stay half-lit
+   so you can still tell which building you are looking at */
+.plan[data-focus="ta"] .ta,
+.plan[data-focus="tb"] .tb{ opacity:1; }
+.plan[data-focus="ta"] .mk,
+.plan[data-focus="tb"] .mk{ opacity:.55; }
+.plan[data-focus="unit"] .mk[data-cat="unit"] .mk-d,
+.plan[data-focus="cd"]   .mk[data-cat="cd"]   .mk-d,
+.plan[data-focus="ac"]   .mk[data-cat="ac"]   .mk-d{ stroke:var(--accent-live); stroke-width:2.2; }
+.legend{ margin-top:26px; display:flex; align-items:center; flex-wrap:wrap; gap:14px 24px; }
+.legend-item{ display:inline-flex; align-items:center; gap:10px; font-size:var(--fs-meta); color:var(--fg-quiet); }
+button.legend-item{
+  min-height:44px; padding:6px 14px 6px 6px; border-radius:var(--pill);
+  background:transparent; border:1px solid transparent; text-align:left;
+  transition:background .2s var(--ease), border-color .2s var(--ease), color .2s var(--ease);
+}
+button.legend-item:hover{ color:var(--fg); border-color:var(--border-soft); background:rgba(255,255,255,.05); }
+button.legend-item[aria-pressed="true"]{ color:var(--fg); border-color:var(--accent-live); background:rgba(40,165,136,.14); }
+button.legend-item[aria-pressed="true"] .legend-key{ border-color:var(--accent-live); background:rgba(40,165,136,.24); }
+.legend-key{
+  display:grid; place-items:center; width:30px; height:30px; border-radius:50%;
+  background:rgba(58,129,112,.18); border:1px solid var(--accent);
+  font-family:var(--font-display); font-size:12px; font-weight:600; color:var(--live);
+}
+.legend-note{ color:var(--muted); }
+.legend-swatch{ width:20px; height:12px; border-radius:2px; flex:none; border:1px solid var(--plan-edge); }
+.legend-swatch.sw-a{ background:var(--plan-unit-a); }
+.legend-swatch.sw-b{ background:var(--plan-unit-b); }
+.legend .spacer{ margin-left:auto; }
+
+/* --- units module ------------------------------------------------------ */
+.units-panel{ background:var(--panel); border-radius:var(--radius); padding:clamp(28px,3.4vw,48px); }
+.units-head{ text-align:center; margin-bottom:clamp(24px,2.6vw,34px); }
+.units-head p{ margin-top:8px; font-size:var(--fs-meta); color:var(--muted); }
+.filter{ display:flex; justify-content:center; gap:8px; margin-bottom:clamp(24px,2.6vw,34px); flex-wrap:wrap; }
+.filter button{
+  min-height:44px; padding:8px 20px; border-radius:var(--pill);
+  background:transparent; color:var(--fg-quiet); border:1px solid var(--border-soft);
+  font-family:var(--font-display); font-size:14px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+  transition:background .2s var(--ease), color .2s var(--ease), border-color .2s var(--ease);
+}
+.filter button:hover{ color:var(--fg); border-color:var(--border); background:rgba(255,255,255,.05); }
+.filter button[aria-pressed="true"]{ background:var(--surface); color:var(--bg); border-color:var(--surface); }
+.unit-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:26px; }
+.unit-grid.is-single{ grid-template-columns:minmax(0,560px); justify-content:center; }
+.unit{
+  display:flex; flex-direction:column; gap:18px;
+  background:var(--bg); border:1px solid var(--hairline); border-radius:var(--radius);
+  padding:clamp(20px,2.2vw,28px); box-shadow:0 14px 38px -2px rgba(0,0,0,.99);
+}
+.unit[hidden]{ display:none; }
+.badge{
+  align-self:flex-start; padding:4px 14px; border-radius:var(--pill);
+  font-size:13px; letter-spacing:.04em; line-height:1.6;
+}
+.badge-premium{ color:var(--link); background:rgba(138,190,245,.12); border:1px solid rgba(138,190,245,.45); }
+.badge-standard{ color:var(--gold); background:rgba(254,183,106,.12); border:1px solid rgba(254,183,106,.45); }
+.unit h3{ font-family:var(--font-display); font-size:var(--fs-h3); color:var(--accent); line-height:1.1; }
+.unit h3 em{ font-style:normal; color:var(--fg); }
+.unit .price{ font-family:var(--font-display); font-size:var(--fs-h3); line-height:1.1; color:var(--fg); }
+.unit .price span{ color:var(--accent); }
+.unit-shot{ border-radius:var(--radius-sm); overflow:hidden; background:var(--panel); }
+.unit-shot img{ width:100%; height:auto; }
+.unit .spec{ padding-top:18px; border-top:1px solid var(--border-soft); font-size:var(--fs-meta); line-height:1.75; color:var(--fg); }
+.avail{ padding-top:18px; border-top:1px solid var(--border-soft); }
+.avail-top{ display:flex; align-items:baseline; justify-content:space-between; gap:14px; }
+.avail-top dt{ font-size:var(--fs-meta); color:var(--fg); }
+.avail-top dd{ margin:0; font-size:var(--fs-meta); color:var(--link); }
+.avail-pct{ margin:6px 0 10px; font-size:13px; color:var(--muted); }
+.meter{ height:4px; border-radius:2px; background:var(--meter-track); overflow:hidden; }
+.meter i{
+  display:block; height:100%; width:100%; background:var(--surface); border-radius:2px;
+  transform:scaleX(0); transform-origin:left center;
+  transition:transform var(--dur-reveal) var(--ease);
+}
+.avail-foot{ display:flex; justify-content:space-between; gap:14px; margin-top:12px; font-size:var(--fs-meta); }
+.avail-foot .ok{ color:var(--live); }
+.avail-foot .no{ color:var(--sold); }
+.unit-actions{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:auto; padding-top:6px; }
+.unit-actions .btn{ flex:1 1 auto; }
+.plan-btn{ display:inline-flex; align-items:center; gap:10px; }
+.plan-btn svg{ width:16px; height:16px; color:var(--accent-live); flex:none; }
+.plan-btn:hover svg{ color:var(--bg); }
+
+.incl{ margin-top:clamp(32px,3.4vw,44px); display:grid; grid-template-columns:repeat(3,1fr); gap:28px; text-align:center; }
+.incl .ico{ width:25px; height:25px; margin:0 auto 18px; color:var(--accent); }
+.incl ul{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:14px; }
+.incl li{ font-size:var(--fs-meta); color:var(--fg-quiet); line-height:1.55; }
+
+/* --- tour bar ---------------------------------------------------------- */
+.tourbar{
+  margin-top:clamp(28px,3vw,40px); background:var(--panel); border-radius:var(--radius);
+  padding:clamp(24px,2.6vw,34px) clamp(24px,3vw,40px);
+  display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap;
+}
+.tourbar p{ margin-top:6px; font-size:var(--fs-meta); color:var(--fg-quiet); }
+
+/* --- dialogs ----------------------------------------------------------- */
+/* Dialogs are a reorientation between states - the one case motion reliably
+   helps. Scrim crossfades; the card rises 8px and settles. Exit is quicker
+   than entry so dismissing never feels like waiting. */
+.sheet{
+  position:fixed; inset:0; z-index:80; display:flex;
+  align-items:center; justify-content:center; padding:clamp(20px,5vw,56px);
+  background:rgba(6,6,7,.94); backdrop-filter:blur(8px);
+  opacity:0; visibility:hidden; pointer-events:none;
+  transition:opacity var(--dur-state) var(--ease), visibility 0s linear var(--dur-state);
+}
+.sheet[open]{
+  opacity:1; visibility:visible; pointer-events:auto;
+  transition:opacity var(--dur-enter) var(--ease), visibility 0s;
+}
+.sheet-card{
+  background:var(--panel); border:1px solid var(--hairline); border-radius:var(--radius);
+  padding:clamp(26px,3vw,40px); max-width:560px; width:100%;
+  opacity:0; transform:translateY(8px) scale(.99);
+  transition:opacity var(--dur-state) var(--ease), transform var(--dur-state) var(--ease);
+}
+.sheet[open] .sheet-card{
+  opacity:1; transform:none;
+  transition:opacity var(--dur-enter) var(--ease), transform var(--dur-enter) var(--ease);
+}
+.sheet-card h3{ font-family:var(--font-display); font-size:var(--fs-h3); margin-bottom:6px; }
+.sheet-card .kv{ margin:22px 0 0; display:grid; grid-template-columns:auto 1fr; gap:10px 22px; font-size:var(--fs-meta); }
+.sheet-card .kv dt{ color:var(--muted); letter-spacing:.14em; text-transform:uppercase; }
+.sheet-card .kv dd{ margin:0; color:var(--fg); }
+.sheet-note{ margin-top:22px; padding-top:18px; border-top:1px solid var(--border-soft); font-size:13px; color:var(--muted); }
+.sheet-actions{ margin-top:24px; display:flex; gap:12px; flex-wrap:wrap; }
+.sheet-actions .btn{ flex:1 1 auto; min-width:0; }
+.map-sheet .sheet-card{ max-width:1300px; background:transparent; border:0; padding:0; }
+.map-sheet img{ width:100%; height:auto; border-radius:var(--radius); }
+.sheet-close{
+  position:absolute; top:24px; right:clamp(12px,2.5vw,32px);
+  width:52px; height:52px; min-width:0; border-radius:50%; display:grid; place-items:center;
+  background:transparent; color:var(--fg); border:1px solid var(--border);
+  transition:background .2s var(--ease), color .2s var(--ease), border-color .2s var(--ease);
+}
+.sheet-close:hover{ background:var(--surface); color:var(--bg); border-color:var(--surface); }
+
+/* --- contact ----------------------------------------------------------- */
+.contact{ position:relative; overflow:hidden; padding-block:clamp(110px,12vw,170px) clamp(40px,5vw,64px); }
+.contact::before{
+  content:""; position:absolute; inset:0; z-index:0;
+  background:linear-gradient(180deg,var(--bg) 0%, var(--contact-mid) 34%, var(--contact-low) 74%, var(--bg) 100%);
+}
+.watermark{
+  position:absolute; z-index:1; left:50%; top:0; transform:translateX(-50%);
+  height:clamp(56px,8vw,226px); width:auto; max-width:none; opacity:.5; pointer-events:none;
+}
+.contact .container{ position:relative; z-index:2; }
+.contact-grid{ display:grid; grid-template-columns:1fr 526px; gap:clamp(40px,6vw,96px); align-items:start; }
+.contact-body h2{ margin:18px 0 22px; }
+.contact-body .lead{ max-width:46ch; }
+.contact-body hr{ margin:34px 0 0; border:0; border-top:1px solid var(--border-soft); width:85px; }
+.detail{ margin-top:34px; }
+.detail dt{ font-size:var(--fs-body); font-weight:500; color:var(--fg); }
+.detail dd{ margin:2px 0 0; font-size:var(--fs-body); color:var(--fg-quiet); }
+.detail dd a:hover{ color:var(--accent-live); }
+.socials{ margin-top:38px; }
+.socials p{ font-size:var(--fs-body); color:var(--fg); margin-bottom:14px; }
+.social-row{ display:flex; gap:22px; flex-wrap:wrap; }
+.social-row a{ display:grid; place-items:center; width:44px; height:44px; margin:-10px; color:var(--muted); transition:transform var(--dur-state) var(--ease), color var(--dur-state) var(--ease); }
+.social-row a:hover{ transform:translateY(-2px); color:var(--fg); }
+.social-row .ico{ width:24px; height:24px; }
+.form-card{ background:var(--glass-solid); backdrop-filter:blur(20px); border:1px solid var(--border-soft); border-radius:var(--radius-lg); padding:clamp(28px,3vw,46px); }
+.field{ margin-bottom:29px; position:relative; }
+.field:last-of-type{ margin-bottom:34px; }
+.input,.textarea,.select{
+  width:100%; min-height:50px; padding:13px 16px;
+  background:var(--field); border:1px solid transparent; border-radius:var(--radius-sm);
+  color:var(--fg); font:inherit; font-size:var(--fs-body);
+  transition:background .2s var(--ease), border-color .2s var(--ease);
+}
+.textarea{ min-height:117px; resize:vertical; line-height:1.6; }
+.select{ appearance:none; padding-right:46px; }
+.select option{ background:var(--option-bg); color:var(--fg); }
+.input::placeholder,.textarea::placeholder{ color:var(--fg); opacity:.72; }
+.input:hover,.textarea:hover,.select:hover{ background:var(--field-hi); }
+.input:focus,.textarea:focus,.select:focus{ background:var(--field-hi); border-color:var(--accent-live); outline:none; }
+.input[aria-invalid="true"],.select[aria-invalid="true"]{ border-color:var(--marque); }
+.field .chev{ position:absolute; right:16px; top:17px; width:16px; height:16px; pointer-events:none; color:var(--fg); }
+.field .err{ display:none; margin-top:6px; font-size:13px; color:var(--marque); }
+.field .err.show{ display:block; }
+.form-actions{ display:flex; gap:16px; flex-wrap:wrap; }
+.form-actions .btn{ min-width:0; flex:1 1 auto; padding-inline:18px; font-size:15px; }
+.form-note{ margin-top:20px; font-size:13px; color:var(--muted); }
+.form-done{ display:none; padding:22px 20px; border-radius:var(--radius-sm); background:rgba(58,129,112,.16); border:1px solid var(--accent); font-size:var(--fs-body); }
+.form-done.show{ display:block; }
+
+.footbar{ border-top:1px solid var(--border-soft); padding-block:26px; }
+.footbar .container{ display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap; }
+.footbar, .footbar a{ font-size:var(--fs-meta); color:var(--muted); }
+.footbar a:hover{ color:var(--fg); }
+
+.reveal{ opacity:0; transform:translateY(14px); transition:opacity var(--dur-reveal) var(--ease), transform var(--dur-reveal) var(--ease); }
+.reveal.in{ opacity:1; transform:none; }
+/* the map is wide and detailed - let it pan rather than shrink to unreadable */
+.map-hint{ display:none; margin-top:12px; font-size:13px; color:var(--muted); }
+
+/* --- responsive -------------------------------------------------------- */
+@media (max-width:1100px){
+  .contact-grid{ grid-template-columns:1fr; }
+  .form-card{ max-width:560px; }
+}
+@media (max-width:980px){
+  .unit-grid{ grid-template-columns:1fr; }
+  .unit-grid.is-single{ grid-template-columns:1fr; }
+  .release-grid{ grid-template-columns:1fr; gap:38px; }
+  .incl{ grid-template-columns:1fr; gap:34px; }
+}
+@media (max-width:860px){
+  :root{ --nav-h:65px; }
+  .nav-center{ position:static; transform:none; }
+  .brand .word{ width:150px; height:20px; }
+  .brand .mark{ width:20px; height:29px; }
+  .nav-right .btn{ display:none; }
+  .topnav{ background:rgba(13,13,14,.92); backdrop-filter:blur(14px); border-bottom-color:var(--border-soft); }
+  .menu-toggle{ order:2; }
+  .a-hero{ min-height:0; padding-top:calc(var(--nav-h) + 56px); }
+  .a-hero .btn-row{ flex-direction:column; align-items:stretch; }
+  .a-hero .btn-row .btn{ width:100%; min-width:0; }
+  /* the map is wide and detailed - let it pan rather than shrink to unreadable */
+  .map-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .map-wrap{ min-width:720px; }
+  .map-hint{ display:block; }
+  .tourbar{ flex-direction:column; align-items:flex-start; }
+  .tourbar .btn{ width:100%; }
+  .watermark{ height:60px; }
+}
+@media (max-width:620px){
+  .release-legend .note{ margin-left:0; width:100%; }
+  .btn-row .btn,.form-actions .btn,.unit-actions .btn{ width:100%; min-width:0; }
+  .unit-actions{ flex-direction:column; align-items:stretch; }
+  .plan-btn{ justify-content:center; }
+}
+@media (prefers-reduced-motion:reduce){
+  html{ scroll-behavior:auto; }
+  *,*::before,*::after{
+    animation-duration:.01ms !important; animation-iteration-count:1 !important;
+    transition-duration:.01ms !important; transition-delay:0s !important;
+  }
+  .reveal{ opacity:1; transform:none; }
+  /* strip travel on an axis; the dialog still crossfades so the state change
+     is never silent, and the meters land filled rather than growing */
+  .sheet-card{ transform:none; }
+  .tier-bar i, .meter i{ transition:none; }
+}
+</style>
+</head>
+<body>
+
+<a class="sr-only" href="#content">Skip to content</a>
+
+<header class="topnav" data-od-id="topnav">
+  <div class="container topnav-inner">
+    <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="menu" aria-label="Open menu">
+      <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+    </button>
+    <a class="brand nav-center" href="luxe-corsa.html" aria-label="Luxe Corsa &mdash; home">
+      <img class="mark" src="assets/logo-mark.svg" alt="" width="46" height="64" />
+      <img class="word" src="assets/logo-word.svg" alt="Luxe Corsa" width="339" height="44" />
+    </a>
+    <div class="nav-right">
+      <a class="btn btn-outline" href="#contact" data-od-id="nav-reserve">Reserve now!</a>
+    </div>
+  </div>
+</header>
+
+<nav class="menu" id="menu" aria-label="Primary" data-od-id="menu-overlay">
+  <div class="menu-inner">
+    <ul class="menu-list">
+      <li><a href="#inventory" aria-current="page">Suite Availability</a></li>
+      <li><a href="luxe-corsa.html#gallery">Gallery</a></li>
+      <li><a href="luxe-corsa.html#monaco">Events</a></li>
+      <li><a href="#inventory">Construction Update</a></li>
+      <li><a href="luxe-corsa.html#prestige">Who We Are</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="btn-row">
+      <a class="btn btn-outline" href="luxe-corsa.html">Back to home</a>
+      <a class="btn btn-outline" href="tel:+12246620000">Call us: 224.662.0000</a>
+    </div>
+  </div>
+</nav>
+
+<main id="content">
+
+<!-- hero -->
+<section class="a-hero" data-od-id="availability-hero">
+  <div class="a-hero-media">
+    <img src="assets/avail-hero.jpg" alt="The Luxe Corsa clubhouse frontage at night" width="1920" height="600" fetchpriority="high" />
+  </div>
+  <div class="container a-hero-body">
+    <span class="tick" aria-hidden="true"></span>
+    <p class="eyebrow is-centered">Pricing &amp; Availability</p>
+    <h1>Site plan <span class="hl">and</span> units</h1>
+    <p class="lead">Luxe Corsa Auto Suites offers 121 meticulously crafted luxury auto suites, each offering a private, secure, and customizable space to showcase and store your prized vehicles. Elevate your lifestyle with a fusion of high performance, automotive passion, and unparalleled sophistication.</p>
+    <div class="btn-row">
+      <a class="btn btn-outline" href="#units">Suite availability</a>
+      <a class="btn btn-outline" href="#inventory">Construction updates</a>
+    </div>
+  </div>
+</section>
+
+<!-- inventory strip -->
+<section class="release" id="inventory" data-od-id="release-status">
+  <div class="container release-grid" id="invGrid">
+
+    <div class="release-head" data-od-id="release-headline">
+      <span class="fig num" data-count="75">75</span>
+      <span class="k">Available Now</span>
+      <p class="s">of <span class="num">121</span> units across 11 buildings</p>
+      <p class="s s-tight"><em class="num">46</em> sold &mdash; <em class="num">38%</em> of the release</p>
+    </div>
+
+    <div class="release-bars">
+      <div class="tier" data-od-id="tier-a">
+        <div class="tier-top">
+          <p class="tier-name">Type A <span>Premium &middot; 26 units</span></p>
+          <p class="tier-nums"><b class="n-ok num">15</b> available <i>/</i> <b class="n-no num">11</b> sold</p>
+        </div>
+        <div class="tier-bar" data-width="21.49" role="img"
+             aria-label="Type A: 26 of 121 units in the release. 15 available, 11 sold.">
+          <i class="s-ok" style="flex:15"></i><i class="s-no" style="flex:11"></i>
+        </div>
+      </div>
+
+      <div class="tier" data-od-id="tier-b">
+        <div class="tier-top">
+          <p class="tier-name">Type B <span>Standard &middot; 95 units</span></p>
+          <p class="tier-nums"><b class="n-ok num">60</b> available <i>/</i> <b class="n-no num">35</b> sold</p>
+        </div>
+        <div class="tier-bar" data-width="78.51" role="img"
+             aria-label="Type B: 95 of 121 units in the release. 60 available, 35 sold.">
+          <i class="s-ok" style="flex:60"></i><i class="s-no" style="flex:35"></i>
+        </div>
+      </div>
+
+      <div class="release-legend">
+        <span class="li"><span class="sw sw-ok"></span> Available</span>
+        <span class="li"><span class="sw sw-no"></span> Sold</span>
+        <span class="note">Next phase in progress &mdash; stay tuned</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- property map -->
+<section class="section" id="map" data-od-id="property-map">
+  <div class="container">
+    <div class="map-head reveal">
+      <h2 class="h3">Property Map &amp; Units</h2>
+      <p class="addr">21591 N Rand Rd, Lake Zurich, IL 60047</p>
+    </div>
+
+    <div class="view-switch" role="group" aria-label="Site plan view" data-od-id="plan-view-switch">
+      <button type="button" data-view="2d" aria-pressed="true">
+        <svg class="ico-line" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 2.5h11v11h-11zM2.5 7.5h6M8.5 2.5v11"/></svg>
+        Plan
+      </button>
+      <button type="button" data-view="3d" aria-pressed="false" id="view3d">
+        <svg class="ico-line" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.25 13.75 5.5 8 8.75 2.25 5.5zM2.25 5.5v5L8 13.75l5.75-3.25v-5M8 8.75v5"/></svg>
+        Massing
+      </button>
+      <span class="view-note" id="viewNote">Drag to orbit &middot; scroll to zoom</span>
+    </div>
+
+    <div class="map-scroll reveal">
+      <div class="map-wrap" id="mapWrap">
+        <div class="plan-3d" id="plan3d" tabindex="0" role="img"
+             aria-label="Three-dimensional massing study of the Luxe Corsa campus, extruded from the site plan: 26 wider Type A Premium bays, 96 narrower Type B Standard bays, and the Luxe Corsa Club and car dealership. Footprints and tiers are to scale; building heights are indicative. Drag or use the arrow keys to orbit."></div>
+      <svg class="plan" id="planSvg" viewBox="0 0 1296 712" role="img" xmlns="http://www.w3.org/2000/svg"
+           aria-label="Luxe Corsa site plan: eleven private-unit buildings numbered 01 to 11, the Luxe Corsa Club and the car dealership, arranged across the 15-acre secured campus. Bays are drawn to scale, so the wider 30-foot Type A Premium bays sit at the ends of each row and the narrower 23-foot Type B Standard bays fill the runs between them.">
+<rect x="243.917" y="382.074" width="18.5953" height="32.4752" transform="rotate(-22.9768 243.917 382.074)" class="uw ta"/>
+<rect x="248.337" y="375.765" width="5.53175" height="3.89881" transform="rotate(-22.9768 248.337 375.765)" class="uw"/>
+<rect x="264.122" y="369.072" width="5.53175" height="3.89881" transform="rotate(-22.9768 264.122 369.072)" class="u"/>
+<rect x="277.653" y="363.335" width="5.53175" height="3.89881" transform="rotate(-22.9768 277.653 363.335)" class="u"/>
+<rect x="416.807" y="308.769" width="17.7788" height="32.4752" transform="rotate(-22.9768 416.807 308.769)" class="uw ta"/>
+<rect x="261.205" y="374.743" width="14.5129" height="32.4752" transform="rotate(-22.9768 261.205 374.743)" class="u tb"/>
+<rect x="274.737" y="369.006" width="15.3294" height="32.4752" transform="rotate(-22.9768 274.737 369.006)" class="u tb"/>
+<rect x="291.935" y="357.28" width="5.53175" height="3.89881" transform="rotate(-22.9768 291.935 357.28)" class="u"/>
+<rect x="289.018" y="362.951" width="15.3294" height="32.4752" transform="rotate(-22.9768 289.018 362.951)" class="u tb"/>
+<rect x="306.217" y="351.224" width="5.53175" height="3.89881" transform="rotate(-22.9768 306.217 351.224)" class="u"/>
+<rect x="303.301" y="356.895" width="15.3294" height="32.4752" transform="rotate(-22.9768 303.301 356.895)" class="u tb"/>
+<rect x="320.499" y="345.169" width="5.53175" height="3.89881" transform="rotate(-22.9768 320.499 345.169)" class="u"/>
+<rect x="317.582" y="350.839" width="15.3294" height="32.4752" transform="rotate(-22.9768 317.582 350.839)" class="u tb"/>
+<rect x="334.781" y="339.113" width="5.53175" height="3.89881" transform="rotate(-22.9768 334.781 339.113)" class="u"/>
+<rect x="331.864" y="344.784" width="15.3294" height="32.4752" transform="rotate(-22.9768 331.864 344.784)" class="u tb"/>
+<rect x="349.065" y="333.057" width="5.53175" height="3.89881" transform="rotate(-22.9768 349.065 333.057)" class="u"/>
+<rect x="346.148" y="338.728" width="15.3294" height="32.4752" transform="rotate(-22.9768 346.148 338.728)" class="u tb"/>
+<rect x="363.347" y="327.002" width="5.53175" height="3.89881" transform="rotate(-22.9768 363.347 327.002)" class="u"/>
+<rect x="360.429" y="332.673" width="15.3294" height="32.4752" transform="rotate(-22.9768 360.429 332.673)" class="u tb"/>
+<rect x="377.627" y="320.946" width="5.53175" height="3.89881" transform="rotate(-22.9768 377.627 320.946)" class="u"/>
+<rect x="374.711" y="326.617" width="15.3294" height="32.4752" transform="rotate(-22.9768 374.711 326.617)" class="u tb"/>
+<rect x="391.91" y="314.891" width="5.53175" height="3.89881" transform="rotate(-22.9768 391.91 314.891)" class="u"/>
+<rect x="388.993" y="320.561" width="15.3294" height="32.4752" transform="rotate(-22.9768 388.993 320.561)" class="u tb"/>
+<rect x="405.44" y="309.154" width="5.53175" height="3.89881" transform="rotate(-22.9768 405.44 309.154)" class="u"/>
+<rect x="421.227" y="302.461" width="5.53175" height="3.89881" transform="rotate(-22.9768 421.227 302.461)" class="uw"/>
+<rect x="402.524" y="314.824" width="15.3294" height="32.4752" transform="rotate(-22.9768 402.524 314.824)" class="u tb"/>
+<rect x="507.046" y="476.053" width="18.5953" height="32.4752" transform="rotate(157.023 507.046 476.053)" class="uw ta"/>
+<rect x="502.626" y="482.361" width="5.53175" height="3.89881" transform="rotate(157.023 502.626 482.361)" class="uw"/>
+<rect x="486.841" y="489.054" width="5.53175" height="3.89881" transform="rotate(157.023 486.841 489.054)" class="u"/>
+<rect x="473.31" y="494.791" width="5.53175" height="3.89881" transform="rotate(157.023 473.31 494.791)" class="u"/>
+<rect x="334.157" y="549.358" width="17.7788" height="32.4752" transform="rotate(157.023 334.157 549.358)" class="uw ta"/>
+<rect x="489.757" y="483.384" width="14.5129" height="32.4752" transform="rotate(157.023 489.757 483.384)" class="u tb"/>
+<rect x="476.226" y="489.12" width="15.3294" height="32.4752" transform="rotate(157.023 476.226 489.12)" class="u tb"/>
+<rect x="459.028" y="500.847" width="5.53175" height="3.89881" transform="rotate(157.023 459.028 500.847)" class="u"/>
+<rect x="461.944" y="495.176" width="15.3294" height="32.4752" transform="rotate(157.023 461.944 495.176)" class="u tb"/>
+<rect x="444.746" y="506.902" width="5.53175" height="3.89881" transform="rotate(157.023 444.746 506.902)" class="u"/>
+<rect x="447.662" y="501.232" width="15.3294" height="32.4752" transform="rotate(157.023 447.662 501.232)" class="u tb"/>
+<rect x="430.464" y="512.958" width="5.53175" height="3.89881" transform="rotate(157.023 430.464 512.958)" class="u"/>
+<rect x="433.38" y="507.287" width="15.3294" height="32.4752" transform="rotate(157.023 433.38 507.287)" class="u tb"/>
+<rect x="416.181" y="519.014" width="5.53175" height="3.89881" transform="rotate(157.023 416.181 519.014)" class="u"/>
+<rect x="419.097" y="513.343" width="15.3294" height="32.4752" transform="rotate(157.023 419.097 513.343)" class="u tb"/>
+<rect x="401.899" y="525.069" width="5.53175" height="3.89881" transform="rotate(157.023 401.899 525.069)" class="u"/>
+<rect x="404.815" y="519.398" width="15.3294" height="32.4752" transform="rotate(157.023 404.815 519.398)" class="u tb"/>
+<rect x="387.617" y="531.125" width="5.53175" height="3.89881" transform="rotate(157.023 387.617 531.125)" class="u"/>
+<rect x="390.534" y="525.454" width="15.3294" height="32.4752" transform="rotate(157.023 390.534 525.454)" class="u tb"/>
+<rect x="373.336" y="537.18" width="5.53175" height="3.89881" transform="rotate(157.023 373.336 537.18)" class="u"/>
+<rect x="376.252" y="531.51" width="15.3294" height="32.4752" transform="rotate(157.023 376.252 531.51)" class="u tb"/>
+<rect x="359.052" y="543.236" width="5.53175" height="3.89881" transform="rotate(157.023 359.052 543.236)" class="u"/>
+<rect x="361.969" y="537.565" width="15.3294" height="32.4752" transform="rotate(157.023 361.969 537.565)" class="u tb"/>
+<rect x="345.522" y="548.973" width="5.53175" height="3.89881" transform="rotate(157.023 345.522 548.973)" class="u"/>
+<rect x="329.736" y="555.666" width="5.53175" height="3.89881" transform="rotate(157.023 329.736 555.666)" class="uw"/>
+<rect x="348.438" y="543.302" width="15.3294" height="32.4752" transform="rotate(157.023 348.438 543.302)" class="u tb"/>
+<rect x="655.422" y="420.236" width="18.5953" height="32.4752" transform="rotate(157.023 655.422 420.236)" class="uw ta"/>
+<rect x="651.002" y="426.544" width="5.53175" height="3.89881" transform="rotate(157.023 651.002 426.544)" class="uw"/>
+<rect x="538.911" y="469.637" width="17.7788" height="32.4752" transform="rotate(157.023 538.911 469.637)" class="uw ta"/>
+<rect x="635.218" y="433.237" width="5.53175" height="3.89881" transform="rotate(157.023 635.218 433.237)" class="u"/>
+<rect x="638.134" y="427.566" width="15.3294" height="32.4752" transform="rotate(157.023 638.134 427.566)" class="u tb"/>
+<rect x="620.934" y="439.292" width="5.53175" height="3.89881" transform="rotate(157.023 620.934 439.292)" class="u"/>
+<rect x="623.85" y="433.622" width="15.3294" height="32.4752" transform="rotate(157.023 623.85 433.622)" class="u tb"/>
+<rect x="606.653" y="445.348" width="5.53175" height="3.89881" transform="rotate(157.023 606.653 445.348)" class="u"/>
+<rect x="609.569" y="439.677" width="15.3294" height="32.4752" transform="rotate(157.023 609.569 439.677)" class="u tb"/>
+<rect x="592.371" y="451.404" width="5.53175" height="3.89881" transform="rotate(157.023 592.371 451.404)" class="u"/>
+<rect x="595.288" y="445.733" width="15.3294" height="32.4752" transform="rotate(157.023 595.288 445.733)" class="u tb"/>
+<rect x="578.089" y="457.459" width="5.53175" height="3.89881" transform="rotate(157.023 578.089 457.459)" class="u"/>
+<rect x="581.005" y="451.788" width="15.3294" height="32.4752" transform="rotate(157.023 581.005 451.788)" class="u tb"/>
+<rect x="563.806" y="463.515" width="5.53175" height="3.89881" transform="rotate(157.023 563.806 463.515)" class="u"/>
+<rect x="566.723" y="457.844" width="15.3294" height="32.4752" transform="rotate(157.023 566.723 457.844)" class="u tb"/>
+<rect x="550.275" y="469.252" width="5.53175" height="3.89881" transform="rotate(157.023 550.275 469.252)" class="u"/>
+<rect x="534.491" y="475.945" width="5.53175" height="3.89881" transform="rotate(157.023 534.491 475.945)" class="uw"/>
+<rect x="553.192" y="463.581" width="15.3294" height="32.4752" transform="rotate(157.023 553.192 463.581)" class="u tb"/>
+<rect x="1029.28" y="496.728" width="18.5953" height="32.4752" transform="rotate(157.023 1029.28 496.728)" class="uw ta"/>
+<rect x="1024.86" y="503.037" width="5.53175" height="3.89881" transform="rotate(157.023 1024.86 503.037)" class="uw"/>
+<rect x="898.489" y="552.185" width="17.7788" height="32.4752" transform="rotate(157.023 898.489 552.185)" class="uw ta"/>
+<rect x="994.797" y="515.785" width="5.53175" height="3.89881" transform="rotate(157.023 994.797 515.785)" class="u"/>
+<rect x="997.714" y="510.114" width="15.3294" height="32.4752" transform="rotate(157.023 997.714 510.114)" class="u tb"/>
+<rect x="1009.08" y="509.73" width="5.53175" height="3.89881" transform="rotate(157.023 1009.08 509.73)" class="u"/>
+<rect x="1011.99" y="504.059" width="15.3294" height="32.4752" transform="rotate(157.023 1011.99 504.059)" class="u tb"/>
+<rect x="980.514" y="521.841" width="5.53175" height="3.89881" transform="rotate(157.023 980.514 521.841)" class="u"/>
+<rect x="983.431" y="516.17" width="15.3294" height="32.4752" transform="rotate(157.023 983.431 516.17)" class="u tb"/>
+<rect x="966.231" y="527.896" width="5.53175" height="3.89881" transform="rotate(157.023 966.231 527.896)" class="u"/>
+<rect x="969.148" y="522.226" width="15.3294" height="32.4752" transform="rotate(157.023 969.148 522.226)" class="u tb"/>
+<rect x="951.95" y="533.952" width="5.53175" height="3.89881" transform="rotate(157.023 951.95 533.952)" class="u"/>
+<rect x="954.866" y="528.281" width="15.3294" height="32.4752" transform="rotate(157.023 954.866 528.281)" class="u tb"/>
+<rect x="937.668" y="540.008" width="5.53175" height="3.89881" transform="rotate(157.023 937.668 540.008)" class="u"/>
+<rect x="940.584" y="534.337" width="15.3294" height="32.4752" transform="rotate(157.023 940.584 534.337)" class="u tb"/>
+<rect x="923.386" y="546.063" width="5.53175" height="3.89881" transform="rotate(157.023 923.386 546.063)" class="u"/>
+<rect x="926.302" y="540.393" width="15.3294" height="32.4752" transform="rotate(157.023 926.302 540.393)" class="u tb"/>
+<rect x="909.855" y="551.8" width="5.53175" height="3.89881" transform="rotate(157.023 909.855 551.8)" class="u"/>
+<rect x="894.069" y="558.493" width="5.53175" height="3.89881" transform="rotate(157.023 894.069 558.493)" class="uw"/>
+<rect x="912.771" y="546.13" width="15.3294" height="32.4752" transform="rotate(157.023 912.771 546.13)" class="u tb"/>
+<rect x="785.922" y="240.447" width="18.5953" height="32.4752" transform="rotate(-43.0127 785.922 240.447)" class="uw ta"/>
+<rect x="787.913" y="233.006" width="5.53175" height="3.89881" transform="rotate(-43.0127 787.913 233.006)" class="uw"/>
+<rect x="878.459" y="154.117" width="17.7788" height="32.4752" transform="rotate(-43.0127 878.459 154.117)" class="uw ta"/>
+<rect x="800.451" y="221.31" width="5.53175" height="3.89881" transform="rotate(-43.0127 800.451 221.31)" class="u"/>
+<rect x="799.653" y="227.636" width="15.3294" height="32.4752" transform="rotate(-43.0127 799.653 227.636)" class="u tb"/>
+<rect x="811.794" y="210.727" width="5.53175" height="3.89881" transform="rotate(-43.0127 811.794 210.727)" class="u"/>
+<rect x="810.996" y="217.054" width="15.3294" height="32.4752" transform="rotate(-43.0127 810.996 217.054)" class="u tb"/>
+<rect x="823.135" y="200.145" width="5.53175" height="3.89881" transform="rotate(-43.0127 823.135 200.145)" class="u"/>
+<rect x="822.339" y="206.472" width="15.3294" height="32.4752" transform="rotate(-43.0127 822.339 206.472)" class="u tb"/>
+<rect x="834.479" y="189.563" width="5.53175" height="3.89881" transform="rotate(-43.0127 834.479 189.563)" class="u"/>
+<rect x="833.681" y="195.889" width="15.3294" height="32.4752" transform="rotate(-43.0127 833.681 195.889)" class="u tb"/>
+<rect x="845.822" y="178.98" width="5.53175" height="3.89881" transform="rotate(-43.0127 845.822 178.98)" class="u"/>
+<rect x="845.025" y="185.307" width="15.3294" height="32.4752" transform="rotate(-43.0127 845.025 185.307)" class="u tb"/>
+<rect x="857.166" y="168.398" width="5.53175" height="3.89881" transform="rotate(-43.0127 857.166 168.398)" class="u"/>
+<rect x="856.368" y="174.725" width="15.3294" height="32.4752" transform="rotate(-43.0127 856.368 174.725)" class="u tb"/>
+<rect x="867.912" y="158.373" width="5.53175" height="3.89881" transform="rotate(-43.0127 867.912 158.373)" class="u"/>
+<rect x="880.449" y="146.677" width="5.53175" height="3.89881" transform="rotate(-43.0127 880.449 146.677)" class="uw"/>
+<rect x="867.114" y="164.699" width="15.3294" height="32.4752" transform="rotate(-43.0127 867.114 164.699)" class="u tb"/>
+<rect x="955.824" y="327.652" width="18.5953" height="32.4752" transform="rotate(67.0232 955.824 327.652)" class="uw ta"/>
+<rect x="962.132" y="332.073" width="5.53175" height="3.89881" transform="rotate(67.0232 962.132 332.073)" class="uw"/>
+<rect x="999.488" y="430.634" width="17.7788" height="32.4752" transform="rotate(67.0232 999.488 430.634)" class="uw ta"/>
+<rect x="968.824" y="347.858" width="5.53175" height="3.89881" transform="rotate(67.0232 968.824 347.858)" class="u"/>
+<rect x="963.154" y="344.941" width="15.3294" height="32.4752" transform="rotate(67.0232 963.154 344.941)" class="u tb"/>
+<rect x="974.879" y="362.14" width="5.53175" height="3.89881" transform="rotate(67.0232 974.879 362.14)" class="u"/>
+<rect x="969.209" y="359.223" width="15.3294" height="32.4752" transform="rotate(67.0232 969.209 359.223)" class="u tb"/>
+<rect x="980.935" y="376.422" width="5.53175" height="3.89881" transform="rotate(67.0232 980.935 376.422)" class="u"/>
+<rect x="975.265" y="373.505" width="15.3294" height="32.4752" transform="rotate(67.0232 975.265 373.505)" class="u tb"/>
+<rect x="986.991" y="390.704" width="5.53175" height="3.89881" transform="rotate(67.0232 986.991 390.704)" class="u"/>
+<rect x="981.32" y="387.788" width="15.3294" height="32.4752" transform="rotate(67.0232 981.32 387.788)" class="u tb"/>
+<rect x="993.046" y="404.986" width="5.53175" height="3.89881" transform="rotate(67.0232 993.046 404.986)" class="u"/>
+<rect x="987.376" y="402.07" width="15.3294" height="32.4752" transform="rotate(67.0232 987.376 402.07)" class="u tb"/>
+<rect x="999.102" y="419.269" width="5.53175" height="3.89881" transform="rotate(67.0232 999.102 419.269)" class="u"/>
+<rect x="993.432" y="416.352" width="15.3294" height="32.4752" transform="rotate(67.0232 993.432 416.352)" class="u tb"/>
+<rect x="1005.8" y="435.054" width="5.53175" height="3.89881" transform="rotate(67.0232 1005.8 435.054)" class="uw"/>
+<rect x="916.58" y="218.362" width="18.5953" height="32.4752" transform="rotate(67.0232 916.58 218.362)" class="uw ta"/>
+<rect x="922.887" y="222.782" width="5.53175" height="3.89881" transform="rotate(67.0232 922.887 222.782)" class="uw"/>
+<rect x="929.581" y="238.568" width="5.53175" height="3.89881" transform="rotate(67.0232 929.581 238.568)" class="u"/>
+<rect x="923.91" y="235.651" width="15.3294" height="32.4752" transform="rotate(67.0232 923.91 235.651)" class="u tb"/>
+<rect x="935.636" y="252.85" width="5.53175" height="3.89881" transform="rotate(67.0232 935.636 252.85)" class="u"/>
+<rect x="929.964" y="249.933" width="15.3294" height="32.4752" transform="rotate(67.0232 929.964 249.933)" class="u tb"/>
+<rect x="941.692" y="267.132" width="5.53175" height="3.89881" transform="rotate(67.0232 941.692 267.132)" class="u"/>
+<rect x="936.021" y="264.216" width="15.3294" height="32.4752" transform="rotate(67.0232 936.021 264.216)" class="u tb"/>
+<rect x="947.748" y="281.414" width="5.53175" height="3.89881" transform="rotate(67.0232 947.748 281.414)" class="u"/>
+<rect x="942.076" y="278.498" width="15.3294" height="32.4752" transform="rotate(67.0232 942.076 278.498)" class="u tb"/>
+<rect x="948.132" y="292.78" width="17.7788" height="32.4752" transform="rotate(67.0232 948.132 292.78)" class="uw ta"/>
+<rect x="954.441" y="297.2" width="5.53175" height="3.89881" transform="rotate(67.0232 954.441 297.2)" class="uw"/>
+<rect x="268.137" y="439.203" width="18.5953" height="32.4752" transform="rotate(-22.9768 268.137 439.203)" class="uw ta"/>
+<rect x="441.028" y="365.898" width="17.7788" height="32.4752" transform="rotate(-22.9768 441.028 365.898)" class="uw ta"/>
+<rect x="285.426" y="431.872" width="14.5129" height="32.4752" transform="rotate(-22.9768 285.426 431.872)" class="u tb"/>
+<rect x="298.956" y="426.135" width="15.3294" height="32.4752" transform="rotate(-22.9768 298.956 426.135)" class="u tb"/>
+<rect x="313.239" y="420.079" width="15.3294" height="32.4752" transform="rotate(-22.9768 313.239 420.079)" class="u tb"/>
+<rect x="327.521" y="414.024" width="15.3294" height="32.4752" transform="rotate(-22.9768 327.521 414.024)" class="u tb"/>
+<rect x="341.802" y="407.968" width="15.3294" height="32.4752" transform="rotate(-22.9768 341.802 407.968)" class="u tb"/>
+<rect x="356.084" y="401.912" width="15.3294" height="32.4752" transform="rotate(-22.9768 356.084 401.912)" class="u tb"/>
+<rect x="370.366" y="395.857" width="15.3294" height="32.4752" transform="rotate(-22.9768 370.366 395.857)" class="u tb"/>
+<rect x="384.65" y="389.801" width="15.3294" height="32.4752" transform="rotate(-22.9768 384.65 389.801)" class="u tb"/>
+<rect x="398.933" y="383.746" width="15.3294" height="32.4752" transform="rotate(-22.9768 398.933 383.746)" class="u tb"/>
+<rect x="413.215" y="377.69" width="15.3294" height="32.4752" transform="rotate(-22.9768 413.215 377.69)" class="u tb"/>
+<rect x="426.745" y="371.953" width="15.3294" height="32.4752" transform="rotate(-22.9768 426.745 371.953)" class="u tb"/>
+<rect x="903.205" y="349.963" width="18.7185" height="33.6567" transform="rotate(67.0232 903.205 349.963)" class="uw ta"/>
+<rect x="946.822" y="452.836" width="17.8969" height="33.6567" transform="rotate(67.0232 946.822 452.836)" class="uw ta"/>
+<rect x="910.581" y="367.36" width="14.6105" height="33.6567" transform="rotate(67.0232 910.581 367.36)" class="u tb"/>
+<rect x="916.354" y="380.976" width="15.4321" height="33.6567" transform="rotate(67.0232 916.354 380.976)" class="u tb"/>
+<rect x="922.448" y="395.348" width="15.4321" height="33.6567" transform="rotate(67.0232 922.448 395.348)" class="u tb"/>
+<rect x="928.541" y="409.72" width="15.4321" height="33.6567" transform="rotate(67.0232 928.541 409.72)" class="u tb"/>
+<rect x="934.634" y="424.092" width="15.4321" height="33.6567" transform="rotate(67.0232 934.634 424.092)" class="u tb"/>
+<rect x="940.728" y="438.464" width="15.4321" height="33.6567" transform="rotate(67.0232 940.728 438.464)" class="u tb"/>
+<rect x="869.715" y="364.162" width="18.7185" height="33.6567" transform="rotate(67.0232 869.715 364.162)" class="uw ta"/>
+<rect x="913.333" y="467.035" width="17.8969" height="33.6567" transform="rotate(67.0232 913.333 467.035)" class="uw ta"/>
+<rect x="877.091" y="381.56" width="14.6105" height="33.6567" transform="rotate(67.0232 877.091 381.56)" class="u tb"/>
+<rect x="882.864" y="395.175" width="15.4321" height="33.6567" transform="rotate(67.0232 882.864 395.175)" class="u tb"/>
+<rect x="888.958" y="409.547" width="15.4321" height="33.6567" transform="rotate(67.0232 888.958 409.547)" class="u tb"/>
+<rect x="895.051" y="423.919" width="15.4321" height="33.6567" transform="rotate(67.0232 895.051 423.919)" class="u tb"/>
+<rect x="901.145" y="438.291" width="15.4321" height="33.6567" transform="rotate(67.0232 901.145 438.291)" class="u tb"/>
+<rect x="907.24" y="452.663" width="15.4321" height="33.6567" transform="rotate(67.0232 907.24 452.663)" class="u tb"/>
+<rect x="514.855" y="296.361" width="18.5953" height="32.4752" transform="rotate(7.48686 514.855 296.361)" class="uw ta"/>
+<rect x="594.186" y="306.787" width="17.7788" height="32.4752" transform="rotate(7.48686 594.186 306.787)" class="uw ta"/>
+<rect x="533.474" y="298.808" width="14.5129" height="32.4752" transform="rotate(7.48686 533.474 298.808)" class="u tb"/>
+<rect x="548.045" y="300.723" width="15.3294" height="32.4752" transform="rotate(7.48686 548.045 300.723)" class="u tb"/>
+<rect x="563.426" y="302.744" width="15.3294" height="32.4752" transform="rotate(7.48686 563.426 302.744)" class="u tb"/>
+<rect x="578.807" y="304.765" width="15.3294" height="32.4752" transform="rotate(7.48686 578.807 304.765)" class="u tb"/>
+<rect x="281.843" y="471.525" width="18.5953" height="32.4752" transform="rotate(-22.9768 281.843 471.525)" class="uw ta"/>
+<rect x="454.733" y="398.22" width="17.7788" height="32.4752" transform="rotate(-22.9768 454.733 398.22)" class="uw ta"/>
+<rect x="299.132" y="464.194" width="14.5129" height="32.4752" transform="rotate(-22.9768 299.132 464.194)" class="u tb"/>
+<rect x="312.662" y="458.458" width="15.3294" height="32.4752" transform="rotate(-22.9768 312.662 458.458)" class="u tb"/>
+<rect x="326.945" y="452.402" width="15.3294" height="32.4752" transform="rotate(-22.9768 326.945 452.402)" class="u tb"/>
+<rect x="341.227" y="446.346" width="15.3294" height="32.4752" transform="rotate(-22.9768 341.227 446.346)" class="u tb"/>
+<rect x="355.509" y="440.291" width="15.3294" height="32.4752" transform="rotate(-22.9768 355.509 440.291)" class="u tb"/>
+<rect x="369.791" y="434.235" width="15.3294" height="32.4752" transform="rotate(-22.9768 369.791 434.235)" class="u tb"/>
+<rect x="384.073" y="428.18" width="15.3294" height="32.4752" transform="rotate(-22.9768 384.073 428.18)" class="u tb"/>
+<rect x="398.356" y="422.124" width="15.3294" height="32.4752" transform="rotate(-22.9768 398.356 422.124)" class="u tb"/>
+<rect x="412.639" y="416.068" width="15.3294" height="32.4752" transform="rotate(-22.9768 412.639 416.068)" class="u tb"/>
+<rect x="426.92" y="410.013" width="15.3294" height="32.4752" transform="rotate(-22.9768 426.92 410.013)" class="u tb"/>
+<rect x="440.45" y="404.276" width="15.3294" height="32.4752" transform="rotate(-22.9768 440.45 404.276)" class="u tb"/>
+<path d="M912.948 100.703C919.851 91.7958 934.834 88.9316 941.463 88.613C941.463 88.613 980.153 82.8883 1013.43 58.0993C1046.71 33.3104 1043.15 100.497 1043.15 100.497C1040.92 104.469 1035.26 114.63 1030.48 123.494C1024.5 134.574 1011.8 161.315 1035.06 222.473C1058.33 283.631 1145.5 344.391 1156.79 396.207C1168.08 448.023 1089.16 473.475 1067.83 479.848C1046.5 486.22 1034.73 459.708 1019.18 423.045C1009.72 400.715 980.363 328.969 962.378 289.07C944.392 249.17 937.719 222.096 941.068 207.326C944.418 192.556 949.795 187.606 943.654 173.123C937.513 158.639 917.232 144.81 909.211 132.191C901.191 119.572 904.319 111.838 912.948 100.703Z" class="ln"/>
+<circle cx="678.185" cy="345.488" r="53.0871" transform="rotate(-22.9768 678.185 345.488)" class="ln"/>
+<circle cx="678.447" cy="344.843" r="28.0142" transform="rotate(-22.9768 678.447 344.843)" class="ln"/>
+<circle cx="258.574" cy="548.5" r="14.2487" transform="rotate(-22.9768 258.574 548.5)" class="ln"/>
+<path d="M563.977 248.666C539.755 257.868 488.62 277.734 477.856 283.579C464.4 290.887 461.218 295.974 459.831 304.038C458.444 312.102 461.638 320.893 456.246 329.587C450.854 338.281 447.932 342.724 443.942 339.61" class="ln"/>
+<path d="M730.864 345.046C741.123 340.696 766.53 329.923 780.652 323.936C798.304 316.451 815.135 304.509 828.771 283.776C842.408 263.042 846.427 258.668 858.304 258.972C870.181 259.276 875.775 264.914 882.575 275.915C889.375 286.915 901.864 312.592 901.574 320.724C901.284 328.857 894.097 334.574 875.539 342.443C856.982 350.311 833.652 356.999 820.772 365.664C807.892 374.329 812.169 386.933 817.665 401.157C822.063 412.535 853.274 485.559 868.33 520.648M629.006 276.095L639.072 277.167C640.512 277.625 643.181 279.804 642.335 284.862C641.489 289.919 641.039 297.337 640.919 300.414C639.406 302.301 635.978 306.14 634.376 306.392C632.374 306.707 631.566 298.505 630.114 290.043C628.662 281.581 624.657 282.211 625.7 279.633C626.535 277.57 628.252 276.415 629.006 276.095Z" class="ln"/>
+<path d="M727.905 325.475C743.98 319.727 778.343 306.652 787.198 300.334C798.268 292.437 808.953 283.635 811.491 278.286C813.522 274.008 811.727 267.507 810.575 264.791" class="ln"/>
+<path d="M853.904 111.32C857.098 120.112 862.07 139.897 856.406 148.707C849.327 159.718 832.099 174.499 814.885 185.535C797.671 196.572 794.419 202.757 789.096 210.353C784.838 216.431 774.436 228.673 769.767 234.034C767.678 234.564 764.275 238.713 767.377 251.067C771.256 266.511 773.258 266.196 776.039 281.57C778.82 296.945 778.092 301.526 771.578 300.016C765.064 298.506 757.536 292.086 757.456 279.304C757.376 266.522 759.6 259.171 750.851 251.133C743.853 244.702 731.342 243.741 725.961 244.064L715.772 241.443C716.965 238.801 719.469 230.263 719.932 217.251C720.396 204.239 711.297 191.009 706.69 186.02L697.75 177.529" class="ln"/>
+<path d="M498.386 349.633C494.734 348.156 486.162 345.738 481.093 347.888C476.023 350.037 476.931 355.704 478.018 358.269C484.863 374.412 499.428 407.503 502.927 410.719C507.301 414.738 517.737 420.459 525.102 418.938C530.994 417.722 585.492 393.867 612.005 382.092C614.702 380.058 619.393 374.58 616.574 368.94C613.756 363.3 602.336 361.806 596.978 361.764L580.137 359.826" class="ln"/>
+<rect x="492.69" y="353.062" width="18.5953" height="32.4752" transform="rotate(7.48686 492.69 353.062)" class="uw ta"/>
+<rect x="572.021" y="363.487" width="17.7788" height="32.4752" transform="rotate(7.48686 572.021 363.487)" class="uw ta"/>
+<rect x="511.309" y="355.509" width="14.5129" height="32.4752" transform="rotate(7.48686 511.309 355.509)" class="u tb"/>
+<rect x="525.88" y="357.423" width="15.3294" height="32.4752" transform="rotate(7.48686 525.88 357.423)" class="u tb"/>
+<rect x="541.261" y="359.445" width="15.3294" height="32.4752" transform="rotate(7.48686 541.261 359.445)" class="u tb"/>
+<rect x="556.642" y="361.466" width="15.3294" height="32.4752" transform="rotate(7.48686 556.642 361.466)" class="u tb"/>
+<path d="M260.59 410.943C261.751 411.163 262.455 412.822 255.981 417.703C247.888 423.805 245.31 422.762 244.376 430.634C243.628 436.931 264.79 482.141 275.465 503.958C277.97 507.346 281.736 514.97 276.765 518.359C271.794 521.748 263.073 520.07 259.334 518.808L256.455 512.018L265.055 508.372L215.926 392.501" class="ln"/>
+<rect x="182.559" y="577.001" width="31.4473" height="6.866" rx="3.433" transform="rotate(-22.9768 182.559 577.001)" class="ln"/>
+<path d="M78.4821 444.903L127.419 560.322C129.055 565.858 133.768 577.814 139.538 581.348C146.751 585.766 153.457 587.729 159.932 582.848C166.406 577.967 170.041 572.687 191.905 561.281C209.395 552.156 221.824 547.884 225.851 546.888C226.67 546.719 228.605 545.827 229.802 543.611C231.297 540.841 229.172 539.606 233.068 533.682C236.964 527.758 241.682 526.292 242.986 523.069C244.029 520.491 243.092 517.862 242.493 516.87L230.725 521.86L182.364 407.799" class="ln"/>
+<path d="M162.745 639.86L152.573 615.871C151.184 613.434 149.637 607.183 154.565 601.677C160.724 594.793 165.949 595.782 177.634 595.633C189.319 595.485 208.191 589.619 220.22 583.985C229.843 579.477 237.205 576.605 239.683 575.733C242.407 577.959 249.715 582.265 257.154 581.675C266.453 580.936 288.247 570.627 289.019 554.814C289.79 539.002 287.266 540.606 290.065 534.613C292.304 529.819 296.403 526.052 298.172 524.768L304.111 524.92" class="ln"/>
+<path d="M648.189 289.855L649.069 279.336C649.975 278.952 652.663 278.24 656.174 278.46C659.685 278.68 660.946 279.64 661.138 280.093C663.003 281.972 666.719 285.95 666.664 286.828C666.595 287.925 666.718 289.475 664.263 289.982C661.808 290.489 659.161 290.543 655.348 291.626C651.535 292.708 650.108 294.381 648.627 293.407C647.443 292.628 647.842 290.714 648.189 289.855Z" class="ln"/>
+<path d="M762.352 415.531C763.259 403.399 765.374 375.055 766.574 358.74C768.073 338.347 773.135 331.395 786.438 330.026C799.742 328.657 804.239 334.226 820.685 321.379C833.843 311.102 855.997 293.413 865.43 285.854C868.809 279.971 876.745 267.707 881.453 265.711C886.16 263.715 892.529 267.066 895.125 268.991C895.916 270.436 896.756 274.601 893.793 279.702C890.089 286.079 885.425 290.192 887.782 298.27C890.139 306.349 898.312 313.03 891.37 321.847" class="ln"/>
+<path d="M108.984 436.242L188.051 622.722" class="ln" stroke-dasharray="2 2"/>
+<path d="M1058.11 139.546C1052.83 141.785 1042.52 151.389 1043.52 171.896C1044.78 197.528 1032.74 206.907 1053 224.479C1073.27 242.052 1070.71 237.265 1091.95 253.357C1108.94 266.23 1114.98 273.673 1115.87 275.785" class="ln" stroke-dasharray="2 2"/>
+<path d="M517.033 295.097C517.49 293.657 518.189 290.015 517.323 286.964C516.457 283.914 498.217 291.861 489.206 296.216C487.743 296.124 484.825 297.219 484.857 302.332C484.889 307.445 491.096 308.23 494.196 307.984L495.253 301.662L508.227 302.035L505.616 326.103L492.903 325.086L494.029 317.666C492.699 316.628 488.862 315.051 484.155 317.047C478.271 319.542 479.285 324.452 482.04 329.692C484.796 334.931 484.205 337.318 495.629 337.814C504.769 338.21 509.678 338.621 510.99 338.777L511.786 333.099" class="ln"/>
+<rect x="185.412" y="549.46" width="131.268" height="47.1717" transform="rotate(-112.977 185.412 549.46)" class="cv"/>
+<rect x="561.997" y="245.435" width="130.451" height="47.9881" transform="rotate(-22.9768 561.997 245.435)" class="cv"/>
+<rect x="629.254" y="221.121" width="93.7332" height="48.9923" transform="rotate(6.58093 629.254 221.121)" class="cv"/>
+<g class="mk" data-cat="unit" transform="translate(347 512)"><title>Building 01 &#8212; Private Units</title><circle class="mk-d" r="19"/><text class="mk-t" y="5.2">01</text></g>
+<g class="mk" data-cat="unit" transform="translate(263 449)"><title>Building 02 &#8212; Private Units</title><circle class="mk-d" r="19"/><text class="mk-t" y="5.2">02</text></g>
+<g class="mk" data-cat="unit" transform="translate(291 362)"><title>Building 03 &#8212; Private Units</title><circle class="mk-d" r="19"/><text class="mk-t" y="5.2">03</text></g>
+<g class="mk" data-cat="unit" transform="translate(509 297)"><title>Building 04 &#8212; Private Units</title><circle class="mk-d" r="19"/><text class="mk-t" y="5.2">04</text></g>
+<g class="mk" data-cat="unit" transform="translate(598 372)"><title>Building 05 &#8212; Private Units</title><circle class="mk-d" r="19"/><text class="mk-t" y="5.2">05</text></g>
+<g class="mk" data-cat="unit" transform="translate(548 426)"><title>Building 06 &#8212; Private Units</title><circle class="mk-d" r="19"/><text class="mk-t" y="5.2">06</text></g>
+<g class="mk" data-cat="unit" transform="translate(920 169)"><title>Building 07 &#8212; Private Units</title><circle class="mk-d" r="19"/><text class="mk-t" y="5.2">07</text></g>
+<g class="mk" data-cat="unit" transform="translate(902 288)"><title>Building 08 &#8212; Private Units</title><circle class="mk-d" r="19"/><text class="mk-t" y="5.2">08</text></g>
+<g class="mk" data-cat="unit" transform="translate(991 395)"><title>Building 09 &#8212; Private Units</title><circle class="mk-d" r="19"/><text class="mk-t" y="5.2">09</text></g>
+<g class="mk" data-cat="unit" transform="translate(864 446)"><title>Building 10 &#8212; Private Units</title><circle class="mk-d" r="19"/><text class="mk-t" y="5.2">10</text></g>
+<g class="mk" data-cat="unit" transform="translate(859 529)"><title>Building 11 &#8212; Private Units</title><circle class="mk-d" r="19"/><text class="mk-t" y="5.2">11</text></g>
+<g class="mk" data-cat="cd" transform="translate(131 434)"><title>Car Dealership</title><circle class="mk-d" r="19"/><text class="mk-t" y="5.2">CD</text></g>
+<g class="mk" data-cat="ac" transform="translate(681 195)"><title>Luxe Corsa Club</title><circle class="mk-d" r="19"/><text class="mk-t" y="5.2">AC</text></g>
+      </svg>      </div>
+    </div>
+    <p class="map-hint">Drag the map sideways to explore the campus.</p>
+
+    <!-- controls, not decoration: never gated behind a scroll reveal -->
+    <div class="legend">
+      <button type="button" class="legend-item" data-focus="cd" aria-pressed="false"><span class="legend-key">CD</span> Car Dealership</button>
+      <button type="button" class="legend-item" data-focus="ac" aria-pressed="false"><span class="legend-key">AC</span> Luxe Corsa Club</button>
+      <button type="button" class="legend-item" data-focus="unit" aria-pressed="false"><span class="legend-key">01</span> Private Units</button>
+      <button type="button" class="legend-item" data-focus="ta" aria-pressed="false"><span class="legend-swatch sw-a"></span> Type A &middot; Premium</button>
+      <button type="button" class="legend-item" data-focus="tb" aria-pressed="false"><span class="legend-swatch sw-b"></span> Type B &middot; Standard</button>
+      <span class="legend-item legend-note">Bay width is the tier &mdash; 30 ft Premium, 23 ft Standard.</span>
+      <span class="spacer"></span>
+      <button class="btn btn-outline btn-sm" id="openMap" data-od-id="map-detailed">See detailed map</button>
+    </div>
+  </div>
+</section>
+
+<!-- units & features -->
+<section class="section" id="units" data-od-id="units">
+  <div class="container">
+    <div class="units-panel reveal">
+      <div class="units-head">
+        <h2 class="h3">Available Units &amp; Features</h2>
+        <p>Multiple units can be combined &ldquo;pre-construction&rdquo; only.</p>
+      </div>
+
+      <div class="filter" role="group" aria-label="Filter suites by type">
+        <button type="button" data-filter="all" aria-pressed="true">All units</button>
+        <button type="button" data-filter="a" aria-pressed="false">Type A &middot; Premium</button>
+        <button type="button" data-filter="b" aria-pressed="false">Type B &middot; Standard</button>
+      </div>
+
+      <div class="unit-grid" id="unitGrid">
+        <article class="unit" data-type="a" data-od-id="unit-type-a">
+          <span class="badge badge-premium">Premium</span>
+          <h3>Type <em>A</em> Units</h3>
+          <p class="price">Starting: <span class="num">$699,000</span></p>
+          <div class="unit-shot">
+            <img src="assets/unit-type-a.jpg" alt="Interior of a Type A suite: double-height mezzanine, glass frontage and a red supercar on the polished floor" width="928" height="480" loading="lazy" />
+          </div>
+          <p class="spec">30&rsquo; x 50&rsquo; + mezzanine 30&rsquo; x 31&rsquo; = 2,430 total square feet (fits approximately 6 cars and 3 motorcycles)</p>
+          <div class="avail">
+            <dl class="avail-top"><dt>Availability</dt><dd class="num">15 of 26 units</dd></dl>
+            <p class="avail-pct num">58% available</p>
+            <div class="meter" role="img" aria-label="15 of 26 Type A units available &mdash; 58 percent">
+              <i data-fill="58"></i>
+            </div>
+            <div class="avail-foot"><span class="ok num">Available: 15</span><span class="no num">Sold: 11</span></div>
+          </div>
+          <div class="unit-actions">
+            <button class="btn btn-outline btn-sm plan-btn" data-plan="a">
+              <svg class="ico-line" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5v7.5m0 0 2.75-2.75M8 10 5.25 7.25M3 11.5v1.5a1.5 1.5 0 0 0 1.5 1.5h7a1.5 1.5 0 0 0 1.5-1.5v-1.5"/></svg>
+              Floor plan
+            </button>
+            <button class="btn btn-outline btn-sm" data-reserve="type-a">
+              Reserve Type A
+              <svg class="arw ico-line" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 8h7.3M8.6 4.9 11.7 8l-3.1 3.1"/></svg>
+            </button>
+          </div>
+        </article>
+
+        <article class="unit" data-type="b" data-od-id="unit-type-b">
+          <span class="badge badge-standard">Standard</span>
+          <h3>Type <em>B</em> Units</h3>
+          <p class="price">Starting: <span class="num">$549,000</span></p>
+          <div class="unit-shot">
+            <img src="assets/unit-type-b.jpg" alt="Interior of a Type B suite: bright single-volume bay with sports cars parked side by side" width="936" height="480" loading="lazy" />
+          </div>
+          <p class="spec">23&rsquo; x 50&rsquo; + mezzanine 23&rsquo; x 31&rsquo; = 1,863 total square feet (fits approximately 4 cars and 2 motorcycles)</p>
+          <div class="avail">
+            <dl class="avail-top"><dt>Availability</dt><dd class="num">60 of 95 units</dd></dl>
+            <p class="avail-pct num">63% available</p>
+            <div class="meter" role="img" aria-label="60 of 95 Type B units available &mdash; 63 percent">
+              <i data-fill="63"></i>
+            </div>
+            <div class="avail-foot"><span class="ok num">Available: 60</span><span class="no num">Sold: 35</span></div>
+          </div>
+          <div class="unit-actions">
+            <button class="btn btn-outline btn-sm plan-btn" data-plan="b">
+              <svg class="ico-line" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5v7.5m0 0 2.75-2.75M8 10 5.25 7.25M3 11.5v1.5a1.5 1.5 0 0 0 1.5 1.5h7a1.5 1.5 0 0 0 1.5-1.5v-1.5"/></svg>
+              Floor plan
+            </button>
+            <button class="btn btn-outline btn-sm" data-reserve="type-b">
+              Reserve Type B
+              <svg class="arw ico-line" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 8h7.3M8.6 4.9 11.7 8l-3.1 3.1"/></svg>
+            </button>
+          </div>
+        </article>
+      </div>
+
+      <div class="incl" data-od-id="inclusions">
+        <div>
+          <span class="ico" style="--ico:url(assets/icon-climate.svg)" aria-hidden="true"></span>
+          <ul>
+            <li>Fully climate controlled</li>
+            <li>Modern pedestrian door</li>
+            <li>Stylish curated bathroom with walk-in shower</li>
+          </ul>
+        </div>
+        <div>
+          <span class="ico" style="--ico:url(assets/icon-systems.svg)" aria-hidden="true"></span>
+          <ul>
+            <li>LED lighting throughout</li>
+            <li>Insulated walls, ceilings and garage door</li>
+            <li>100 AMP electric service</li>
+          </ul>
+        </div>
+        <div>
+          <span class="ico" style="--ico:url(assets/icon-finish.svg)" aria-hidden="true"></span>
+          <ul>
+            <li>Commercial-grade overhead garage door</li>
+            <li>Wood staircase and railings to mezzanine level</li>
+            <li>Upgrades &amp; customization via onsite designer</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="tourbar reveal" data-od-id="tour-bar">
+      <div>
+        <h2 class="h3">Schedule Your Private Tour</h2>
+        <p>Discover your perfect automotive suite in person. Reserve your private walkthrough today.</p>
+      </div>
+      <button class="btn btn-accent" data-reserve="" data-od-id="tour-book">
+        Book now
+        <svg class="arw ico-line" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 8h7.3M8.6 4.9 11.7 8l-3.1 3.1"/></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- contact -->
+<section class="contact" id="contact" data-od-id="contact">
+  <img class="watermark" src="assets/wordmark-large.svg" alt="" width="1733" height="226" aria-hidden="true" loading="lazy" />
+  <div class="container contact-grid">
+    <div class="contact-body reveal">
+      <p class="eyebrow">Get Started</p>
+      <h2 class="display">Check availability<br />&amp; schedule a tour</h2>
+      <p class="lead">Ready to secure your suite? Contact us to discuss availability and arrange a private tour.</p>
+      <hr />
+      <dl class="detail"><dt>Location</dt><dd>Lake Zurich, IL / South Florida &mdash; Coming Soon</dd></dl>
+      <dl class="detail"><dt>Phone</dt><dd><a href="tel:+12246620000">(224) 662-0000</a></dd></dl>
+      <div class="socials">
+        <p>Connect with us</p>
+        <div class="social-row">
+          <a href="#" aria-label="Luxe Corsa on Facebook"><span class="ico" style="--ico:url(assets/social-facebook.svg)" aria-hidden="true"></span></a>
+          <a href="#" aria-label="Luxe Corsa on YouTube"><span class="ico" style="--ico:url(assets/social-youtube.svg)" aria-hidden="true"></span></a>
+          <a href="#" aria-label="Luxe Corsa on X"><span class="ico" style="--ico:url(assets/social-x.svg)" aria-hidden="true"></span></a>
+          <a href="#" aria-label="Luxe Corsa on Instagram"><span class="ico" style="--ico:url(assets/social-instagram.svg)" aria-hidden="true"></span></a>
+          <a href="#" aria-label="Luxe Corsa on LinkedIn"><span class="ico" style="--ico:url(assets/social-linkedin.svg)" aria-hidden="true"></span></a>
+          <a href="#" aria-label="Luxe Corsa on TikTok"><span class="ico" style="--ico:url(assets/social-tiktok.svg)" aria-hidden="true"></span></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card reveal" data-od-id="inquiry-form">
+      <form id="inquiry" novalidate>
+        <div class="field">
+          <label class="sr-only" for="f-name">Your name</label>
+          <input class="input" id="f-name" name="name" type="text" placeholder="Your Name" autocomplete="name" required />
+          <p class="err" data-for="f-name">Please tell us your name.</p>
+        </div>
+        <div class="field">
+          <label class="sr-only" for="f-email">Your email</label>
+          <input class="input" id="f-email" name="email" type="email" placeholder="Your Email" autocomplete="email" required />
+          <p class="err" data-for="f-email">Please enter a valid email address.</p>
+        </div>
+        <div class="field">
+          <label class="sr-only" for="f-phone">Phone</label>
+          <input class="input" id="f-phone" name="phone" type="tel" placeholder="Phone" autocomplete="tel" />
+        </div>
+        <div class="field">
+          <label class="sr-only" for="f-suite">Preferred suite size</label>
+          <select class="select" id="f-suite" name="suite" required>
+            <option value="" selected disabled>Preferred Suite Size</option>
+            <option value="type-a">Type A &mdash; 2,430 sq ft (approx. 6 cars + 3 motorcycles)</option>
+            <option value="type-b">Type B &mdash; 1,863 sq ft (approx. 4 cars + 2 motorcycles)</option>
+            <option value="undecided">Not sure yet &mdash; advise me</option>
+          </select>
+          <span class="ico chev" style="--ico:url(assets/chevron-down.svg)" aria-hidden="true"></span>
+          <p class="err" data-for="f-suite">Choose a suite size so we can check availability.</p>
+        </div>
+        <div class="field">
+          <label class="sr-only" for="f-msg">Tell us about your collection</label>
+          <textarea class="textarea" id="f-msg" name="message" placeholder="Tell us about your collection..."></textarea>
+        </div>
+        <div class="form-actions">
+          <a class="btn btn-outline" href="tel:+12246620000">Call us: 224.662.0000</a>
+          <button class="btn btn-solid" type="submit">
+            Submit inquiry
+            <svg class="arw ico-line" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 8h7.3M8.6 4.9 11.7 8l-3.1 3.1"/></svg>
+          </button>
+        </div>
+        <p class="form-note">Prototype form &mdash; submissions are not sent anywhere.</p>
+      </form>
+      <div class="form-done" id="formDone" role="status">
+        Thank you &mdash; your inquiry is logged. A Luxe Corsa advisor will call you at the number provided within one business day.
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footbar" data-od-id="footer">
+  <div class="container">
+    <p>&copy;2025 Luxe Corsa <span aria-hidden="true">|</span> <a href="#">Privacy Policy</a> <span aria-hidden="true">|</span> <a href="#">Terms and Conditions</a> <span aria-hidden="true">|</span> <a href="#">Sitemap</a></p>
+    <p>Powered by All Auto Network</p>
+  </div>
+</footer>
+
+<!-- floor-plan sheet -->
+<div class="sheet" id="planSheet" role="dialog" aria-modal="true" aria-labelledby="planTitle">
+  <button class="sheet-close" id="planClose" aria-label="Close">
+    <svg class="ico-line" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+  </button>
+  <div class="sheet-card">
+    <h3 id="planTitle">Type A Units</h3>
+    <p class="lead" id="planTier" style="font-size:14px;">Premium tier</p>
+    <dl class="kv">
+      <dt>Main floor</dt><dd id="planMain">30&rsquo; x 50&rsquo;</dd>
+      <dt>Mezzanine</dt><dd id="planMezz">30&rsquo; x 31&rsquo;</dd>
+      <dt>Total area</dt><dd id="planArea">2,430 sq ft</dd>
+      <dt>Capacity</dt><dd id="planCap">Approx. 6 cars and 3 motorcycles</dd>
+      <dt>From</dt><dd id="planPrice">$699,000</dd>
+      <dt>Remaining</dt><dd id="planLeft">15 of 26 units</dd>
+    </dl>
+    <p class="sheet-note">Dimensioned floor-plan drawings are issued by a Luxe Corsa advisor on request &mdash; they are not published here. Request the set and we will send it with the current unit map.</p>
+    <div class="sheet-actions">
+      <button class="btn btn-outline btn-sm" id="planCancel">Close</button>
+      <button class="btn btn-solid btn-sm" id="planRequest">Request floor plan</button>
+    </div>
+  </div>
+</div>
+
+<!-- detailed map sheet -->
+<div class="sheet map-sheet" id="mapSheet" role="dialog" aria-modal="true" aria-label="Detailed site plan">
+  <button class="sheet-close" id="mapClose" aria-label="Close map">
+    <svg class="ico-line" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+  </button>
+  <!-- the live plan is cloned in here on open, so it stays one source of truth -->
+  <div class="sheet-card" id="mapSheetBody"></div>
+</div>
+
+<!-- Three.js is vendored locally, like every other asset on this page - no CDN
+     at runtime. Both files load after the document so nothing blocks first paint,
+     and the massing scene is only built if the user asks for it. -->
+<script src="assets/three.min.js"></script>
+<script src="assets/site-massing.js"></script>
+
+<script>
+(function () {
+  'use strict';
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* -- sticky nav + menu ------------------------------------------------ */
+  var nav = document.querySelector('.topnav');
+  function onScroll(){ nav.classList.toggle('is-stuck', window.scrollY > 40); }
+  onScroll(); window.addEventListener('scroll', onScroll, { passive:true });
+
+  var toggle = document.getElementById('menuToggle'), menu = document.getElementById('menu');
+  function setMenu(open){
+    document.body.classList.toggle('menu-open', open);
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    document.body.style.overflow = open ? 'hidden' : '';
+    if (open) { var f = menu.querySelector('a'); if (f) f.focus(); }
+  }
+  toggle.addEventListener('click', function(){ setMenu(toggle.getAttribute('aria-expanded') !== 'true'); });
+  menu.addEventListener('click', function(e){ if (e.target.closest('a')) setMenu(false); });
+
+  /* -- reveal ----------------------------------------------------------- */
+  var reveals = [].slice.call(document.querySelectorAll('.reveal'));
+  if (reduce || !('IntersectionObserver' in window)) {
+    reveals.forEach(function(el){ el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ if (en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+    }, { rootMargin:'0px 0px -12% 0px', threshold:0.12 });
+    reveals.forEach(function(el){ io.observe(el); });
+  }
+  // Motion must never gate content. Anything at or near the first screen resolves
+  // on load, so a missed observer can never leave a block permanently invisible.
+  window.addEventListener('load', function(){
+    reveals.forEach(function(el){
+      if (el.getBoundingClientRect().top < window.innerHeight * 1.25) el.classList.add('in');
+    });
+  });
+
+  /* -- site plan: the legend filters the drawing ------------------------ */
+  var planSvg = document.getElementById('planSvg');
+  var legendBtns = [].slice.call(document.querySelectorAll('button.legend-item'));
+  function setPlanFocus(cat){
+    if (cat) { planSvg.setAttribute('data-focus', cat); }
+    else { planSvg.removeAttribute('data-focus'); }
+    legendBtns.forEach(function(b){
+      b.setAttribute('aria-pressed', String(b.getAttribute('data-focus') === cat));
+    });
+    // one filter, both views
+    if (window.LuxeMassing) window.LuxeMassing.setFocus(cat);
+  }
+  legendBtns.forEach(function(b){
+    b.addEventListener('click', function(){
+      var cat = b.getAttribute('data-focus');
+      setPlanFocus(planSvg.getAttribute('data-focus') === cat ? null : cat);
+    });
+  });
+
+  /* -- 2D plan <-> 3D massing ------------------------------------------- */
+  var mapWrap = document.getElementById('mapWrap');
+  var plan3d  = document.getElementById('plan3d');
+  var btn3d   = document.getElementById('view3d');
+  var viewNote = document.getElementById('viewNote');
+  var massing = window.LuxeMassing;
+
+  if (!massing || !massing.supported()) {
+    btn3d.disabled = true;
+    viewNote.textContent = 'Massing view needs WebGL, which this browser has turned off.';
+  } else {
+    viewNote.hidden = true;   // only surfaced once the massing view is showing
+    [].slice.call(document.querySelectorAll('.view-switch button[data-view]')).forEach(function(b){
+      b.addEventListener('click', function(){
+        var want3d = b.getAttribute('data-view') === '3d';
+        [].slice.call(document.querySelectorAll('.view-switch button[data-view]')).forEach(function(o){
+          o.setAttribute('aria-pressed', String(o === b));
+        });
+        // the scene is only built the first time it is actually asked for
+        if (want3d && !massing.isMounted()) {
+          if (!massing.mount(plan3d)) {
+            btn3d.disabled = true;
+            viewNote.hidden = false;
+            viewNote.textContent = 'Massing view could not start on this device.';
+            return;
+          }
+          massing.setFocus(planSvg.getAttribute('data-focus'));
+        }
+        mapWrap.classList.toggle('is-3d', want3d);
+        viewNote.hidden = !want3d;
+      });
+    });
+  }
+
+  /* -- inventory count-up + availability meters ------------------------- */
+  function countUp(el){
+    var target = parseInt(el.getAttribute('data-count'), 10);
+    if (reduce) { el.textContent = target; return; }
+    // top of the --dur-* scale: long enough to read as counting, short enough
+    // that the figure is never held hostage to its own animation
+    var start = null, dur = 520;
+    el.textContent = '0';
+    requestAnimationFrame(function step(ts){
+      if (start === null) start = ts;
+      var p = Math.min((ts - start) / dur, 1);
+      el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) requestAnimationFrame(step);
+    });
+  }
+  function fillMeters(scope){
+    [].slice.call(scope.querySelectorAll('.tier-bar')).forEach(function(b){
+      b.style.width = b.getAttribute('data-width') + '%';  /* set once, never tweened */
+      b.classList.add('in');
+    });
+    [].slice.call(scope.querySelectorAll('.meter i')).forEach(function(i){
+      i.style.transform = 'scaleX(' + (parseFloat(i.getAttribute('data-fill')) / 100) + ')';
+    });
+  }
+  if ('IntersectionObserver' in window) {
+    var invIo = new IntersectionObserver(function(entries){
+      if (entries[0].isIntersecting) {
+        [].slice.call(document.querySelectorAll('#invGrid [data-count]')).forEach(countUp);
+        fillMeters(document.getElementById('invGrid'));
+        invIo.disconnect();
+      }
+    }, { threshold:0.4 });
+    invIo.observe(document.getElementById('invGrid'));
+
+    var meterIo = new IntersectionObserver(function(entries){
+      if (entries[0].isIntersecting) { fillMeters(document); meterIo.disconnect(); }
+    }, { threshold:0.25 });
+    meterIo.observe(document.getElementById('unitGrid'));
+  } else {
+    fillMeters(document);
+  }
+
+  /* -- type filter ------------------------------------------------------ */
+  var grid = document.getElementById('unitGrid');
+  var units = [].slice.call(grid.querySelectorAll('.unit'));
+  [].slice.call(document.querySelectorAll('.filter button')).forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var f = btn.getAttribute('data-filter');
+      [].slice.call(document.querySelectorAll('.filter button')).forEach(function(o){
+        o.setAttribute('aria-pressed', String(o === btn));
+      });
+      var shown = 0;
+      units.forEach(function(u){
+        var on = (f === 'all' || u.getAttribute('data-type') === f);
+        u.hidden = !on;
+        if (on) shown++;
+      });
+      grid.classList.toggle('is-single', shown === 1);
+      fillMeters(grid);
+    });
+  });
+
+  /* -- reserve ? prefill the inquiry ------------------------------------ */
+  var suiteSelect = document.getElementById('f-suite');
+  function goToForm(value){
+    if (value) suiteSelect.value = value;
+    var y = document.getElementById('contact').getBoundingClientRect().top + window.scrollY - 90;
+    window.scrollTo({ top:y, behavior: reduce ? 'auto' : 'smooth' });
+    window.setTimeout(function(){ document.getElementById('f-name').focus({ preventScroll:true }); }, reduce ? 0 : 620);
+  }
+  [].slice.call(document.querySelectorAll('[data-reserve]')).forEach(function(b){
+    b.addEventListener('click', function(){ goToForm(b.getAttribute('data-reserve')); });
+  });
+
+  /* -- floor-plan sheet ------------------------------------------------- */
+  var PLANS = {
+    a: { title:'Type A Units', tier:'Premium tier', main:'30’ x 50’', mezz:'30’ x 31’',
+         area:'2,430 sq ft', cap:'Approx. 6 cars and 3 motorcycles', price:'$699,000', left:'15 of 26 units', value:'type-a' },
+    b: { title:'Type B Units', tier:'Standard tier', main:'23’ x 50’', mezz:'23’ x 31’',
+         area:'1,863 sq ft', cap:'Approx. 4 cars and 2 motorcycles', price:'$549,000', left:'60 of 95 units', value:'type-b' }
+  };
+  var planSheet = document.getElementById('planSheet'), planKey = 'a', lastFocus = null;
+  function openSheet(el){
+    lastFocus = document.activeElement;
+    el.setAttribute('open','');
+    document.body.style.overflow = 'hidden';
+    el.querySelector('.sheet-close').focus();
+  }
+  function closeSheet(el){
+    el.removeAttribute('open');
+    document.body.style.overflow = '';
+    if (lastFocus) lastFocus.focus();
+  }
+  [].slice.call(document.querySelectorAll('[data-plan]')).forEach(function(b){
+    b.addEventListener('click', function(){
+      planKey = b.getAttribute('data-plan');
+      var p = PLANS[planKey];
+      document.getElementById('planTitle').textContent = p.title;
+      document.getElementById('planTier').textContent = p.tier;
+      document.getElementById('planMain').textContent = p.main;
+      document.getElementById('planMezz').textContent = p.mezz;
+      document.getElementById('planArea').textContent = p.area;
+      document.getElementById('planCap').textContent = p.cap;
+      document.getElementById('planPrice').textContent = p.price;
+      document.getElementById('planLeft').textContent = p.left;
+      openSheet(planSheet);
+    });
+  });
+  document.getElementById('planClose').addEventListener('click', function(){ closeSheet(planSheet); });
+  document.getElementById('planCancel').addEventListener('click', function(){ closeSheet(planSheet); });
+  document.getElementById('planRequest').addEventListener('click', function(){
+    var v = PLANS[planKey].value;
+    closeSheet(planSheet);
+    document.getElementById('f-msg').value = 'Please send the dimensioned floor plan for ' + PLANS[planKey].title + '.';
+    goToForm(v);
+  });
+  planSheet.addEventListener('click', function(e){ if (e.target === planSheet) closeSheet(planSheet); });
+
+  /* -- detailed map sheet ----------------------------------------------- */
+  var mapSheet = document.getElementById('mapSheet');
+  document.getElementById('openMap').addEventListener('click', function(){
+    var clone = planSvg.cloneNode(true);
+    clone.removeAttribute('id');
+    clone.removeAttribute('data-focus');
+    var wrap = document.createElement('div');
+    wrap.className = 'map-wrap';
+    wrap.appendChild(clone);
+    var host = document.getElementById('mapSheetBody');
+    while (host.firstChild) { host.removeChild(host.firstChild); }
+    host.appendChild(wrap);
+    openSheet(mapSheet);
+  });
+  document.getElementById('mapClose').addEventListener('click', function(){ closeSheet(mapSheet); });
+  mapSheet.addEventListener('click', function(e){ if (e.target === mapSheet) closeSheet(mapSheet); });
+
+  document.addEventListener('keydown', function(e){
+    if (e.key !== 'Escape') return;
+    if (planSheet.hasAttribute('open')) closeSheet(planSheet);
+    else if (mapSheet.hasAttribute('open')) closeSheet(mapSheet);
+    else if (document.body.classList.contains('menu-open')) setMenu(false);
+  });
+
+  /* -- inquiry form ----------------------------------------------------- */
+  var form = document.getElementById('inquiry'), done = document.getElementById('formDone');
+  function showError(id, on){
+    var f = document.getElementById(id), m = form.querySelector('.err[data-for="' + id + '"]');
+    f.setAttribute('aria-invalid', String(on));
+    if (m) m.classList.toggle('show', on);
+  }
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var name = document.getElementById('f-name'), email = document.getElementById('f-email'), suite = suiteSelect;
+    var nameBad = name.value.trim().length < 2;
+    var emailBad = !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.value.trim());
+    var suiteBad = !suite.value;
+    showError('f-name', nameBad); showError('f-email', emailBad); showError('f-suite', suiteBad);
+    var bad = nameBad ? name : emailBad ? email : suiteBad ? suite : null;
+    if (bad) { bad.focus(); return; }
+    form.style.display = 'none';
+    done.classList.add('show');
+  });
+  ['f-name','f-email','f-suite'].forEach(function(id){
+    var el = document.getElementById(id);
+    el.addEventListener('input', function(){ showError(id, false); });
+    el.addEventListener('change', function(){ showError(id, false); });
+  });
+})();
+</script>
+</body>
+</html>

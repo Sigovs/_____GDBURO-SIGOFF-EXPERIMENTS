@@ -59,8 +59,8 @@ body{font-family:var(--grot);-webkit-font-smoothing:antialiased}
 /* an inline SVG with no width/height falls back to 300x150 and clips everything drawn
    past it — the ring was being computed correctly and then cropped away */
 #edge{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;overflow:visible}
-#edge .ring{fill:none;stroke:var(--sand-70);stroke-width:2;vector-effect:non-scaling-stroke}
-#edge .run{fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;vector-effect:non-scaling-stroke}
+#edge .ring{display:none}
+#edge .run{display:none}
 #edge[data-s='on'] .ring{stroke:var(--red)} #edge[data-s='on'] .run{stroke:var(--red)}
 @keyframes travel{from{stroke-dashoffset:var(--len)}to{stroke-dashoffset:0}}
 #edge .run{animation:travel .7s var(--ease) forwards}
@@ -71,10 +71,10 @@ body{font-family:var(--grot);-webkit-font-smoothing:antialiased}
   background:var(--sand);color:var(--void);border:0;padding:0;text-align:left;font:inherit;
   box-shadow:0 0 0 1px rgb(0 0 0/.35)}
 #tab[data-s='on']{background:var(--red);color:#fff}
-#tab .n{display:block;font-family:var(--grot);font-size:26px;font-weight:600;line-height:1;letter-spacing:-.02em;padding:9px 14px 4px}
-#tab .m{display:block;font-family:var(--mono);font-size:14px;letter-spacing:.10em;text-transform:uppercase;padding:0 14px 7px;opacity:.78}
-#tab .go{display:block;font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;
-  padding:7px 14px 6px;border-top:1px solid rgb(0 0 0/.28);background:rgb(0 0 0/.12)}
+#tab .n{display:block;font-family:var(--grot);font-size:18px;font-weight:600;line-height:1;letter-spacing:-.02em;padding:6px 10px 2px}
+#tab .m{display:block;font-family:var(--mono);font-size:14px;letter-spacing:.06em;text-transform:uppercase;padding:0 10px 5px;opacity:.8}
+#tab .go{display:block;font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;
+  padding:5px 10px 4px;border-top:1px solid rgb(0 0 0/.28);background:rgb(0 0 0/.14)}
 #tab::after{content:'';position:absolute;left:50%;bottom:-9px;width:1px;height:9px;background:var(--sand)}
 #tab[data-s='on']::after{background:var(--red)}
 
@@ -373,6 +373,14 @@ function buildPlan(){ if(planBuilt) return; planBuilt=true
   const svgEl=compound.svg.cloneNode(true)
   svgEl.style.width='100%'; svgEl.style.height='100%'; svgEl.style.visibility='visible'
   planMap.appendChild(svgEl)
+  svgEl.setAttribute('preserveAspectRatio','xMidYMid meet')
+  requestAnimationFrame(() => {
+    try {
+      const bb = svgEl.getBBox()
+      const m = Math.max(bb.width, bb.height) * 0.06
+      svgEl.setAttribute('viewBox', (bb.x - m) + ' ' + (bb.y - m) + ' ' + (bb.width + m * 2) + ' ' + (bb.height + m * 2))
+    } catch (e) { /* a drawing with no rendered content has no bbox; leave the crop alone */ }
+  })
   const NS='http://www.w3.org/2000/svg'
   for(const b of compound.buildings){
     const src=svgEl.querySelector('g[data-building="'+b.num+'"]')

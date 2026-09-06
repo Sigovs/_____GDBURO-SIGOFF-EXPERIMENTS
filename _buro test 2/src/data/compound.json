@@ -7,7 +7,57 @@
    "2plan-B-scaled-1.jpg"
   ],
   "read": "2026-09-04",
-  "note": "Positions, angles, lengths and the Type A bay placements are measured off the published site plan. The division of Type B bays between the two rows of a double-row building is derived by length and reconciled to the verified total of 95. The published plan draws no parcel line, so the perimeter is not traced: it is the outer envelope of the measured masses and the roadway that serves them, closed and offset by one unit depth. Road width is the one declared assumption and is not shape-determining."
+  "note": "Positions, angles, lengths and the Type A bay placements are measured off the published site plan. The division of Type B bays between the two rows of a double-row building is derived by length and reconciled to the verified total of 95. The published plan draws no parcel line, so the perimeter is not traced: it is the outer envelope of the measured masses and the roadway that serves them, closed and offset by one unit depth. Road width is the one declared assumption and is not shape-determining.",
+  "relabel": {
+   "by": "tools/relabel-buildings.mjs",
+   "read": "2026-09-06",
+   "note": "The badges on the published plan sit at one END of their building, so the nearest-badge-by-centre test in extract-plan.py walked the numbering along each cluster of parallel runs and left buildings 02 and 05 with no geometry. Runs are now grouped into masses first (parallel, overlapping, touching = one building, which resolves 13 runs into exactly the published 11 masses), each mass is assigned to the nearest badge BY RECTANGLE, and each Type A bay is assigned to the run it caps together with the end it caps. Reconciles to 11 / 121 / 26 / 95.",
+   "was": {
+    "rows": [
+     "07",
+     "08",
+     "04",
+     "03",
+     "09",
+     "06",
+     "03",
+     "10",
+     "10",
+     "01",
+     "06",
+     "01",
+     "11"
+    ],
+    "typeA": [
+     "07",
+     "08",
+     "08",
+     "08",
+     "04",
+     "04",
+     "05",
+     "09",
+     "08",
+     "06",
+     "04",
+     "10",
+     "05",
+     "03",
+     "05",
+     "06",
+     "09",
+     "02",
+     "06",
+     "06",
+     "10",
+     "10",
+     "02",
+     "09",
+     "01",
+     "11"
+    ]
+   }
+  }
  },
  "viewBox": [
   0,
@@ -379,11 +429,11 @@
  ],
  "perimeter_derivation": {
   "method": "morphological closing of the measured masses + roadway, then an outward offset; largest component, Moore-neighbour contour, RDP",
-  "close_ft": 50.0,
-  "setback_ft": 50.0,
-  "road_width_ft_assumed": 24.0,
+  "close_ft": 50,
+  "setback_ft": 50,
+  "road_width_ft_assumed": 24,
   "cell_units": 1.5,
-  "simplify_eps_units": 3.0,
+  "simplify_eps_units": 3,
   "components_before_largest": 1
  },
  "rows": [
@@ -433,7 +483,7 @@
    "bays": 6
   },
   {
-   "building": "06",
+   "building": "05",
    "cx": 431.63,
    "cy": 271.36,
    "ang": 7.25,
@@ -442,7 +492,7 @@
    "bays": 4
   },
   {
-   "building": "03",
+   "building": "02",
    "cx": 235.88,
    "cy": 315.42,
    "ang": -22.98,
@@ -469,7 +519,7 @@
    "bays": 6
   },
   {
-   "building": "01",
+   "building": "02",
    "cx": 251.61,
    "cy": 352.74,
    "ang": -22.98,
@@ -512,7 +562,9 @@
    "cy": 20.75,
    "ang": 59.92,
    "w": 23.36,
-   "d": 41.9
+   "d": 41.9,
+   "row": 0,
+   "end": "R"
   },
   {
    "building": "08",
@@ -520,23 +572,29 @@
    "cy": 107.11,
    "ang": -22.78,
    "w": 20.53,
-   "d": 41.04
+   "d": 41.04,
+   "row": 1,
+   "end": "L"
   },
   {
-   "building": "08",
+   "building": "07",
    "cx": 735.99,
    "cy": 121.57,
    "ang": 47.09,
    "w": 20.5,
-   "d": 40.96
+   "d": 40.96,
+   "row": 0,
+   "end": "L"
   },
   {
    "building": "08",
-   "cx": 890.0,
+   "cx": 890,
    "cy": 192.43,
    "ang": -22.77,
    "w": 19.6,
-   "d": 41.15
+   "d": 41.15,
+   "row": 1,
+   "end": "R"
   },
   {
    "building": "04",
@@ -544,23 +602,29 @@
    "cy": 203.09,
    "ang": -66.76,
    "w": 24.07,
-   "d": 39.36
+   "d": 39.36,
+   "row": 2,
+   "end": "L"
   },
   {
-   "building": "04",
+   "building": "03",
    "cx": 306.83,
    "cy": 207.1,
    "ang": 67.2,
    "w": 19.57,
-   "d": 41.21
+   "d": 41.21,
+   "row": 3,
+   "end": "R"
   },
   {
-   "building": "05",
+   "building": "04",
    "cx": 502.48,
    "cy": 211.9,
    "ang": -82.76,
    "w": 19.57,
-   "d": 36.45
+   "d": 36.45,
+   "row": 2,
+   "end": "R"
   },
   {
    "building": "09",
@@ -568,31 +632,39 @@
    "cy": 233.07,
    "ang": -23.3,
    "w": 20.47,
-   "d": 41.02
+   "d": 41.02,
+   "row": 4,
+   "end": "L"
   },
   {
-   "building": "08",
+   "building": "10",
    "cx": 837.24,
    "cy": 259.36,
    "ang": -23.01,
    "w": 20.67,
-   "d": 37.87
+   "d": 37.87,
+   "row": 7,
+   "end": "L"
   },
   {
-   "building": "06",
+   "building": "05",
    "cx": 385.93,
    "cy": 265.43,
    "ang": -82.36,
    "w": 20.42,
-   "d": 36.49
+   "d": 36.49,
+   "row": 5,
+   "end": "L"
   },
   {
-   "building": "04",
+   "building": "02",
    "cx": 334.95,
    "cy": 273.44,
    "ang": 67.04,
    "w": 19.55,
-   "d": 36.46
+   "d": 36.46,
+   "row": 6,
+   "end": "R"
   },
   {
    "building": "10",
@@ -600,7 +672,9 @@
    "cy": 275.69,
    "ang": -23.25,
    "w": 20.61,
-   "d": 37.84
+   "d": 37.84,
+   "row": 8,
+   "end": "L"
   },
   {
    "building": "05",
@@ -608,7 +682,9 @@
    "cy": 279.45,
    "ang": 85.8,
    "w": 21.7,
-   "d": 37.8
+   "d": 37.8,
+   "row": 5,
+   "end": "R"
   },
   {
    "building": "03",
@@ -616,23 +692,29 @@
    "cy": 291.42,
    "ang": 66.61,
    "w": 20.53,
-   "d": 41.17
+   "d": 41.17,
+   "row": 3,
+   "end": "L"
   },
   {
-   "building": "05",
+   "building": "06",
    "cx": 548.36,
    "cy": 310.31,
    "ang": 67.36,
    "w": 20.56,
-   "d": 41.05
+   "d": 41.05,
+   "row": 10,
+   "end": "R"
   },
   {
-   "building": "06",
+   "building": "02",
    "cx": 350.77,
    "cy": 310.69,
    "ang": 67.14,
    "w": 19.57,
-   "d": 36.51
+   "d": 36.51,
+   "row": 9,
+   "end": "R"
   },
   {
    "building": "09",
@@ -640,7 +722,9 @@
    "cy": 351.34,
    "ang": -23.03,
    "w": 19.6,
-   "d": 40.87
+   "d": 40.87,
+   "row": 4,
+   "end": "R"
   },
   {
    "building": "02",
@@ -648,7 +732,9 @@
    "cy": 360.27,
    "ang": 84.11,
    "w": 21.78,
-   "d": 38.98
+   "d": 38.98,
+   "row": 6,
+   "end": "L"
   },
   {
    "building": "06",
@@ -656,15 +742,19 @@
    "cy": 366.98,
    "ang": 67.06,
    "w": 19.59,
-   "d": 40.91
+   "d": 40.91,
+   "row": 10,
+   "end": "L"
   },
   {
-   "building": "06",
+   "building": "01",
    "cx": 377.32,
    "cy": 374.58,
    "ang": 67.06,
    "w": 20.5,
-   "d": 41.03
+   "d": 41.03,
+   "row": 11,
+   "end": "R"
   },
   {
    "building": "10",
@@ -672,7 +762,9 @@
    "cy": 377.49,
    "ang": -22.96,
    "w": 19.72,
-   "d": 37.85
+   "d": 37.85,
+   "row": 7,
+   "end": "R"
   },
   {
    "building": "10",
@@ -680,7 +772,9 @@
    "cy": 393.83,
    "ang": -22.98,
    "w": 19.68,
-   "d": 37.85
+   "d": 37.85,
+   "row": 8,
+   "end": "R"
   },
   {
    "building": "02",
@@ -688,23 +782,29 @@
    "cy": 395.05,
    "ang": 66.75,
    "w": 20.45,
-   "d": 36.49
+   "d": 36.49,
+   "row": 9,
+   "end": "L"
   },
   {
-   "building": "09",
+   "building": "11",
    "cx": 979.25,
    "cy": 398.43,
    "ang": 67.17,
    "w": 20.52,
-   "d": 41.04
+   "d": 41.04,
+   "row": 12,
+   "end": "R"
   },
   {
    "building": "01",
    "cx": 178.49,
-   "cy": 459.0,
+   "cy": 459,
    "ang": 67.21,
    "w": 19.59,
-   "d": 41.04
+   "d": 41.04,
+   "row": 11,
+   "end": "L"
   },
   {
    "building": "11",
@@ -712,7 +812,9 @@
    "cy": 463.13,
    "ang": 72.9,
    "w": 21.7,
-   "d": 41.69
+   "d": 41.69,
+   "row": 12,
+   "end": "L"
   }
  ],
  "civic": [

@@ -108,9 +108,14 @@ function routeTo(spine, px, py) {
    from these two numbers and nothing else needs a legend. */
 const W_TYPE = { A: 30, B: 23 }
 
-function baysFor(row, typeAInRow) {
+function baysFor(row, caps) {
   const out = []
-  const n = row.bays + typeAInRow.length
+  /* The Type A bays are the run's END CAPS, and the plan draws them that way: a white
+     wide bay at each end of every grey run. `caps` says how many cap each end, measured
+     rather than distributed, so a premium suite is where the source puts it. */
+  const nL = caps.L || 0
+  const nR = caps.R || 0
+  const n = row.bays + nL + nR
   const r = (row.ang * Math.PI) / 180
   const c = Math.cos(r)
   const s = Math.sin(r)
@@ -119,8 +124,9 @@ function baysFor(row, typeAInRow) {
      in n equal parts. A run of one Type A and ten Type B divides 30 : 23 x 10, so the
      premium bay is visibly the wider one — in the model, in the drawing and in any
      control that mirrors them. */
+  const isTypeA = (i) => i < nL || i >= n - nR
   const widths = []
-  for (let i = 0; i < n; i++) widths.push(i < typeAInRow.length ? W_TYPE.A : W_TYPE.B)
+  for (let i = 0; i < n; i++) widths.push(isTypeA(i) ? W_TYPE.A : W_TYPE.B)
   const feet = widths.reduce((a, b) => a + b, 0)
   const unitsPerFoot = row.length / feet
 
@@ -129,9 +135,7 @@ function baysFor(row, typeAInRow) {
     const slotW = widths[i] * unitsPerFoot
     const u = cursor + slotW / 2
     cursor += slotW
-    /* Type A bays are the wider ones and the plan draws them at the outer ends of the
-       runs that carry them; place them first so the widths read correctly. */
-    const isA = i < typeAInRow.length
+    const isA = isTypeA(i)
     out.push({
       cx: row.cx + u * c,
       cy: row.cy + u * s,
@@ -354,14 +358,17 @@ export function buildCompound(mount) {
   /* --- the suite buildings. Grouped by building number so a whole building can be
      focused by light in one operation. */
   const byBuilding = new Map()
-  for (const row of data.rows) {
+  data.rows.forEach((row, i) => {
     if (!byBuilding.has(row.building)) byBuilding.set(row.building, [])
-    byBuilding.get(row.building).push(row)
-  }
-  const aByBuilding = new Map()
+    byBuilding.get(row.building).push({ row, index: i })
+  })
+  /* Each measured Type A bay carries the run it caps and the end it caps it at
+     (tools/relabel-buildings.mjs). Keyed by run, so a run gets exactly the caps the
+     plan draws on it and buildings 02 and 05 stop being invisible. */
+  const capsByRow = new Map()
   for (const a of data.typeA) {
-    if (!aByBuilding.has(a.building)) aByBuilding.set(a.building, [])
-    aByBuilding.get(a.building).push(a)
+    if (!capsByRow.has(a.row)) capsByRow.set(a.row, { L: 0, R: 0 })
+    capsByRow.get(a.row)[a.end === 'L' ? 'L' : 'R'] += 1
   }
 
   /* Availability is a published, dated figure: 23 of 121 sold. The plan does not
@@ -375,14 +382,11 @@ export function buildCompound(mount) {
   const suites = []
   const buildingsG = el('g', { class: 'compound__buildings' })
 
-  for (const [num, rows] of [...byBuilding.entries()].sort()) {
+  for (const [num, entries] of [...byBuilding.entries()].sort()) {
     const g = el('g', { class: 'bldg', 'data-building': num })
-    const aList = aByBuilding.get(num) || []
-    let aCursor = 0
 
-    for (const row of rows) {
-      const share = aList.slice(aCursor, aCursor + Math.ceil(aList.length / rows.length))
-      aCursor += share.length
+    for (const { row, index } of entries) {
+      const share = capsByRow.get(index) || { L: 0, R: 0 }
 
       /* The run's extruded side walls, drawn under the bays. Depth here is occlusion
          and a value step — never a cast shadow and never an elevation layer (U9). */

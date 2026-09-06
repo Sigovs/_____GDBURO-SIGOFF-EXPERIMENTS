@@ -109,6 +109,18 @@ LABELS = {
 }
 
 
+# LABELLING IS NOT FINISHED HERE.  A badge on the published plan sits at one END of its
+# building, off the corner, not at its centre.  So the nearest-badge-by-centre test
+# below walks the numbering along any cluster of parallel runs: it gave 03 and 01 two
+# runs each and left buildings 02 and 05 with no geometry at all, which shipped a
+# nine-building compound claiming eleven.  The labels this function writes are a first
+# pass only.
+#
+# tools/relabel-buildings.mjs REPAIRS THEM and must be run after this script.  It groups
+# the runs into masses first (parallel + overlapping + touching = one building, which
+# resolves the 13 runs into exactly the published 11 masses), assigns each mass to the
+# nearest badge BY RECTANGLE, and assigns each Type A bay to the run it caps plus the end
+# it caps it at.  It refuses to write unless the result reconciles to 11 / 121 / 26 / 95.
 def label_for(cx, cy):
     return min(LABELS.items(), key=lambda kv: math.hypot(kv[0][0] - cx, kv[0][1] - cy))[1]
 
@@ -496,6 +508,7 @@ for b in sorted(badges, key=lambda b: b["label"]):
 OUT.parent.mkdir(parents=True, exist_ok=True)
 OUT.write_text(json.dumps(out, indent=1))
 
+print("NEXT STEP, REQUIRED:  node tools/relabel-buildings.mjs   (repairs the building labels)")
 print(f"source            {SRC.name}  {W}x{H}")
 print(f"scale             {px_per_ft:.4f} px/ft  (Type A bay {med_len:.1f} x {med_dep:.1f} px)")
 print(f"bay runs          {len(rows)}  ->  {sum(counts)} Type B bays  {counts}")

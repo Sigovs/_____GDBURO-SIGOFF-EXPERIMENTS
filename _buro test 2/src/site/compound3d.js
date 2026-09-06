@@ -90,7 +90,10 @@ const C = {
   glass: 0x223243,      /* lifted off black: at 0x0b1119 it returned nothing and read as a hole */
   grass: 0x10150f,      /* planted ground — dark olive, well below the architecture */
   water: 0x16202e,      /* the basin: near-black, and it borrows the sky */
-  door: 0x1b222b,       /* a sectional door is dark metal, not a void */
+  door: 0x323b46,       /* THE LEAF. At 0x1b222b with metalness 0.62 this was a black
+                           mirror with a night sky in it — the darkest thing in the model
+                           and the reason every bay read as a hole. A sectional door is
+                           PAINTED steel: mid-charcoal, mostly diffuse, a little sheen. */
   sold: 0x1b2026,
   lit: 0x8e9aa6,
   lume: 0xcbd6de,
@@ -159,11 +162,47 @@ export function initCompound3D(mount, model, opts = {}) {
 
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
   renderer.toneMapping = THREE.ACESFilmicToneMapping
-  renderer.toneMappingExposure = 1.22
+  /* EXPOSURE IS A DESIGN VALUE, and 1.22 was under-exposing the product. Measured on
+     the composited frame, the garage doors — the entire proposition — sat within a few
+     values of the wall around them and the compound read as one dark mass with roofs on
+     it. Opened up until the door rhythm reads at the rest camera without the sky
+     clipping or the shadows losing their foot. The hour is unchanged; the print is. */
+  renderer.toneMappingExposure = 1.46
   renderer.outputColorSpace = THREE.SRGBColorSpace
   renderer.shadowMap.enabled = true
   renderer.shadowMap.type = THREE.PCFSoftShadowMap
   renderer.domElement.className = 'compound__gl'
+
+  /* --- THE SKY THE MODEL STANDS AGAINST -------------------------------------------
+     The environment dome lights the model, but nothing was ever drawn BEHIND it: the
+     canvas is alpha and the page under it is #060708, so every surface facing away from
+     the key resolved to the same black as the page and its silhouette disappeared.
+
+     That is not an abstract loss. It is what produced the "black slab" the review kept
+     finding beside the clubhouse: the clubhouse roof edge catches the horizon while the
+     wall beneath it is turned away from every light in the rig, so the wall vanishes
+     into the page and the lit roof edge is left floating in nothing. Raycasting the
+     rectangle names the civic mass and its roof, in that order, at every pixel — the
+     geometry was always there and always correct. There was simply nothing for it to be
+     seen against.
+
+     So the compound now sits in front of the same blue hour that lights it: indigo
+     overhead, the cold horizon band behind the far end of the site, the ground haze the
+     fog already resolves to (#141920) at the base. Silhouettes read, the dead quadrants
+     of the frame carry tone instead of nothing, and the model is outdoors.
+
+     Drawn in the DOM under a transparent canvas rather than as scene.background: the
+     camera looks DOWN at the compound, so a mapped dome would put its dark under-bounce
+     across the whole frame and its horizon nowhere near the horizon. */
+  const sky = document.createElement('div')
+  sky.className = 'compound__sky'
+  sky.setAttribute('aria-hidden', 'true')
+  sky.style.cssText = 'position:absolute;inset:0;pointer-events:none;'
+    + 'background:'
+    + 'radial-gradient(120% 78% at 50% 96%, rgba(20,25,32,.85) 0%, rgba(20,25,32,0) 62%),'
+    + 'radial-gradient(78% 52% at 62% 30%, rgba(56,84,106,.30) 0%, rgba(56,84,106,0) 70%),'
+    + 'linear-gradient(to bottom, #0a1220 0%, #10202e 26%, #1a3245 40%, #14202b 56%, #0a0e13 78%, #07090c 100%)'
+  mount.appendChild(sky)
   mount.appendChild(renderer.domElement)
 
   const scene = new THREE.Scene()
@@ -225,7 +264,7 @@ export function initCompound3D(mount, model, opts = {}) {
      to leave. Low enough that every run lays its own length across the site, which is
      the shadow that makes a model read as solid, and warm enough to hold a real
      temperature argument against the indigo sky. This is the only light that casts. */
-  const key = new THREE.DirectionalLight(0xffd9a8, 4.6)
+  const key = new THREE.DirectionalLight(0xffd9a8, 6.0)
   key.position.set(-19, 9.5, 6)
   key.castShadow = true
   key.shadow.mapSize.set(2048, 2048)
@@ -239,7 +278,7 @@ export function initCompound3D(mount, model, opts = {}) {
 
   /* The sky as a lamp, cold over near-black ground. It is the FILL at this hour — at
      blue hour the sky is doing most of the work and the sun is doing the drawing. */
-  scene.add(new THREE.HemisphereLight(0x6f90b4, 0x05070a, 1.55))
+  scene.add(new THREE.HemisphereLight(0x6f90b4, 0x05070a, 1.62))
 
   /* THE RIM. Cold, low, from behind: it puts a cool edge along every far roof plane so
      the compound has a silhouette instead of dissolving into its own shadow. It casts
@@ -312,10 +351,10 @@ export function initCompound3D(mount, model, opts = {}) {
     wall: new THREE.MeshStandardMaterial({ color: C.wall, roughness: 0.46, metalness: 0.34 }),
     roof: new THREE.MeshStandardMaterial({ color: C.roof, roughness: 0.66, metalness: 0.2 }),
     membrane: new THREE.MeshStandardMaterial({ color: C.membrane, roughness: 0.99, metalness: 0 }),
-    trim: new THREE.MeshStandardMaterial({ color: C.trim, roughness: 0.4, metalness: 0.55 }),
+    trim: new THREE.MeshStandardMaterial({ color: C.trim, roughness: 0.52, metalness: 0.34 }),
     civic: new THREE.MeshStandardMaterial({ color: C.civic, roughness: 0.4, metalness: 0.3 }),
     glass: new THREE.MeshStandardMaterial({ color: C.glass, roughness: 0.06, metalness: 0.5, envMapIntensity: 2.2 }),
-    door: new THREE.MeshStandardMaterial({ color: C.door, roughness: 0.3, metalness: 0.62 }),
+    door: new THREE.MeshStandardMaterial({ color: C.door, roughness: 0.54, metalness: 0.26 }),
     sold: new THREE.MeshStandardMaterial({ color: C.sold, roughness: 0.85, metalness: 0.1 }),
     /* GRASS — the site's second ground. Utterly matte and a touch green, so it separates
        from concrete by material as well as by value. */
@@ -326,6 +365,10 @@ export function initCompound3D(mount, model, opts = {}) {
        and only a very low roughness returns enough of the horizon band to say so. */
     water: new THREE.MeshStandardMaterial({ color: C.water, roughness: 0.045, metalness: 0.9, envMapIntensity: 2.4 }),
     wallLight: new THREE.MeshBasicMaterial({ color: 0xffc07a }),
+    /* THE LAND. Darker than the plinth top so the site reads as a pad cut into it, and
+       fully matte so it never competes with a horizontal the compound owns. Its far
+       edge is past the fog, so it becomes haze rather than ending. */
+    terrain: new THREE.MeshStandardMaterial({ color: 0x11161b, roughness: 1, metalness: 0 }),
   }
 
   /* --- THE MODEL GROUP. Everything measured lives in here, at source scale. ------- */
@@ -377,6 +420,25 @@ export function initCompound3D(mount, model, opts = {}) {
      model and the contact shadow never slides off it. */
   table.position.y = -SLAB
   site.add(table)
+
+  /* --- THE LAND THE SITE IS CUT INTO ----------------------------------------------
+     The plinth is a deliberate object with a real machined edge, and on its own against
+     a sky that was the problem: an outdoor hour behind a plate that stops in mid-air
+     reads as a model on a table someone forgot to photograph the table of. Two readings
+     were fighting and the floating one was winning.
+
+     So the site now has land around it. One large matte plane at the plinth's underside,
+     far enough out that its own edge is well past the fog's far plane — which means it
+     resolves to exactly the haze value the fog resolves to, and that value is the one
+     the sky gradient carries at the horizon. The compound becomes a raised pad in open
+     ground at dusk, the plinth edge becomes the cut that pad is made by, and there is
+     no edge anywhere for the eye to find. */
+  const terrain = new THREE.Mesh(new THREE.PlaneGeometry(9000, 9000), M.terrain)
+  terrain.rotation.x = -Math.PI / 2
+  terrain.position.y = -SLAB - ft(0.4)
+  terrain.receiveShadow = true
+  terrain.name = 'terrain'
+  site.add(terrain)
 
   /* --- THE ROADWAY, laid onto the slab. ------------------------------------------ */
   let road = null
@@ -933,7 +995,7 @@ export function initCompound3D(mount, model, opts = {}) {
     const g = new THREE.Group()
     g.userData = { kind: 'building', num: b.num }
     site.add(g)
-    buildingObjs.set(b.num, { num: b.num, group: g, bays: [], roofs: [], model: b, lift: 0 })
+    buildingObjs.set(b.num, { num: b.num, group: g, bays: [], roofs: [], picks: [], model: b, lift: 0 })
   }
 
   for (const s of model.suites) {
@@ -997,36 +1059,57 @@ export function initCompound3D(mount, model, opts = {}) {
     const rot = -(s.ang * Math.PI) / 180
     const faceD = faceD0
 
-    /* THE REVEAL. A door set flush in a wall is a rectangle of a different colour; a
-       door set BACK behind a frame is an opening, because the frame's own edge throws a
-       shadow across the head and one jamb. This is the frame — trim material, oversized
-       by a hand's width all round, sitting proud of the wall. */
-    const frame = new THREE.Mesh(bayGeo, M.trim)
-    frame.scale.set(dw + ft(1.1), dh + ft(1.1), ft(0.7))
-    frame.position.set(s.cx + fnx * (faceD + ft(0.2)), dh / 2, s.cy + fny * (faceD + ft(0.2)))
-    frame.rotation.y = rot
-    frame.castShadow = true
-    frame.receiveShadow = true
-    B.group.add(frame)
+    /* THE REVEAL, AND THE BLACK RECTANGLE THIS FIXES.
 
-    /* The leaf itself, recessed INSIDE that frame. Segmented dark metal: a commercial
-       sectional door is four horizontal panels, and at this scale the segmentation is
-       what tells the eye how big the opening is — the single most useful scale cue on
-       the whole elevation. */
+       The frame was ONE SOLID BOX the full size of the opening, sitting PROUD of the
+       wall, with the leaf buried half a foot BEHIND the wall face. So the leaf was never
+       visible at all: what a visitor saw in every bay was the front face of that solid
+       slab, in trim material at metalness 0.55 — a semi-mirror with a dark sky to
+       reflect, which renders as pure black. Measured at building level, every bay in the
+       compound was a black rectangle, and that is the object the review kept finding.
+
+       A frame is a RING, not a plate. Four bars — head, cill and two jambs — stand proud
+       around the opening and throw the shadow that makes it an opening. The leaf sits
+       just inside them where it can be seen, and is what the light in the interface
+       actually lands on. */
+    const REV = ft(0.62)                       /* the reveal's own width */
+    const frameZ = faceD + ft(0.26)
+    const bar = (w, h, ox, oy) => {
+      const m = new THREE.Mesh(bayGeo, M.trim)
+      m.scale.set(w, h, ft(0.62))
+      m.position.set(
+        s.cx + Math.cos(rot) * ox + fnx * frameZ,
+        dh / 2 + oy,
+        s.cy - Math.sin(rot) * ox + fny * frameZ,
+      )
+      m.rotation.y = rot
+      m.castShadow = true
+      m.receiveShadow = true
+      B.group.add(m)
+      return m
+    }
+    const frame = bar(dw + REV * 2, REV, 0, dh / 2 + REV / 2)   /* head */
+    bar(REV, dh + REV, (dw + REV) / 2, 0)                        /* jamb, one side */
+    bar(REV, dh + REV, -(dw + REV) / 2, 0)                       /* jamb, the other */
+
+    /* The leaf, just inside the reveal so the frame's own edge shades its head and one
+       jamb. Segmented: a commercial sectional door is four horizontal panels, and at
+       this scale the segmentation is what tells the eye how big the opening is. */
     const door = new THREE.Mesh(bayGeo, M.door)
     door.scale.set(dw, dh, ft(0.5))
-    door.position.set(s.cx + fnx * (faceD - ft(0.5)), dh / 2, s.cy + fny * (faceD - ft(0.5)))
+    door.position.set(s.cx + fnx * (faceD + ft(0.04)), dh / 2, s.cy + fny * (faceD + ft(0.04)))
     door.rotation.y = rot
+    door.castShadow = true
     door.receiveShadow = true
     B.group.add(door)
 
     for (let seg = 1; seg <= 3; seg++) {
       const line = new THREE.Mesh(bayGeo, M.trim)
-      line.scale.set(dw, ft(0.28), ft(0.6))
+      line.scale.set(dw * 0.985, ft(0.26), ft(0.62))
       line.position.set(
-        s.cx + fnx * (faceD - ft(0.3)),
+        s.cx + fnx * (faceD + ft(0.1)),
         (dh / 4) * seg,
-        s.cy + fny * (faceD - ft(0.3)),
+        s.cy + fny * (faceD + ft(0.1)),
       )
       line.rotation.y = rot
       B.group.add(line)
@@ -1086,7 +1169,7 @@ export function initCompound3D(mount, model, opts = {}) {
     lamp.rotation.y = rot
     B.group.add(lamp)
 
-    const obj = { suite: s, mesh: m, door, baseY: H_SUITE / 2 }
+    const obj = { suite: s, mesh: m, door, glaze, transom, lamp, baseY: H_SUITE / 2 }
     B.bays.push(obj)
     suiteObjs[s.index] = obj
   }
@@ -1216,6 +1299,43 @@ export function initCompound3D(mount, model, opts = {}) {
     roofAssembly(row.cx, row.cy, row.length, row.depth, row.ang, H_SUITE, B.group, row.building, B.roofs)
   }
 
+  /* --- THE PICK PROXIES ------------------------------------------------------------
+     A BUILDING'S IDENTITY IS NOT A PILE OF DECORATIVE MESHES.
+
+     Compound-level hover used to raycast the 121 suite boxes plus every parapet bar and
+     membrane in the model and read the building number off whichever one the ray
+     happened to reach first. That works until it doesn't: a fascia overhanging its
+     neighbour, a parapet bar standing proud over the gap between two runs, a roof slab
+     seen edge-on — any of them can be the nearest hit while the pointer is visibly over
+     a different building, which is exactly how 06 answered as 04.
+
+     So each measured RUN gets one proxy: a single box on the run's own measured
+     rectangle, from the slab to the top of the parapet, carrying the building number.
+     It is the only thing compound-level picking is ever allowed to hit. Every building
+     therefore has one canonical identity, adjacent buildings cannot claim each other's
+     pointer because their measured rectangles do not overlap, and the target is the
+     building's real footprint rather than an approximation of it — nothing is inflated.
+
+     It draws nothing: colorWrite off, so there is no pixel, no depth write, no shadow. */
+  const pickProxies = []
+  const M_pick = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false, depthTest: false })
+  for (const row of data.rows) {
+    const B = buildingObjs.get(row.building)
+    if (!B) continue
+    const h = H_SUITE + H_PARAPET
+    const p = new THREE.Mesh(bayGeo, M_pick)
+    p.scale.set(row.length, h, row.depth)
+    p.position.set(row.cx, h / 2, row.cy)
+    p.rotation.y = -(row.ang * Math.PI) / 180
+    p.castShadow = false
+    p.receiveShadow = false
+    p.renderOrder = -999
+    p.userData = { kind: 'building', num: row.building, building: row.building, pick: true }
+    B.group.add(p)
+    B.picks.push(p)
+    pickProxies.push(p)
+  }
+
   /* --- CIVIC MASSES. The clubhouse and the dealership: taller, smoother, no bays.
      The material does the distinguishing — a civic building in this compound is the one
      that is not a row of doors. */
@@ -1315,8 +1435,27 @@ export function initCompound3D(mount, model, opts = {}) {
      HERO is the composed resting frame. ARRIVE is act 01's viewpoint expressed in this
      model's own coordinates: down near the ground, close in, turned along the drive.
      The boundary between the acts interpolates one into the other. */
-  const HERO = { az: -0.58, el: 0.42, dist: 20.4, ty: -2.1 }
+  /* HERO IS SOLVED, NOT SET.
+
+     A hand-set distance is a number that was right for the model on the day it was
+     typed. Measured on the corrected data, dist 20.4 put building 11 a hundred and
+     fifty pixels off the right edge of a 1440 frame — and a building a visitor cannot
+     see is a building a visitor cannot choose, which makes CHOOSE A BUILDING a lie.
+
+     So the rest pose is fitted to the eleven numbered buildings themselves: their own
+     union box, projected at a trial distance, binary-searched for the largest scale
+     that still clears a declared safe area. The safe area is the composition — the
+     margins are asymmetric because the interface is: the top strip belongs to the mark
+     and SITE PLAN, the bottom to the dock.
+
+     The dealership is deliberately NOT in the fit. It is the way in, it sits a long way
+     west of everything numbered, and including it shrank the compound by a fifth to
+     hold a building that cannot be selected. It runs out of the left edge instead —
+     a committed crop, which reads as the site continuing past the frame rather than as
+     the frame having been drawn too small. */
+  const HERO = { az: -0.58, el: 0.42, dist: 20.4, ty: -2.1, tx: 0, tz: 0 }
   const ARRIVE = { az: -1.12, el: 0.055, dist: 12.4, ty: 0.6 }
+  const SAFE = { left: 44, right: 56, top: 104, bottom: 132 }
 
   const cam = { az: HERO.az, el: HERO.el, dist: HERO.dist, target: new THREE.Vector3(0, HERO.ty, 0) }
   const camTo = { ...cam, target: cam.target.clone() }
@@ -1342,10 +1481,9 @@ export function initCompound3D(mount, model, opts = {}) {
     cam.dist = Math.max(lo, Math.min(hi, cam.dist))
     const { az, el, target } = cam
     const dist = cam.dist * fit()
-    /* The label band is desktop-only, so on one column the model does not need to sit
-       low to leave room above it — it takes the whole frame instead. */
-    const lift = narrow() ? 0.25 : 1
-    const ty = target.y * lift
+    /* The target's height is solved by fitHero against the real stage, so there is no
+       per-breakpoint lift to keep in step any more. */
+    const ty = target.y
     camera.position.set(
       target.x + dist * Math.cos(el) * Math.sin(az),
       ty + dist * Math.sin(el),
@@ -1361,6 +1499,98 @@ export function initCompound3D(mount, model, opts = {}) {
     camFill.position.y += dist * 0.22
     camFill.target.position.set(target.x, ty, target.z)
     camFill.target.updateMatrixWorld()
+  }
+
+  /* --- FIT THE REST POSE TO THE ELEVEN BUILDINGS ----------------------------------
+     Solved against the projection itself rather than against a formula, because the
+     frame that matters is the one the visitor gets: the eight corners of the union box
+     are projected at a trial pose and the pose is accepted only if every one of them
+     lands inside the safe area. Two passes — first the target, so the box is centred in
+     the safe rect, then a binary search on distance for the largest the compound can be
+     while still clearing it. Twenty-two iterations is exact to a pixel and costs
+     nothing: this runs at init and on resize, never per frame. */
+  /* Declared here rather than beside the handlers that own them: the resize handler
+     re-solves the rest pose and has to know whether the visitor is resting at compound
+     and whether a drag is in progress, and it runs before either section is reached. */
+  let dragging = false
+  let level = 'compound'
+
+  const fitHero = () => {
+    const box = new THREE.Box3()
+    let any = false
+    for (const B of buildingObjs.values()) {
+      for (const p of B.picks) { box.expandByObject(p); any = true }
+    }
+    if (!any) return
+    const c = box.getCenter(new THREE.Vector3())
+    HERO.tx = c.x
+    HERO.tz = c.z
+
+    const W = Math.max(1, mount.clientWidth || window.innerWidth)
+    const H = Math.max(1, mount.clientHeight || window.innerHeight)
+    const inner = {
+      x0: SAFE.left, x1: W - SAFE.right,
+      y0: SAFE.top, y1: H - SAFE.bottom,
+    }
+    const probe = new THREE.PerspectiveCamera(camera.fov, W / H, camera.near, camera.far)
+    const v = new THREE.Vector3()
+    const corners = []
+    for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y]) for (const z of [box.min.z, box.max.z]) corners.push([x, y, z])
+
+    /* screen box of the compound at a given distance and target height */
+    const measure = (dist, ty) => {
+      probe.position.set(
+        HERO.tx + dist * Math.cos(HERO.el) * Math.sin(HERO.az),
+        ty + dist * Math.sin(HERO.el),
+        HERO.tz + dist * Math.cos(HERO.el) * Math.cos(HERO.az),
+      )
+      probe.lookAt(HERO.tx, ty, HERO.tz)
+      probe.updateMatrixWorld(true)
+      probe.updateProjectionMatrix()
+      let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9
+      for (const [x, y, z] of corners) {
+        v.set(x, y, z).project(probe)
+        const px = (v.x * 0.5 + 0.5) * W, py = (-v.y * 0.5 + 0.5) * H
+        x0 = Math.min(x0, px); x1 = Math.max(x1, px); y0 = Math.min(y0, py); y1 = Math.max(y1, py)
+      }
+      return { x0, x1, y0, y1 }
+    }
+
+    const wantX = (inner.x0 + inner.x1) / 2
+    const wantY = (inner.y0 + inner.y1) / 2
+    let ty = 0
+    let dist = HERO.dist
+
+    /* Centre and scale interact — recentring changes what fits, and rescaling moves the
+       centre — so they are solved together, three rounds, which converges well inside a
+       pixel on every stage this runs at. Centring works in SCREEN error and pushes the
+       target along the camera's own right vector and along the ground, which is the only
+       way to move a picture predictably when the camera is on a sphere. */
+    const right = new THREE.Vector3()
+    for (let round = 0; round < 3; round++) {
+      for (let i = 0; i < 10; i++) {
+        const m = measure(dist, ty)
+        const ex = ((m.x0 + m.x1) / 2) - wantX
+        const ey = ((m.y0 + m.y1) / 2) - wantY
+        if (Math.abs(ex) < 0.5 && Math.abs(ey) < 0.5) break
+        /* world units per screen pixel at the target plane */
+        const perPx = (2 * dist * Math.tan((camera.fov * Math.PI / 180) / 2)) / H
+        right.set(Math.cos(HERO.az), 0, -Math.sin(HERO.az))
+        HERO.tx += right.x * ex * perPx
+        HERO.tz += right.z * ex * perPx
+        ty -= ey * perPx
+      }
+      let lo = RANGE.compound[0], hi = RANGE.compound[1]
+      for (let i = 0; i < 24; i++) {
+        const mid = (lo + hi) / 2
+        const m = measure(mid, ty)
+        if (m.x0 >= inner.x0 && m.x1 <= inner.x1 && m.y0 >= inner.y0 && m.y1 <= inner.y1) hi = mid
+        else lo = mid
+      }
+      dist = Math.min(RANGE.compound[1], hi)
+    }
+    HERO.dist = dist
+    HERO.ty = ty
   }
 
   /* ================================================================================
@@ -1517,8 +1747,15 @@ export function initCompound3D(mount, model, opts = {}) {
     renderer.setSize(r.width, r.height, false)
     camera.aspect = r.width / r.height
     camera.updateProjectionMatrix()
+    /* The rest pose is a fit, so it belongs to the stage and has to be re-solved when
+       the stage changes. If the visitor is resting at compound, the fit is applied
+       straight away — otherwise it waits for the next return home. */
+    fitHero()
+    if (level === 'compound' && !dragging) {
+      cam.dist = HERO.dist
+      cam.target.set(HERO.tx, HERO.ty, HERO.tz)
+    }
   }
-  resize()
 
   /* --- AMBIENT MOTION ------------------------------------------------------------
      The model turns, very slowly, and it is the site that turns rather than the camera
@@ -1549,7 +1786,6 @@ export function initCompound3D(mount, model, opts = {}) {
   let ambient = 1                           /* 0..1, eased by hand on interaction */
   let idleSince = performance.now()
   let ambientPhase = 0
-  let dragging = false
 
   /* --- RAYCAST -------------------------------------------------------------------
      Hover is resolved once per frame against the objects that are legal targets AT THE
@@ -1560,7 +1796,6 @@ export function initCompound3D(mount, model, opts = {}) {
   const ray = new THREE.Raycaster()
   const ptr = new THREE.Vector2()
   let ptrInside = false
-  let level = 'compound'
   let focusNum = null
   let hoverNum = null
   let hoverSuite = null
@@ -1569,11 +1804,10 @@ export function initCompound3D(mount, model, opts = {}) {
   const suiteIndexOf = (suite) => (suite ? suite.index : -1)
 
   const targetsForLevel = () => {
-    if (level === 'compound') {
-      const out = []
-      for (const B of buildingObjs.values()) out.push(...B.bays.map((b) => b.mesh), ...B.roofs)
-      return out
-    }
+    /* At compound level ONLY the pick proxies answer: one canonical box per measured
+       run, so a hover resolves to exactly one building and never to whatever mesh the
+       ray reached first. Inside a building, its own bays answer as suites. */
+    if (level === 'compound') return pickProxies
     const B = buildingObjs.get(focusNum)
     return B ? B.bays.map((b) => b.mesh) : []
   }
@@ -1641,13 +1875,19 @@ export function initCompound3D(mount, model, opts = {}) {
      compound's own verified LED and the only light source name this system has. */
   const lume = new THREE.Color(C.lume)
 
+  /* THE HOVER USED TO GO THE WRONG WAY.  M_focus was 0x59636f against a 0x6a7683 wall —
+     the building a visitor was considering got DARKER than it had been, and the only
+     thing that made a hover read at all was its neighbours falling further. That is why
+     the model never felt clickable: nothing arrives, something leaves. The subject now
+     gains, its neighbours give way, and the ratio between them is about 1.6 before the
+     emissive and nearer 1.9 with it — which is the separation the brief asks for. */
   const M_focus = M.wall.clone()
-  M_focus.color.setHex(0x59636f)
-  M_focus.emissive = lume.clone(); M_focus.emissiveIntensity = 0.045
+  M_focus.color.setHex(0x7c8794)
+  M_focus.emissive = lume.clone(); M_focus.emissiveIntensity = 0.10
 
   const M_hover = M.wall.clone()
-  M_hover.color.setHex(0x6d7885)
-  M_hover.emissive = lume.clone(); M_hover.emissiveIntensity = 0.09
+  M_hover.color.setHex(0x8b95a1)
+  M_hover.emissive = lume.clone(); M_hover.emissiveIntensity = 0.16
 
   /* THE ONE SUITE. Not a lighter grey — a surface with the compound's light on it, at
      four times the roof's intensity, which at this exposure is the brightest thing in
@@ -1676,10 +1916,40 @@ export function initCompound3D(mount, model, opts = {}) {
      interior light in the model and it appears exactly once. */
   const M_doorLit = new THREE.MeshBasicMaterial({ color: 0xffc98a })
 
+  /* --- THE ARCHITECTURAL HOVER LANGUAGE ------------------------------------------
+     A hover is not a fill change. What arrives on the subject is the set of things
+     that would actually change on a real building when the light comes up on it:
+
+       the door reads as metal instead of as a hole   M_doorHot
+       the glazed head over it returns something      M_glassHot
+       the wall light above it comes on               M_lampHot
+
+     Applied to every bay of the subject building, and one step further on the single
+     suite being considered — which is what ties a control in the dock to a door in the
+     world without drawing a line between them. */
+  const M_doorHot = M.door.clone(); M_doorHot.color.setHex(0x4a5561); M_doorHot.metalness = 0.3
+  /* THE ONE DOOR BEING CONSIDERED. A step above the rest of its own building, because
+     "which real door is this control?" has to be answerable in the frame, not by
+     elimination. Measured against M_doorHot it is a full value apart. */
+  const M_doorPick = M.door.clone(); M_doorPick.color.setHex(0x6d7b89); M_doorPick.metalness = 0.32
+  const M_doorSub = M.door.clone(); M_doorSub.color.setHex(0x232a33)
+  const M_glassHot = M.glass.clone(); M_glassHot.color.setHex(0x40596f); M_glassHot.envMapIntensity = 3.1
+  const M_glassPick = M.glass.clone(); M_glassPick.color.setHex(0x6d8ba6); M_glassPick.envMapIntensity = 3.6
+  const M_lampHot = new THREE.MeshBasicMaterial({ color: 0xffe6c2 })
+  const M_lampPick = new THREE.MeshBasicMaterial({ color: 0xfff3e2 })
+
   /* the one light that follows a decision */
   const focusLight = new THREE.PointLight(0xcfe0ee, 0, ft(150), 2)
   focusLight.position.set(0, ft(60), 0)
   site.add(focusLight)
+
+  /* THE APRON POOL. A second, much tighter light that sits low in front of ONE door:
+     the suite being considered or the suite chosen. It is what makes the answer to
+     "which real door is this?" instant — the ground in front of it lights up, the way
+     it would if someone had switched that bay on. */
+  const suiteLight = new THREE.PointLight(0xffd9ab, 0, ft(46), 2)
+  suiteLight.position.set(0, ft(12), 0)
+  site.add(suiteLight)
 
   const paint3d = () => {
     for (const B of buildingObjs.values()) {
@@ -1695,18 +1965,27 @@ export function initCompound3D(mount, model, opts = {}) {
           : M.roof
       }
 
+      /* The subject's own bays get the light: door, glass and wall lamp together, so
+         the building reads as switched on rather than tinted. */
+      const lit = isFocus || isHover
       for (const o of B.bays) {
+        const picked = selectedSuite && o.suite === selectedSuite
+        const considered = hoverSuite && o.suite === hoverSuite && !picked
+
+        /* A SOLD SUITE IS IDENTIFIED, NEVER OFFERED. Pointing at one still says which
+           door it is — that is orientation and it is owed — but nothing warms up and
+           nothing lights: the apron pool below stays off and the leaf stays shut. */
+        const soldConsidered = considered && o.suite.sold
+        o.door.material = picked ? M_doorLit
+          : (considered && !o.suite.sold) ? M_doorPick
+          : lit ? M_doorHot
+          : (subordinate || hoverSubordinate) ? M_doorSub : M.door
+        if (o.glaze) o.glaze.material = (picked || (considered && !o.suite.sold)) ? M_glassPick : (lit ? M_glassHot : M.glass)
+        if (o.lamp) o.lamp.material = picked ? M_lampPick : (lit && !soldConsidered ? M_lampHot : M.wallLight)
+
         if (o.suite.sold) { o.mesh.material = M.sold; continue }
-        if (selectedSuite && o.suite === selectedSuite) {
-          o.mesh.material = M_lit
-          o.door.material = M_doorLit
-          continue
-        }
-        o.door.material = M.door
-        if (isFocus) {
-          o.mesh.material = (hoverSuite && o.suite === hoverSuite) ? M_hover : M_focus
-          continue
-        }
+        if (picked) { o.mesh.material = M_lit; continue }
+        if (isFocus) { o.mesh.material = considered ? M_hover : M_focus; continue }
         if (isHover) { o.mesh.material = M_focus; continue }
         o.mesh.material = subordinate ? M_sub : (hoverSubordinate ? M_hoverSub : M.wall)
       }
@@ -1742,9 +2021,28 @@ export function initCompound3D(mount, model, opts = {}) {
       if (B && B.roofs[0]) {
         const p = worldOf(B.roofs[0])
         focusLight.position.set(p.x, p.y + ft(46), p.z)
-        focusLight.intensity = focusNum ? 26 : 13
+        /* A hover is a question and used to get half the light a selection gets, which
+           made considering a building almost indistinguishable from not. It now gets
+           most of it — the difference between the two states is carried by the camera
+           and by the dock, which is where a difference of KIND belongs. */
+        focusLight.intensity = focusNum ? 30 : 24
       } else {
         focusLight.intensity = 0
+      }
+    }
+
+    /* THE APRON POOL, over one door: the suite chosen, or failing that the one being
+       considered from the dock. Nothing else in the model is warm. */
+    {
+      const o = (selectedSuite && suiteObjs[selectedSuite.index]) || (hoverSuite && !hoverSuite.sold && suiteObjs[hoverSuite.index]) || null
+      if (o && o.door) {
+        const p = worldOf(o.door)
+        const n = o.suite.faceNormal || [0, 0]
+        const sc = site.scale.x || 1
+        suiteLight.position.set(p.x + n[0] * ft(9) * sc, p.y + ft(7) * sc, p.z + n[1] * ft(9) * sc)
+        suiteLight.intensity = selectedSuite ? 15 : 11
+      } else {
+        suiteLight.intensity = 0
       }
     }
 
@@ -1784,6 +2082,20 @@ export function initCompound3D(mount, model, opts = {}) {
   /* --- PUBLIC API. main.js owns the STATE; this file owns the picture. ------------ */
   const api = {
     renderer, scene, camera, root, site,
+    /* one bay, by suite index — what a test needs to ask the model a direct question */
+    bayOf: (i) => suiteObjs[i] || null,
+    /* Author's handle on the rest pose: set the azimuth, refit, and land there. Used to
+       compare candidate rest frames against each other in the browser rather than by
+       arguing about numbers in a file. */
+    setRestAzimuth(az) {
+      HERO.az = az
+      fitHero()
+      cam.az = HERO.az
+      cam.dist = HERO.dist
+      cam.target.set(HERO.tx, HERO.ty, HERO.tz)
+      site.rotation.y = 0
+      applyCamera()
+    },
     useGsap(lib) { gsapRef.lib = lib },
 
     resize,
@@ -1921,7 +2233,7 @@ export function initCompound3D(mount, model, opts = {}) {
         site.rotation.y = 0
         ambient = 0
         ambientPhase = 0
-        flyTo({ az: cam.az, el: HERO.el, dist: HERO.dist, target: new THREE.Vector3(0, HERO.ty, 0) }, 1.1)
+        flyTo({ az: HERO.az, el: HERO.el, dist: HERO.dist, target: new THREE.Vector3(HERO.tx, HERO.ty, HERO.tz) }, 1.1)
       } else if (next === 'building') {
         const B = buildingObjs.get(num)
         if (B?.roofs[0]) {
@@ -1934,6 +2246,20 @@ export function initCompound3D(mount, model, opts = {}) {
       }
       paint3d()
       this.syncCallouts()
+    },
+
+    /* ENTER. The camera drops to the apron in front of one door and comes in close —
+       standing where a car would stand, which is the only camera move in this act that
+       is at a person's height rather than a model-viewer's. It is a commitment, so it is
+       slower than the moves that precede it and it does not change the level: the
+       visitor is still in the suite they chose, they are simply at its door. */
+    enterSuite(index) {
+      const o = suiteObjs[index]
+      if (!o) return
+      const p = worldOf(o.door)
+      const n = o.suite.faceNormal || [0, 1]
+      const az = Math.atan2(n[0], n[1]) + site.rotation.y
+      flyTo({ az, el: 0.085, dist: 3.4, target: new THREE.Vector3(p.x, p.y + ft(2) * (site.scale.y || 1), p.z) }, 1.5)
     },
 
     setHoverBuilding(num) {
@@ -2119,6 +2445,9 @@ export function initCompound3D(mount, model, opts = {}) {
   }
   requestAnimationFrame(frame)
 
+  resize()
+  cam.dist = HERO.dist
+  cam.target.set(HERO.tx, HERO.ty, HERO.tz)
   paint3d()
   applyCamera()
 

@@ -85,10 +85,10 @@ const C = {
   membrane: 0x23292f,   /* the roof field, recessed inside the parapet */
   trim: 0x161b21,       /* fascia, frames, kerbs, door segments */
   civic: 0x7b8794,      /* the clubhouse reads lighter — it is the shared building */
-  glass: 0x0b1119,
+  glass: 0x223243,      /* lifted off black: at 0x0b1119 it returned nothing and read as a hole */
   grass: 0x10150f,      /* planted ground — dark olive, well below the architecture */
   water: 0x16202e,      /* the basin: near-black, and it borrows the sky */
-  door: 0x11161c,
+  door: 0x1b222b,       /* a sectional door is dark metal, not a void */
   sold: 0x1b2026,
   lit: 0x8e9aa6,
   lume: 0xcbd6de,
@@ -312,7 +312,7 @@ export function initCompound3D(mount, model, opts = {}) {
     membrane: new THREE.MeshStandardMaterial({ color: C.membrane, roughness: 0.99, metalness: 0 }),
     trim: new THREE.MeshStandardMaterial({ color: C.trim, roughness: 0.4, metalness: 0.55 }),
     civic: new THREE.MeshStandardMaterial({ color: C.civic, roughness: 0.4, metalness: 0.3 }),
-    glass: new THREE.MeshStandardMaterial({ color: C.glass, roughness: 0.08, metalness: 0.55 }),
+    glass: new THREE.MeshStandardMaterial({ color: C.glass, roughness: 0.06, metalness: 0.5, envMapIntensity: 2.2 }),
     door: new THREE.MeshStandardMaterial({ color: C.door, roughness: 0.3, metalness: 0.62 }),
     sold: new THREE.MeshStandardMaterial({ color: C.sold, roughness: 0.85, metalness: 0.1 }),
     /* GRASS — the site's second ground. Utterly matte and a touch green, so it separates
@@ -460,7 +460,7 @@ export function initCompound3D(mount, model, opts = {}) {
     const LEN = ft(17)
     const marks = []
     for (const row of data.rows) {
-      const dir = buildingApronDir(row)
+      const dir = rowDoorDir(row)
       if (!dir) continue
       const r = (row.ang * Math.PI) / 180
       const ux = Math.cos(r), uy = Math.sin(r)
@@ -945,8 +945,9 @@ export function initCompound3D(mount, model, opts = {}) {
     B.group.add(pierL)
 
     /* THE DOOR occupies ~80 % of the clear bay between piers, which is what the
-       reference elevation shows and what a car actually needs. */
-    const dw = clear * 0.80
+       reference elevation shows and what a car actually needs — and the share is where
+       PREMIUM and STANDARD become architecture rather than a colour key. */
+    const dw = clear * (s.type === 'A' ? 0.88 : 0.72)
     const dh = H_SUITE * 0.5
     const [fnx, fny] = s.faceNormal
     const rot = -(s.ang * Math.PI) / 180
@@ -990,16 +991,28 @@ export function initCompound3D(mount, model, opts = {}) {
     /* THE GLAZED HEAD.  Every real Luxe Corsa door has a windowed top section, and it is
        the detail that stops a bay reading as a black rectangle: it catches the sky where
        the rest of the leaf catches nothing. */
-    const glazeH = dh * 0.24
+    const glazeH = dh * 0.30
+    const glazeY = dh - glazeH * 0.56
     const glaze = new THREE.Mesh(bayGeo, M.glass)
-    glaze.scale.set(dw * 0.94, glazeH, ft(0.34))
+    glaze.scale.set(dw * 0.92, glazeH, ft(0.30))
     glaze.position.set(
-      s.cx + fnx0 * (faceD0 - ft(0.42)),
-      dh - glazeH * 0.62,
-      s.cy + fny0 * (faceD0 - ft(0.42)),
+      s.cx + fnx0 * (faceD0 - ft(0.30)),
+      glazeY,
+      s.cy + fny0 * (faceD0 - ft(0.30)),
     )
     glaze.rotation.y = rot0
     B.group.add(glaze)
+    /* the transom under it — one light line across every bay, which is what makes the
+       glazed section read at compound distance rather than only in close-up */
+    const transom = new THREE.Mesh(bayGeo, M.roof)
+    transom.scale.set(dw * 0.96, ft(0.42), ft(0.5))
+    transom.position.set(
+      s.cx + fnx0 * (faceD0 - ft(0.16)),
+      glazeY - glazeH / 2,
+      s.cy + fny0 * (faceD0 - ft(0.16)),
+    )
+    transom.rotation.y = rot0
+    B.group.add(transom)
 
     /* THE UNIT PLAQUE, beside the opening, where the render puts it. Small, light, and
        the only thing on the elevation that identifies one bay from another. */
@@ -1030,6 +1043,40 @@ export function initCompound3D(mount, model, opts = {}) {
     const obj = { suite: s, mesh: m, door, baseY: H_SUITE / 2 }
     B.bays.push(obj)
     suiteObjs[s.index] = obj
+  }
+
+  /* THE CORNER REVEAL, on the two end piers of every run. The architect's elevation puts
+     a thin red line down the corner pilaster; it is the building's own identity mark and
+     the reason the interface may use that red for selection at all. */
+  {
+    const revealMat = new THREE.MeshStandardMaterial({ color: 0xd8453c, roughness: 0.5, metalness: 0.1,
+      emissive: new THREE.Color(0xd8453c), emissiveIntensity: 0.22 })
+    for (const B of buildingObjs.values()) {
+      const bays = B.bays.map((o) => o.suite)
+      if (bays.length < 2) continue
+      const byRun = new Map()
+      for (const s of bays) { const k = s.ang.toFixed(2); if (!byRun.has(k)) byRun.set(k, []); byRun.get(k).push(s) }
+      for (const list of byRun.values()) {
+        const r0 = -(list[0].ang * Math.PI) / 180
+        const ux = Math.cos(r0), uz = -Math.sin(r0)
+        const proj = list.map((s) => ({ s, u: s.cx * ux + s.cy * uz })).sort((a, b) => a.u - b.u)
+        for (const end of [proj[0], proj[proj.length - 1]]) {
+          const s = end.s
+          const half = (s.slot ?? s.w) / 2
+          const sign = end === proj[0] ? -1 : 1
+          const fd = (s.depth ?? s.dep) * 0.5
+          const rev = new THREE.Mesh(bayGeo, revealMat)
+          rev.scale.set(ft(0.34), H_SUITE * 0.82, ft(0.5))
+          rev.position.set(
+            s.cx + ux * sign * (half - ft(1.0)) + s.faceNormal[0] * (fd + ft(0.5)),
+            H_SUITE * 0.41,
+            s.cy + uz * sign * (half - ft(1.0)) + s.faceNormal[1] * (fd + ft(0.5)),
+          )
+          rev.rotation.y = r0
+          B.group.add(rev)
+        }
+      }
+    }
   }
 
   /* ================================================================================
@@ -1173,22 +1220,31 @@ export function initCompound3D(mount, model, opts = {}) {
       const g2 = new THREE.Mesh(bayGeo, M.glass)
       g2.scale.set(ax ? ft(0.3) : runL, bandH, az ? ft(0.3) : runL)
       put(ft(0.10), g2)
-      /* mullions, at a structural pitch rather than a decorative one */
-      const bays = Math.max(3, Math.round(runL / ft(11)))
+      /* MULLIONS, on one honest basis: a face on the +/-X side runs along local Z and a
+         face on the +/-Z side runs along local X, so the offset goes into whichever axis
+         is free. The previous attempt mixed the two and the mullions came off the
+         building as loose sticks — the artifact this block exists to remove. */
+      const bays = Math.max(2, Math.round(runL / ft(19)))
       for (let i = 1; i < bays; i++) {
         const u = (i / bays - 0.5) * runL
-        const mull = new THREE.Mesh(bayGeo, M.trim)
-        mull.scale.set(ax ? ft(0.36) : ft(0.5), bandH, az ? ft(0.36) : ft(0.5))
-        const ox = ax * (halfL + ft(0.3)) + (ax ? 0 : u)
-        const oz = az * (halfD + ft(0.3)) + (az ? 0 : 0)
-        const lx = ax ? u : 0
-        mull.position.set(
-          c.cx + (ox - (ax ? 0 : 0)) * cs - (oz + (ax ? lx : 0)) * sn + (ax ? 0 : 0),
-          bandY,
-          c.cy + ox * sn + (oz + (ax ? lx : 0)) * cs,
-        )
+        const lx = ax ? ax * (halfL + ft(0.16)) : u
+        const lz = az ? az * (halfD + ft(0.16)) : u
+        const mull = new THREE.Mesh(bayGeo, M.roof)
+        mull.scale.set(ft(0.34), bandH * 0.96, ft(0.34))
+        mull.position.set(c.cx + lx * cs - lz * sn, bandY, c.cy + lx * sn + lz * cs)
         mull.rotation.y = rr
         civicGroup.add(mull)
+      }
+      /* THE HEAD AND THE CILL. Without them the band has no top and no bottom and reads
+         as a slot cut in the wall rather than as a window in it. */
+      for (const dy of [bandH / 2 + ft(0.55), -bandH / 2 - ft(0.55)]) {
+        const rail = new THREE.Mesh(bayGeo, M.roof)
+        rail.scale.set(ax ? ft(0.62) : runL + ft(1.4), ft(1.1), az ? ft(0.62) : runL + ft(1.4))
+        const lx = ax * (halfL + ft(0.44)), lz = az * (halfD + ft(0.44))
+        rail.position.set(c.cx + lx * cs - lz * sn, bandY + dy, c.cy + lx * sn + lz * cs)
+        rail.rotation.y = rr
+        rail.castShadow = true
+        civicGroup.add(rail)
       }
     }
 
@@ -1551,10 +1607,10 @@ export function initCompound3D(mount, model, opts = {}) {
      four times the roof's intensity, which at this exposure is the brightest thing in
      the frame without ever clipping to white. */
   const M_lit = M.wall.clone()
-  M_lit.color.setHex(C.lit)
+  M_lit.color.setHex(0x77828f)
   M_lit.emissive = lume.clone()
-  M_lit.emissiveIntensity = 0.42
-  M_lit.roughness = 0.55
+  M_lit.emissiveIntensity = 0.10
+  M_lit.roughness = 0.5
 
   const M_sub = M.wall.clone(); M_sub.color.setHex(0x272d35)
   /* HOVER HAS TO BE VISIBLE IN THE MODEL, NOT ONLY IN A TAG.  Considering a building now
@@ -1622,9 +1678,10 @@ export function initCompound3D(mount, model, opts = {}) {
          a building and must stay part of it: it steps forward by a foot and a half —
          enough for its own party walls to throw a shadow and for the eye to find it
          instantly — and everything else that distinguishes it is illumination. */
-      const want = (selectedSuite && o.suite === selectedSuite) ? ft(0.8) : 0
+      /* NO TRANSLATION. A suite is part of a building and stays in it; what changes is
+         the light on it, the door behind it and the state in the interface. */
       const cur = o.mesh.position.y - o.baseY
-      if (Math.abs(cur - want) > 0.001) tweenSuiteLift(o, want)
+      if (Math.abs(cur) > 0.001) tweenSuiteLift(o, 0)
     }
 
     /* The civic masses are context once a building is the subject. */

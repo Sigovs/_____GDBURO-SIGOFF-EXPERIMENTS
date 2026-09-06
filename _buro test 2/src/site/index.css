@@ -544,6 +544,24 @@ ul, ol { list-style: none; padding: 0; }
    column, so without this a callout could be drawn behind 14px mono and neither would
    be readable — the label has the left two-thirds, which is the part of the stage the
    composition keeps clear. */
+/* THE THRESHOLD between act 02 and act 03.
+
+   A full-viewport field whose colour is the door's own warm light, growing from the
+   door's real projected position. It sits above everything including the header — a
+   threshold you can see the navigation through is not a threshold — and it is inert:
+   pointer events pass straight through, so the visitor can keep scrolling out of it in
+   either direction at any point (`SC1`). Opacity is the only property the stylesheet
+   owns; the gradient itself is written by the scrub, because its centre moves with the
+   model. */
+.threshold {
+  position: fixed; inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0;
+  will-change: opacity;
+}
+@media (prefers-reduced-motion: reduce) { .threshold { display: none; } }
+
 .cal { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 @media (min-width: 1025px) { .cal { right: 34%; } }
 .cal__lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }

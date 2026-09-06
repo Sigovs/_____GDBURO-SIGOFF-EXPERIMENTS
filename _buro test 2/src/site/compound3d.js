@@ -25,6 +25,8 @@ import * as THREE from 'three'
    drawing so the doors, the aprons, the planting setback and the routes cannot disagree
    about where the roadway is. */
 import { nearestOnSpine } from './compound.js'
+/* The civil plan's own geometry — visual, not surveyed, and the module says so. */
+import * as SV from '../data/site-visual.js'
 
 /* ----------------------------------------------------------------------------------
    DECLARED DIMENSIONS. The source measures the plan; it does not measure the section.
@@ -84,6 +86,8 @@ const C = {
   trim: 0x161b21,       /* fascia, frames, kerbs, door segments */
   civic: 0x7b8794,      /* the clubhouse reads lighter — it is the shared building */
   glass: 0x0b1119,
+  grass: 0x10150f,      /* planted ground — dark olive, well below the architecture */
+  water: 0x16202e,      /* the basin: near-black, and it borrows the sky */
   door: 0x11161c,
   sold: 0x1b2026,
   lit: 0x8e9aa6,
@@ -305,6 +309,14 @@ export function initCompound3D(mount, model, opts = {}) {
     glass: new THREE.MeshStandardMaterial({ color: C.glass, roughness: 0.08, metalness: 0.55 }),
     door: new THREE.MeshStandardMaterial({ color: C.door, roughness: 0.3, metalness: 0.62 }),
     sold: new THREE.MeshStandardMaterial({ color: C.sold, roughness: 0.85, metalness: 0.1 }),
+    /* GRASS — the site's second ground. Utterly matte and a touch green, so it separates
+       from concrete by material as well as by value. */
+    grass: new THREE.MeshStandardMaterial({ color: C.grass, roughness: 1, metalness: 0 }),
+    /* WATER — smooth and slightly metallic so it returns the sky and almost nothing
+       else. At blue hour that makes the basin the brightest horizontal on the site. */
+    /* Near-mirror. A basin at dusk is not a dark shape, it is a hole with the sky in it,
+       and only a very low roughness returns enough of the horizon band to say so. */
+    water: new THREE.MeshStandardMaterial({ color: C.water, roughness: 0.045, metalness: 0.9, envMapIntensity: 2.4 }),
     wallLight: new THREE.MeshBasicMaterial({ color: 0xffc07a }),
   }
 
@@ -333,7 +345,19 @@ export function initCompound3D(mount, model, opts = {}) {
      UNNEGATED — every mass below places itself at world z = plan y, and negating here
      built the slab as a mirror image of the compound standing on it. */
   const shape = new THREE.Shape(data.perimeter.map(([x, y]) => v2(x, y)))
-  const slabGeo = new THREE.ExtrudeGeometry(shape, { depth: SLAB, bevelEnabled: false })
+  /* THE PLATE'S EDGE IS CHAMFERED, and that one change is most of what stopped it
+     reading as a cut-out. A prism with a hard 90-degree arris returns exactly one value
+     along its whole rim; a bevel gives the rim a second facet at a different angle to
+     the key, so the plinth draws a continuous highlight around itself and reads as a
+     machined object with a thickness. Small — a foot and a half — because this is a
+     presentation model, not a plinth in a museum. */
+  const slabGeo = new THREE.ExtrudeGeometry(shape, {
+    depth: SLAB,
+    bevelEnabled: true,
+    bevelThickness: ft(1.6),
+    bevelSize: ft(1.6),
+    bevelSegments: 2,
+  })
   slabGeo.rotateX(Math.PI / 2)
   const slab = new THREE.Mesh(slabGeo, [M.slab, M.slabSide])
   slab.position.z = 0
@@ -470,6 +494,96 @@ export function initCompound3D(mount, model, opts = {}) {
     const b = [row.cx - nx * row.depth, row.cy - ny * row.depth]
     return Math.hypot(a[0] - n.x, a[1] - n.y) <= Math.hypot(b[0] - n.x, b[1] - n.y)
       ? [nx, ny] : [-nx, -ny]
+  }
+
+  /* ================================================================================
+     THE SITE, from the civil plan.  REFERENCE_DERIVED_VISUAL throughout.
+
+     Everything in this block comes from `src/data/site-visual.js`, which reads the
+     published civil render through a transform fitted on the eleven building badges
+     the render and the measured data share. It is visual truth, not survey truth, and
+     the file says so at the top of itself.
+
+     Four things, in the order they are laid down: the landscape ground the paving sits
+     in, the roundabout that organises the drive, the basin that carries the ground off
+     the edge of the plate, and the planting that frames the architecture.
+     ================================================================================ */
+
+  /* --- LANDSCAPE GROUND. The second site material, and the end of the one-value
+     plate. Soft-edged discs of planted ground laid into the paving — grass reads
+     darker and far rougher than concrete, and the difference between the two is what
+     finally gives the site a surface instead of a silhouette. */
+  {
+    const grassGeo = new THREE.CircleGeometry(1, 40)
+    for (const z of SV.landscape) {
+      const g = new THREE.Mesh(grassGeo, M.grass)
+      g.rotation.x = -Math.PI / 2
+      /* Elliptical and turned, deterministically per zone. A landscaped area drawn as a
+         true circle reads as a compass mark on the plan rather than as ground. */
+      g.rotation.z = (z.cx % 7) * 0.42
+      g.scale.set(z.r * 1.22, z.r * (0.62 + (z.cy % 5) * 0.08), 1)
+      g.position.set(z.cx, ROAD_LIFT * 0.25, z.cy)
+      g.receiveShadow = true
+      site.add(g)
+    }
+  }
+
+  /* --- THE ROUNDABOUT and the turning head. Carriageway, kerb ring, planted island —
+     three concentric pieces, which is all a roundabout is. */
+  for (const r of [SV.roundabout, SV.culDeSac]) {
+    const road2 = new THREE.Mesh(new THREE.CircleGeometry(r.outer, 48), M.road)
+    road2.rotation.x = -Math.PI / 2
+    road2.position.set(r.cx, ROAD_LIFT, r.cy)
+    road2.receiveShadow = true
+    site.add(road2)
+
+    const kerb = new THREE.Mesh(new THREE.RingGeometry(r.island, r.island + ft(1.6), 44), M.concrete)
+    kerb.rotation.x = -Math.PI / 2
+    kerb.position.set(r.cx, ROAD_LIFT + 0.08, r.cy)
+    site.add(kerb)
+
+    const island = new THREE.Mesh(new THREE.CircleGeometry(r.island, 40), M.grass)
+    island.rotation.x = -Math.PI / 2
+    island.position.set(r.cx, ROAD_LIFT + 0.12, r.cy)
+    island.receiveShadow = true
+    site.add(island)
+  }
+
+  /* --- THE RETENTION BASIN.
+
+     Dark, smooth and very slightly metallic, so at blue hour it returns the sky and
+     nothing else — a basin at dusk is a hole with the sky in it. It is the quiet
+     counterweight the architecture needed: the only horizontal surface on the site that
+     is brighter than the ground around it, and the only one that is not paved.
+
+     It sits proud of the parcel envelope on the plan and it is left that way. The
+     ground it needs is laid under it, which is also what softens the plate's north-east
+     corner — the hard polygon edge stops being the end of the world there. */
+  {
+    /* Same convention as the slab: the geometry is rotated ON ITSELF so a shape point
+       (x, y) lands at world (x, 0, y). Rotating the MESH instead mirrors the outline
+       about the axis and puts the basin on the wrong side of the site — which is
+       exactly where a first pass put it. */
+    const pondPts = SV.pond.outline.map(([x, y]) => v2(x, y))
+    const cen = pondPts.reduce((a, p) => ({ x: a.x + p.x / pondPts.length, y: a.y + p.y / pondPts.length }), { x: 0, y: 0 })
+
+    /* The bank: the same outline grown about its own centre, so the water sits in a
+       margin of planted ground rather than meeting the paving at a hard line. */
+    const bankGeo = new THREE.ShapeGeometry(
+      new THREE.Shape(pondPts.map((p) => v2(cen.x + (p.x - cen.x) * 1.3, cen.y + (p.y - cen.y) * 1.3))),
+    )
+    bankGeo.rotateX(Math.PI / 2)
+    const bank = new THREE.Mesh(bankGeo, M.grass)
+    bank.position.y = ROAD_LIFT * 0.2
+    bank.receiveShadow = true
+    site.add(bank)
+
+    const waterGeo = new THREE.ShapeGeometry(new THREE.Shape(pondPts))
+    waterGeo.rotateX(Math.PI / 2)
+    const water = new THREE.Mesh(waterGeo, M.water)
+    water.position.y = ROAD_LIFT * 0.3
+    water.receiveShadow = true
+    site.add(water)
   }
 
   /* --- PLANTING. -------------------------------------------------------------------
@@ -888,7 +1002,15 @@ export function initCompound3D(mount, model, opts = {}) {
      units about the centre it spins on, and a distance solved for the box alone put a
      corner of the site through the left edge of the frame a quarter of a turn later.
      27.5 holds the whole compound at every angle it will ever be at. */
-  const cam = { az: -0.58, el: 0.42, dist: 20.4, target: new THREE.Vector3(0, -2.1, 0) }
+  /* THE TWO POSES THE ACT MOVES BETWEEN.
+
+     HERO is the composed resting frame. ARRIVE is act 01's viewpoint expressed in this
+     model's own coordinates: down near the ground, close in, turned along the drive.
+     The boundary between the acts interpolates one into the other. */
+  const HERO = { az: -0.58, el: 0.42, dist: 20.4, ty: -2.1 }
+  const ARRIVE = { az: -1.12, el: 0.055, dist: 12.4, ty: 0.6 }
+
+  const cam = { az: HERO.az, el: HERO.el, dist: HERO.dist, target: new THREE.Vector3(0, HERO.ty, 0) }
   const camTo = { ...cam, target: cam.target.clone() }
 
   /* Every distance in this file is composed against the desktop stage's 3:2. A phone's
@@ -1023,7 +1145,11 @@ export function initCompound3D(mount, model, opts = {}) {
       const PAD = 12
       const bh = c.box.offsetHeight || 62
       const BAND = bh + 14 + [0, 52, 104, 156][i]
-      const ly = Math.max(bh + 14, Math.min(y - 40, BAND))
+      /* The band is ABSOLUTE, not a minimum. Letting a label ride up to its anchor when
+         the anchor happened to be high put two callouts on the same line and they
+         overprinted; stacking them at fixed heights is the only arrangement that cannot
+         collide however the model turns. */
+      const ly = BAND
       let dirX = x < r.width * 0.5 ? 1 : -1
       const JOG = 26
       if (dirX > 0 && x + JOG + w > r.width - PAD) dirX = -1
@@ -1332,6 +1458,73 @@ export function initCompound3D(mount, model, opts = {}) {
       ])
     },
 
+    /* ------------------------------------------------------------------------------
+       THE ARRIVAL — act 01 becoming act 02, as one camera move.
+
+       Act 01 is a photograph taken standing on the drive, looking down it between two
+       facing rows of doors. Act 02 is the same drive from above. The transition between
+       them is therefore not a cut and not a crossfade: it is the ONE MOVE that connects
+       those two viewpoints, and the model can perform it because it is a real camera in
+       a real space.
+
+       At k = 0 the camera is at eye height on the entry road, turned along the drive's
+       own axis — as close to act 01's viewpoint as this model can stand. At k = 1 it is
+       the composed hero pose. Scrubbed across the boundary, so the visitor lifts off the
+       ground at exactly the rate they scroll: you were standing in it, now you are above
+       it, and nothing was cut.
+
+       Ignored the moment the visitor selects anything (`owner`), so an arrival can never
+       drag the frame off a building someone chose. ------------------------------------ */
+    /* WHERE THE SELECTED DOOR IS ON SCREEN, as a percentage of the stage.
+
+       The 02 -> 03 threshold grows its warm field from the actual door the visitor
+       chose, so it needs that door's projected position rather than the centre of the
+       frame. Returns null when nothing is selected, and the threshold falls back to a
+       composed default rather than guessing. */
+    doorScreen() {
+      const o = suiteObjs[suiteIndexOf(selectedSuite)]
+      if (!o) return null
+      const v = new THREE.Vector3()
+      o.door.getWorldPosition(v)
+      v.project(camera)
+      const r = mount.getBoundingClientRect()
+      const host = document.documentElement
+      /* the stage is not the viewport — convert through the element's own box */
+      const px = r.left + (v.x * 0.5 + 0.5) * r.width
+      const py = r.top + (-v.y * 0.5 + 0.5) * r.height
+      return { x: (px / host.clientWidth) * 100, y: (py / host.clientHeight) * 100 }
+    },
+
+    /* THE DESCENT. The last of the model's authored moves: from the suite pose down
+       toward the door itself, so the camera is looking AT the opening when the light
+       takes the frame. It stops short of the door — going through it would be the
+       videogame move this transition exists to avoid. */
+    descend(k) {
+      const o = suiteObjs[suiteIndexOf(selectedSuite)]
+      if (!o || k <= 0) return
+      const t = Math.max(0, Math.min(1, k))
+      cam.el = 0.30 + (0.085 - 0.30) * t
+      cam.dist = 8.2 + (3.4 - 8.2) * t
+      const v = new THREE.Vector3()
+      o.door.getWorldPosition(v)
+      cam.target.lerpVectors(cam.target.clone(), v, 0.35 * t)
+    },
+
+    arrival(k) {
+      /* `owner` lives in main.js's camera facade, not here. The model's own equivalent of
+         'the visitor has taken the wheel' is simply that something is selected — and an
+         arrival must never drag the frame off a building someone chose. */
+      if (level !== 'compound' || focusNum) return
+      const t = Math.max(0, Math.min(1, k))
+      /* Eased on the door curve rather than linearly: the lift should resist starting
+         and settle rather than run at a constant rate, which is the page's character. */
+      const e = t < 0.5 ? 2 * t * t : 1 - ((-2 * t + 2) ** 2) / 2
+      cam.az = HERO.az + (ARRIVE.az - HERO.az) * (1 - e)
+      cam.el = HERO.el + (ARRIVE.el - HERO.el) * (1 - e)
+      cam.dist = HERO.dist + (ARRIVE.dist - HERO.dist) * (1 - e)
+      cam.target.set(0, HERO.ty + (ARRIVE.ty - HERO.ty) * (1 - e), 0)
+    },
+
     setLevel(next, num, suiteIndex) {
       level = next
       focusNum = next === 'compound' ? null : num
@@ -1341,7 +1534,7 @@ export function initCompound3D(mount, model, opts = {}) {
       hoverNum = null
 
       if (next === 'compound') {
-        flyTo({ az: cam.az, el: 0.42, dist: 20.4, target: new THREE.Vector3(0, -2.1, 0) }, 1.1)
+        flyTo({ az: cam.az, el: HERO.el, dist: HERO.dist, target: new THREE.Vector3(0, HERO.ty, 0) }, 1.1)
       } else if (next === 'building') {
         const B = buildingObjs.get(num)
         if (B?.roofs[0]) {

@@ -100,6 +100,14 @@ const camera = (() => {
        the LEVEL is now expressed as a move around a physical object, so the level
        change is forwarded to the model as well. One state, two views. */
     useGl(inst) { gl = inst; if (gsapLib) gl.useGsap(gsapLib) },
+    /* The 01 -> 02 arrival is the model camera, so it is forwarded rather than
+       duplicated: the boundary trigger drives this and the pin drives the SVG frame,
+       which keeps one writer per camera. */
+    arrival(k) { gl?.arrival(k) },
+    /* The threshold needs the chosen door where it actually is on screen, and the
+       descent that puts the camera in front of it. Both belong to the model. */
+    doorScreen() { return gl?.doorScreen?.() || null },
+    descend(k) { gl?.descend?.(k) },
     get owner() { return owner },
     get rest() { return rest },
     aspect,

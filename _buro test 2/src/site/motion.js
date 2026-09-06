@@ -447,6 +447,112 @@ export function initMotion({ compound, selectSuite, setLevel, state, cam } = {})
     }
 
     /* ==============================================================================
+       01 → 02 — THE ARRIVAL, and it is one spatial event rather than two sections.
+
+       THE THESIS: act 02's camera starts where act 01's camera ended.
+
+       Act 01 is a photograph taken standing on the drive looking down it. Act 02 is
+       that same drive from above. So the boundary between them is not a cut, a fade or
+       another aperture — it is the single camera move that joins those two viewpoints,
+       and the model can actually perform it because it is a real camera in a real
+       space rather than a picture of one.
+
+       Three things are scrubbed together across the boundary, and they are deliberately
+       on different curves so the handover is a dissolve of AUTHORITY rather than of
+       pixels:
+
+         the MODEL lifts from eye height on the entry road to the composed aerial
+         the PHOTOGRAPH gives way — it darkens and compresses toward its own vanishing
+           point, so the image recedes down the drive it depicts instead of fading out
+         the CAPTION clears early, because reading matter should not be present while
+           the ground is moving
+
+       One trigger owns the whole boundary. The pin's own resolve keeps the SVG frame
+       for the fallback path and never touches the model, so there is exactly one writer
+       of the 3D camera at any moment (`G6`).
+       ============================================================================== */
+    const act02El = document.querySelector('[data-pin="compound"]')
+    const act01El = document.querySelector('[data-dolly]')
+    if (act02El && cam && !reduced()) {
+      const plate01 = act01El?.querySelector('.field__pic')
+      const cap01 = act01El?.querySelector('.field__caption')
+      ScrollTrigger.create({
+        trigger: act02El,
+        start: 'top bottom',
+        end: 'top top',
+        scrub: 0.5,
+        invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          const p = self.progress
+          cam.arrival?.(p)
+          if (plate01) {
+            /* The photograph recedes INTO its own perspective: it scales down about a
+               point near its vanishing point and loses light as it goes. */
+            plate01.style.transformOrigin = '54% 46%'
+            plate01.style.transform = `scale(${1 - p * 0.14})`
+            plate01.style.filter = `brightness(${1 - p * 0.72})`
+          }
+          if (cap01) cap01.style.opacity = String(Math.max(0, 1 - p * 2.2))
+        },
+        onLeaveBack: () => {
+          if (plate01) { plate01.style.transform = ''; plate01.style.filter = '' }
+          if (cap01) cap01.style.opacity = ''
+        },
+      })
+    }
+
+    /* ==============================================================================
+       ACT 05 — THE ROOM BREATHES.
+
+       Every act up to here moves like a machine: masks with hard edges, scrubbed
+       cameras, precise staggers, nothing arriving late. That is correct for a compound
+       of closed doors and it is exactly wrong for the one act about people.
+
+       So act 05 breaks the cadence, once, and the break IS the content: the lead
+       frame — members standing in the club with the compound through the glass behind
+       them — is the only image on the page that moves on its own clock. It drifts,
+       slowly and continuously, on a long sine rather than on scroll: a very small
+       lateral wander with a matching scale breath, twenty-three seconds a cycle, never
+       repeating exactly against the page's own rhythm.
+
+       WHY IT WORKS: everything else on this page stops when the visitor stops. This
+       does not. A room with people in it is still going on whether or not you are
+       looking at it, and that single difference in temporal behaviour does more to make
+       act 05 feel human than any amount of warm grading.
+
+       The two subordinate frames stay mechanical, so the drift reads as belonging to
+       the people rather than to the section. Transform only. It halts under reduced
+       motion, where the still frame is already a designed frame. */
+    const clubLead = document.querySelector('.club__lead .macro__frame img')
+    if (clubLead && !reduced()) {
+      const drift = { t: 0 }
+      gsap.to(drift, {
+        t: Math.PI * 2,
+        duration: 23,
+        ease: 'none',
+        repeat: -1,
+        onUpdate: () => {
+          const x = Math.sin(drift.t) * 1.15
+          const y = Math.sin(drift.t * 0.63 + 1.1) * 0.7
+          gsap.set(clubLead, { xPercent: x, yPercent: y, scale: 1.045 + Math.sin(drift.t * 0.5) * 0.012 })
+        },
+      })
+
+      /* The warmth arrives BEFORE the people do. A short, once-only lift on the frame's
+         own light as it enters, so the act is already warmer by the time the figures in
+         it are legible — light first, company second, which is how walking into a lit
+         room actually reads. */
+      gsap.fromTo(clubLead,
+        { filter: 'brightness(0.62) saturate(0.72)' },
+        {
+          filter: 'brightness(1) saturate(1)',
+          duration: DUR.settle * 1.3,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: clubLead, start: 'top 82%', once: true },
+        })
+    }
+
+    /* ==============================================================================
        ACT 07 — THE HOLD.
 
        The page closes on a photograph of an open door with light coming through it, and
@@ -563,6 +669,87 @@ export function initMotion({ compound, selectSuite, setLevel, state, cam } = {})
        the drawing be the aperture. `NEVER 31` also binds: the polygon that grows and
        the clip that opens are the same numbers, not two approximations of one shape.
        ------------------------------------------------------------------------------ */
+    /* ==============================================================================
+       02 → 03 — THE THRESHOLD.
+
+       THE THESIS: the warm light at the chosen door becomes the room.
+
+       `C6-TEMP` still binds — act 03's four images are four different cameras and no
+       amount of choreography may pretend otherwise. So this does not fly through the
+       door, morph geometry into photography or match anything spatially. It uses the
+       one thing that CAN be continuous across incompatible cameras: LIGHT.
+
+       Outside, the selected suite's door carries a small warm light. As the act closes,
+       four things happen in sequence and none of them shares a beat:
+
+         0.74–0.82  the camera descends toward that door and the compound behind it
+                    loses its own light. The model is still the subject.
+         0.80–0.90  the warm field grows FROM THE DOOR'S OWN PROJECTED POSITION on
+                    screen — not from the centre, from wherever that door actually is —
+                    until it is the whole frame.
+         0.90–0.96  near-black. A true threshold: for a moment there is nothing, which
+                    is what crossing one is.
+         0.96–1.00  act 03's interior arrives through the existing aperture, inheriting
+                    the warmth the door established.
+
+       The colour is the door's own emissive value, so the light that fills the screen is
+       literally the light that was on the model a second earlier. That is the whole
+       device, and it is why it reads as physical without asserting a camera match. */
+    const threshold = (() => {
+      let layer = null
+      const build = () => {
+        if (layer) return
+        layer = document.createElement('div')
+        layer.className = 'threshold'
+        layer.setAttribute('aria-hidden', 'true')
+        document.body.appendChild(layer)
+      }
+      const update = (p) => {
+        const warm = clamp01((p - 0.80) / 0.10)
+        const dark = clamp01((p - 0.90) / 0.06)
+        /* THE THRESHOLD MUST CLEAR ITSELF AT BOTH ENDS.
+
+           A pinned act's onUpdate stops firing once the scroll leaves its range, so a
+           layer left at full opacity at p = 1 stays over every act below it — the
+           whole rest of the page rendered as a black field. The act's own comments warn
+           about exactly this class of defect for the rail; this is the same one, on a
+           fixed element covering the viewport. Cleared above 0.985 as well as below
+           0.80, and cleared again by the trigger's own leave handlers. */
+        if (warm <= 0 || p > 0.985) { if (layer) layer.style.opacity = '0'; return }
+        build()
+
+        /* WHERE the light comes from: the selected suite's door, projected to screen.
+           Falls back to the frame's centre only when nothing is selected. */
+        let ox = 50
+        let oy = 62
+        const d = cam?.doorScreen?.()
+        if (d) { ox = d.x; oy = d.y }
+
+        layer.style.opacity = '1'
+        /* The field grows from a tight warm core to the whole frame, then the whole
+           frame goes to the compound's own black. */
+        /* The core stays SMALL for most of the beat. Growing straight to 150% put a
+           flat wash over the whole frame at the halfway point, which reads as a haze
+           rather than as light coming out of an opening. A tight core with a dark
+           surround is what a lit door in a dark elevation actually looks like. */
+        const r = 3 + warm * warm * 88
+        const lum = 1 - dark
+        /* ELLIPSE, not circle: a radial-gradient circle's size must be a LENGTH, and
+           `circle 94%` is simply invalid — the whole declaration is dropped and the
+           layer renders nothing at all while still reporting opacity 1. Percentages are
+           legal on the two-value ellipse form, which is what this needs anyway: the
+           field should reach the frame's corners on a wide stage and on a tall one. */
+        layer.style.background =
+          `radial-gradient(ellipse ${r}% ${r * 1.35}% at ${ox}% ${oy}%, ` +
+          `rgba(255,201,138,${(0.96 * lum).toFixed(3)}) 0%, ` +
+          `rgba(190,132,74,${(0.78 * lum).toFixed(3)}) 30%, ` +
+          `rgba(12,10,9,${(0.78 + 0.22 * dark).toFixed(3)}) 62%, ` +
+          `rgba(7,8,10,${(0.9 + 0.1 * dark).toFixed(3)}) 100%)`
+      }
+      const hide = () => { if (layer) layer.style.opacity = '0' }
+      return { update, hide }
+    })()
+
     const enter = (() => {
       let layer = null, plate = null, outlinePoly = null
       let quad = null, shown = false
@@ -915,13 +1102,18 @@ export function initMotion({ compound, selectSuite, setLevel, state, cam } = {})
              the compound. What scroll still owns is the RESOLVE above — the frame
              opening from the entry road — and the recognition beat. Scroll introduces
              the compound and then gets out of the way. */
+          /* The camera goes to the door before the light does. */
+          cam?.descend?.(clamp01((p - 0.74) / 0.10))
           enter.update(p)
+          threshold.update(p)
         },
+        onLeave: () => { threshold.hide() },
         onLeaveBack: () => {
           enter.hide()
           /* onUpdate does not necessarily fire again above the start, and a rail left
              lit outside the act it belongs to is the page's only permanent state — the
              same class of defect `SC6` caught in the ENTER's opacity. */
+          threshold.hide()
           if (railEl) railEl.style.setProperty('--rail-k', '0')
           if (roadTrace) {
             roadTrace.setAttribute('opacity', '0')

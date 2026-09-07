@@ -34,15 +34,28 @@
   .v6-host{position:relative;height:100vh;min-height:100vh;width:100%;background:#060708}
   /* The page already has a persistent header carrying the mark and the location, so the
      interface's own standalone mark would be the same words twice on the same screen. */
-  .v6-host .mark{display:none}
+  .v6-host.v6 .mark{display:none!important}
   /* The site header sits above act 02's own controls. */
-  .v6 .topright,.v6 .nav{top:70px}
+  /* A DESCENDANT SELECTOR NEEDS A DESCENDANT. mountV6 puts the class v6 on the HOST
+     element itself, so the host carries both v6-host and v6 and there is no .v6 INSIDE
+     a .v6-host to match — the first attempt at these overrides selected nothing at all.
+     Compounded on the one element, they also outrank v6.css's own single-class rules,
+     which is the other half of the problem: Vite emits that stylesheet as a link after
+     this block, so at equal specificity it wins. Measured on the published page before
+     this fix: Site plan at 32px under a 70px header, the way home at 98 where the
+     comment claimed 70. */
+  .v6-host.v6 .topright,.v6-host.v6 .nav{top:70px}
   /* THE WAY HOME KEEPS ITS PLACE IN BOTH PAGES. Standalone it sits under act 02's own
      mark; here that mark is hidden and the site's header is in the same band, so the
      button moves up to sit level with Site plan. It is one variable, so the two pages
      cannot drift into two different positions for the one control a lost visitor
      depends on. */
-  .v6{--home-top:70px}
+  /* TWO CLASSES, NOT ONE, and for the same reason min-height is spelled out above:
+     v6.css declares --home-top on its own .v6 rule, and in a BUILD Vite emits that
+     stylesheet as a link AFTER this inline block. At equal specificity the later rule
+     wins, so the override worked on the dev server and was silently ignored in the
+     published page — measured live at 98px where this claims 70. */
+  .v6-host.v6{--home-top:70px}
 </style>
 </head>
 <body>

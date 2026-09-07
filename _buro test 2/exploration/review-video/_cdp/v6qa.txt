@@ -1,5 +1,5 @@
 THE CRITICAL PATH — the model, and nothing else
-   building 03 answers the pointer   YES at 306,453
+   building 03 answers the pointer   YES at 312,448
    cursor says clickable             true
    named before any click            0310 of 13 availableView →
    after the click                   {"level":"building","b":"03","s":null,"hs":null,"hov":null}
@@ -9,7 +9,7 @@ THE CRITICAL PATH — the model, and nothing else
    the door names its own suite      03 · 01Premium · 2,430 sq ft$699K
    a sold door says so               03 · 03Sold
    after clicking the door           {"level":"suite","b":"03","s":"03 · 01","hs":null,"hov":null}
-   ENTER                             {"w":248,"h":49,"bg":"rgb(206, 59, 50)","text":"Enter suite→"}
+   ENTER                             {"w":276,"h":56,"bg":"rgb(206, 59, 50)","text":"Enter suite→"}
    the product panel says            Suite 03 · 01 Premium · 2,430 sq ft $699,000 Enter suite→ Full specs →
 
 WHAT WAS NOT NEEDED TO GET HERE

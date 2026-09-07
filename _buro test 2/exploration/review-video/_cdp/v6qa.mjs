@@ -4,6 +4,19 @@
    coordinate, and the suite is chosen by pointing at a REAL GARAGE DOOR. */
 import { connect, sleep } from './cdp.mjs'
 import { ensure } from './chrome.mjs'
+/* WAIT FOR THE CAMERA TO ARRIVE — but wait for it to LEAVE first.
+   The first cut polled `moving` immediately after the click and found it false, because
+   the interface hands the selection to the model on the next frame: settle returned
+   before the flight had begun, the harness read every door position mid-flight, and
+   reported a door at the far left of the frame that would not answer a click. The
+   product was correct and the measurement was not. */
+const settle = async (evf, max = 5000) => {
+  const t0 = Date.now()
+  const moving = () => evf('!!(window.__v5.gl && window.__v5.gl.moving)')
+  while (Date.now() - t0 < 700 && !(await moving())) await sleep(50)
+  while (Date.now() - t0 < max && (await moving())) await sleep(70)
+  await sleep(300)
+}
 import fs from 'node:fs'
 
 const URL = process.argv[2] || 'http://localhost:5183/exploration/study/proposed-v6-architecture-ui.html'
@@ -71,7 +84,7 @@ console.log('   building 03 answers the pointer   ' + (pB ? 'YES at ' + pB.join(
 console.log('   cursor says clickable             ' + await ev('document.querySelector("[data-stage]").dataset.hot'))
 console.log('   named before any click            ' + await text('[data-tag-b]'))
 if (!pB) { console.log('   CANNOT CONTINUE'); process.exit(1) }
-await click(pB[0], pB[1]); await sleep(2200)
+await click(pB[0], pB[1]); await settle(ev)
 console.log('   after the click                   ' + JSON.stringify(await st()))
 console.log('   anything appeared at the bottom?  ' + await text('[data-prod]'))
 
@@ -107,7 +120,7 @@ for (const d of doors.filter((x) => x.sold)) {
 console.log('   a sold door says so               ' + (soldSeen || '(none reachable)'))
 if (!hit) { console.log('   CANNOT CONTINUE'); process.exit(1) }
 await move(hit.x, hit.y); await sleep(200)
-await click(hit.x, hit.y); await sleep(2200)
+await click(hit.x, hit.y); await settle(ev)
 console.log('   after clicking the door           ' + JSON.stringify(await st()))
 
 /* 3 · is ENTER there, and is it the strongest thing on screen? */
@@ -137,12 +150,12 @@ const count = () => ev(`(() => {
   const panels = [...host.querySelectorAll('[data-dock], [data-prod], [data-rail], [data-nav]')].filter(vis)
   return { controls: controls.length, panels: panels.length }
 })()`)
-await ev('window.__v5.overview()'); await sleep(1700)
+await ev('window.__v5.overview()'); await settle(ev)
 console.log('VISIBLE CONTROLS AND PANELS')
 console.log('   compound   ' + JSON.stringify(await count()))
-await ev('window.__v5.selectBuilding(window.__v5.compound.byNum.get("03"))'); await sleep(1700)
+await ev('window.__v5.selectBuilding(window.__v5.compound.byNum.get("03"))'); await settle(ev)
 console.log('   building   ' + JSON.stringify(await count()))
-await ev('(() => { const v = window.__v5; v.selectSuite(v.S.building.suites.find((x) => !x.sold)) })()'); await sleep(1700)
+await ev('(() => { const v = window.__v5; v.selectSuite(v.S.building.suites.find((x) => !x.sold)) })()'); await settle(ev)
 console.log('   suite      ' + JSON.stringify(await count()))
 console.log('')
 console.log('CONSOLE ERRORS: ' + (errors.length ? errors.length + '\n  ' + errors.slice(0, 5).join('\n  ') : 'none'))

@@ -1,5 +1,18 @@
 import { connect, sleep } from './cdp.mjs'
 import { ensure } from './chrome.mjs'
+/* WAIT FOR THE CAMERA TO ARRIVE — but wait for it to LEAVE first.
+   The first cut polled `moving` immediately after the click and found it false, because
+   the interface hands the selection to the model on the next frame: settle returned
+   before the flight had begun, the harness read every door position mid-flight, and
+   reported a door at the far left of the frame that would not answer a click. The
+   product was correct and the measurement was not. */
+const settle = async (evf, max = 5000) => {
+  const t0 = Date.now()
+  const moving = () => evf('!!(window.__v5.gl && window.__v5.gl.moving)')
+  while (Date.now() - t0 < 700 && !(await moving())) await sleep(50)
+  while (Date.now() - t0 < max && (await moving())) await sleep(70)
+  await sleep(300)
+}
 import fs from 'node:fs'
 const URL = process.argv[2] || 'http://localhost:5183/exploration/study/proposed-v6-architecture-ui.html'
 const DIR = process.argv[3] || 'exploration/study/shots6'

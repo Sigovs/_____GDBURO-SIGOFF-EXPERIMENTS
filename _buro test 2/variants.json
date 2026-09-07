@@ -27,8 +27,8 @@
       "file": "index5.html",
       "from": "exploration/integrated/v6-full-site.html",
       "name": "The full site · V6",
-      "sub": "Acts 00-07, architecture as the interface",
-      "note": "The whole homepage with the newest act 02. There is no navigator and no legend: you point at a building on the model and it answers, you point at a real garage door and it tells you the suite, the size and the price, and the panel with ENTER in it only exists once a door has been chosen. The suite you choose is the one act 03 then describes.",
+      "sub": "Acts 00-07, V6.1",
+      "note": "The whole homepage with the newest act 02. Precast walls, sectional doors with glazed heads, and the buildings own wall lights — which are what light the elevation when you select one. Every move between buildings is a camera flight, not a cut. One control, ALL BUILDINGS, always in the same place, always means the whole compound. The product panel does not move when the suite does.",
       "date": "2026-09-07",
       "status": "current",
       "shotAt": "#act-02"
@@ -37,8 +37,8 @@
       "file": "index6.html",
       "from": "exploration/study/proposed-v6-architecture-ui.html",
       "name": "Act 02 on its own · V6",
-      "sub": "The compound, full screen",
-      "note": "The same interface with nothing around it. Eleven buildings, 121 doors, and four controls: Overview, Site plan and two chevrons. Everything else is the model.",
+      "sub": "The compound, full screen, V6.1",
+      "note": "The same interface with nothing around it. Eleven buildings, 121 doors. Hover a building and its practicals come up along the run; point at a real garage door and it names the suite; buildings 02 and 10 have two rows and a control to go round to the second one.",
       "date": "2026-09-07",
       "status": "current",
       "shotAt": "top"

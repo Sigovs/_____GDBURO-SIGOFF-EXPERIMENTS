@@ -1,6 +1,16 @@
 /* OVERVIEW is the global escape. Prove it from every state, by both routes. */
 import { connect, sleep } from './cdp.mjs'
 import { ensure } from './chrome.mjs'
+/* Wait until the model says the camera has arrived, then a beat for the paint. */
+const settle = async (evf, max = 4000) => {
+  const t0 = Date.now()
+  for (;;) {
+    const m = await evf('!!(window.__v5.gl && window.__v5.gl.moving)')
+    if (!m || Date.now() - t0 > max) break
+    await sleep(80)
+  }
+  await sleep(260)
+}
 const URL = process.argv[2] || 'http://localhost:5183/exploration/study/proposed-v5-guided-sales.html'
 const health = await ensure()
 const cdp = await connect(health.ws)

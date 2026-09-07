@@ -28,6 +28,6 @@ STALE STATE AFTER A SWITCH WITH A SUITE CHOSEN
    before {"level":"suite","b":"03","s":"03 · 01","prev":null}
    after  {"level":"building","b":"06","s":null,"prev":null}
    mini bays now belong to building 06   PASS
-   ENTER present after switch: false   (must be false)
+   ENTER reachable after switch: {"present":true,"visible":false,"focusable":false,"hit":false}   (visible, focusable and hit must all be false)
 
 CONSOLE ERRORS: none

@@ -56,6 +56,37 @@
 .v6 .say__t{margin:var(--s3) 0 0;font-size:19px;font-weight:600;letter-spacing:-.01em;color:var(--sand)}
 
 /* ---- the two quiet actions -------------------------------------------------------- */
+/* ---- ONE WAY HOME ------------------------------------------------------------------
+   Reserved position, reserved size, one meaning. --home-top is a variable because the
+   standalone page shows act 02's own mark above it and the integrated page hides that
+   mark and puts the site's header there instead; the button must not move between them
+   for any other reason. It is the only control in the interface with a filled ground,
+   because it is the only one a lost visitor has to find without looking. */
+.v6{--home-top:98px}
+.v6 .home{position:absolute;z-index:9;top:var(--home-top);left:var(--s7);
+  display:inline-grid;grid-auto-flow:column;align-items:center;gap:10px;
+  height:40px;padding:0 18px 0 15px;box-sizing:border-box;
+  appearance:none;border:1px solid var(--ink-24);background:rgb(11 13 16/.82);backdrop-filter:blur(8px);
+  color:var(--ink);cursor:pointer;font-family:var(--mono);font-size:14px;font-weight:500;
+  letter-spacing:.16em;text-transform:uppercase;
+  transition:background-color .16s var(--ease),border-color .16s var(--ease)}
+.v6 .home:hover{background:rgb(20 24 29/.94);border-color:var(--ink-70)}
+.v6 .home:focus-visible{outline:2px solid var(--sand);outline-offset:3px}
+.v6 .home__a{font-size:15px;line-height:1;opacity:.8}
+
+/* The second elevation, in the same left column, in its own reserved place directly
+   under the way home. Quieter than home — it is a view, not an exit. */
+.v6 .flip{position:absolute;z-index:9;top:calc(var(--home-top) + 52px);left:var(--s7);
+  display:inline-grid;grid-auto-flow:column;align-items:center;gap:9px;
+  height:34px;padding:0 15px 0 13px;box-sizing:border-box;
+  appearance:none;border:1px solid var(--ink-16);background:rgb(11 13 16/.62);backdrop-filter:blur(8px);
+  color:var(--ink-70);cursor:pointer;font-family:var(--mono);font-size:14px;font-weight:500;
+  letter-spacing:.14em;text-transform:uppercase;
+  transition:color .16s var(--ease),border-color .16s var(--ease)}
+.v6 .flip:hover{color:var(--ink);border-color:var(--ink-40)}
+.v6 .flip:focus-visible{outline:2px solid var(--sand);outline-offset:3px}
+.v6 .flip__a{font-size:15px;line-height:1;opacity:.75}
+
 .v6 .topright{position:absolute;z-index:8;top:var(--s6);right:var(--s7);display:flex;gap:var(--s5);align-items:center}
 .v6 .quiet{appearance:none;background:none;border:0;padding:4px 0;cursor:pointer;
   font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;
@@ -82,11 +113,25 @@
    the 3.0 a 26px mark needs, because what is behind a chevron is a live scene and
    changes with every camera move. The scrim is deepest exactly where the glyph sits and
    still fades to nothing before it can draw an edge. Re-measured: both ends clear 3.0. */
-.v6 .step--prev{left:0;justify-items:start;background:linear-gradient(90deg,rgb(8 9 11/.86) 0 42px,rgb(8 9 11/0))}
-.v6 .step--next{right:0;justify-items:end;background:linear-gradient(270deg,rgb(8 9 11/.86) 0 42px,rgb(8 9 11/0))}
+.v6 .step--prev{left:0;justify-items:start;background:linear-gradient(90deg,rgb(8 9 11/.86) 0 96px,rgb(8 9 11/0))}
+.v6 .step--next{right:0;justify-items:end;background:linear-gradient(270deg,rgb(8 9 11/.86) 0 96px,rgb(8 9 11/0))}
+/* The number is the label, so the control has to be wide enough to carry one. */
+.v6 .step{width:118px}
+.v6 .step__a{font-size:19px;line-height:1;opacity:.72}
+.v6 .step__n{font-family:var(--mono);font-size:16px;font-weight:500;letter-spacing:.10em;font-variant-numeric:tabular-nums}
+.v6 .step--prev{grid-auto-flow:column;justify-content:start;gap:9px}
+.v6 .step--next{grid-auto-flow:column;justify-content:end;gap:9px}
 
 /* ---- the tags: on the object, never over empty space ------------------------------ */
-.v6 .tag{position:absolute;z-index:5;transform:translate(-50%,0);pointer-events:none;
+/* THE TAG ARRIVES, it does not blink into place. Same reason as the light: an element
+   that appears fully formed at full opacity reads as a tooltip; one that rises the last
+   few pixels into position reads as a label being placed on the object. Position is set
+   from the model every frame, so only opacity and a small lift are animated — a
+   transition on `left`/`top` would lag the door it is naming. */
+@keyframes tagIn{from{opacity:0;transform:translate(-50%,6px)}to{opacity:1;transform:translate(-50%,0)}}
+@media (prefers-reduced-motion:reduce){.v6 .tag{animation:none!important}}
+.v6 .tag{animation:tagIn .17s var(--ease) both;
+position:absolute;z-index:5;transform:translate(-50%,0);pointer-events:none;
   display:grid;gap:1px;padding:7px 11px 8px;background:var(--sand);color:var(--void);
   box-shadow:0 0 0 1px rgb(0 0 0/.42),0 12px 30px rgb(0 0 0/.42)}
 .v6 .tag::after{content:'';position:absolute;left:50%;bottom:-11px;width:1px;height:11px;background:var(--sand)}
@@ -118,29 +163,52 @@
 /* ---- the product, and only when there is one -------------------------------------- */
 /* NOT A FOOTER. A bar the width of the screen is a website chrome; this is a small plate
    in the corner the product is in, with one committed action on it. */
-.v6 .prod{position:absolute;z-index:7;right:var(--s7);bottom:var(--s6);width:298px;
+/* NOTHING IN HERE MOVES WHEN THE DATA DOES.
+
+   The review's word was "unstable", and it was a fair description of a panel whose
+   every dimension was decided by the length of the text inside it. Suite 03 · 01 and
+   suite 03 · 11 are different widths; Standard and Premium are different widths;
+   $549,000 and $699,000 are different widths — and each of them moved the button.
+
+   So: a fixed width, a fixed row for every fact whether or not that fact is long, and
+   grid tracks that are stated rather than inferred. Tabular numerals, so even the
+   digits inside a row hold their columns. The CTA is the last track and it is a fixed
+   height, which means the plate's bottom edge is at the same pixel for every suite in
+   the compound and ENTER is under the pointer where it was a moment ago. */
+.v6 .prod{position:absolute;z-index:7;right:var(--s7);bottom:var(--s6);
+  width:326px;box-sizing:border-box;
+  display:grid;grid-template-rows:18px 40px 22px 34px 56px 20px;gap:8px;
   background:linear-gradient(to bottom,rgb(13 16 20/.97),rgb(9 11 14/.97));
   border:1px solid var(--ink-24);backdrop-filter:blur(8px);
-  padding:var(--s5) var(--s5) var(--s4);display:grid;gap:2px;
+  padding:var(--s5) var(--s5) var(--s5);
   animation:prodIn .26s var(--ease) both}
 @keyframes prodIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.v6 .prod{animation:none}}
-.v6 .prod__k{margin:0;font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.20em;text-transform:uppercase;color:var(--ink-55)}
-.v6 .prod__n{margin:5px 0 0;font-size:33px;font-weight:600;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
-.v6 .prod__t{margin:7px 0 0;font-size:15px;color:var(--ink-70)}
+/* every slot fills its own row and clips rather than pushing its neighbours */
+.v6 .prod > *{margin:0;min-width:0;align-self:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.v6 .prod__k{font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.20em;text-transform:uppercase;color:var(--ink-55)}
+.v6 .prod__n{font-size:34px;font-weight:600;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.v6 .prod__t{font-size:15px;color:var(--ink-70)}
 .v6 .prod__t em{font-style:normal;font-weight:500;color:var(--steel)}
 .v6 .prod__t em[data-type='A']{color:var(--sand)}
-.v6 .prod__p{margin:2px 0 var(--s4);font-size:25px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-.v6 .go{appearance:none;width:100%;cursor:pointer;display:grid;grid-template-columns:1fr 46px;align-items:stretch;
+.v6 .prod__p{font-size:26px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+
+/* ENTER: fixed box, fixed place, and the only saturated thing on the screen. */
+.v6 .go{appearance:none;width:100%;height:56px;cursor:pointer;
+  display:grid;grid-template-columns:1fr 52px;align-items:stretch;
   border:0;padding:0;font:inherit;background:var(--red);color:#fff;
-  box-shadow:0 0 0 1px var(--red-40),0 12px 30px rgb(206 59 50/.22);
-  transition:filter .18s var(--ease)}
-.v6 .go:hover{filter:brightness(1.1)}
-.v6 .go span{padding:15px var(--s4) 14px;text-align:left;font-size:18px;font-weight:600;letter-spacing:-.005em}
-.v6 .go i{display:flex;align-items:center;justify-content:center;font-style:normal;font-size:20px;border-left:1px solid rgb(255 255 255/.28)}
-.v6 .specs{appearance:none;background:none;border:0;cursor:pointer;margin-top:var(--s3);padding:0;text-align:left;
+  box-shadow:0 0 0 1px var(--red-40),0 14px 34px rgb(206 59 50/.28);
+  transition:filter .18s var(--ease),box-shadow .18s var(--ease)}
+.v6 .go:hover{filter:brightness(1.09);box-shadow:0 0 0 1px var(--red),0 16px 40px rgb(206 59 50/.38)}
+.v6 .go:focus-visible{outline:2px solid var(--sand);outline-offset:3px}
+.v6 .go span{display:flex;align-items:center;padding:0 var(--s4);text-align:left;
+  font-size:18px;font-weight:600;letter-spacing:-.005em;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.v6 .go i{display:flex;align-items:center;justify-content:center;font-style:normal;font-size:21px;border-left:1px solid rgb(255 255 255/.28)}
+.v6 .specs{appearance:none;background:none;border:0;cursor:pointer;padding:0;text-align:left;
   font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-55)}
 .v6 .specs:hover{color:var(--ink)}
+/* hidden, not removed — the row it sits in stays reserved either way */
+.v6 .specs[hidden]{display:block!important;visibility:hidden;pointer-events:none}
 
 /* ---- the site plan: a sheet lying on the model ------------------------------------ */
 .v6.plan{position:fixed;inset:26px;z-index:30;display:grid;grid-template-rows:auto 1fr;

@@ -123,6 +123,12 @@ html = html.replace('<link rel="stylesheet" href="/src/site/index.css">',
   .${V}-host .mark{display:none}
   /* The site header sits above act 02's own controls. */
   .${V} .topright,.${V} .nav{top:70px}
+  /* THE WAY HOME KEEPS ITS PLACE IN BOTH PAGES. Standalone it sits under act 02's own
+     mark; here that mark is hidden and the site's header is in the same band, so the
+     button moves up to sit level with Site plan. It is one variable, so the two pages
+     cannot drift into two different positions for the one control a lost visitor
+     depends on. */
+  .${V}{--home-top:70px}
 </style>`)
 
 html = html.replace('<script type="module" src="/src/site/main.js"></script>',

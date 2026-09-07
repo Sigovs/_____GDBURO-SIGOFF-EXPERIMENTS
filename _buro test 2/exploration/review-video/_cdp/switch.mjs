@@ -3,6 +3,19 @@
    inside that state. A pass means the visitor never had to go home. */
 import { connect, sleep } from './cdp.mjs'
 import { ensure } from './chrome.mjs'
+/* WAIT FOR THE CAMERA TO ARRIVE — but wait for it to LEAVE first.
+   The first cut polled `moving` immediately after the click and found it false, because
+   the interface hands the selection to the model on the next frame: settle returned
+   before the flight had begun, the harness read every door position mid-flight, and
+   reported a door at the far left of the frame that would not answer a click. The
+   product was correct and the measurement was not. */
+const settle = async (evf, max = 5000) => {
+  const t0 = Date.now()
+  const moving = () => evf('!!(window.__v5.gl && window.__v5.gl.moving)')
+  while (Date.now() - t0 < 700 && !(await moving())) await sleep(50)
+  while (Date.now() - t0 < max && (await moving())) await sleep(70)
+  await sleep(300)
+}
 import fs from 'node:fs'
 const URL = process.argv[2] || 'http://localhost:5183/exploration/study/proposed-v5-guided-sales.html'
 const RANDOM_N = Number(process.argv[3] || 30)
@@ -141,7 +154,21 @@ const bays = await ev(`(() => { const bs=[...document.querySelectorAll('[data-ba
 console.log('   before ' + JSON.stringify(before))
 console.log('   after  ' + JSON.stringify(after))
 console.log('   mini bays now belong to building ' + bays + '   ' + (bays === after.b ? 'PASS' : 'STALE'))
-console.log('   ENTER present after switch: ' + (await ev('!!document.querySelector("[data-enter]")')) + '   (must be false)')
+/* REACHABLE, NOT PRESENT. The product plate is now a fixed skeleton that stays in the
+   document so its geometry cannot move when the data changes — so 'is the element
+   present' stopped being the right question. The one that matters is whether a visitor
+   with no suite chosen can SEE or REACH an ENTER: it must have no box, no place in the
+   tab order, and nothing under the pointer. */
+console.log('   ENTER reachable after switch: ' + JSON.stringify(await ev(`(() => {
+  const b = document.querySelector('[data-enter]')
+  if (!b) return { present: false, visible: false, focusable: false, hit: false }
+  const r = b.getBoundingClientRect(), cs = getComputedStyle(b)
+  const visible = r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none'
+  b.focus()
+  const focusable = document.activeElement === b
+  const hit = visible && document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2) === b
+  return { present: true, visible, focusable, hit }
+})()`)) + '   (visible, focusable and hit must all be false)')
 console.log('')
 console.log('CONSOLE ERRORS: ' + (errors.length ? errors.length + '\n  ' + errors.slice(0, 5).join('\n  ') : 'none'))
 process.exit(0)

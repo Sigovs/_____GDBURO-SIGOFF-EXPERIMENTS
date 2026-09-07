@@ -1,5 +1,5 @@
 THE CRITICAL PATH — the model, and nothing else
-   building 03 answers the pointer   YES at 312,448
+   building 03 answers the pointer   YES at 306,453
    cursor says clickable             true
    named before any click            0310 of 13 availableView →
    after the click                   {"level":"building","b":"03","s":null,"hs":null,"hov":null}

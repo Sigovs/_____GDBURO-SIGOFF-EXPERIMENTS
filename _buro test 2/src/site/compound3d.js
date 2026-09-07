@@ -75,18 +75,25 @@ const C = {
      the thing every other value is measured against. */
   slabTop: 0x191e24,
   slabSide: 0x191f26,   /* the plinth edge must CATCH light — it is what says "object" */
-  concrete: 0x454e58,   /* aprons, forecourts, the gate threshold — lifted, so the
+  concrete: 0x474a4b,   /* aprons, forecourts, the gate threshold — lifted, so the
                            forecourt reads as a different surface from the drive */
   road: 0x14181d,       /* asphalt: now clearly the darkest paved thing on the site */
   /* BUILT — the cladding is the lightest thing in the compound, which is what makes the
      architecture the figure. The last pass had wall and roof within one step of each
      other and the buildings merged into their own roofs. */
-  wall: 0x6a7683,
+  /* SAND PRECAST, not metal cladding. The brief names the material and the reference
+     confirms it: the real Luxe Corsa is precast concrete. 0x6a7683 at metalness 0.34 was
+     a cool blue-grey metal box. Two things follow from the change. The walls stop
+     competing with their own asphalt for coolness, so the compound separates from the
+     site by HUE and not only by value. And a warm stone under a warm key against a cold
+     sky is what blue-hour architectural photography is made of — which is also how act
+     02 rejoins the evening that act 00 opens in. */
+  wall: 0x8d8478,
   roof: 0x39424d,       /* parapet cap */
   membrane: 0x23292f,   /* the roof field, recessed inside the parapet */
   trim: 0x2c333b,       /* fascia, frames, kerbs, door segments — lifted off black:
                            at 0x161b21 every frame and segment read as a void */
-  civic: 0x7b8794,      /* the clubhouse reads lighter — it is the shared building */
+  civic: 0x9a9082,      /* the clubhouse reads lighter — it is the shared building */
   glass: 0x223243,      /* lifted off black: at 0x0b1119 it returned nothing and read as a hole */
   grass: 0x10150f,      /* planted ground — dark olive, well below the architecture */
   water: 0x16202e,      /* the basin: near-black, and it borrows the sky */
@@ -167,7 +174,10 @@ export function initCompound3D(mount, model, opts = {}) {
      values of the wall around them and the compound read as one dark mass with roofs on
      it. Opened up until the door rhythm reads at the rest camera without the sky
      clipping or the shadows losing their foot. The hour is unchanged; the print is. */
-  renderer.toneMappingExposure = 1.46
+  /* The act's base exposure. applyCamera stops down from here as the camera closes on
+     a facade; nothing else changes it. */
+  const EXPOSURE = 1.46
+  renderer.toneMappingExposure = EXPOSURE
   renderer.outputColorSpace = THREE.SRGBColorSpace
   renderer.shadowMap.enabled = true
   renderer.shadowMap.type = THREE.PCFSoftShadowMap
@@ -347,12 +357,22 @@ export function initCompound3D(mount, model, opts = {}) {
     slab: new THREE.MeshStandardMaterial({ color: C.slabTop, roughness: 1, metalness: 0 }),
     slabSide: new THREE.MeshStandardMaterial({ color: C.slabSide, roughness: 0.95, metalness: 0 }),
     concrete: new THREE.MeshStandardMaterial({ color: C.concrete, roughness: 0.88, metalness: 0.03 }),
-    road: new THREE.MeshStandardMaterial({ color: C.road, roughness: 0.62, metalness: 0.05 }),
-    wall: new THREE.MeshStandardMaterial({ color: C.wall, roughness: 0.46, metalness: 0.34 }),
-    roof: new THREE.MeshStandardMaterial({ color: C.roof, roughness: 0.66, metalness: 0.2 }),
+    road: new THREE.MeshStandardMaterial({ color: C.road, roughness: 0.70, metalness: 0.04, envMapIntensity: 0.55 }),
+    /* Precast is not metal. Roughness carries the surface and the joints and mottle
+       injected below carry the rest. */
+    wall: new THREE.MeshStandardMaterial({ color: C.wall, roughness: 0.74, metalness: 0.02 }),
+    /* Less mirror. At metalness 0.2 a point light two feet away put a hard specular
+       disc on the neighbouring roof that read as a light leak rather than as metal. */
+    /* THE PARAPET CAP IS THE BRIGHTEST OBJECT IN THE FRAME IF YOU LET IT BE. Traced by
+       raycasting the pixels: the soft white pool that kept appearing on the roof of the
+       run in front of the subject was the specular highlight on a 263-foot cap bar seen
+       nearly edge on, smeared along its whole length. A coated metal coping is not a
+       mirror; at 0.88 / 0.04 it catches the key as a LINE along its edge, which is what
+       a coping does, instead of as a pool that reads as a light with no source. */
+    roof: new THREE.MeshStandardMaterial({ color: C.roof, roughness: 0.88, metalness: 0.04, envMapIntensity: 0.6 }),
     membrane: new THREE.MeshStandardMaterial({ color: C.membrane, roughness: 0.99, metalness: 0 }),
     trim: new THREE.MeshStandardMaterial({ color: C.trim, roughness: 0.52, metalness: 0.34 }),
-    civic: new THREE.MeshStandardMaterial({ color: C.civic, roughness: 0.4, metalness: 0.3 }),
+    civic: new THREE.MeshStandardMaterial({ color: C.civic, roughness: 0.68, metalness: 0.03 }),
     glass: new THREE.MeshStandardMaterial({ color: C.glass, roughness: 0.06, metalness: 0.5, envMapIntensity: 2.2 }),
     door: new THREE.MeshStandardMaterial({ color: C.door, roughness: 0.54, metalness: 0.26 }),
     sold: new THREE.MeshStandardMaterial({ color: C.sold, roughness: 0.85, metalness: 0.1 }),
@@ -370,6 +390,205 @@ export function initCompound3D(mount, model, opts = {}) {
        edge is past the fog, so it becomes haze rather than ending. */
     terrain: new THREE.MeshStandardMaterial({ color: 0x11161b, roughness: 1, metalness: 0 }),
   }
+
+  /* ====================================================================================
+     SURFACE DETAIL, AND WHY IT IS PROCEDURAL RATHER THAN A TEXTURE.
+
+     The review's verdict on materials was 1/10 — "current materials effectively do not
+     exist visually" — and it was right. Every surface was a single colour with a
+     roughness number. Under any light a flat colour on a box returns a flat plane, so a
+     202-foot precast wall and a 4-foot door panel came back as the same substance at two
+     sizes, and the whole model read as massing study rather than as building.
+
+     THREE THINGS RULED OUT AN IMAGE MAP.
+
+       1. SCALE. Every wall here is a BoxGeometry, and a box's UVs run 0..1 per face. The
+          same texture on a 202-foot run and a 23-foot bay is two different panel sizes.
+          Fixing that with per-mesh repeats means per-mesh textures, which means the
+          shared-material rule goes and several hundred materials arrive.
+       2. WEIGHT. The published folder already carries 9.8 MB of geometry. Precast,
+          asphalt, membrane and door maps at a useful resolution are megabytes more, for
+          detail that is a few instructions of arithmetic.
+       3. TRUTH. A photographed concrete map brings someone else's building's stains with
+          it. This is new construction at dusk, not a ruin.
+
+     So the detail is computed from WORLD POSITION IN FEET, injected into the standard
+     material's own shader. One material per surface, no downloads, correct panel size on
+     every mesh whatever its dimensions, and the joints line up across two boxes that
+     meet because both are reading the same world coordinate.
+
+     Everything here is deliberately quiet. Precast varies by a few percent, not by the
+     twenty that reads as dirt. The brief's words are "premium new construction", and the
+     failure mode of procedural material is grunge.
+     ==================================================================================== */
+  const FEET = 1 / (U * S)        /* world units -> feet, for the shader */
+
+  const DETAIL_COMMON = `
+    varying vec3 vDPos;
+    varying vec3 vDNrm;
+    float dhash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }
+    float dnoise(vec2 p){
+      vec2 i = floor(p), f = fract(p);
+      f = f * f * (3.0 - 2.0 * f);
+      return mix(mix(dhash(i), dhash(i + vec2(1.0, 0.0)), f.x),
+                 mix(dhash(i + vec2(0.0, 1.0)), dhash(i + vec2(1.0, 1.0)), f.x), f.y);
+    }
+    /* the surface's own two axes, in feet, chosen by the face it is on: a wall is read
+       in elevation and a roof or a road in plan, so a joint never smears round a corner */
+    vec2 dPlane(vec3 p, vec3 n){
+      vec3 a = abs(n);
+      if (a.y > max(a.x, a.z)) return p.xz;
+      if (a.x > a.z) return vec2(p.z, p.y);
+      return vec2(p.x, p.y);
+    }
+    /* distance in feet to the nearest line of a grid of the given pitch */
+    /* distance in feet to the nearest line of a grid of the given pitch */
+    float dJoint(float v, float pitch){ return abs(fract(v / pitch) - 0.5) * pitch; }
+    /* A JOINT THAT DOES NOT ALIAS.
+       The first cut drew every line with a fixed smoothstep width in feet. That is
+       correct at arm's length and wrong everywhere else: on a roof seen at a grazing
+       angle one screen pixel spans several feet, the line pattern falls below the
+       sampling rate, and it comes back as a grid of crawling dots — which is precisely
+       what appeared in the specular on the neighbouring roofs, and looked like a
+       rendering fault rather than like metal. fwidth() is how wide this line is ON
+       SCREEN right here, so the line softens exactly as fast as it needs to and fades
+       out entirely once it is smaller than a pixel. */
+    /* HOW MUCH FINE DETAIL SURVIVES AT THIS DISTANCE. Grain of a couple of feet is
+       material in close-up and NOISE from the compound pose, where a pixel spans ten
+       or twenty feet — the site slab came back speckled, which reads as a dirty render
+       rather than as ground. This returns 1 up close and 0 once the feature is below
+       the sampling rate, which is the same thing a mip chain does for a texture. */
+    float dFine(vec2 uv, float feat){
+      float px = max(fwidth(uv.x), fwidth(uv.y));
+      return 1.0 - smoothstep(feat * 0.6, feat * 2.6, px);
+    }
+    float dLine(float v, float pitch, float w){
+      float d = dJoint(v, pitch);
+      float aa = max(fwidth(v), 1e-5);
+      return 1.0 - smoothstep(w, w + aa * 1.6, d);
+    }
+  `
+
+  /* Each recipe returns GLSL that may modify `diffuseColor` and `roughnessFactor`, with
+     `P` the world position in feet, `N` the world normal and `UP` how upward-facing the
+     surface is. */
+  const DETAIL = {
+    /* PRECAST. Panel joints at a real casting size, and a mottle so broad it is only
+       visible as the wall not being one value across two hundred feet. */
+    precast: `
+      vec2 uv = dPlane(P, N);
+      float wall = 1.0 - smoothstep(0.55, 0.82, UP);
+      /* PANEL SIZE. 10.5 feet put a vertical joint every third of a bay and the wall came
+         back reading as a grid — closer to a curtain wall than to precast. A tilt-up
+         panel on a building like this is sixteen feet or so wide and full storey height,
+         which gives a wall two or three verticals along a run, not thirty. */
+      float joint = max(dLine(uv.x, 16.0, 0.11), dLine(uv.y + 2.0, 13.0, 0.12)) * wall;
+      float m = dnoise(uv * 0.115) * 0.62 + dnoise(uv * 0.47) * 0.38 * dFine(uv, 2.1);
+      diffuseColor.rgb *= (0.962 + m * 0.076) * (1.0 - joint * 0.17);
+      roughnessFactor = clamp(roughnessFactor * (0.90 + m * 0.20) + joint * 0.14, 0.03, 1.0);
+    `,
+    /* THE SECTIONAL DOOR. Four panels and the ribs inside them — the detail the brief
+       asks for by name, and the thing that tells the eye how big the opening is. The
+       grooves used to be three separate trim boxes standing PROUD of the leaf, which is
+       backwards: the joint between two door panels is a recess. */
+    door: `
+      vec2 uv = dPlane(P, N);
+      float seam = dLine(uv.y + 0.30, 1.72, 0.035);
+      float rib  = dLine(uv.y + 0.30, 0.43, 0.05);
+      diffuseColor.rgb *= (1.0 - seam * 0.52) * (1.0 - rib * 0.10);
+      roughnessFactor = clamp(roughnessFactor + seam * 0.28 - rib * 0.04, 0.04, 1.0);
+    `,
+    /* ASPHALT. Aggregate, and a very slight unevenness in the sheen — a flat roughness
+       over a 1,100-foot drive is a plastic ribbon. */
+    asphalt: `
+      vec2 uv = dPlane(P, N);
+      float g = dnoise(uv * 2.6) * 0.5 * dFine(uv, 0.4) + dnoise(uv * 0.34) * 0.5;
+      /* SPARKLE IS A ROUGHNESS BUG, NOT AGGREGATE. Swinging roughness by a third of
+         its value took the drive down to 0.52 in patches, and a surface that smooth
+         returns the sky: the roundabout came back as a ring of bright blue-grey
+         speckle that read as gravel or as standing water. Asphalt varies, but it
+         never varies into a mirror. Floored at 0.58 and swung by a tenth. */
+      diffuseColor.rgb *= 0.96 + g * 0.08;
+      roughnessFactor = clamp(roughnessFactor * (0.95 + g * 0.10), 0.58, 1.0);
+    `,
+    /* CONCRETE APRON. Saw-cut control joints on the bay pitch, which is what actually
+       gets poured in front of a run of garages, plus a broom-float tone. */
+    concrete: `
+      vec2 uv = dPlane(P, N);
+      float cut = max(dLine(uv.x, 11.5, 0.10), dLine(uv.y, 11.5, 0.10));
+      float g = dnoise(uv * 0.20) * 0.6 + dnoise(uv * 1.7) * 0.4 * dFine(uv, 1.5);
+      /* A POURED APRON IS EVEN. The first tuning gave it a ten-percent value swing at a
+         four-foot feature size, and from the compound pose the roundabout came back as a
+         sparkling blue-grey patch that read as gravel or standing water. Broom finish is a
+         two-percent variation you can only see when you are standing on it. */
+      diffuseColor.rgb *= (0.978 + g * 0.045) * (1.0 - cut * 0.26);
+      roughnessFactor = clamp(roughnessFactor * (0.96 + g * 0.08) + cut * 0.08, 0.05, 1.0);
+    `,
+    /* MEMBRANE. Broad lap seams and a completely dead surface between them. */
+    membrane: `
+      vec2 uv = dPlane(P, N);
+      float lap = dLine(uv.y, 9.0, 0.18);
+      float g = dnoise(uv * 0.09);
+      diffuseColor.rgb *= (0.94 + g * 0.12) * (1.0 - lap * 0.10);
+      roughnessFactor = clamp(roughnessFactor - lap * 0.05, 0.6, 1.0);
+    `,
+    /* STANDING SEAM. The parapet cap and the trim: a rolled metal edge catches the key
+       in a line every couple of feet, and that line is most of what says "metal". */
+    metal: `
+      vec2 uv = dPlane(P, N);
+      /* Standing seam is a WALL detail here. On a roof it is seen at a grazing angle
+         from every authored camera, and a bright low-roughness line at that angle is a
+         specular artefact, not a material. */
+      float up2 = 1.0 - smoothstep(0.45, 0.80, UP);
+      float seam = dLine(uv.x, 2.1, 0.025) * up2;
+      diffuseColor.rgb *= 1.0 + seam * 0.14;
+      roughnessFactor = clamp(roughnessFactor - seam * 0.12, 0.03, 1.0);
+    `,
+    /* GROUND. Only enough variation that a 9,000-unit plane stops reading as paper. */
+    earth: `
+      vec2 uv = dPlane(P, N);
+      float g = dnoise(uv * 0.055) * 0.7 + dnoise(uv * 0.4) * 0.3 * dFine(uv, 2.5);
+      diffuseColor.rgb *= 0.90 + g * 0.20;
+      roughnessFactor = clamp(roughnessFactor * (0.94 + g * 0.10), 0.2, 1.0);
+    `,
+  }
+
+  const surfaced = (mat, kind) => {
+    const body = DETAIL[kind]
+    if (!body) return mat
+    mat.onBeforeCompile = (shader) => {
+      shader.uniforms.uFeet = { value: FEET }
+      shader.vertexShader = shader.vertexShader
+        .replace('#include <common>', '#include <common>\nvarying vec3 vDPos;\nvarying vec3 vDNrm;')
+        .replace('#include <project_vertex>',
+          '#include <project_vertex>\n vDPos = (modelMatrix * vec4(transformed, 1.0)).xyz;\n vDNrm = normalize(mat3(modelMatrix) * normal);')
+      shader.fragmentShader = shader.fragmentShader
+        .replace('#include <common>', '#include <common>\nuniform float uFeet;\n' + DETAIL_COMMON)
+        /* AFTER the map, so a future texture still wins the base colour, and BEFORE
+           lighting, so the joints are lit rather than painted on top of the light. */
+        .replace('#include <roughnessmap_fragment>',
+          '#include <roughnessmap_fragment>\n{\n vec3 P = vDPos * uFeet;\n vec3 N = normalize(vDNrm);\n float UP = abs(N.y);\n'
+          + body + '\n}')
+    }
+    /* Three caches compiled programs by material signature; without a distinct key two
+       recipes on the same base material would share one program and one of them would
+       silently render as the other. */
+    mat.customProgramCacheKey = () => 'lc-detail-' + kind
+    mat.userData.detail = kind
+    return mat
+  }
+
+  surfaced(M.wall, 'precast')
+  surfaced(M.civic, 'precast')
+  surfaced(M.sold, 'precast')
+  surfaced(M.door, 'door')
+  surfaced(M.road, 'asphalt')
+  surfaced(M.concrete, 'concrete')
+  surfaced(M.membrane, 'membrane')
+  surfaced(M.roof, 'metal')
+  surfaced(M.trim, 'metal')
+  surfaced(M.slab, 'earth')
+  surfaced(M.terrain, 'earth')
 
   /* FEET TO WORLD UNITS. The measured geometry is built at source scale inside `site`
      and the SCALE IS ON ITS PARENT — site.scale is 1, root.scale is S. Three separate
@@ -1142,43 +1361,60 @@ export function initCompound3D(mount, model, opts = {}) {
     door.receiveShadow = true
     B.group.add(door)
 
-    for (let seg = 1; seg <= 3; seg++) {
-      const line = new THREE.Mesh(bayGeo, M.trim)
-      line.scale.set(dw * 0.985, ft(0.26), ft(0.62))
-      line.position.set(
-        s.cx + fnx * (faceD + ft(0.1)),
-        (dh / 4) * seg,
-        s.cy + fny * (faceD + ft(0.1)),
-      )
-      line.rotation.y = rot
-      B.group.add(line)
-    }
+    /* THE SEGMENTATION IS IN THE MATERIAL NOW, and it is more correct there. These were
+       three boxes per leaf standing PROUD of it — 363 meshes across the compound drawing
+       the joint between two door panels as a raised bar, when a sectional joint is a
+       RECESS. The door recipe cuts it as one, at a real 20-inch panel pitch, with the
+       ribs inside each panel that a steel door actually has, and it costs no meshes. */
 
     /* THE GLAZED HEAD.  Every real Luxe Corsa door has a windowed top section, and it is
        the detail that stops a bay reading as a black rectangle: it catches the sky where
        the rest of the leaf catches nothing. */
+    /* THE GLAZED HEAD WAS BEHIND THE DOOR. Scored 2/10 as "visible glazed upper door
+       panels", and it was not visible at all: the leaf sits at faceD + 0.04 and is 0.5ft
+       deep, so its front face is at faceD + 0.29 — and the glass was placed at
+       faceD - 0.30, six tenths of a foot BEHIND it, inside the suite. Every frame of
+       every review has been of a door with no window in it.
+
+       It belongs in the leaf's own plane, a little proud of it and set back inside the
+       reveal, which is exactly where a glazed top section sits on a real sectional door:
+       the glass is in the panel, the frame stands in front of both. */
     const glazeH = dh * 0.30
     const glazeY = dh - glazeH * 0.56
     const glaze = new THREE.Mesh(bayGeo, M.glass)
-    glaze.scale.set(dw * 0.92, glazeH, ft(0.30))
+    glaze.scale.set(dw * 0.90, glazeH * 0.86, ft(0.12))
     glaze.position.set(
-      s.cx + fnx0 * (faceD0 - ft(0.30)),
+      s.cx + fnx0 * (faceD0 + ft(0.36)),
       glazeY,
-      s.cy + fny0 * (faceD0 - ft(0.30)),
+      s.cy + fny0 * (faceD0 + ft(0.36)),
     )
     glaze.rotation.y = rot0
     B.group.add(glaze)
-    /* the transom under it — one light line across every bay, which is what makes the
-       glazed section read at compound distance rather than only in close-up */
-    const transom = new THREE.Mesh(bayGeo, M.roof)
-    transom.scale.set(dw * 0.96, ft(0.42), ft(0.5))
+    /* THE MEETING RAIL under it — the horizontal that separates the glazed section from
+       the panels below, and the line that makes the glazing read at compound distance
+       rather than only in close-up. It stands proud of the glass, as the rail does. */
+    const transom = new THREE.Mesh(bayGeo, M.trim)
+    transom.scale.set(dw * 0.96, ft(0.40), ft(0.46))
     transom.position.set(
-      s.cx + fnx0 * (faceD0 - ft(0.16)),
-      glazeY - glazeH / 2,
-      s.cy + fny0 * (faceD0 - ft(0.16)),
+      s.cx + fnx0 * (faceD0 + ft(0.32)),
+      glazeY - glazeH * 0.52,
+      s.cy + fny0 * (faceD0 + ft(0.32)),
     )
     transom.rotation.y = rot0
+    transom.castShadow = true
     B.group.add(transom)
+    /* Two glazing bars, so the head is a set of panes rather than one dark strip. */
+    for (const side of [-1, 1]) {
+      const bar2 = new THREE.Mesh(bayGeo, M.trim)
+      bar2.scale.set(ft(0.22), glazeH * 0.86, ft(0.34))
+      bar2.position.set(
+        s.cx + Math.cos(rot0) * (dw * 0.30 * side) + fnx0 * (faceD0 + ft(0.36)),
+        glazeY,
+        s.cy - Math.sin(rot0) * (dw * 0.30 * side) + fny0 * (faceD0 + ft(0.36)),
+      )
+      bar2.rotation.y = rot0
+      B.group.add(bar2)
+    }
 
     /* THE UNIT PLAQUE IS GONE. Eighty-seven near-black rectangles across the facades read
        as signs stuck to the buildings, and the number on them is unreadable at every
@@ -1198,15 +1434,42 @@ export function initCompound3D(mount, model, opts = {}) {
     /* One small wall light over every door. It is the detail that makes a compound at
        dusk read as occupied, and it is emissive rather than a light source — 116 point
        lights would be a different kind of project. */
+    /* A FITTING, NOT A GLOWING RECTANGLE. The review's rule is that every visible light
+       must have a source, a direction and a surface it lands on, and a bright quad stuck
+       flat on a wall has none of the three. This is a hooded downlight: a dark cast body
+       on a bracket, and the lit lens UNDERNEATH it facing down at the door. When this
+       building's practicals come up, the light that appears on the wall and the apron
+       comes from a point just under this object, so the eye can trace it. */
+    const hood = new THREE.Mesh(bayGeo, M.trim)
+    hood.scale.set(ft(1.9), ft(0.62), ft(1.15))
+    hood.position.set(
+      s.cx + fnx * (faceD + ft(0.56)),
+      dh + ft(3.9),
+      s.cy + fny * (faceD + ft(0.56)),
+    )
+    hood.rotation.y = rot
+    hood.castShadow = true
+    B.group.add(hood)
+
     const lamp = new THREE.Mesh(bayGeo, M.wallLight)
-    lamp.scale.set(ft(1.5), ft(0.34), ft(0.5))
+    lamp.scale.set(ft(1.45), ft(0.14), ft(0.86))
     lamp.position.set(
-      s.cx + fnx * (faceD + ft(0.6)),
-      dh + ft(3.4),
-      s.cy + fny * (faceD + ft(0.6)),
+      s.cx + fnx * (faceD + ft(0.58)),
+      dh + ft(3.56),
+      s.cy + fny * (faceD + ft(0.58)),
     )
     lamp.rotation.y = rot
     B.group.add(lamp)
+    /* The bracket back to the wall, so the fitting is fixed to something. */
+    const arm = new THREE.Mesh(bayGeo, M.trim)
+    arm.scale.set(ft(0.34), ft(0.9), ft(0.7))
+    arm.position.set(
+      s.cx + fnx * (faceD + ft(0.18)),
+      dh + ft(4.2),
+      s.cy + fny * (faceD + ft(0.18)),
+    )
+    arm.rotation.y = rot
+    B.group.add(arm)
 
     /* THE DOOR IS A CONTROL, so it has to answer a ray as one. The bay mass already
        carried the suite's identity and was generous to hit; the leaf and its glazed head
@@ -1397,7 +1660,12 @@ export function initCompound3D(mount, model, opts = {}) {
   for (const B of buildingObjs.values()) {
     const runs = new Map()
     for (const o of B.bays) {
-      const k = o.suite.ang.toFixed(2)
+      /* KEYED ON WHICH WAY THE DOORS FACE, NOT ON THE RUN'S ANGLE. The two rows of
+         building 02 are parallel — both at -22.98 degrees — and their doors face
+         OPPOSITE ways. Keying on the angle put them in one group whose mean normal is
+         zero, which is the same collapse the faceDir note above describes and the
+         reason rowCount answered 1 for the two buildings that have two rows. */
+      const k = Math.round(o.suite.faceNormal[0] * 8) + ':' + Math.round(o.suite.faceNormal[1] * 8)
       if (!runs.has(k)) runs.set(k, { nx: 0, nz: 0, open: 0, n: 0 })
       const r = runs.get(k)
       r.nx += o.suite.faceNormal[0]
@@ -1405,14 +1673,27 @@ export function initCompound3D(mount, model, opts = {}) {
       r.n += 1
       if (!o.suite.sold) r.open += 1
     }
-    let best = null
-    for (const r of runs.values()) {
-      if (!best || r.open > best.open || (r.open === best.open && r.n > best.n)) best = r
+    /* EVERY ELEVATION THIS BUILDING HAS, not only the best one.
+
+       Buildings 02 and 10 are two runs back to back — twenty-six suites and sixteen
+       suites facing opposite ways — and picking the better run was the whole answer
+       until now, which left half of each of them permanently out of sight. There is no
+       camera that shows both: they are separated by a solid building. So the building
+       carries a LIST of its elevations, best first, and the interface can walk it. */
+    const list = [...runs.values()]
+      .filter((r) => r.nx || r.nz)
+      .map((r) => { const len = Math.hypot(r.nx, r.nz) || 1; return { dir: [r.nx / len, r.nz / len], open: r.open, n: r.n } })
+      .sort((a, b) => (b.open - a.open) || (b.n - a.n))
+    /* two runs that face within sixty degrees of each other are one elevation seen
+       twice, not two — only genuinely opposing rows become a second side */
+    const sides = []
+    for (const r of list) {
+      if (sides.some((t) => t.dir[0] * r.dir[0] + t.dir[1] * r.dir[1] > 0.5)) continue
+      sides.push(r)
     }
-    if (best && (best.nx || best.nz)) {
-      const len = Math.hypot(best.nx, best.nz) || 1
-      B.faceDir = [best.nx / len, best.nz / len]
-    }
+    B.faceDirs = sides.map((r) => r.dir)
+    B.rowIdx = 0
+    if (B.faceDirs.length) B.faceDir = B.faceDirs[0]
   }
 
   /* --- CIVIC MASSES. The clubhouse and the dealership: taller, smoother, no bays.
@@ -1449,10 +1730,23 @@ export function initCompound3D(mount, model, opts = {}) {
       const cs = Math.cos(rr), sn = Math.sin(rr)
       const halfL = c.length / 2, halfD = c.depth / 2
       const runL = ax ? c.depth * 0.86 : c.length * 0.86
+      /* THE BLACK SLAB FLYING OUT OF THE CLUBHOUSE. Found by raycasting the pixels it
+         occupies rather than by reading the file: a 0.3ft x 11.4ft x 67ft plate, which
+         is exactly this band's frame, sitting in open air off the west end of the club.
+
+         THE CAUSE IS ONE TRANSPOSED ROTATION. Three's rotation.y = t maps a local point
+         to (x cos t + z sin t, y, -x sin t + z cos t). This offset was computed as
+         (x cos t - z sin t, y, x sin t + z cos t) — the rotation by MINUS t. So the mesh
+         was oriented one way and pushed the other, and on a face of a rotated building
+         the two disagree by twice the angle. The clubhouse's second wing sits at -29.3
+         degrees, which is why it was the one that threw a plate into the sky while the
+         6.5-degree wing beside it looked almost right. roofAssembly's place() already
+         had this correct; this block did not, and the mullion note above fixed the axis
+         choice without noticing the convention underneath it. */
       const put = (offset, mesh) => {
         const ox = ax * (halfL + offset)
         const oz = az * (halfD + offset)
-        mesh.position.set(c.cx + ox * cs - oz * sn, bandY, c.cy + ox * sn + oz * cs)
+        mesh.position.set(c.cx + ox * cs + oz * sn, bandY, c.cy - ox * sn + oz * cs)
         mesh.rotation.y = rr
         civicGroup.add(mesh)
       }
@@ -1476,7 +1770,7 @@ export function initCompound3D(mount, model, opts = {}) {
         const lz = az ? az * (halfD + ft(0.16)) : u
         const mull = new THREE.Mesh(bayGeo, M.roof)
         mull.scale.set(ft(0.34), bandH * 0.96, ft(0.34))
-        mull.position.set(c.cx + lx * cs - lz * sn, bandY, c.cy + lx * sn + lz * cs)
+        mull.position.set(c.cx + lx * cs + lz * sn, bandY, c.cy - lx * sn + lz * cs)
         mull.rotation.y = rr
         civicGroup.add(mull)
       }
@@ -1486,7 +1780,7 @@ export function initCompound3D(mount, model, opts = {}) {
         const rail = new THREE.Mesh(bayGeo, M.roof)
         rail.scale.set(ax ? ft(0.34) : runL, ft(0.9), az ? ft(0.34) : runL)
         const lx = ax * (halfL + ft(0.14)), lz = az * (halfD + ft(0.14))
-        rail.position.set(c.cx + lx * cs - lz * sn, bandY + dy, c.cy + lx * sn + lz * cs)
+        rail.position.set(c.cx + lx * cs + lz * sn, bandY + dy, c.cy - lx * sn + lz * cs)
         rail.rotation.y = rr
         rail.castShadow = true
         civicGroup.add(rail)
@@ -1602,6 +1896,17 @@ export function initCompound3D(mount, model, opts = {}) {
        chosen so the rest pose keeps the frame it was composed with — at dist 20.4 this
        gives 18.4 and 61.2 against the 19 and 62 that were hand-set — and everything
        closer tightens from there. */
+    /* THE EYE STOPS DOWN AS IT WALKS UP TO A LIT WALL.
+
+       One exposure for every camera in the act meant the value that composes the
+       compound — a dark site with a few warm points in it — was also the value used
+       three feet from a floodlit precast elevation, and the ENTER frame came back as
+       cream on cream with the door's own panels washed out of it. This is what a
+       photographer does between the two shots and what an eye does by itself. It only
+       bites inside four world units, so every composed frame above that is untouched. */
+    const close = Math.max(0, Math.min(1, (4.0 - dist) / 3.2))
+    renderer.toneMappingExposure = EXPOSURE - 0.48 * close
+
     scene.fog.near = dist * 0.9
     scene.fog.far = dist * 3.0
 
@@ -2008,28 +2313,37 @@ export function initCompound3D(mount, model, opts = {}) {
      compound's own verified LED and the only light source name this system has. */
   const lume = new THREE.Color(C.lume)
 
+  /* A CLONE LOSES ITS SURFACE. THREE.Material.copy() copies a fixed list of properties
+     and onBeforeCompile is not on it, so every one of these state materials came back
+     as flat colour — which meant the precast joints and the sectional door panels were
+     present on a building at rest and vanished the moment it was hovered or selected.
+     Exactly backwards: the detail is most wanted on the building being looked at.
+     Every variant is minted through here, so a surface can never be lost by cloning. */
+  const variant = (base, kind, hex, extra) => {
+    const m = base.clone()
+    if (hex != null) m.color.setHex(hex)
+    if (extra) Object.assign(m, extra)
+    return surfaced(m, kind)
+  }
+
   /* THE HOVER USED TO GO THE WRONG WAY.  M_focus was 0x59636f against a 0x6a7683 wall —
      the building a visitor was considering got DARKER than it had been, and the only
      thing that made a hover read at all was its neighbours falling further. That is why
      the model never felt clickable: nothing arrives, something leaves. The subject now
      gains, its neighbours give way, and the ratio between them is about 1.6 before the
      emissive and nearer 1.9 with it — which is the separation the brief asks for. */
-  const M_focus = M.wall.clone()
-  M_focus.color.setHex(0x7c8794)
-  M_focus.emissive = lume.clone(); M_focus.emissiveIntensity = 0.10
+  const M_focus = variant(M.wall, 'precast', 0xa3998b)
+  M_focus.emissive = lume.clone(); M_focus.emissiveIntensity = 0.07
 
-  const M_hover = M.wall.clone()
-  M_hover.color.setHex(0x8b95a1)
-  M_hover.emissive = lume.clone(); M_hover.emissiveIntensity = 0.16
+  const M_hover = variant(M.wall, 'precast', 0xb2a695)
+  M_hover.emissive = lume.clone(); M_hover.emissiveIntensity = 0.11
 
   /* THE ONE SUITE. Not a lighter grey — a surface with the compound's light on it, at
      four times the roof's intensity, which at this exposure is the brightest thing in
      the frame without ever clipping to white. */
-  const M_lit = M.wall.clone()
-  M_lit.color.setHex(0x77828f)
+  const M_lit = variant(M.wall, 'precast', 0xa79c8d, { roughness: 0.68 })
   M_lit.emissive = lume.clone()
-  M_lit.emissiveIntensity = 0.10
-  M_lit.roughness = 0.5
+  M_lit.emissiveIntensity = 0.07
 
   /* A SUBORDINATE BUILDING IS STILL PART OF THE PLACE. 0x272d35 is within a value of the
      ground, which was survivable while the building camera looked down at one mass from
@@ -2037,31 +2351,28 @@ export function initCompound3D(mount, model, opts = {}) {
      the foreground — and at that value they filled it with black. They step back, they do
      not switch off; the subject is separated by its own facade wash, not by everything
      else being extinguished. */
-  const M_sub = M.wall.clone(); M_sub.color.setHex(0x424b56)
+  const M_sub = variant(M.wall, 'precast', 0x5b544b)
   /* HOVER HAS TO BE VISIBLE IN THE MODEL, NOT ONLY IN A TAG.  Considering a building now
      steps every other building back to roughly two thirds of its emphasis — far enough
      that the subject separates instantly, not so far that the compound stops being a
      place.  Distinct from the focus subordinate above, which goes further because a
      selection is a commitment and a hover is a question. */
-  const M_hoverSub = M.wall.clone(); M_hoverSub.color.setHex(0x4a545f)
-  const M_roofHoverSub = M.roof.clone(); M_roofHoverSub.color.setHex(0x2b323a)
+  const M_hoverSub = variant(M.wall, 'precast', 0x6b6458)
+  const M_roofHoverSub = variant(M.roof, 'metal', 0x2b323a)
   /* PREVIEW IS SAND, COMMITTED IS COOL AND LIT. A building being considered from inside
      another one must never look like the one that is selected, or switching is guesswork.
      The committed building keeps the compound's own cold LED and its red corner reveal;
      the preview warms instead — the sand the interface already uses for discovery — and
      lifts a little less. Two different lights, not two intensities of one. */
-  const M_preview = M.wall.clone()
-  M_preview.color.setHex(0x9a8f7c)
+  const M_preview = variant(M.wall, 'precast', 0xbaab90)
   M_preview.emissive = new THREE.Color(0xc9bca8); M_preview.emissiveIntensity = 0.13
-  const M_roofPreview = M.roof.clone()
-  M_roofPreview.color.setHex(0x5b5346)
+  const M_roofPreview = variant(M.roof, 'metal', 0x5b5346)
   M_roofPreview.emissive = new THREE.Color(0xc9bca8); M_roofPreview.emissiveIntensity = 0.07
-  const M_doorPreview = M.door.clone(); M_doorPreview.color.setHex(0x585043); M_doorPreview.metalness = 0.3
+  const M_doorPreview = variant(M.door, 'door', 0x585043, { metalness: 0.3 })
 
-  const M_roofFocus = M.roof.clone()
-  M_roofFocus.color.setHex(0x424b57)
+  const M_roofFocus = variant(M.roof, 'metal', 0x424b57)
   M_roofFocus.emissive = lume.clone(); M_roofFocus.emissiveIntensity = 0.05
-  const M_roofSub = M.roof.clone(); M_roofSub.color.setHex(0x2a3038)
+  const M_roofSub = variant(M.roof, 'metal', 0x2a3038)
 
   /* THE DOOR, LIT FROM INSIDE. The one detail that says a suite is OCCUPIED rather than
      available: warm light behind the opening of the selected suite. It is the only warm
@@ -2071,19 +2382,27 @@ export function initCompound3D(mount, model, opts = {}) {
      feet from it. Standard material, so the leaf keeps its segments, its reveal shadow
      and its sheen, with a warm emissive strong enough to stay the brightest thing on the
      run from across the site. */
-  const M_doorLit = M.door.clone()
-  M_doorLit.color.setHex(0x5a4f41)
+  /* THE LIGHT IS BEHIND THE GLAZING, NOT IN THE PAINT.
+
+     A whole leaf with a warm emissive on it is a lamp shaped like a door. At the ENTER
+     pose it came back cream-white with the sectional panels washed out of it, on a
+     facade that was also cream-white — the one moment in the act where a visitor is
+     three feet from the product, and the product had no material. A garage with its
+     light on shows that through its WINDOW: the glazed head goes warm, the leaf stays
+     the dark coated steel it is, and the two together say occupied far more plainly
+     than a glowing rectangle did. */
+  const M_doorLit = variant(M.door, 'door', 0x3f4750)
   M_doorLit.emissive = new THREE.Color(0xffc27a)
-  /* 0.45, and the number is smaller than it was after a measurement that did NOT say
-     what I expected. Magnified three times on the composited render the chosen door was
-     very close to white, so the emissive was the obvious suspect; dropping it from 0.62
-     to 0.30 changed the crop almost not at all. The brightness is the apron pool, which
-     is why that light was moved back and turned down rather than this number being
-     chased. This sits between the two: still the brightest thing on the run, with a
-     little more room under the clip. */
-  M_doorLit.emissiveIntensity = 0.45
-  M_doorLit.roughness = 0.62
-  M_doorLit.metalness = 0.12
+  M_doorLit.emissiveIntensity = 0.05
+  M_doorLit.roughness = 0.56
+  M_doorLit.metalness = 0.20
+  /* the warm interior, seen through the top section — the only warm glass in the model */
+  const M_glazeLit = M.glass.clone()
+  M_glazeLit.color.setHex(0x6b5942)
+  M_glazeLit.emissive = new THREE.Color(0xffc98f)
+  M_glazeLit.emissiveIntensity = 0.72
+  M_glazeLit.roughness = 0.30
+  M_glazeLit.metalness = 0.10
 
   /* --- THE ARCHITECTURAL HOVER LANGUAGE ------------------------------------------
      A hover is not a fill change. What arrives on the subject is the set of things
@@ -2096,12 +2415,12 @@ export function initCompound3D(mount, model, opts = {}) {
      Applied to every bay of the subject building, and one step further on the single
      suite being considered — which is what ties a control in the dock to a door in the
      world without drawing a line between them. */
-  const M_doorHot = M.door.clone(); M_doorHot.color.setHex(0x4a5561); M_doorHot.metalness = 0.3
+  const M_doorHot = variant(M.door, 'door', 0x424b55, { metalness: 0.3 })
   /* THE ONE DOOR BEING CONSIDERED. A step above the rest of its own building, because
      "which real door is this control?" has to be answerable in the frame, not by
      elimination. Measured against M_doorHot it is a full value apart. */
-  const M_doorPick = M.door.clone(); M_doorPick.color.setHex(0x6d7b89); M_doorPick.metalness = 0.32
-  const M_doorSub = M.door.clone(); M_doorSub.color.setHex(0x232a33)
+  const M_doorPick = variant(M.door, 'door', 0x616f7d, { metalness: 0.32 })
+  const M_doorSub = variant(M.door, 'door', 0x232a33)
   const M_glassHot = M.glass.clone(); M_glassHot.color.setHex(0x40596f); M_glassHot.envMapIntensity = 3.1
   const M_glassPick = M.glass.clone(); M_glassPick.color.setHex(0x6d8ba6); M_glassPick.envMapIntensity = 3.6
   const M_lampHot = new THREE.MeshBasicMaterial({ color: 0xffe6c2 })
@@ -2116,9 +2435,57 @@ export function initCompound3D(mount, model, opts = {}) {
      stray bright patch that has been floating in the middle of the compound. Parented
      to the scene, a world position means what it says — and the ranges become world
      lengths, so the wash dies before it reaches the terrain behind the building. */
-  const focusLight = new THREE.PointLight(0xcfe0ee, 0, 4.2, 2)
-  focusLight.position.set(0, 1, 0)
-  scene.add(focusLight)
+  /* THERE IS NO FACADE FILL ANY MORE, AND THAT IS THE FIX.
+
+     Traced by raycasting the pixels it occupied: the soft cool pool that sat on the
+     roof of the run IN FRONT of whichever building was selected was this light. It was
+     positioned from the subject's roof centre, thirty-eight feet out on the door side
+     and thirty feet up, with a hundred-foot reach — so it hung in the air over the
+     neighbouring building and lit its roof. A viewer could not possibly work out where
+     it came from, because there was nothing there. That is the review's rule failing in
+     one object: no source, no direction, no surface it belongs to.
+
+     Nothing replaces it. The subject's own fittings light its elevation, its material
+     steps up and its neighbours step back — all three are visible causes. A wash whose
+     only job was to raise exposure on one building was compensating for the fact that
+     the building had no lights of its own. It has them now.
+  */
+
+  /* ==================================================================================
+     THE BUILDING'S OWN PRACTICALS.
+
+     The rule the review sets is that every visible light must have a SOURCE, a
+     DIRECTION and a SURFACE IT LIGHTS, and nothing in this model obeyed it: one big
+     point light stood a hundred feet off the elevation with no fitting anywhere near
+     it. Meanwhile every bay carries a hooded downlight that emitted nothing.
+
+     Nine real lights, parked at zero, are re-hung on the fittings of whichever run is
+     the subject — directly under the lens, aimed down the wall. A hundred and sixteen
+     lights is a different kind of project; nine that move to where they are needed
+     costs one shadowless point light per fitting on ONE building at a time. The lit
+     fittings are the ones the visitor can see, so the light and its source agree.
+
+     They also come up IN ORDER along the run, which is the hover the brief describes:
+     warm light travelling along the architectural rhythm rather than a fill changing
+     value. Staggered in the frame loop, not by GSAP, so it works with no host library.
+     ================================================================================== */
+  const SCONCE_N = 9
+  const sconces = []
+  for (let i = 0; i < SCONCE_N; i++) {
+    /* ALWAYS IN THE SCENE, NEVER TOGGLED. Three bakes the number of point lights into
+       every shader program it compiles, so switching a light's `visible` on invalidates
+       the whole program cache and recompiles every material in the model on the main
+       thread. Measured: the first building selection blocked for about 1.2 seconds, and
+       because the camera tween runs on the wall clock it arrived already finished — the
+       one selection in the session that still read as a hard cut was the first one a
+       visitor ever makes. Nine lights at zero intensity cost a few uniforms and keep
+       the light count constant from the first frame to the last. */
+    const L = new THREE.PointLight(0xffc48e, 0, wft(33), 2)
+    scene.add(L)
+    sconces.push({ light: L, want: 0, have: 0, delay: 0 })
+  }
+  /* how far through the run-up we are, advanced per frame */
+  let sconceT = 0
 
   /* THE APRON POOL. A second, much tighter light that sits low in front of ONE door:
      the suite being considered or the suite chosen. It is what makes the answer to
@@ -2126,6 +2493,7 @@ export function initCompound3D(mount, model, opts = {}) {
      it would if someone had switched that bay on. */
   const suiteLight = new THREE.PointLight(0xffd9ab, 0, 0.9, 2)
   suiteLight.position.set(0, 0.2, 0)
+  let suiteWant = 0
   scene.add(suiteLight)
 
   const paint3d = () => {
@@ -2165,7 +2533,7 @@ export function initCompound3D(mount, model, opts = {}) {
           : lit ? M_doorHot
           : isPreview ? M_doorPreview
           : (subordinate || hoverSubordinate) ? M_doorSub : M.door
-        if (o.glaze) o.glaze.material = (picked || (considered && !o.suite.sold)) ? M_glassPick : (lit ? M_glassHot : M.glass)
+        if (o.glaze) o.glaze.material = picked ? M_glazeLit : ((considered && !o.suite.sold) ? M_glassPick : (lit ? M_glassHot : M.glass))
         if (o.lamp) o.lamp.material = picked ? M_lampPick : (lit && !soldConsidered ? M_lampHot : M.wallLight)
 
         if (o.suite.sold) { o.mesh.material = M.sold; continue }
@@ -2200,34 +2568,43 @@ export function initCompound3D(mount, model, opts = {}) {
       if (Math.abs(cur) > 0.001) tweenSuiteLift(o, 0)
     }
 
-    /* THE FOCUS LIGHT. Placed over whichever mass is the subject, off when none is. */
+    /* HANG THE PRACTICALS ON THE SUBJECT'S OWN FITTINGS. */
     {
-      const subject = focusNum || hoverNum
+      const subject = focusNum || hoverNum || previewNum
       const B = subject ? buildingObjs.get(subject) : null
-      if (B && B.roofs[0]) {
-        const p = worldOf(B.roofs[0])
-        /* IT LIGHTS THE FACADE, NOT THE ROOF.
-
-           Forty-six feet directly above the ridge, this washed the one surface nobody is
-           looking at. That was survivable while the building camera kept whatever angle
-           it happened to have; once it started arriving AT THE DOORS — which face away
-           from the key on more than half the compound — it left the entire garage
-           elevation in shadow. Measured on building 03: a black slab with the glazing
-           barely readable, and the doors are the whole product.
-
-           The wash stands off the door side now, at the height a facade light would be,
-           so the elevation being looked at is the elevation that is lit. It still casts
-           nothing, and at compound distance the difference is a lifted face rather than
-           a spot. */
-        const fd = B.faceDir
-        if (fd) focusLight.position.set(p.x + fd[0] * wft(104), p.y - wft(9), p.z + fd[1] * wft(104))
-        else focusLight.position.set(p.x, p.y + wft(46), p.z)
-        /* A hover is a question and used to get half the light a selection gets, which
-           made considering a building almost indistinguishable from not. */
-        focusLight.intensity = focusNum ? 8.5 : 4.5
-      } else {
-        focusLight.intensity = 0
+      /* Only the run the camera arrived at — lighting the blind side of a double-row
+         building spends fittings on an elevation nobody can see. */
+      const fd = B && ((B.faceDirs && B.faceDirs[B.rowIdx]) || B.faceDir)
+      const bays = B
+        ? B.bays.filter((o) => !fd || (o.suite.faceNormal
+            && o.suite.faceNormal[0] * fd[0] + o.suite.faceNormal[1] * fd[1] > 0.4))
+        : []
+      const pool = bays.length ? bays : (B ? B.bays : [])
+      /* A DOWNLIGHT LIGHTS ITS OWN BAY. At a 62-foot radius the pools reached over the
+         next run and put a bright disc on ITS roof — a pool with no visible source, which
+         is the exact failure the review names. Thirty-three feet is wall, door and apron. */
+      const strength = focusNum && focusNum === subject ? 0.98 : 0.66
+      for (let i = 0; i < SCONCE_N; i++) {
+        const sc = sconces[i]
+        if (!pool.length) { sc.want = 0; sc.delay = 0; continue }
+        /* spread the nine evenly down the run, so a 26-bay building is lit end to end */
+        const o = pool[Math.round(((i + 0.5) / SCONCE_N) * (pool.length - 1) * (pool.length > 1 ? 1 : 0))]
+        if (!o || !o.lamp) { sc.want = 0; continue }
+        /* UNDER THE HOOD AND A LITTLE OFF THE WALL. Directly beneath the lens the pool
+           is a hot disc on the wall ABOVE the door, with the door itself left in the
+           dark — which is the wrong surface: the fitting exists to light the bay. A
+           downlight on a bracket throws from slightly proud of the wall, so the wash
+           runs down the elevation, across the leaf and out onto the apron. */
+        const lp = worldOf(o.lamp)
+        const fn = o.suite.faceNormal || [0, 0]
+        const sr = site.rotation.y, cs2 = Math.cos(sr), sn2 = Math.sin(sr)
+        const wx = fn[0] * cs2 + fn[1] * sn2, wz = -fn[0] * sn2 + fn[1] * cs2
+        sc.light.position.set(lp.x + wx * wft(2.6), lp.y - wft(2.4), lp.z + wz * wft(2.6))
+        sc.want = strength
+        /* the run-up travels: fitting 1 lights first, fitting 9 last */
+        sc.delay = (i / SCONCE_N) * 0.42
       }
+      if (!B) sconceT = 0
     }
 
     /* THE APRON POOL, over one door: the suite chosen, or failing that the one being
@@ -2244,9 +2621,12 @@ export function initCompound3D(mount, model, opts = {}) {
            enough that the leaf is lit rather than erased, and low enough to rake across
            the concrete the way a real bay light does. */
         suiteLight.position.set(p.x + n[0] * wft(19), p.y + wft(2), p.z + n[1] * wft(19))
-        suiteLight.intensity = selectedSuite ? 1.15 : 0.82
+        /* A REQUEST, NOT AN ASSIGNMENT. Snapping a light on is the difference between
+           light arriving on a door and a rectangle changing colour, and it is most of
+           what made the suite hover read as mechanical. The frame loop rolls it. */
+        suiteWant = selectedSuite ? 0.80 : 0.58
       } else {
-        suiteLight.intensity = 0
+        suiteWant = 0
       }
     }
 
@@ -2263,29 +2643,133 @@ export function initCompound3D(mount, model, opts = {}) {
 
   const wantsStill = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
+  /* ====================================================================================
+     THE CAMERA TRAVELS. IT DOES NOT CUT.
+
+     THE BUG, and it is the whole reason every selection read as a jump cut. flyTo tweened
+     with `gsapRef.lib`, which is only ever set by a host calling api.useGsap(). main.js
+     does that for production act 02; the V6 shell and v6-boot.js never did. So `g` was
+     null in every V6 context and flyTo took its instant branch — the camera was ASSIGNED
+     its new pose on the same frame the state changed. Not a short move. Not a fast ease.
+     A cut, in the standalone page, in the integrated page, and in the published build.
+
+     THE FIX IS TO STOP DEPENDING ON THE HOST FOR IT. Camera motion is not decoration a
+     page may or may not supply; it is how this act explains where the visitor is. The
+     interpolator lives here now and runs off the same rAF that renders. useGsap still
+     works and is still honoured for everything else, but nothing about the camera waits
+     on it.
+
+     WHAT MAKES A MOVE READ AS TRAVEL rather than as a dissolve between two poses:
+
+       SHORTEST WAY ROUND    azimuth is an angle. Lerping -3.0 to 3.0 the long way is a
+                             360-degree spin for a six-degree turn.
+       A HOP                 the camera lifts and stands off through the middle of the
+                             move and settles back in. Real travel goes UP and OVER; a
+                             straight line between two orbit poses slides through the
+                             buildings and reads as a wipe. Scaled by how far the target
+                             actually moved, so a neighbour is a step and the far end of
+                             the site is a flight.
+       DURATION FROM DISTANCE  0.72s next door, up to 1.5s across the compound.
+       A QUINTIC IN-OUT      leaves and arrives with zero velocity, so there is no snap
+                             at either end and no lookAt pop.
+     ==================================================================================== */
+  const fly = { on: false, t: 0, dur: 0, hop: 0, elHop: 0, from: null, to: null }
+  /* smootherstep: zero first AND second derivative at both ends */
+  const ease5 = (t) => t * t * t * (t * (t * 6 - 15) + 10)
+  const shortAngle = (from, to) => {
+    let d = (to - from) % (Math.PI * 2)
+    if (d > Math.PI) d -= Math.PI * 2
+    if (d < -Math.PI) d += Math.PI * 2
+    return d
+  }
+
   const flyTo = (to, dur = 1.0) => {
     /* REDUCED MOTION IS AN AUTHORED STILL, NOT A SLOWER FLIGHT. A visitor who has asked
        for no motion still gets every level of this act — they are simply PUT there. The
        framing is identical, because the framing is the content; only the travel is
        removed. Read live rather than captured, so a change of setting takes effect
        without a reload. */
-    if (wantsStill()) dur = 0
-    composed = {
+    const still = wantsStill()
+    const dest = {
       az: to.az ?? cam.az,
       el: to.el ?? cam.el,
       dist: to.dist ?? cam.dist,
       target: (to.target || cam.target).clone(),
     }
-    const g = gsapRef.lib
-    if (!g || dur === 0) {
-      g?.killTweensOf(cam); g?.killTweensOf(cam.target)
-      Object.assign(cam, { az: to.az ?? cam.az, el: to.el ?? cam.el, dist: to.dist ?? cam.dist })
-      if (to.target) cam.target.copy(to.target)
+    composed = { az: dest.az, el: dest.el, dist: dest.dist, target: dest.target.clone() }
+    gsapRef.lib?.killTweensOf(cam)
+    gsapRef.lib?.killTweensOf(cam.target)
+
+    if (still || dur === 0) {
+      fly.on = false
+      Object.assign(cam, { az: dest.az, el: dest.el, dist: dest.dist })
+      cam.target.copy(dest.target)
       return
     }
-    g.killTweensOf(cam); g.killTweensOf(cam.target)
-    g.to(cam, { az: to.az ?? cam.az, el: to.el ?? cam.el, dist: to.dist ?? cam.dist, duration: dur, ease: 'door', overwrite: true })
-    if (to.target) g.to(cam.target, { x: to.target.x, y: to.target.y, z: to.target.z, duration: dur, ease: 'door', overwrite: true })
+
+    /* HOW FAR IS THIS, REALLY. Both ends of the move are resolved to a world position so
+       the answer is a distance in the scene rather than a difference between two orbit
+       numbers — a 40-degree swing at close range and the same swing across the site are
+       not the same journey and must not take the same time. */
+    const eye = (c) => new THREE.Vector3(
+      c.target.x + c.dist * Math.cos(c.el) * Math.sin(c.az),
+      c.target.y + c.dist * Math.sin(c.el),
+      c.target.z + c.dist * Math.cos(c.el) * Math.cos(c.az),
+    )
+    const travel = eye(cam).distanceTo(eye(dest)) + cam.target.distanceTo(dest.target) * 0.5
+    const span = Math.min(1, travel / 18)
+
+    fly.from = { az: cam.az, el: cam.el, dist: cam.dist, target: cam.target.clone() }
+    fly.to = dest
+    fly.dAz = shortAngle(cam.az, dest.az)
+    /* GOING ROUND THE END, NOT THROUGH THE WALL. Turning to the far side of a building
+       is half a turn, and half a turn has two equal ways round; the shorter-arc rule
+       cannot choose and the camera may sweep straight through the mass it is looking
+       at. `spin` names the way that passes the END of the run. */
+    if (to.spin) {
+      const want = Math.sign(to.spin)
+      if (Math.sign(fly.dAz) !== want) fly.dAz += want * Math.PI * 2
+    }
+    fly.t = 0
+    fly.t0 = (typeof performance !== 'undefined' ? performance.now() : Date.now())
+    fly.dur = Math.max(0.74, Math.min(1.6, dur * (0.78 + span * 0.92)))
+    /* The arc. Enough to be felt at a step next door, never enough to feel like a stunt. */
+    /* even a step next door lifts a little, or a short move is a dissolve */
+    fly.hop = Math.min(3.4, 0.42 + travel * 0.29)
+    fly.elHop = 0.018 + span * 0.10
+    fly.on = true
+  }
+
+  /* ADVANCED ON THE WALL CLOCK, NOT ON THE FRAME CLOCK.
+
+     The render loop clamps dt to 0.05 so a backgrounded tab cannot jump the model half
+     a second on its first frame back. Accumulating a tween out of that clamped value
+     ties the tween's SPEED to the frame rate: at sixty frames a second the move took
+     the 1.1s it was authored at, and under the review harness — which blocks the page
+     on every evaluate — the same move measured 3.3 seconds, creeping for two of them
+     and then rushing. That is not a harness curiosity; it is what a visitor on a slow
+     machine would get. Real elapsed time is the only honest basis for a duration. */
+  const flyStep = (now) => {
+    if (!fly.on) return
+    fly.t = Math.min(1, (now - fly.t0) / (fly.dur * 1000))
+    const k = ease5(fly.t)
+    /* sin(pi t) is zero at both ends and one in the middle — the arc adds nothing to
+       where the move starts or where it lands, only to the way it gets there */
+    const arc = Math.sin(Math.PI * fly.t)
+    const f = fly.from, t = fly.to
+    cam.az = f.az + fly.dAz * k
+    cam.el = f.el + (t.el - f.el) * k + fly.elHop * arc
+    cam.dist = f.dist + (t.dist - f.dist) * k + fly.hop * arc
+    cam.target.set(
+      f.target.x + (t.target.x - f.target.x) * k,
+      f.target.y + (t.target.y - f.target.y) * k,
+      f.target.z + (t.target.z - f.target.z) * k,
+    )
+    if (fly.t >= 1) {
+      fly.on = false
+      cam.az = t.az; cam.el = t.el; cam.dist = t.dist
+      cam.target.copy(t.target)
+    }
   }
 
   /* The world position of a building or a suite, so the camera can take it as its
@@ -2308,6 +2792,37 @@ export function initCompound3D(mount, model, opts = {}) {
     roofTopLocal: H_SUITE + H_PARAPET,
     /* one bay, by suite index — what a test needs to ask the model a direct question */
     bayOf: (i) => suiteObjs[i] || null,
+
+    /* IS THE CAMERA STILL MOVING. Now that a selection is a flight rather than a cut,
+       'wait 2.2 seconds and click where the door was' is a race a test can lose — and
+       it did, reporting a suite that would not select when what had actually happened
+       was that the door had travelled out from under a stale coordinate. A test that
+       waits for the model to say it has arrived measures the product; one that waits
+       for a number measures the number. */
+    get moving() { return fly.on },
+
+    /* HOW MANY ELEVATIONS THIS BUILDING HAS, and which one is being shown. Nine of the
+       eleven answer 1 and the interface offers nothing; 02 and 10 answer 2. */
+    rowCount: (num) => (buildingObjs.get(num)?.faceDirs?.length ?? 1),
+    rowIndex: (num) => (buildingObjs.get(num)?.rowIdx ?? 0),
+    /* Fly to this building's other side, round the end of it rather than through it.
+       Same level, same building, same selection rules — it is a camera move. */
+    flipRow() {
+      const B = buildingObjs.get(focusNum)
+      if (!B || !B.faceDirs || B.faceDirs.length < 2) return false
+      B.rowIdx = (B.rowIdx + 1) % B.faceDirs.length
+      const fd = B.faceDirs[B.rowIdx]
+      const p = B.roofs[0] ? worldOf(B.roofs[0]) : null
+      if (!p) return false
+      const az = Math.atan2(fd[0], fd[1]) + site.rotation.y + FOCUS.swing
+      const aim = p.clone()
+      aim.y -= wft(16)
+      aim.x += fd[0] * wft(12); aim.z += fd[1] * wft(12)
+      /* stand off further through the move so the swing clears the building */
+      flyTo({ az, el: FOCUS.el + 0.06, dist: FOCUS.dist, target: aim, spin: 1 }, 1.45)
+      paint3d()
+      return true
+    },
 
     /* WHERE A REAL DOOR IS ON SCREEN. V6 puts the suite's identity beside the door
        itself rather than in a rail at the bottom, so the interface has to be able to
@@ -2497,7 +3012,7 @@ export function initCompound3D(mount, model, opts = {}) {
              so the runs are taken separately and the one with the most AVAILABLE suites
              wins. That is the side worth showing, and for a single-run building it is
              simply that run. */
-          const fd = B.faceDir
+          const fd = (B.faceDirs && B.faceDirs[B.rowIdx]) || B.faceDir
           /* THREE QUARTERS, NOT DEAD ON. Standing exactly on the door normal is the most
              static view a building has, and on this site it is also the least legible
              one: the runs are parallel, so a perpendicular camera stacks the neighbours
@@ -2627,6 +3142,9 @@ export function initCompound3D(mount, model, opts = {}) {
   }
 
   el.addEventListener('pointerdown', (e) => {
+    /* A HAND ON THE MODEL OUTRANKS A MOVE IN PROGRESS. Without this the visitor drags
+       against the flight and the camera fights back for the rest of its duration. */
+    fly.on = false
     dragging = true; moved = 0
     lastX = e.clientX; lastY = e.clientY
     el.setPointerCapture?.(e.pointerId)
@@ -2707,6 +3225,9 @@ export function initCompound3D(mount, model, opts = {}) {
     if (!running) return
     requestAnimationFrame(frame)
     const dt = Math.min(0.05, (now - last) / 1000)
+    /* the same delta without the frame clamp, for anything whose DURATION is authored
+       in seconds rather than in frames — see flyStep */
+    const dtReal = Math.min(0.25, (now - last) / 1000)
     last = now
 
     /* Nothing renders while the act is off screen. A 3D scene ticking behind six other
@@ -2755,6 +3276,22 @@ export function initCompound3D(mount, model, opts = {}) {
       site.rotation.y = Math.sin((ambientPhase / AMB_PERIOD) * Math.PI * 2) * AMB_AMP * ambient
     }
 
+    /* THE PRACTICALS COME UP ALONG THE RUN. One shared clock, each fitting with its
+       own head start, so the light reads as travelling rather than as a level change. */
+    {
+      let any = false
+      for (const sc of sconces) if (sc.want > 0) { any = true; break }
+      sconceT = Math.min(1.35, Math.max(0, sconceT + (any ? dtReal : -dtReal * 2.4)))
+      for (const sc of sconces) {
+        const k = Math.max(0, Math.min(1, (sconceT - sc.delay) / 0.34))
+        const target = sc.want * k * k * (3 - 2 * k)
+        sc.have += (target - sc.have) * Math.min(1, dtReal * 9)
+        sc.light.intensity = sc.have
+      }
+    }
+    /* the apron pool rolls onto the door rather than switching onto it */
+    suiteLight.intensity += (suiteWant - suiteLight.intensity) * Math.min(1, dtReal * 7.5)
+    flyStep(now)
     applyCamera()
     renderer.render(scene, camera)
     updateCallouts()
@@ -2766,6 +3303,41 @@ export function initCompound3D(mount, model, opts = {}) {
   cam.target.set(HERO.tx, HERO.ty, HERO.tz)
   paint3d()
   applyCamera()
+
+  /* ====================================================================================
+     COMPILE THE STATE MATERIALS BEFORE ANYBODY ASKS FOR THEM.
+
+     Measured, and it was the second half of the transition problem. Sampling the camera
+     every 40ms across each move, five of the six legs travelled and ONE did not: the
+     first selection of the session, every time, reproducibly, reported zero moving
+     frames. Not a camera bug — a stall. The first time a building is focused, a dozen
+     materials it has never worn arrive at once (focus, hover, preview, subordinate, and
+     their roof and door variants, each carrying its own injected surface and therefore
+     its own program), GLSL compilation and linking happen on the main thread, rAF stops,
+     and when it resumes the tween's elapsed clock has run out. The visitor's very first
+     selection — the one that teaches them what selection does — was the one that cut.
+
+     So every variant is put on a tiny mesh inside the frustum, compiled once at startup
+     while nothing is happening, and the meshes are thrown away. The materials stay warm
+     for the life of the page. Nothing is left in the scene.
+     ==================================================================================== */
+  {
+    const warmMats = [M_focus, M_hover, M_lit, M_sub, M_hoverSub, M_preview, M_doorPreview,
+      M_roofPreview, M_roofFocus, M_roofSub, M_roofHoverSub, M_doorLit, M_doorHot,
+      M_doorPick, M_doorSub, M_glassHot, M_glassPick, M_glazeLit, M_lampHot, M_lampPick]
+    const warm = new THREE.Group()
+    for (const mm of warmMats) {
+      const w = new THREE.Mesh(bayGeo, mm)
+      w.scale.setScalar(0.0006)
+      w.position.copy(cam.target)
+      warm.add(w)
+    }
+    scene.add(warm)
+    try { renderer.compile(scene, camera) } catch { /* a driver that refuses is not fatal */ }
+    renderer.render(scene, camera)
+    scene.remove(warm)
+    warm.traverse((o) => { if (o.isMesh) o.geometry = null })
+  }
 
   return api
 }

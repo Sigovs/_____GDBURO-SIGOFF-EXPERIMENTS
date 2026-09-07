@@ -47,8 +47,24 @@ const STAGE = `
     <span>Lake Zurich, Illinois</span>
   </div>
 
+  <!-- ONE WAY HOME, AND IT NEVER MOVES.
+       ← Overview lived in the top-right cluster beside Site plan, in the same weight,
+       and a visitor deep in a suite had to decide which of Overview, Site plan, Escape
+       and the chevrons meant "show me everything again". It is its own control now,
+       in its own reserved place on the left, at one fixed coordinate in both the
+       building state and the suite state, saying what it does in words. -->
+  <button class="home" type="button" data-overview hidden>
+    <span class="home__a" aria-hidden="true">←</span><span class="home__t">All buildings</span>
+  </button>
+
+  <!-- ONLY WHERE THE ARCHITECTURE HAS TWO. Buildings 02 and 10 are two runs back to
+       back; nine of the eleven are one run and never show this. It is a camera move,
+       not a navigation layer: same building, same state, the other elevation. -->
+  <button class="flip" type="button" data-flip hidden>
+    <span class="flip__a" aria-hidden="true">⟳</span><span class="flip__t" data-flip-t>Other row</span>
+  </button>
+
   <div class="topright">
-    <button class="quiet" type="button" data-overview hidden>← Overview</button>
     <button class="quiet" type="button" data-plan-open>Site plan</button>
   </div>
 
@@ -59,17 +75,38 @@ const STAGE = `
     <p class="say__t" data-say-t>Choose a building.</p>
   </div>
 
-  <!-- The fallback, for the one switch in twenty the camera hides. No labels at rest. -->
-  <button class="step step--prev" type="button" data-step="-1" aria-label="Previous building" hidden>‹</button>
-  <button class="step step--next" type="button" data-step="1" aria-label="Next building" hidden>›</button>
+  <!-- THE STEPS SAY WHERE THEY GO. Two unlabelled chevrons scored 2/10 and deserved it:
+       an arrow at the edge of a compound of eleven buildings could mean the next
+       building, the next suite, or the next page. The number is the label. -->
+  <button class="step step--prev" type="button" data-step="-1" hidden>
+    <span class="step__a" aria-hidden="true">←</span><span class="step__n" data-step-prev></span>
+  </button>
+  <button class="step step--next" type="button" data-step="1" hidden>
+    <span class="step__n" data-step-next></span><span class="step__a" aria-hidden="true">→</span>
+  </button>
 
   <!-- Secondary: reaching a door that is off screen. Never the way the idea is learnt. -->
   <div class="v6-rail" data-v6-rail hidden>
     <div class="v6-rail__bays" data-bays role="group" aria-label="Suites in this building"></div>
   </div>
 
-  <!-- Only when there is a product. -->
-  <div class="prod" data-prod hidden></div>
+  <!-- ================================================================================
+       THE PRODUCT PLATE, BUILT ONCE.
+
+       It used to be written with innerHTML on every paint, so every value that changed
+       length changed the layout: 03 · 01 to 03 · 11 moved the price, Standard to Premium
+       moved the button, $549,000 to $699,000 re-centred the row. The plate has fixed
+       geometry now — a fixed width, fixed rows, one slot per fact — and changing suite
+       writes TEXT into slots that do not move. Nothing here is ever rebuilt.
+       ============================================================================== -->
+  <div class="prod" data-prod hidden>
+    <p class="prod__k" data-p-k>Suite</p>
+    <p class="prod__n" data-p-n>&nbsp;</p>
+    <p class="prod__t"><em data-p-kind>&nbsp;</em><span data-p-sq>&nbsp;</span></p>
+    <p class="prod__p" data-p-price>&nbsp;</p>
+    <button class="go" type="button" data-enter><span data-p-cta>Enter suite</span><i aria-hidden="true" data-p-arrow>→</i></button>
+    <button class="specs" type="button" data-specs>Full specs →</button>
+  </div>
 </div>`
 
 const PLAN = `
@@ -102,6 +139,16 @@ export function mountV6(host, opts = {}) {
   const railEl = q('[data-v6-rail]'), baysEl = q('[data-bays]')
   const prod = q('[data-prod]')
   const steps = [...host.querySelectorAll('[data-step]')]
+  const stepPrev = q('[data-step-prev]'), stepNext = q('[data-step-next]')
+  const flip = q('[data-flip]'), flipT = q('[data-flip-t]')
+  const P = {
+    k: q('[data-p-k]'), n: q('[data-p-n]'), kind: q('[data-p-kind]'), sq: q('[data-p-sq]'),
+    price: q('[data-p-price]'), cta: q('[data-p-cta]'), arrow: q('[data-p-arrow]'),
+    enter: q('[data-enter]'), specs: q('[data-specs]'),
+  }
+  /* WRITE, DO NOT REBUILD. Setting the same text is a no-op, so a repaint that changes
+     nothing cannot restart an animation or reflow a row. */
+  const put = (el, text) => { if (el && el.textContent !== text) el.textContent = text }
   const planMap = q('[data-plan-map]', plan)
 
   const compound = buildCompound(mount)
@@ -247,8 +294,11 @@ export function mountV6(host, opts = {}) {
     tagB.dataset.s = S.preview ? 'preview' : 'hover'
     tagB.style.left = Math.max(110, Math.min(w - 120, topX)) + 'px'
     tagB.style.top = Math.max(safe, top - 78) + 'px'
+    /* A DOUBLE-ROW BUILDING SAYS SO BEFORE YOU GO IN, which is the only way the fact
+       can be learnt: once inside, the second row is behind the first one. */
+    const rows2 = gl.rowCount ? gl.rowCount(subject.num) : 1
     tagB.innerHTML = `<span class="tag__n">${subject.num}</span>`
-      + `<span class="tag__m">${subject.open} of ${subject.suites.length} available</span>`
+      + `<span class="tag__m">${subject.open} of ${subject.suites.length} available${rows2 > 1 ? ' · two rows' : ''}</span>`
       + `<span class="tag__go">${S.preview ? 'Switch →' : 'View →'}</span>`
     tagB.hidden = false
   }
@@ -304,24 +354,51 @@ export function mountV6(host, opts = {}) {
        nobody has chosen — hidden, but present, and present is what a keyboard, a
        screen reader and a query all find. There is no product, so there is no
        product markup. */
+    /* THE PLATE APPEARS ONLY WHEN THERE IS A PRODUCT, and its CONTENT is written into
+       slots that never move. The old block replaced the whole panel's markup on every
+       paint, which is what made it jump. */
     prod.hidden = !s
-    if (!s) prod.replaceChildren()
+    /* Belt as well as braces: `hidden` already takes it out of layout, out of the tab
+       order and out of hit testing, and `inert` says so to anything that asks. */
+    if (s) prod.removeAttribute('inert'); else prod.setAttribute('inert', '')
+    /* HIDDEN IS NOT EMPTY. The skeleton has to stay in the document — that is what
+       makes the geometry fixed — but the last suite's number and price must not stay
+       in it, or a query, a find-in-page or a stale read still turns up a product
+       nobody has chosen. The slots are blanked; the rows they sit in do not move. */
+    if (!s) {
+      for (const el of [P.n, P.kind, P.sq, P.price]) put(el, ' ')
+      P.enter.dataset.mode = 'enter'
+    }
     if (s) {
-      const t = TYPE_SPEC[s.type]
-      prod.innerHTML = S.entered
-        ? `<p class="prod__k">You are in</p>
-           <p class="prod__n">${s.ref}</p>
-           <p class="prod__t"><em data-type="${s.type}">${kind(s.type)}</em> · ${sqft(s.type)}</p>
-           <p class="prod__p">${price(s.type)}</p>
-           <button class="go" type="button" data-go><span>Continue to the suite</span><i aria-hidden="true">↓</i></button>`
-        : `<p class="prod__k">Suite</p>
-           <p class="prod__n">${s.ref}</p>
-           <p class="prod__t"><em data-type="${s.type}">${kind(s.type)}</em> · ${sqft(s.type)}</p>
-           <p class="prod__p">${price(s.type)}</p>
-           <button class="go" type="button" data-enter><span>Enter suite</span><i aria-hidden="true">→</i></button>
-           <button class="specs" type="button" data-specs>Full specs →</button>`
+      put(P.k, S.entered ? 'You are in' : 'Suite')
+      put(P.n, s.ref)
+      put(P.kind, kind(s.type))
+      P.kind.dataset.type = s.type
+      put(P.sq, ' · ' + sqft(s.type))
+      put(P.price, price(s.type))
+      put(P.cta, S.entered ? 'Continue to the suite' : 'Enter suite')
+      put(P.arrow, S.entered ? '↓' : '→')
+      P.enter.dataset.mode = S.entered ? 'go' : 'enter'
+      P.specs.hidden = S.entered
     }
 
+    /* THE SECOND ELEVATION, where there is one. */
+    {
+      const rows = (b && gl) ? gl.rowCount(b.num) : 1
+      flip.hidden = !(b && rows > 1)
+      if (!flip.hidden) {
+        const i = gl.rowIndex(b.num)
+        put(flipT, i === 0 ? 'Second row' : 'First row')
+      }
+    }
+
+    /* THE STEPS NAME THE BUILDINGS THEY LEAD TO. */
+    if (S.building) {
+      const list = compound.buildings
+      const i = list.indexOf(S.building)
+      put(stepPrev, list[(i - 1 + list.length) % list.length].num)
+      put(stepNext, list[(i + 1) % list.length].num)
+    }
     for (const el of baysEl.children) {
       el.setAttribute('aria-pressed', el._s === s ? 'true' : 'false')
       if (el._s === S.hoverSuite && el._s !== s) el.setAttribute('data-hot', 'true')
@@ -331,11 +408,16 @@ export function mountV6(host, opts = {}) {
   }
 
   ov.addEventListener('click', overview)
+  flip.addEventListener('click', () => { if (gl?.flipRow()) paint() })
   for (const el of steps) el.addEventListener('click', () => stepBuilding(Number(el.dataset.step)))
   prod.addEventListener('click', (e) => {
-    if (e.target.closest('[data-enter]')) enterSuite()
-    else if (e.target.closest('[data-go]')) opts.onContinue?.(S.suite)
-    else if (e.target.closest('[data-specs]')) opts.onSpecs?.(S.suite)
+    /* One button, two jobs, ONE box. It used to be two different buttons swapped in and
+       out of the markup, which is a change of geometry at the exact moment a visitor is
+       reaching for it. */
+    if (e.target.closest('[data-enter]')) {
+      if (P.enter.dataset.mode === 'go') opts.onContinue?.(S.suite)
+      else enterSuite()
+    } else if (e.target.closest('[data-specs]')) opts.onSpecs?.(S.suite)
   })
   /* THE ESCAPE HIERARCHY IS V5.3'S AND IS NOT TOUCHED: one step per press. */
   const onKey = (e) => {

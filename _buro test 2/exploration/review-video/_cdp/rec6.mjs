@@ -7,6 +7,19 @@
 */
 import { connect, recorder, sleep, moveTo, clickAt, CURSOR_JS } from './cdp.mjs'
 import { ensure } from './chrome.mjs'
+/* WAIT FOR THE CAMERA TO ARRIVE — but wait for it to LEAVE first.
+   The first cut polled `moving` immediately after the click and found it false, because
+   the interface hands the selection to the model on the next frame: settle returned
+   before the flight had begun, the harness read every door position mid-flight, and
+   reported a door at the far left of the frame that would not answer a click. The
+   product was correct and the measurement was not. */
+const settle = async (evf, max = 5000) => {
+  const t0 = Date.now()
+  const moving = () => evf('!!(window.__v5.gl && window.__v5.gl.moving)')
+  while (Date.now() - t0 < 700 && !(await moving())) await sleep(50)
+  while (Date.now() - t0 < max && (await moving())) await sleep(70)
+  await sleep(300)
+}
 const URL = process.argv[2] || 'http://localhost:5183/exploration/study/proposed-v6-architecture-ui.html'
 const DIR = 'exploration/review-video/_cdp/frames-v6'
 const VW = 1440, VH = 900
@@ -81,30 +94,34 @@ if (d) { cur = await moveTo(cdp, cur, d, 26, 17); await sleep(1800); await beat(
   await clickAt(cdp, d); await sleep(3000) }
 await beat('05 suite ' + firstFree)
 
-/* ENTER — held on screen, then pressed */
+/* ENTER — held on screen, then pressed, then the facade in close-up */
 const en = await at('[data-enter]')
-if (en) { cur = await moveTo(cdp, cur, en, 22, 17); await sleep(1400); await clickAt(cdp, en); await sleep(3400) }
-await beat('06 entered')
+if (en) { cur = await moveTo(cdp, cur, en, 22, 17); await sleep(1500); await clickAt(cdp, en); await sleep(4200) }
+await beat('06 entered — facade close')
+await sleep(1800)
 
-/* straight to another building, from inside — no Overview in between */
-await ev('window.__v5.backToBuilding()'); await sleep(2000)
-/* WHICHEVER NEIGHBOURS ARE ACTUALLY IN THE FRAME. Naming two building numbers in advance
-   assumes a camera pose; the first cut asked for 04 and 06 from inside 03, neither was on
-   screen, and the walk silently skipped the one move the brief most wants to see. The
-   pose decides which neighbours are reachable, so the walk asks the pose. */
+/* back out to the building, then straight to the next one by clicking the model */
+await ev('window.__v5.backToBuilding()'); await sleep(2400)
 let switched = 0
 for (const nn of ['04', '02', '05', '01', '06', '07', '08', '09', '10', '11']) {
   if (switched >= 2) break
   const q = await pointOn(nn)
   if (!q) continue
-  cur = await moveTo(cdp, cur, q, 26, 17); await sleep(1200); await clickAt(cdp, q); await sleep(2900)
-  await beat('07 switched to ' + nn); switched++
+  cur = await moveTo(cdp, cur, q, 26, 17); await sleep(1300); await clickAt(cdp, q); await sleep(3200)
+  await beat('07 travelled to ' + nn); switched++
 }
 
-/* home */
-const ovb = await at('[data-overview]')
-if (ovb) { cur = await moveTo(cdp, cur, ovb, 24, 17); await sleep(800); await clickAt(cdp, ovb); await sleep(3200) }
-await beat('08 home')
+/* the one control that always means the whole compound */
+const home = await at('[data-overview]')
+if (home) { cur = await moveTo(cdp, cur, home, 24, 17); await sleep(1100); await clickAt(cdp, home); await sleep(3400) }
+await beat('08 all buildings')
+
+/* the site plan as a utility, and back to the model */
+const pl = await at('[data-plan-open]')
+if (pl) { cur = await moveTo(cdp, cur, pl, 22, 17); await sleep(900); await clickAt(cdp, pl); await sleep(2600); await beat('09 site plan') }
+const px = await at('[data-plan-exit]')
+if (px) { cur = await moveTo(cdp, cur, px, 22, 17); await sleep(900); await clickAt(cdp, px); await sleep(2600) }
+await beat('10 back to 3D')
 
 const n = await rec.stop()
 console.log('frames ' + n + '  ->  ' + DIR)

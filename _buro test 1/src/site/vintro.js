@@ -34,6 +34,42 @@ import { gsap } from '../motion/context.js';
 import { place } from './vfilm.js';
 import { ENTER_FROM } from './vreveal.js';
 
+/*
+  THE DESIGNATION IS SPLIT AT RUNTIME, NOT IN THE MARKUP.
+
+  The h1 ships as one real word so it is still the document's heading, still the
+  LCP element, and still correct with scripts off. Only when the intro is actually
+  going to play does it become letters — each glyph in its own clipping wrapper so
+  it can wipe in from its own left edge instead of flying across its neighbours.
+
+  The clip is `inset(-30% 0 -30% 0)`: horizontal only. `overflow: hidden` would
+  have cut the cap heights, because the monument is set at 0.84 line-height and
+  the caps stand taller than their own line box.
+
+  Accessibility: the element keeps the whole word as its label and every letter is
+  hidden from the tree, so a screen reader still reads "KR700PA" and not seven
+  separate characters.
+*/
+const splitChars = (el) => {
+  const text = el.textContent.trim();
+  if (!text) return [];
+  el.setAttribute('aria-label', text);
+  el.textContent = '';
+  const chars = [];
+  for (const ch of text) {
+    const wrap = document.createElement('span');
+    wrap.className = 'mon__w';
+    wrap.setAttribute('aria-hidden', 'true');
+    const glyph = document.createElement('span');
+    glyph.className = 'mon__c';
+    glyph.textContent = ch;
+    wrap.append(glyph);
+    el.append(wrap);
+    chars.push(glyph);
+  }
+  return chars;
+};
+
 const lerp = (a, b, t) => a + (b - a) * t;
 const blend = (f, t, k) => place({
   az: lerp(f.az, t.az, k), r: lerp(f.r, t.r, k), h: lerp(f.h, t.h, k), fov: lerp(f.fov, t.fov, k),
@@ -58,8 +94,24 @@ export function playIntro(world, callouts, D) {
   world.setLight(I.light, 1);
   world.touch();
 
+  /*
+    THE DESIGNATION GETS ITS OWN GESTURE, SO IT LEAVES THE BLOCK LIST.
+
+    Everything else in the opening beat uses the section's authored entrance as
+    one move. The word does not: it is the first thing on the page and the only
+    element big enough for a per-letter reveal to read as an event rather than as
+    a fidget. It is held at rest while its own letters carry the motion.
+  */
+  const mon = section?.querySelector('[data-split="chars"]');
+  const chars = mon ? splitChars(mon) : [];
+  const blocks = chars.length ? type.filter((n) => n !== mon) : type;
+
   const enterFrom = ENTER_FROM[section?.dataset.enter ?? 'rise'] ?? ENTER_FROM.rise;
-  if (type.length) gsap.set(type, { ...enterFrom });
+  if (blocks.length) gsap.set(blocks, { ...enterFrom });
+  if (chars.length) {
+    gsap.set(mon, { x: 0, y: 0, xPercent: 0, scale: 1, opacity: 1, filter: 'none' });
+    gsap.set(chars, { xPercent: -108, opacity: 0 });
+  }
 
   if (first) {
     callouts.setShot([first], shot.id);
@@ -114,6 +166,8 @@ export function playIntro(world, callouts, D) {
       k.cam = 1; k.light = 1;
       try { drive(); callouts.setDraw(1); } catch (e) { console.error('[intro]', e); }
       if (type.length) gsap.set(type, { x: 0, y: 0, xPercent: 0, scale: 1, opacity: 1, filter: 'none' });
+      // the deadline can win mid-word; the letters have to land too
+      if (chars.length) gsap.set(chars, { xPercent: 0, opacity: 1 });
       delete document.documentElement.dataset.intro;
       scrollTo(0, 0);
       resolve();
@@ -128,11 +182,27 @@ export function playIntro(world, callouts, D) {
     tl.to(k, { light: 1, duration: 0.95, ease: 'power2.out' }, 0)
       .to(k, { cam: 1, duration: 1.70, ease: 'power2.inOut' }, 0.30);
 
-    if (type.length) {
-      tl.to(type, {
+    if (blocks.length) {
+      tl.to(blocks, {
         x: 0, y: 0, xPercent: 0, scale: 1, opacity: 1, filter: 'blur(0px)',
         duration: 1.05, ease: 'power3.out', stagger: 0.12,
       }, 0.85);
+    }
+
+    /*
+      LETTER BY LETTER, AND EARLY.
+
+      It starts at 0.72 — ahead of the rest of the type — because seven letters at
+      0.06 apart take four tenths to lay down, and the word has to be finished
+      before the callout strikes at 1.35 or the frame has two things being drawn
+      at once. Each glyph wipes in from its own left edge inside its own clip, so
+      no letter ever crosses the one beside it.
+    */
+    if (chars.length) {
+      tl.to(chars, {
+        xPercent: 0, opacity: 1,
+        duration: 0.86, ease: 'power3.out', stagger: 0.06,
+      }, 0.72);
     }
 
     if (first) {

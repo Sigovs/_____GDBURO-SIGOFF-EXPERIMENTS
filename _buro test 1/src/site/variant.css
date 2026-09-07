@@ -116,6 +116,19 @@ main { position: relative; }
 }
 .co__dot { fill: var(--accent); }
 
+/*
+  THE PLATE VOCABULARY IS INERT UNTIL A DIRECTION ASKS FOR IT.
+
+  `co__cut`, `co__edge` and `co__tick` exist for the presentation direction's
+  machined plate. They are siblings in every callout group, so they have to paint
+  NOTHING anywhere else — and an SVG path with no fill declared is filled BLACK,
+  not left alone. Measured on indexFinal: the chamfer path was drawing a black
+  slab behind that page's callout. Stated here once, where the shared group is
+  built, rather than left to each sheet to remember.
+*/
+.co__cut, .co__tick { fill: none; stroke: none; }
+.co__edge { stroke: none; }
+
 /* the plate: a numbered marker, a label, a measured value under a rule */
 .co__box {
   fill: none;

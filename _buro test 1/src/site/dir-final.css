@@ -1,0 +1,336 @@
+/*
+  FINAL — the level line
+
+  Three things this sheet decides, and nothing else:
+
+  1  THE OPENING IS A COLLISION, NOT A CAPTION. The designation is set at 18vw
+     and the station is composed against it, so the machine rises out of its own
+     name. That is the one thing direction B had that C did not, and it is the
+     whole reason C's opening was the weak frame in an otherwise strong film.
+     (It was first authored as an occlusion at z-index -1. That painted nothing;
+     the note at the opening rule below records what was measured and why the
+     relationship is now built out of where the masses are instead.)
+
+  2  THE ANNOTATION IS HEAVY ENOUGH TO BE READ AT A GLANCE. Direction A's weight
+     — filled marker, ink number on the accent, 26px label — plus a backing that
+     A did not have, so a label can land anywhere the solver puts it and still be
+     legible over a lit casting.
+
+  3  ONE SENTENCE PER BEAT, LOW LEFT, ON ITS OWN CONSTRUCTED GROUND. C's grammar,
+     unchanged, because it was the only one that survived eight stops.
+
+  The scroll budget (`DNA38`): 88 + 140 + 210 + 120 + 160 vh of film, plus the
+  record — 7.2 viewport-heights before the table, 9.06 measured end to end at
+  1440x900. The peak holds 210 of them, which is the only place on this page
+  where an advance that long buys something the stops can show (`MJ10`).
+*/
+
+.beat--open    { min-height:  88vh; }   /* short: two stops inside it were one shot twice */
+.beat--stature { min-height: 140vh; }
+.beat--level   { min-height: 210vh; }   /* the peak gets the room (DNA28) */
+.beat--skin    { min-height: 120vh; }
+.beat--release { min-height: 160vh; }
+
+.beat .type {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  padding: 6rem var(--gutter) 4.5rem;
+  display: grid;
+  align-content: end;
+  justify-items: start;
+  pointer-events: none;
+  z-index: 10;
+  overflow: clip;
+}
+
+/* ── 01 · THE OPENING ─────────────────────────────────────────────────────
+   The word is set at 18vw and runs past both edges on purpose; the crop is
+   committed rather than nearly-committed (`C9`). One vw value fits every width
+   because the string is fixed and both the set width and the size scale
+   linearly with vw.
+
+   THE WORD IS IN FRONT, AND THE COLLISION IS COMPOSED RATHER THAN LAYERED.
+
+   It was authored at `z-index: -1` so the arm would pass through the letterforms.
+   Measured on the render, it painted nothing at all: at -1 the block is covered,
+   and at 5 the same block is the strongest thing on the page. index1's own sheet
+   carries a note about the day this identical device turned out never to have
+   fired for a whole build, which is the point — a depth trick that silently
+   paints nothing is indistinguishable from a design that was never made (`U16`).
+
+   So the relationship is built out of where the masses ARE. The station puts the
+   machine right of centre and standing well clear above the cap-line, the word
+   is set low, and the two overlap only across the base and its shadow — dark
+   ground, where 288px of near-white measures clean. The machine rises out of its
+   own name instead of passing through it. */
+.beat--open .type {
+  align-content: end;
+  padding-bottom: 4.6rem;
+}
+.monument {
+  margin: 0;
+  font: 700 18vw/0.84 var(--display);
+  letter-spacing: -0.055em;
+  white-space: nowrap;
+  transform: translateX(-3.5%);
+  color: var(--ink);
+}
+.monument__sub {
+  margin: 1.15rem 0 0;
+  font: 500 15px/1 var(--mono);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/*
+  The chapter mark. Editorial furniture rather than another element (`DNA34`):
+  it identifies the page as a five-part study on the first screen, which is work
+  a "scroll to explore" prompt does not do. It sits on the glass, not in the room
+  — it is apparatus, and the designation is the subject.
+*/
+.chapter {
+  position: fixed;
+  left: var(--gutter);
+  bottom: 1.6rem;
+  z-index: 12;
+  margin: 0;
+  font: 500 13px/1 var(--mono);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+.chapter b { color: var(--accent); font-weight: 500; }
+
+/* ── the sentence per beat ────────────────────────────────────────────────
+   A subtitle sits ON the picture, so it carries its own ground — constructed to
+   fade to nothing before it reaches an edge, so it never draws a hard line
+   across a deliberately transparent field (`U18`). */
+.line {
+  margin: 0;
+  font: 400 clamp(1.2rem, 1.75vw, 1.7rem)/1.34 var(--display);
+  color: var(--ink);
+  /* 27ch let the longest line run its tail past the opaque part of its own
+     ground and onto the casting — measured at 2.95:1 on the peak's sentence.
+     The measure comes in and the ground holds full strength further across. */
+  max-width: 23ch;
+  padding: 0.8em 2.6em 0.8em 0;
+  background: linear-gradient(to right,
+    rgb(10 12 13 / 0.88) 0%,
+    rgb(10 12 13 / 0.86) 66%,
+    rgb(10 12 13 / 0) 100%);
+}
+/*
+  The closing claim is the biggest type on the page after the designation, and
+  the release shot puts it over a fully lit machine — measured at 1.31:1, which
+  for 69px display type still needs 3.0. Large type is not exempt; it is exempt
+  from 4.5, and 1.31 is not 3. It gets the same constructed ground as the
+  sentences, deeper because the mass is bigger and the light under it is at its
+  brightest here.
+*/
+.claim {
+  margin: 0;
+  font: 600 clamp(2.1rem, 4.8vw, 5rem)/1.0 var(--display);
+  letter-spacing: -0.03em;
+  max-width: 13ch;
+  color: var(--ink);
+  padding: 0.28em 1.1em 0.34em 0;
+  background: linear-gradient(to right,
+    rgb(10 12 13 / 0.9) 0%,
+    rgb(10 12 13 / 0.86) 70%,
+    rgb(10 12 13 / 0) 100%);
+}
+
+/* ══ THE PERMANENT FURNITURE GETS A GROUND ══════════════════════════════
+   The wordmark, the study line, the camera readout and the chapter mark are on
+   screen for the whole film, which makes them part of the composition (`U10`)
+   and puts them over whatever the camera is looking at. Measured on the render
+   at the macro station — 0.3 m from a lit casting — the wordmark ran at 3.04:1,
+   the readout at 1.29:1 and the chapter mark at 1.71:1. All three are functional
+   text, so all three need AA at every frame (`color I6`, `DM5`, `DNA77`).
+
+   The fix is a constructed ground, not heavier type. Each band fades to nothing
+   before it reaches an edge, so it never draws a hard line across a deliberately
+   transparent field (`U17`), and each is a sibling of the copy rather than a
+   child of it (`DNA21`). */
+.dir-final .masthead {
+  top: 0;
+  padding-block: 1.5rem 4.6rem;
+  background: linear-gradient(to bottom, rgb(10 12 13 / 0.9) 0%, rgb(10 12 13 / 0.72) 38%, rgb(10 12 13 / 0) 100%);
+}
+/* The readout sits below the masthead's opaque zone, where the band has already
+   thinned, and it is 13px mono over whatever the camera is on — at the macro
+   station that measured 1.58:1. It carries its own short ground rather than the
+   band being deepened for everything. */
+.dir-final .readout {
+  top: 3.4rem;
+  /* 13px was under the functional floor (`I7`) for a string a visitor can and
+     does read, and --ink-dim over a 0.85 ground on a lit casting measured
+     1.55:1. It goes to the floor, on a ground that holds, in an ink that is not
+     the page's quietest. */
+  font-size: 14px;
+  color: var(--ink-muted);
+  padding: 0.5em 0 0.55em 1.6em;
+  background: linear-gradient(to left,
+    rgb(10 12 13 / 0.98) 0%,
+    rgb(10 12 13 / 0.97) 80%,
+    rgb(10 12 13 / 0) 100%);
+}
+
+.dir-final .chapter {
+  left: 0;
+  bottom: 0;
+  padding: 3.2rem var(--gutter) 1.6rem;
+  background: linear-gradient(to top, rgb(10 12 13 / 0.92) 0%, rgb(10 12 13 / 0.88) 34%, rgb(10 12 13 / 0) 100%);
+}
+
+/* ══ CALLOUTS — direction A's weight, with the backing A never had ═══════ */
+
+/*
+  A CALLOUT IS LEGIBLE OR IT IS GONE.
+
+  The cue is binary on scroll progress; the only source of an in-between state is
+  the fade itself, and at 620ms a stop landing on a cue boundary caught the marker
+  at a quarter strength — measured at 1.42:1 for a number that is 11:1 when it has
+  arrived. Shortening the crossing is the fix: the band still exists, and nothing
+  a visitor can stop on sits in it for long.
+*/
+.dir-final .co__g { transition-duration: 190ms; }
+
+.dir-final .co__plate {
+  fill: rgb(10 12 13 / 0.78);
+  stroke: none;
+}
+.dir-final .co__box { fill: var(--accent); stroke: none; }
+.dir-final .co__num { fill: var(--ground); font-weight: 600; font-size: 20px; }
+.dir-final .co__label { font-size: 26px; letter-spacing: 0.11em; fill: var(--ink); }
+.dir-final .co__value { font-size: 19px; fill: var(--ink); }
+.dir-final .co__lead { stroke: rgb(var(--ink-rgb) / 0.92); stroke-width: 1.8; }
+.dir-final .co__rule { stroke: rgb(var(--accent-rgb) / 0.75); stroke-width: 1.4; }
+
+/* ══ THE LEVEL LINE ══════════════════════════════════════════════════════
+   Two depths, and the z-indices are the whole statement: the datum is a height
+   in the hall and the machine occludes it; the plate segment and the measurement
+   are an annotation on the glass. */
+
+.lvl {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  transition: opacity 420ms var(--e-enter);
+}
+.lvl--room  { z-index: -1; }
+.lvl--sheet { z-index: 9; }
+
+/* the datum: a hairline the length of the frame, and a solid tick at the plate */
+/* At 0.42 and one pixel the datum did not read as a line across the frame — it
+   read as an artefact of the render, which is the opposite of an instrument. */
+.lvl__rule {
+  stroke: rgb(var(--ink-rgb) / 0.62);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+.lvl__tri { fill: rgb(var(--ink-rgb) / 0.72); }
+
+/*
+  The plate's own axis, drawn heavy and in the accent. It is the only element on
+  the page that carries the accent as a LINE, so nothing else can be mistaken for
+  it — and if it ever pitched away from the hairline behind it, the difference
+  would be the most visible thing on screen.
+*/
+.lvl__plate {
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: butt;
+  vector-effect: non-scaling-stroke;
+}
+
+.lvl__flagbox { fill: none; stroke: rgb(var(--ink-rgb) / 0.5); stroke-width: 1; }
+.lvl__flag {
+  fill: rgb(var(--ink-rgb) / 0.72);
+  font: 500 14px/1 var(--mono);
+  letter-spacing: 0.06em;
+}
+
+/* the measurement, on its own ground so it is legible over the casting */
+.lvl__valbox { fill: url(#lvl-ground); }
+/* The one three-decimal number on the page, and the only thing on it set larger
+   than a callout label. 40px was a caption; this is the argument. */
+.lvl__value {
+  fill: var(--ink);
+  font: 600 58px/1 var(--mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.015em;
+}
+.lvl__cap {
+  /* --ink-muted measured 4.31:1 against its own panel over a lit casting, which
+     is under the floor for 14px. The caption is the sentence that says the number
+     is live; it holds the floor. */
+  fill: rgb(var(--ink-rgb) / 0.82);
+  font: 500 14px/1 var(--mono);   /* the functional floor (`I7`) */
+  letter-spacing: 0.16em;
+}
+
+/* `quiet` introduces the instrument: the rule, and nothing that reads as a claim */
+.lvl--sheet[data-mode="quiet"] .lvl__plate,
+.lvl--sheet[data-mode="quiet"] .lvl__valbox,
+.lvl--sheet[data-mode="quiet"] .lvl__value,
+.lvl--sheet[data-mode="quiet"] .lvl__cap,
+.lvl--sheet[data-mode="quiet"] .lvl__flagbox,
+.lvl--sheet[data-mode="quiet"] .lvl__flag { opacity: 0; }
+.lvl--room[data-mode="quiet"] .lvl__tri { opacity: 0; }
+
+/* ── the record ──────────────────────────────────────────────────────────── */
+/*
+  THE LAST MASS IS COMPOSED, NOT WHERE THE REMAINING CONTENT WENT (`C19`).
+
+  At 54svh of lead the column started so low that the provenance ran off the
+  bottom of the screen and collided with the chapter mark, and the machine had
+  been dimmed to a shadow — which also left `Drag to rotate` pointing at nothing,
+  an affordance with no object (`DM7`). The lead comes in so the whole record
+  stands on one screen, the counter stops at the end of the film, and the machine
+  stays lit enough on the right to be the thing the orbit turns.
+*/
+.beat--record {
+  min-height: 100svh;
+  display: grid;
+  align-content: center;
+  padding: 20svh var(--gutter) 3.5rem;
+}
+.dir-final .chapter[data-end] { opacity: 0; transition: opacity 320ms var(--e-enter); }
+.record__head { font-size: clamp(1.5rem, 2.6vw, 2.4rem); }
+
+/*
+  THE TABLE STANDS ON ITS OWN GROUND.
+
+  The record arrives while the machine is still lit and still travelling behind
+  it — the exposure floor only reaches 0.60 at the end — so the note ran at
+  1.01:1 across a casting on the way in. A column of sustained reading is the one
+  place on this page where "placed rather than defended" is not available: the
+  text is long, the ground moves under it, and the measure cannot dodge.
+
+  It is a panel, not a scrim over the copy: a sibling ground the column sits on,
+  faded out to the right so it never draws an edge across the hall (`U17`).
+*/
+.dir-final .record {
+  padding: 2.6rem 3rem 2.8rem;
+  margin-left: -3rem;
+  /* The fade used to start at 74%, which put the last quarter of every table row
+     and most of the provenance over a lit arm. The ground holds at full strength
+     across the whole column and releases only in the last tenth, where there is
+     nothing but the right margin. */
+  background: linear-gradient(to right,
+    rgb(10 12 13 / 0.96) 0%,
+    rgb(10 12 13 / 0.95) 90%,
+    rgb(10 12 13 / 0) 100%);
+}
+
+/* ── reduced motion: the peak's frame, and the measurement stays on it ───── */
+@media (prefers-reduced-motion: reduce) {
+  .beat--open .type { z-index: 10; }   /* nothing occludes it when nothing moves */
+  .monument { font-size: 15vw; }
+}

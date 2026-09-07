@@ -29,7 +29,27 @@ const blend = (f, t, k) => place({
   t: [lerp(f.t[0], t.t[0], k), lerp(f.t[1], t.t[1], k), lerp(f.t[2], t.t[2], k)],
 });
 
-export function createFilm(world, callouts, direction) {
+/*
+  THE LEVEL LINE'S SHOT SPEC.
+
+  `shot.level` is `{ mode, at }`, where `at` is the progress the device reaches
+  full strength by. It ramps rather than switching, because a full-viewport rule
+  appearing between two frames reads as a glitch — and because a device that
+  arrives WITH the articulation it is measuring is a measurement being taken,
+  while one that is already there is a graphic that was lying on the picture.
+
+  A shot with no `level` key turns it off. Stating the absence per shot rather
+  than letting the last one persist is what keeps `DM6` — one depth idea per view
+  — checkable in the direction file instead of by scrolling.
+*/
+const levelAt = (shot, p) => {
+  const L = shot.level;
+  if (!L) return { mode: 'off', at: 0 };
+  const [a, b] = L.in ?? [0, 0.18];
+  return { mode: L.mode ?? 'quiet', at: clamp01(ease(span(p, a, b))) * (L.max ?? 1) };
+};
+
+export function createFilm(world, callouts, direction, level = null) {
   const D = direction;
   const put = (st) => { world.rigCam.set(st); world.touch(); };
   let active = null;
@@ -62,6 +82,7 @@ export function createFilm(world, callouts, direction) {
           */
           if (active !== shot.id) { active = shot.id; callouts.setShot(shot.callouts ?? []); }
           callouts.cue(p);
+          level?.set(levelAt(shot, p));
         },
       });
     });
@@ -106,7 +127,20 @@ export function createFilm(world, callouts, direction) {
         recordP = self.progress;
         putRecord();
         world.setExposure(lerp(D.record.from ?? 1.18, D.record.floor ?? 0.6, self.progress));
-        callouts.setFade(1 - clamp01(self.progress * 1.4));
+        /*
+          THE EXIT IS FAST, ON PURPOSE.
+
+          At 1.4 the callouts spent most of the record's approach sitting between
+          0.4 and 0.7 opacity — measured on the render at 1.79:1 against the hall,
+          which is a label that is present, unreadable, and still occupying its
+          slot. A callout is either legible or gone (`DNA62`); the band in between
+          is the only wrong answer, so the fade crosses it quickly.
+        */
+        callouts.setFade(1 - clamp01(self.progress * 3.2));
+        // The level line leaves the same way, and by strength rather than by a
+        // mode switch — so scrolling back up restores it continuously instead of
+        // snapping a full-viewport rule on between two frames.
+        level?.set({ ...(last.level ?? { mode: 'quiet' }), at: 1 - clamp01(self.progress * 3.2) });
       },
       onLeaveBack: () => {
         spinDrag = 0; recordP = 0;
@@ -114,6 +148,7 @@ export function createFilm(world, callouts, direction) {
         put(place(last.to));
         world.setExposure(D.record.from ?? 1.18);
         callouts.setFade(1);
+        level?.set(levelAt(last, 1));
       },
     });
   }, document.documentElement);
@@ -122,12 +157,19 @@ export function createFilm(world, callouts, direction) {
 }
 
 /** The authored still for prefers-reduced-motion: the film's strongest frame. */
-export function createStill(world, callouts, direction) {
+export function createStill(world, callouts, direction, level = null) {
   const s = direction.still ?? direction.shots[direction.shots.length - 1].to;
   world.rig.setPose(direction.stillPose ?? 1);
   world.rigCam.cut(place(s));
   world.setLight(direction.stillLight ?? direction.shots[direction.shots.length - 1].light, 1);
   callouts.setShot(direction.stillCallouts ?? []);
   callouts.cue(1);
+  /*
+    The still keeps the PROOF, not a souvenir of it. A reduced-motion visitor
+    cannot watch the plate hold through the range, so the one frame they get is
+    the frame where the measurement is on screen and readable (`DM4`, `MJ9`):
+    the claim survives the loss of the choreography that demonstrated it.
+  */
+  level?.set(direction.stillLevel ?? { mode: 'proof', at: 1 });
   world.touch();
 }

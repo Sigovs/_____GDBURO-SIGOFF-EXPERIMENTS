@@ -41,8 +41,20 @@ export function createReveals(scope, { entered = new Set() } = {}) {
       const enter = gsap.timeline({ paused: true }).fromTo(els, from,
         { y: 0, x: 0, xPercent: 0, scale: 1, opacity: 1, filter: 'blur(0px)',
           duration: 1.15, ease: 'power3.out', stagger: 0.13 });
+      /*
+        THE EXIT BLUR IS OPTIONAL, BECAUSE IT IS THE EXPENSIVE HALF.
+
+        `filter: blur()` is a paint-and-composite cost per element per frame, and
+        it scales with the number of targets — fine for a chapter with two lines
+        of type, not fine for one staging eight blocks at once. `data-exit="clean"`
+        leaves on transform and opacity alone, which is compositor-only work.
+        The gesture reads the same; only the frame budget differs.
+      */
+      const clean = section.dataset.exit === 'clean';
       const exit = gsap.timeline({ paused: true }).to(els,
-        { y: -60, opacity: 0, filter: 'blur(12px)', duration: 0.9, ease: 'power2.in', stagger: 0.08 });
+        clean
+          ? { y: -60, opacity: 0, duration: 0.9, ease: 'power2.in', stagger: 0.08 }
+          : { y: -60, opacity: 0, filter: 'blur(12px)', duration: 0.9, ease: 'power2.in', stagger: 0.08 });
 
       exit.progress(0).pause();
       enter.progress(0).pause();

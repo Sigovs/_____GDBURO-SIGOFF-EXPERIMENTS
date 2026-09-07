@@ -54,3 +54,9 @@ assets/models/midnight-division*
 # playwright browsers live in the machine cache, not here
 tools/.shoot-run.mjs
 .portal-check.png
+
+# Raw media source. `additional assets/` holds the original 1920x1080 masters and
+# a downloaded reference clip — 50 MB of input whose shipped output is the 3.1 MB
+# trim and the 26 KB poster under public/media/. Same rule as assets/source/**:
+# the input lives in the library, the derivative is the deliverable.
+additional assets/

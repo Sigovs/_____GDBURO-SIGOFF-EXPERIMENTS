@@ -91,7 +91,12 @@ if (missing.length) {
   process.exit(1);
 }
 
-for (const item of [...publishing.map((v) => v.file), assetsDir, 'decoders']) {
+// `decoders` and `media` are the two folders under public/: Vite copies them into
+// the build verbatim, so they have to be carried across verbatim too. They are
+// named rather than globbed because everything else at the top of dist/ is a
+// page or the hashed asset folder, and copying those by pattern would be a
+// slower way of writing this list wrong.
+for (const item of [...publishing.map((v) => v.file), assetsDir, 'decoders', 'media']) {
   const from = join(DIST, item);
   if (!existsSync(from)) continue;
   rmSync(join(ROOT, item), { recursive: true, force: true });

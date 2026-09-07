@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buro Automation — engineering motion at industrial scale</title>
+<meta name="description" content="Buro Automation: industrial robotic arms, automation cells, integration and commissioning. Presented through a KUKA KR 700 PA palletiser reconstructed from a 107-solid CAD file and measured while it moves.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Crect width=%2716%27 height=%2716%27 fill=%27%2307090b%27/%3E%3Crect x=%271%27 y=%277.5%27 width=%2714%27 height=%271%27 fill=%27%230066b1%27/%3E%3C/svg%3E">
+  <script type="module" crossorigin src="./assets1/indexPresentation-DNW_toCK.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets1/kr700pa-rig2-v8O1xihs.js">
+  <link rel="modulepreload" crossorigin href="./assets1/vboot-BrJP1bGR.js">
+  <link rel="stylesheet" crossorigin href="./assets1/vboot-BWQAU0Ib.css">
+  <link rel="stylesheet" crossorigin href="./assets1/indexPresentation-Bth_waI9.css">
+</head>
+<body class="dir-presentation">
+<a class="skip" href="#record">Skip to the measurements</a>
+
+<header class="masthead" data-od-id="masthead">
+  <span class="wordmark">Buro&nbsp;<em>Automation</em></span>
+  <nav class="nav" aria-label="Sections" data-od-id="nav">
+    <a href="#systems">Systems</a>
+    <a href="#family">Family</a>
+    <a href="#engineering">Engineering</a>
+    <a href="#industries">Industries</a>
+    <a class="nav__cta" href="#resolution">Start a project</a>
+  </nav>
+</header>
+<span class="readout" data-readout aria-hidden="true"></span>
+
+<!-- Atmosphere: four sheared, masked, partly off-canvas light volumes, blended
+     over the render. Decorative — it carries no information. -->
+<div class="atmos" aria-hidden="true"><b class="a1"></b><b class="a2"></b><b class="a3"></b><b class="a4"></b></div>
+
+<div class="stage" aria-hidden="true"><canvas id="scene"></canvas></div>
+<div class="veil veil--side" aria-hidden="true"></div>
+<div class="veil veil--flat" aria-hidden="true"></div>
+<div class="winframe" aria-hidden="true"></div>
+<!--
+  THE FILM LAYER.
+
+  AN OVERLAY ON THE CHAPTER BEFORE IT, NOT A SCREEN OF ITS OWN.
+
+  The first cut made this a full-bleed takeover on its own black ground, which
+  read as a slide dropped into a film — the page stopped, played something, and
+  started again. It is now a PLATE laid over the frame that precedes it: the
+  macro shot is still rendering underneath and still visible as a live border
+  around all four edges, dimmed by `film__back` so the plate is the subject and
+  the room behind it is context. Nothing cuts; a layer arrives.
+
+  It is decorative to the accessibility tree — the chapter's own type says what
+  the beat is, and the footage carries nothing the page needs a caption for.
+
+  `preload="metadata"` on purpose: three megabytes must not be spent by a visitor
+  who never scrolls this far. It starts when the beat opens and pauses the moment
+  it closes, so nothing is decoding behind seven other chapters.
+
+  IT LIVES IN public/, NOT assets/, AND THAT IS THE WHOLE REASON IT IS PLAIN HTML.
+  assets/ is bundled: its files are imported through JS so they can be hashed and
+  tree-shaken, which means nothing under it can be named in markup. A <video> that
+  needs JS to acquire its own source is a picture that does not exist until a
+  script runs. media/ is small, curated and entirely used, so it is copied
+  verbatim and the paths are RELATIVE — this page is published under a repository
+  subpath, where a leading slash resolves to the wrong origin root.
+-->
+<div class="film" aria-hidden="true">
+  <div class="film__back"></div>
+  <div class="film__plate">
+    <video class="film__v" data-film muted loop playsinline preload="metadata"
+           poster="./media/kuka-motion-poster.jpg">
+      <source src="./media/kuka-motion.mp4" type="video/mp4">
+    </video>
+    <div class="film__scrim"></div>
+    <!--
+      THE FOOTER OF THE PLATE, NOT A PLAYER.
+
+      A running count opposite the chapter's own credit, on the same baseline, with
+      the progress drawn along the plate's bottom EDGE rather than in a track of
+      its own. There is no scrubber, no button and no time-remaining, because none
+      of those are offered: this film is not controllable and chrome that implies
+      otherwise is a lie about the interface. What is left is the one editorial
+      fact a held frame wants — how far through you are.
+
+      Seconds only. At twenty-five seconds a colon and a minutes field would be
+      two characters of zero.
+    -->
+    <div class="film__meter">
+      <span class="film__t"><b data-film-now>00</b><s>/</s><i data-film-tot>25</i><u>S</u></span>
+    </div>
+    <span class="film__bar"><b></b></span>
+  </div>
+</div>
+
+<main>
+
+  <!--
+    01 — ARRIVAL.
+
+    The designation is an h1 and it is real text in the document: with scripts
+    removed it is still the first thing on the page and the LCP element rather
+    than the canvas. Under it, the first time the two voices of this page appear
+    together — the machine's caption on the left, the company's position on the
+    right, on one rule.
+  -->
+  <section class="beat beat--arrival" id="arrival" data-in="0.06" data-out="0.3" data-enter="crop" data-od-id="chapter-arrival">
+    <div class="type">
+      <h1 class="monument" data-r data-split="chars">KR700PA</h1>
+      <div class="arrival__foot">
+        <p class="arrival__sub" data-r>KUKA &middot; palletiser &middot; machine study 01</p>
+        <p class="arrival__pos" data-r><b>Buro Automation</b> engineers motion at industrial scale —
+          the arms, the cells, and the systems that put them to work on a plant floor.</p>
+      </div>
+    </div>
+  </section>
+
+  <!--
+    02 — MACHINE PROOF. The peak, and the reason the page exists.
+
+    The sentence names the MECHANISM and stops. The number it produces is drawn
+    by the level line, read off the live rig every frame, and typed nowhere in
+    this document — showing the thing and telling you the same thing in the same
+    viewport is the page arguing with itself.
+  -->
+  <section class="beat beat--proof" id="proof" data-in="0.10" data-out="0.48" data-enter="rise" data-od-id="chapter-proof">
+    <div class="type">
+      <p class="cine__tag" data-r>02 — Machine proof</p>
+      <p class="line" data-r>Four axes drive through their range. Two closed loops hold the
+        plate&rsquo;s attitude.</p>
+    </div>
+  </section>
+
+  <!--
+    03 — SYSTEMS. The first chapter the machine does not own.
+
+    Copy takes the frame; the camera keeps drifting behind a directional veil that
+    is dense under this column and thin where the machine is, so the subject is
+    dimmed rather than covered.
+  -->
+  <section class="beat beat--systems" id="systems" data-in="0.06" data-out="0.54" data-enter="rise" data-od-id="chapter-systems">
+    <div class="type">
+      <div class="panel">
+        <div class="panel__say">
+          <p class="eyebrow" data-r>03 — Systems</p>
+          <h2 class="statement" data-r>Built around the task.</h2>
+          <p class="lede" data-r>A machine is a component. What a plant buys is a system — the reach,
+            the cell that contains it, the fixture it works against, and the flow of material through
+            it. We engineer those as one thing, because they fail as one thing.</p>
+        </div>
+        <div class="reg" data-r data-od-id="capability-register">
+          <div class="reg__row" data-od-id="capability-heavy-handling">
+            <span class="reg__n">01</span><span class="reg__k">Heavy handling</span>
+            <p class="reg__v">Mass moved under control, where the load is the whole problem.</p>
+          </div>
+          <div class="reg__row" data-od-id="capability-palletising">
+            <span class="reg__n">02</span><span class="reg__k">Palletising</span>
+            <p class="reg__v">Layer patterns, mixed cases, and a plate that stays flat under all of them.</p>
+          </div>
+          <div class="reg__row" data-od-id="capability-machine-tending">
+            <span class="reg__n">03</span><span class="reg__k">Machine tending</span>
+            <p class="reg__v">Load, unload, and the dead time between two machines that never sleep.</p>
+          </div>
+          <div class="reg__row" data-od-id="capability-precision-positioning">
+            <span class="reg__n">04</span><span class="reg__k">Precision positioning</span>
+            <p class="reg__v">Placing a part where the next operation expects to find it.</p>
+          </div>
+          <div class="reg__row" data-od-id="capability-material-flow">
+            <span class="reg__n">05</span><span class="reg__k">Material flow</span>
+            <p class="reg__v">The route through the cell, designed before anything is bolted down.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!--
+    04 — PRODUCT FAMILY. The stage becomes a framed render window on the right.
+
+    Four classes, set as type rather than as cards. Only one of them has a machine
+    behind it in this repository, and that one says so: the steel tag on HEAVY is
+    the single piece of evidence the family section is allowed to claim.
+  -->
+  <section class="beat beat--family" id="family" data-in="0.06" data-out="0.54" data-enter="rise" data-od-id="chapter-family">
+    <div class="type">
+      <div class="family">
+        <div>
+          <div class="family__head">
+            <p class="eyebrow" data-r>04 — Product family</p>
+            <h2 class="statement" data-r style="max-width:13ch">Four classes.</h2>
+          </div>
+          <div data-r data-od-id="class-list">
+            <div class="class__row" data-od-id="class-heavy">
+              <div>
+                <h3 class="class__name">Heavy</h3>
+                <p class="class__note">Long reach and high mass, for palletising and heavy handling.</p>
+              </div>
+              <span class="class__tag class__tag--live">KR 700 PA</span>
+            </div>
+            <div class="class__row" data-od-id="class-precision">
+              <div>
+                <h3 class="class__name">Precision</h3>
+                <p class="class__note">Short moves held inside a tight envelope, for assembly and positioning.</p>
+              </div>
+              <span class="class__tag">Envelope</span>
+            </div>
+            <div class="class__row" data-od-id="class-compact">
+              <div>
+                <h3 class="class__name">Compact</h3>
+                <p class="class__note">Small footprint, for cells where the floor is the scarce resource.</p>
+              </div>
+              <span class="class__tag">Footprint</span>
+            </div>
+            <div class="class__row" data-od-id="class-cell">
+              <div>
+                <h3 class="class__name">Cell</h3>
+                <p class="class__note">The complete enclosure — arm, fixture, guarding and controls as one delivery.</p>
+              </div>
+              <span class="class__tag">Integration</span>
+            </div>
+          </div>
+        </div>
+        <!-- the right column is empty on purpose: it is the render window, and
+             the stage is clipped into it -->
+        <div aria-hidden="true"></div>
+      </div>
+    </div>
+  </section>
+
+  <!--
+    05 — ENGINEERING. Macro, and the heaviest annotation on the page.
+
+    Two callouts on opposite sides name the two joints the shot is of. The copy
+    stays to one sentence because the callouts are the technical layer here.
+  -->
+  <section class="beat beat--engineering" id="engineering" data-in="0.10" data-out="0.37" data-enter="rise" data-od-id="chapter-engineering">
+    <div class="type">
+      <p class="cine__tag" data-r>05 — Engineering</p>
+      <p class="line" data-r>Repeatability is a mechanical property before it is a control problem.</p>
+      <p class="arrival__sub" data-r style="margin-top:1.4rem">Hinge centres derived from the source geometry, not approximated</p>
+    </div>
+  </section>
+
+  <!--
+    06 — MOTION. The render recedes completely and footage takes the frame.
+
+    The only beat on the page where the 3D world is not what you are looking at.
+    Two lines of type held low against a scrim and nothing else — a chapter that
+    is mostly picture has to be mostly picture.
+  -->
+  <section class="beat beat--motion" id="motion" data-in="0.08" data-out="0.52" data-enter="rise" data-od-id="chapter-motion">
+    <div class="type">
+      <div class="motion">
+        <p class="cine__tag" data-r>06 — Motion</p>
+        <p class="line" data-r>Everything above is geometry. This is the geometry at work.</p>
+        <p class="motion__credit" data-r>KUKA KR series</p>
+      </div>
+    </div>
+  </section>
+
+  <!--
+    07 — INDUSTRIES. The quiet chapter.
+
+    Nine metres out, dim, heavily scrimmed: the only chapter where the machine is
+    deliberately too far away to read detail on, placed directly after the macro
+    so the two frames are the widest scalar jump on the page. The selection is
+    scroll-linked rather than hover-linked, so it survives a stopped frame.
+  -->
+  <section class="beat beat--industries" id="industries" data-in="0.06" data-out="0.54" data-enter="rise" data-od-id="chapter-industries">
+    <div class="type">
+      <div class="inds">
+        <p class="eyebrow" data-r>07 — Industries</p>
+        <div class="inds__list" data-r data-inds>
+          <div class="ind" data-on data-od-id="industry-automotive">
+            <span class="ind__n">01</span><svg class="ind__i" viewBox="0 -960 960 960" aria-hidden="true" focusable="false" data-icon="directions_car"><path d="M240-200v40q0 17-11.5 28.5T200-120h-40q-17 0-28.5-11.5T120-160v-320l84-240q6-18 21.5-29t34.5-11h440q19 0 34.5 11t21.5 29l84 240v320q0 17-11.5 28.5T800-120h-40q-17 0-28.5-11.5T720-160v-40H240Zm-8-360h496l-42-120H274l-42 120Zm-32 80v200-200Zm100 160q25 0 42.5-17.5T360-380q0-25-17.5-42.5T300-440q-25 0-42.5 17.5T240-380q0 25 17.5 42.5T300-320Zm360 0q25 0 42.5-17.5T720-380q0-25-17.5-42.5T660-440q-25 0-42.5 17.5T600-380q0 25 17.5 42.5T660-320Zm-460 40h560v-200H200v200Z"/></svg><h3 class="ind__k">Automotive</h3>
+            <p class="ind__v">Body shop, powertrain, and the line rates that come with them.</p>
+          </div>
+          <div class="ind" data-od-id="industry-logistics">
+            <span class="ind__n">02</span><svg class="ind__i" viewBox="0 -960 960 960" aria-hidden="true" focusable="false" data-icon="local_shipping"><path d="M155-195q-35-35-35-85H40v-440q0-33 23.5-56.5T120-800h560v160h120l120 160v200h-80q0 50-35 85t-85 35q-50 0-85-35t-35-85H360q0 50-35 85t-85 35q-50 0-85-35Zm113.5-56.5Q280-263 280-280t-11.5-28.5Q257-320 240-320t-28.5 11.5Q200-297 200-280t11.5 28.5Q223-240 240-240t28.5-11.5ZM120-360h32q17-18 39-29t49-11q27 0 49 11t39 29h272v-360H120v360Zm628.5 108.5Q760-263 760-280t-11.5-28.5Q737-320 720-320t-28.5 11.5Q680-297 680-280t11.5 28.5Q703-240 720-240t28.5-11.5ZM680-440h170l-90-120h-80v120ZM360-540Z"/></svg><h3 class="ind__k">Logistics</h3>
+            <p class="ind__v">Depalletising, sortation, and mixed-case order building.</p>
+          </div>
+          <div class="ind" data-od-id="industry-metal">
+            <span class="ind__n">03</span><svg class="ind__i" viewBox="0 -960 960 960" aria-hidden="true" focusable="false" data-icon="factory"><path d="M80-80v-481l280-119v80l200-80v120h320v480H80Zm80-80h640v-320H480v-82l-200 80v-78l-120 53v347Zm280-80h80v-160h-80v160Zm-160 0h80v-160h-80v160Zm320 0h80v-160h-80v160Zm280-320H680l40-320h120l40 320ZM160-160h640-640Z"/></svg><h3 class="ind__k">Metal</h3>
+            <p class="ind__v">Press tending, welding cells, and parts too hot or too heavy to hand.</p>
+          </div>
+          <div class="ind" data-od-id="industry-manufacturing">
+            <span class="ind__n">04</span><svg class="ind__i" viewBox="0 -960 960 960" aria-hidden="true" focusable="false" data-icon="precision_manufacturing"><path d="M159-120v-120h124L181-574q-27-15-44.5-44T119-680q0-50 35-85t85-35q39 0 69.5 22.5T351-720h128v-40q0-17 11.5-28.5T519-800q9 0 17.5 4t14.5 12l68-64q9-9 21.5-11.5T665-856l156 72q12 6 16.5 17.5T837-744q-6 12-17.5 15.5T797-730l-144-66-94 88v56l94 86 144-66q11-5 23-1t17 15q6 12 1 23t-17 17l-156 74q-12 6-24.5 3.5T619-512l-68-64q-6 6-14.5 11t-17.5 5q-17 0-28.5-11.5T479-600v-40H351q-3 8-6.5 15t-9.5 15l200 370h144v120H159Zm108.5-531.5Q279-663 279-680t-11.5-28.5Q256-720 239-720t-28.5 11.5Q199-697 199-680t11.5 28.5Q222-640 239-640t28.5-11.5ZM365-240h78L271-560h-4l98 320Zm78 0Z"/></svg><h3 class="ind__k">Manufacturing</h3>
+            <p class="ind__v">Assembly, test and end-of-line, where cycle time is the product.</p>
+          </div>
+          <div class="ind" data-od-id="industry-warehousing">
+            <span class="ind__n">05</span><svg class="ind__i" viewBox="0 -960 960 960" aria-hidden="true" focusable="false" data-icon="warehouse"><path d="M160-200h80v-320h480v320h80v-426L480-754 160-626v426Zm-80 80v-560l400-160 400 160v560H640v-320H320v320H80Zm280 0v-80h80v80h-80Zm80-120v-80h80v80h-80Zm80 120v-80h80v80h-80ZM240-520h480-480Z"/></svg><h3 class="ind__k">Warehousing</h3>
+            <p class="ind__v">Storage, retrieval, and the flow between the two.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!--
+    08 — INTEGRATION. A held frame under a sequence.
+
+    The camera moves less here than anywhere else on the page, because the content
+    is a list and a list wants a stable ground. The row is also the only
+    structural change of direction: the chapter before it and the one after are
+    both vertical.
+  -->
+  <section class="beat beat--integration" id="integration" data-in="0.06" data-out="0.52" data-enter="slide" data-exit="clean" data-od-id="chapter-integration">
+    <div class="type">
+      <div class="panel">
+        <div class="panel__say">
+          <p class="eyebrow" data-r>08 — Integration</p>
+          <h2 class="statement" data-r>We finish the job on your floor.</h2>
+          <p class="lede" data-r>Buying a robot is a purchase. Putting one to work is a project — and
+            it is the part that decides whether the machine ever earns anything.</p>
+        </div>
+        <div class="seq" data-od-id="integration-sequence">
+          <div class="step" data-r data-od-id="step-simulation">
+            <span class="step__n">01</span><h3 class="step__k">Simulation</h3>
+            <p class="step__v">Reach, cycle and collision proven before a quote is signed.</p>
+          </div>
+          <div class="step" data-r data-od-id="step-cell-design">
+            <span class="step__n">02</span><h3 class="step__k">Cell design</h3>
+            <p class="step__v">Fixtures, guarding, feed and access, drawn as one enclosure.</p>
+          </div>
+          <div class="step" data-r data-od-id="step-installation">
+            <span class="step__n">03</span><h3 class="step__k">Installation</h3>
+            <p class="step__v">Set, aligned and tied into the services already on the floor.</p>
+          </div>
+          <div class="step" data-r data-od-id="step-commissioning">
+            <span class="step__n">04</span><h3 class="step__k">Commissioning</h3>
+            <p class="step__v">Programmed, proven against the part, and handed over running.</p>
+          </div>
+          <div class="step" data-r data-od-id="step-support">
+            <span class="step__n">05</span><h3 class="step__k">Support</h3>
+            <p class="step__v">Spares, service and the engineer who knows your cell.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!--
+    09 — RESOLUTION. Wide, low, resolved, the datum back at rest beneath the
+    claim — and the only place on the page where a filled control exists.
+  -->
+  <section class="beat beat--resolution" id="resolution" data-in="0.05" data-out="0.34" data-enter="rise" data-od-id="chapter-resolution">
+    <div class="type">
+      <h2 class="claim" data-r>The machine is only the beginning.</h2>
+      <div class="close" data-r>
+        <a class="btn" href="#record" data-od-id="cta-primary">Discuss an automation system</a>
+        <a class="link" href="#systems" data-od-id="cta-secondary">Explore capabilities</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="beat beat--record" id="record" data-in="0.05" data-out="0.98" data-od-id="chapter-record">
+    <div class="record">
+      <h2 class="record__head"><span class="plate-on">Measured, not quoted</span></h2>
+      <!--
+        THE ONE LINE THAT KEEPS THIS PAGE HONEST. The company is written; the
+        machine is not. Stating which is which on the page itself, next to the
+        figures, is the only version of this that a reader can check.
+      -->
+      <p class="sim">Buro Automation is a simulated company, written for this presentation.
+        The machine below is not.</p>
+      <p class="note">Every figure below was measured from the file in this repository. No manufacturer
+        specification is used. The designation &ldquo;KR&nbsp;700&nbsp;PA&rdquo; conventionally implies a
+        700&nbsp;kg payload, and that figure does not appear here, because an implication is not a source.</p>
+      <table class="plate">
+        <caption class="visually-hidden">Measured properties of the KR 700 PA model</caption>
+        <tbody>
+          <tr><th scope="row">Overall height</th><td class="fig">2 744 mm</td></tr>
+          <tr><th scope="row">Overall span</th><td class="fig">3 070 mm</td></tr>
+          <tr><th scope="row">Linkage members</th><td class="fig">3 × 1 300 mm</td></tr>
+          <tr><th scope="row">Driven axes</th><td class="fig">4</td></tr>
+          <tr><th scope="row">Closed loops</th><td class="fig">2</td></tr>
+          <tr><th scope="row">Solids in source</th><td class="fig">107</td></tr>
+          <tr><th scope="row">Triangles</th><td class="fig">137 613</td></tr>
+          <tr><th scope="row">Draw-call floor</th><td class="fig">9</td></tr>
+          <tr><th scope="row">Payload</th><td class="fig">442 KB</td></tr>
+          <tr><th scope="row">Worst plate tilt, full range</th><td class="fig">0.000°</td></tr>
+        </tbody>
+      </table>
+      <p class="provenance"><em>KR 700 PA</em>, obtained from CGTrader under its Royalty&nbsp;Free License.
+        STEP converted with <code>tools/step-to-glb.mjs</code>; hinge centres derived by
+        <code>tools/rod-ends.mjs</code> and the hierarchy recorded in <code>assets/robo&nbsp;hand/rig.json</code>.
+        The tilt figure on the film is read off the live rig every frame, not printed from this table.
+        KUKA and KR&nbsp;700&nbsp;PA are marks of their owner, used to name the machine accurately and not
+        under licence or endorsement. Capability, class, industry and integration copy describes a
+        simulated firm and makes no performance claim.</p>
+    </div>
+    <div class="orbit" data-orbit><span class="orbit__hint">Drag to rotate · 360°</span></div>
+    <!--
+      The footer's list is the BASELINE, not a leftover: it is what this screen
+      offers with no JavaScript, under reduced motion, and in the seconds before
+      the scene boots. Once the dots on the machine are live it hides itself, so
+      the last frame never carries the same five destinations twice.
+    -->
+    <footer class="colophon">
+      <p><span class="wordmark">Buro&nbsp;Automation</span> — machine study 01</p>
+      <ul class="colophon__nav" data-od-id="footer-nav">
+        <li><a href="#systems">Systems</a></li>
+        <li><a href="#family">Family</a></li>
+        <li><a href="#engineering">Engineering</a></li>
+        <li><a href="#industries">Industries</a></li>
+        <li><a href="#integration">Integration</a></li>
+      </ul>
+    </footer>
+  </section>
+</main>
+
+<p class="chapter" aria-hidden="true"><b>01</b><i>Arrival</i></p>
+
+</body>
+</html>

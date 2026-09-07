@@ -1,0 +1,1450 @@
+/*
+  PRESENTATION — Buro Automation
+  ══════════════════════════════════════════════════════════════════════════════
+
+  This sheet does four things the film sheets do not.
+
+  1  IT SPLITS THE COLOUR BY DUTY, NOT BY AREA. The machine is an orange casting
+     and it stays one. Everything the COMPANY says is steel blue. So orange
+     appears exactly where the page is talking about the object in the room — the
+     level line, the anchor crosshair of a callout, the machine itself — and blue
+     appears wherever the page is talking about the firm around it. They are
+     counterpoints with different jobs rather than two thirds of a palette, which
+     is what stops the page reading as one warm monochrome.
+
+  2  IT GIVES THE STAGE FOUR REGISTERS. A presentation cannot be nine viewports of
+     robot-plus-title. The canvas is continuous and never restarts, but each
+     chapter owns it differently: FULL, VEILED (copy in front, machine still
+     moving behind), WINDOW (the canvas clipped into a framed render panel with
+     the type beside it), and QUIET (the machine nine metres out and mostly
+     scrimmed). The registers are set from the page's chrome script; this sheet
+     defines what each one looks like.
+
+  3  IT BUILDS THE ATMOSPHERE OUT OF SHEARED, MASKED, PARTLY OFF-CANVAS FIELDS.
+     Four of them, no filter: rotated ellipses with non-uniform scale and
+     directional masks, blended in `screen` over the render. A radial-gradient
+     with soft stops is already blurred — what makes a blur field read as a CSS
+     circle is that it IS a circle, centred, and complete. None of these is any
+     of those.
+
+  4  IT DRESSES THE CALLOUT AS A MACHINED PLATE. Chamfered outline, filled marker,
+     a heavy leading edge, and a crosshair on the anchor instead of a dot.
+*/
+
+/* ── the design system's token contract, verbatim ──────────────────────────
+   Bound so every `var(--*)` reference resolves. The page's own surfaces are
+   `--ground` / `--ink` from variant.css; what carries into this direction from
+   the contract is `--accent` — #0066b1 — which becomes the company's steel and
+   displaces the orange that variant.css had in that slot. */
+:root {
+  --bg: #f7f8fa;
+  --surface: #ffffff;
+  --surface-warm: #eef3f8;
+  --fg: #111827;
+  --fg-2: #334155;
+  --muted: #64748b;
+  --meta: #0066b1;
+  --border: #d7dee8;
+  --border-soft: #edf1f6;
+  --accent: #0066b1;
+  --accent-on: #ffffff;
+  --accent-hover: color-mix(in oklab, var(--accent), black 8%);
+  --accent-active: color-mix(in oklab, var(--accent), black 14%);
+  --success: #16a34a;
+  --warn: #f59e0b;
+  --danger: #e4002b;
+  --font-display: "BMWTypeNext", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "BMWTypeNext", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "SF Mono", ui-monospace, Menlo, monospace;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 24px;
+  --text-2xl: 36px;
+  --text-3xl: 56px;
+  --text-4xl: 78px;
+  --leading-body: 1.5;
+  --leading-tight: 1.02;
+  --tracking-display: -0.025em;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --section-y-desktop: 104px;
+  --section-y-tablet: 76px;
+  --section-y-phone: 52px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --radius-pill: 9999px;
+  --elev-flat: none;
+  --elev-ring: 0 0 0 1px var(--border);
+  --elev-raised: 0 22px 56px rgba(17, 24, 39, 0.12);
+  --focus-ring: 0 0 0 4px rgba(0, 102, 177, 0.24);
+  --motion-fast: 130ms;
+  --motion-base: 220ms;
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+  --container-max: 1220px;
+  --container-gutter-desktop: 40px;
+  --container-gutter-tablet: 28px;
+  --container-gutter-phone: 18px;
+}
+
+/* ── the page layer ───────────────────────────────────────────────────────
+   `--accent` above is the structural steel: strong enough for a filled marker
+   or a 2px rule (3.1:1 on this ground, which is the graphics floor) and NOT
+   enough for type. Text-weight steel is generated from it in OKLCH, one lightness
+   step up, where it measures about 7:1 — so a mono value on a dark plate is read
+   rather than decoded. */
+.dir-presentation {
+  --ground: #07090b;
+  --ink: #eef2f5;
+  --ink-muted: #97a2ab;
+  --ink-dim: #78838c;
+  --ink-rgb: 238 242 245;
+
+  --steel-deep: var(--accent);            /* #0066b1 — fills, rules, edges */
+  --steel: oklch(0.72 0.12 248);          /* readable steel for type */
+  --steel-soft: oklch(0.62 0.10 248);
+  --steel-rgb: 92 158 226;
+
+  /* the machine keeps its own colour, and only its own things wear it */
+  --machine: #f2903f;
+  --machine-rgb: 242 144 63;
+
+  --rule: rgb(var(--ink-rgb) / 0.14);
+  --rule-soft: rgb(var(--ink-rgb) / 0.08);
+
+  --gutter: clamp(2rem, 5.2vw, 6.5rem);
+  background: var(--ground);
+  color: var(--ink);
+}
+
+/* variant.css put the orange in these three; the company owns them now. */
+.dir-presentation ::selection { background: var(--steel-deep); color: #fff; }
+.dir-presentation :focus-visible { outline: 2px solid #fff; outline-offset: 3px; box-shadow: 0 0 0 4px var(--steel-deep); }
+
+/* ══ ATMOSPHERE ═══════════════════════════════════════════════════════════
+   Four fields, in `screen`, over the render. Every one is an ellipse that has
+   been rotated AND scaled on one axis, masked directionally so it has a leading
+   edge and a tail, and anchored so a good part of it is outside the viewport —
+   which is what makes it read as light spilling into the frame rather than as a
+   shape someone put in the middle of it. */
+.atmos {
+  position: fixed; inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  overflow: hidden;
+  mix-blend-mode: screen;
+}
+.atmos b { position: absolute; display: block; }
+
+/* the cold shaft entering top-left, sheared flat and cut off before it lands */
+.atmos b.a1 {
+  left: -34vw; top: -28vh; width: 134vw; height: 96vh;
+  transform: rotate(-13deg) scaleY(0.54);
+  background: radial-gradient(ellipse 44% 78% at 34% 46%,
+    rgb(78 146 216 / 0.42), rgb(52 104 168 / 0.18) 42%, rgb(20 44 78 / 0) 74%);
+  -webkit-mask-image: linear-gradient(104deg, #000 6%, rgb(0 0 0 / 0.5) 48%, transparent 86%);
+          mask-image: linear-gradient(104deg, #000 6%, rgb(0 0 0 / 0.5) 48%, transparent 86%);
+  opacity: var(--atmos-cool, 0.55);
+  transition: opacity 500ms linear;
+}
+/* the machine's own spill: warm, low, mostly off the right edge */
+.atmos b.a2 {
+  right: -32vw; bottom: -36vh; width: 100vw; height: 88vh;
+  transform: rotate(9deg) scale(1.18, 0.58);
+  background: radial-gradient(ellipse 50% 70% at 58% 40%,
+    rgb(242 144 63 / 0.28), rgb(198 106 46 / 0.09) 46%, rgb(60 30 12 / 0) 76%);
+  -webkit-mask-image: linear-gradient(198deg, #000 16%, transparent 88%);
+          mask-image: linear-gradient(198deg, #000 16%, transparent 88%);
+  opacity: var(--atmos-warm, 0.6);
+  transition: opacity 500ms linear;
+}
+/* a hall haze sitting on the horizon, denser at one end than the other */
+.atmos b.a3 {
+  left: -12vw; top: 42vh; width: 126vw; height: 32vh;
+  transform: rotate(-2.2deg);
+  background: linear-gradient(to top,
+    rgb(132 176 222 / 0.17), rgb(126 168 214 / 0.05) 46%, transparent 84%);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 24%, rgb(0 0 0 / 0.3) 64%, transparent 97%);
+          mask-image: linear-gradient(90deg, transparent, #000 24%, rgb(0 0 0 / 0.3) 64%, transparent 97%);
+  opacity: var(--atmos-haze, 0.7);
+  transition: opacity 500ms linear;
+}
+/* the big soft one, bleeding off the bottom-left corner */
+.atmos b.a4 {
+  left: -48vw; bottom: -54vh; width: 120vw; height: 118vh;
+  transform: rotate(21deg) scale(1, 0.62);
+  background: radial-gradient(ellipse 46% 62% at 62% 34%, rgb(44 86 134 / 0.30), transparent 70%);
+  opacity: var(--atmos-cool, 0.55);
+  transition: opacity 500ms linear;
+}
+
+/* ══ THE STAGE'S FOUR REGISTERS ═══════════════════════════════════════════ */
+
+/* WINDOW. The canvas is clipped, not scaled — the render stays at its native
+   resolution and the frame is a crop, so nothing resamples and the silhouette
+   inside keeps its edge. */
+.dir-presentation .stage {
+  clip-path: inset(var(--win-t, 0px) var(--win-r, 0px) var(--win-b, 0px) var(--win-l, 0px));
+  transition: clip-path 420ms var(--e-enter);
+}
+.dir-presentation .stage canvas {
+  transform: translateX(var(--stage-x, 0vw));
+  transition: transform 420ms var(--e-enter);
+}
+.winframe {
+  position: fixed;
+  top: var(--win-t, 0px); right: var(--win-r, 0px);
+  bottom: var(--win-b, 0px); left: var(--win-l, 0px);
+  z-index: 5;
+  pointer-events: none;
+  border: 1px solid rgb(var(--ink-rgb) / 0.16);
+  opacity: var(--win-on, 0);
+  transition: opacity 320ms linear, top 420ms var(--e-enter), right 420ms var(--e-enter),
+              bottom 420ms var(--e-enter), left 420ms var(--e-enter);
+}
+/* a steel tick in the window's top-left corner: the frame is a device, and a
+   device with a mark on it is a decision rather than a border */
+.winframe::before {
+  content: "";
+  position: absolute; left: -1px; top: -1px;
+  width: 34px; height: 2px;
+  background: var(--steel-deep);
+}
+
+/* VEIL. Two of them. The side veil is directional — dense under the column the
+   copy is in and thin where the machine is — so the machine is dimmed rather
+   than covered, and the page never looks like a grey sheet was dropped on it.
+   The flat veil is for the quiet chapter, where the subject really is meant to
+   go most of the way out. */
+.veil {
+  position: fixed; inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  transition: opacity 380ms linear;
+}
+.veil--side {
+  opacity: var(--veil-side, 0);
+  /* the far end opens so the side the copy does not occupy stays a picture */
+  background: linear-gradient(97deg,
+    rgb(7 9 11 / 0.96) 0%, rgb(7 9 11 / 0.93) 40%,
+    rgb(7 9 11 / 0.72) 68%, rgb(7 9 11 / 0.34) 100%);
+}
+.veil--flat {
+  opacity: var(--veil-flat, 0);
+  background:
+    radial-gradient(ellipse 120% 80% at 24% 42%, rgb(7 9 11 / 0.62), rgb(7 9 11 / 0.88) 74%),
+    rgb(7 9 11 / 0.5);
+}
+
+/* ══ CHROME ═══════════════════════════════════════════════════════════════ */
+
+.dir-presentation .masthead {
+  top: 0; left: 0; right: 0;
+  height: 68px;
+  padding-inline: var(--gutter);
+  display: flex; align-items: center; justify-content: space-between;
+  z-index: 40;
+  pointer-events: auto;
+  background: linear-gradient(to bottom, rgb(7 9 11 / 0.94), rgb(7 9 11 / 0.72) 58%, rgb(7 9 11 / 0.24) 86%, transparent);
+}
+.dir-presentation .wordmark {
+  font: 700 15px/1 var(--display);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.wordmark em { font-style: normal; color: var(--steel); }
+
+.nav { display: flex; align-items: center; gap: clamp(1.2rem, 2.4vw, 2.4rem); }
+.nav a {
+  font: 500 14px/1 var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgb(var(--ink-rgb) / 0.82);
+  text-decoration: none;
+  padding: 0.75rem 0;
+  transition: color var(--motion-base) var(--ease-standard);
+}
+.nav a:hover { color: var(--ink); }
+.nav a.nav__cta {
+  color: var(--ink);
+  border-bottom: 2px solid var(--steel-deep);
+  padding-bottom: 0.5rem;
+}
+.nav a.nav__cta:hover { color: #fff; border-bottom-color: var(--ink); }
+
+/* the readout leaves the top-right corner to the navigation and becomes what it
+   always was — an instrument reading, at the foot of the frame */
+.dir-presentation .readout {
+  top: auto; bottom: 1.6rem; right: var(--gutter);
+  font: 500 14px/1 var(--mono);
+  letter-spacing: 0.14em;
+  color: rgb(var(--ink-rgb) / 0.42);
+  z-index: 30;
+}
+
+/* THE CHAPTER MARK. Set vertically in the left margin, outside the content
+   column and outside the callouts' safe area, reading bottom-to-top. */
+.chapter {
+  position: fixed;
+  left: 18px; top: 50%;
+  transform: translateY(-50%) rotate(180deg);
+  writing-mode: vertical-rl;
+  margin: 0; z-index: 30;
+  font: 500 14px/1 var(--mono);
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: rgb(var(--ink-rgb) / 0.34);
+  pointer-events: none;
+  display: flex; align-items: center; gap: 1.1rem;
+  transition: opacity 360ms linear;
+}
+.chapter b { color: var(--steel); font-weight: 500; }
+.chapter i { font-style: normal; color: rgb(var(--ink-rgb) / 0.5); }
+.chapter[data-end] { opacity: 0; }
+
+/* ══ BEATS ════════════════════════════════════════════════════════════════
+   The scroll budget, in viewport-heights: 1.5 + 2.1 + 1.6 + 1.8 + 1.7 + 1.9 +
+   1.4 + 1.6 = 13.6 before the record. The peak keeps the most room, and the two
+   pure-content chapters are the shortest things that can hold their own copy —
+   length is what a presentation gets wrong first. */
+.beat--arrival     { min-height: 150vh; }
+.beat--proof       { min-height: 210vh; }
+.beat--systems     { min-height: 240vh; }
+.beat--family      { min-height: 240vh; }
+.beat--engineering { min-height: 170vh; }
+.beat--motion      { min-height: 200vh; }
+.beat--industries  { min-height: 240vh; }
+.beat--integration { min-height: 230vh; }
+.beat--resolution  { min-height: 160vh; }
+
+.dir-presentation .beat .type {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  padding: 6.5rem var(--gutter) 4.5rem;
+  display: grid;
+  pointer-events: none;
+  z-index: 10;
+  overflow: clip;
+}
+.dir-presentation .beat .type a,
+.dir-presentation .beat .type button { pointer-events: auto; }
+
+/* the shared registers of the type system */
+.eyebrow {
+  margin: 0;
+  font: 500 14px/1 var(--mono);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--steel);
+}
+.statement {
+  margin: 0;
+  font: 300 clamp(2.6rem, 5.2vw, 5.6rem)/1.02 var(--display);
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+.lede {
+  margin: 0;
+  font: 400 clamp(1.05rem, 1.32vw, 1.28rem)/1.62 var(--display);
+  color: rgb(var(--ink-rgb) / 0.74);
+  max-width: 46ch;
+}
+.line {
+  margin: 0;
+  font: 400 clamp(1.5rem, 2.6vw, 2.6rem)/1.24 var(--display);
+  letter-spacing: -0.018em;
+  max-width: 22ch;
+  text-wrap: balance;
+}
+
+/* ── 01 · ARRIVAL ─────────────────────────────────────────────────────────
+   The designation at 18vw running past both edges, the crop committed rather
+   than nearly committed. Under it, a two-column footer row: the machine's own
+   caption on the left, the company's position on the right — the first time on
+   the page the two voices appear together, which is what this page is about. */
+.beat--arrival .type { align-content: end; }
+.monument {
+  margin: 0;
+  font: 700 18vw/0.84 var(--display);
+  letter-spacing: -0.055em;
+  white-space: nowrap;
+  transform: translateX(-3.5%);
+  color: var(--ink);
+}
+/* one clipping box per glyph, cut on the horizontal axis only — see the split in
+   site/vintro.js. The vertical bleed is what keeps the caps off the blade. */
+.mon__w { display: inline-block; clip-path: inset(-30% 0 -30% 0); }
+.mon__c { display: inline-block; }
+.arrival__foot {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 36ch);
+  gap: clamp(2rem, 6vw, 7rem);
+  align-items: start;
+  margin-top: 1.6rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+}
+.arrival__sub {
+  margin: 0;
+  font: 500 14px/1.5 var(--mono);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgb(var(--ink-rgb) / 0.55);
+}
+.arrival__pos {
+  margin: 0;
+  font: 400 clamp(1.02rem, 1.24vw, 1.2rem)/1.58 var(--display);
+  color: rgb(var(--ink-rgb) / 0.82);
+  /* four lines ending on the single word "floor." is an orphan; the measure and
+     the wrap rule are adjusted rather than the type size */
+  text-wrap: pretty;
+}
+.arrival__pos b { font-weight: 600; color: var(--ink); }
+
+/* ── 02 · PROOF and 05 · ENGINEERING — cinematic, one sentence, low left ─── */
+.beat--proof .type,
+.beat--engineering .type { align-content: end; justify-items: start; }
+.beat--proof .line,
+.beat--engineering .line { max-width: 26ch; }
+.cine__tag {
+  margin: 0 0 1rem;
+  font: 500 14px/1 var(--mono);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--steel);
+}
+
+/* ══ 06 · MOTION — the film beat ══════════════════════════════════════════
+   The one chapter that is a PICTURE rather than a render, so it is treated as a
+   picture: full bleed, no frame, no plate, and only as much type as a frame can
+   carry without becoming a slide.
+
+   The layer sits between the veils (4) and the sheet (10), above the window
+   frame (5) and above the level line (9) — during this beat the level line is
+   off anyway, because the shot carries no `level` spec and the module reads that
+   as zero. */
+.film {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  /* NO GROUND OF ITS OWN. The chapter underneath keeps rendering and keeps
+     showing; painting a black plane here is what turned this beat into a
+     separate screen in the first cut. */
+  opacity: var(--film-on, 0);
+  /* invisible AND out of the compositor until the beat opens: a fixed
+     full-viewport video layer left at opacity 0 is still a layer the GPU pays
+     for on every frame of the other eight chapters */
+  visibility: hidden;
+  content-visibility: hidden;
+}
+/*
+  WHAT THE OVERLAY SITS ON.
+
+  The frame underneath is a lit orange macro, and a bright plate laid straight
+  onto it gives two subjects at the same weight. This drops the previous chapter
+  about a stop and a half — enough that the plate is unambiguously the thing you
+  are looking at, not enough to erase what it is lying on. That distinction is
+  the whole difference between an overlay and a cut.
+*/
+.film__back {
+  position: absolute;
+  inset: 0;
+  background: rgb(7 9 11 / 0.66);
+}
+/*
+  THE PLATE. Inset on all four edges so the chapter it overlays reads as a live
+  border around it — the machine is still turning out there while the footage
+  runs. One hairline and a long shadow put it above the page rather than in it;
+  THE PLATE RISES INTO PLACE. It comes up forty pixels and grows the last one
+  and a half percent, both driven off `--film-on`, which is the chapter's own
+  scrubbed position — so the arrival is scroll-linked, reversible, and stoppable
+  on any frame rather than a fire-and-forget entrance. It is a rise and not a
+  lateral slide because the plate is landing ON something; the lateral move
+  belongs to chapter 08, which is the page's horizontal band.
+*/
+.film__plate {
+  position: absolute;
+  inset: 7.5vh 6.5vw;
+  overflow: hidden;
+  border: 1px solid rgb(var(--ink-rgb) / 0.16);
+  box-shadow: 0 44px 130px rgb(0 0 0 / 0.62);
+  transform: translateY(calc((1 - var(--film-on, 0)) * 40px))
+             scale(calc(0.985 + 0.015 * var(--film-on, 0)));
+  transform-origin: 50% 52%;
+}
+.film[data-live] { visibility: visible; content-visibility: visible; }
+/* the readout prints the live camera's azimuth and distance. During the film
+   beat the render it describes is not on screen, so a telemetry line over
+   somebody else's footage is a caption for a picture that is not there. */
+.dir-presentation .readout { transition: opacity 320ms linear; }
+:root[data-film-on] .dir-presentation .readout { opacity: 0; }
+.film__v {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* THE GRADE. The footage is lit pale and warm against a studio sweep; this
+     page is near-black. Half a stop down and a touch of contrast seats it in the
+     page's own range — enough that the cut into and out of it is a change of
+     MEDIUM rather than a change of brightness, without regrading somebody
+     else's film into a different picture. */
+  filter: brightness(0.86) contrast(1.07)
+          blur(calc((1 - var(--film-on, 0)) * 22px));
+  /*
+    THE FOCUS PULL, AND WHY THE PICTURE IS OVERSCALED WHILE IT IS SOFT.
+
+    The frame lands sharp and the image resolves inside it — a focus pull, which
+    is the one blur this page can justify, because the beat is about film. The
+    blur is on the VIDEO and not on the plate, so the hairline border and the
+    shadow stay crisp the whole way in; blurring the plate would have smeared its
+    own edge and lost the frame that makes this an overlay.
+
+    A blur inside `overflow: hidden` samples past the video's own box and pulls
+    transparent pixels in, which shows as a soft halo all round the plate. The
+    overscale pushes those edges outside the crop; `object-fit: cover` means the
+    extra 7% costs nothing but a slightly tighter framing, and it doubles as a
+    push-in that settles with the rise.
+  */
+  transform: scale(calc(1 + (1 - var(--film-on, 0)) * 0.07));
+}
+/*
+  THE COUNT AND THE PROGRESS RULE.
+
+  The rule is drawn ON the plate's bottom edge — it fills the hairline the border
+  already describes, so the plate gains a state instead of gaining a widget. Steel
+  blue, because that is the accent the company speaks in everywhere else on this
+  page and a second accent introduced for a progress bar would be a new colour
+  bought for the least important element in the frame.
+
+  The count sits at the plate's bottom-right on the same baseline as the chapter's
+  own credit at bottom-left, at the same 51px inset — so the two mono lines read
+  as one footer across the picture rather than as a caption and a control.
+*/
+.film__meter {
+  position: absolute;
+  right: calc(3.4rem - 0.6rem);
+  bottom: 3.2rem;
+}
+.film__t {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.42em;
+  font: 500 12px/1 var(--mono);
+  letter-spacing: 0.2em;
+  color: rgb(var(--ink-rgb) / 0.42);
+  font-variant-numeric: tabular-nums;
+}
+/* the elapsed figure is the only part that changes, so it is the only part lit */
+.film__t b { font-weight: 500; color: var(--steel); }
+.film__t s { text-decoration: none; color: rgb(var(--ink-rgb) / 0.24); }
+.film__t i, .film__t u { font-style: normal; text-decoration: none; }
+.film__bar {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 2px;
+  background: rgb(var(--ink-rgb) / 0.1);
+}
+.film__bar b {
+  display: block;
+  height: 100%;
+  background: var(--steel-deep);
+  transform-origin: 0 50%;
+  transform: scaleX(var(--film-p, 0));
+}
+/* the still is a frame, not a running clip */
+.film[data-still] .film__meter,
+.film[data-still] .film__bar { display: none; }
+
+/* arrived: the filter is dropped rather than left at zero radius, and the
+   overscale with it — see the settled latch in the page's chrome module */
+.film[data-settled] .film__v {
+  filter: brightness(0.86) contrast(1.07);
+  transform: none;
+}
+/*
+  THE SCRIM IS THREE GRADIENTS, NOT A FLAT WASH.
+
+  A flat scrim over footage kills the footage. These darken only where the page
+  has furniture: the top band holds the masthead, the bottom band holds the
+  chapter's own type at the contrast the rest of the page sets, and the vignette
+  closes the corners so a bright studio sweep does not run into the black of the
+  chapter on either side.
+*/
+.film__scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to top, rgb(7 9 11 / 0.9) 0%, rgb(7 9 11 / 0.42) 26%, rgb(7 9 11 / 0) 56%),
+    linear-gradient(to bottom, rgb(7 9 11 / 0.72) 0%, rgb(7 9 11 / 0.14) 18%, rgb(7 9 11 / 0) 34%),
+    radial-gradient(ellipse 96% 82% at 52% 46%, rgb(7 9 11 / 0), rgb(7 9 11 / 0.55) 100%);
+}
+/* the reduced-motion still: the same frame, in flow, not playing */
+.film[data-still] {
+  position: relative;
+  inset: auto;
+  z-index: 0;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin-bottom: 2.8rem;
+  opacity: 1;
+  visibility: visible;
+  content-visibility: visible;
+}
+.film[data-still] .film__back { display: none; }
+.film[data-still] .film__plate { inset: 0; transform: none; box-shadow: none; }
+/* nothing drives `--film-on` on this path, so the arrival state has to be
+   cancelled explicitly or the still would render blurred and overscaled */
+.film[data-still] .film__v { filter: brightness(0.86) contrast(1.07); transform: none; }
+.film[data-still] .film__scrim { display: none; }
+
+/* the type sits INSIDE the plate's lower-left corner, not the viewport's —
+   copy that straddles the edge of the picture it belongs to has no home */
+/* `.dir-presentation .beat .type` sets padding as a SHORTHAND at three classes,
+   so a two-class longhand here loses and the copy hangs off the plate's edge
+   onto the border. Matched depth, and the insets are the plate's own plus a
+   margin. */
+.dir-presentation .beat--motion .type {
+  align-content: end;
+  justify-items: start;
+  padding-left: calc(6.5vw + 3.4rem);
+  padding-right: calc(6.5vw + 3.4rem);
+  padding-bottom: calc(7.5vh + 3.2rem);
+}
+.motion { display: grid; gap: 0; max-width: 30ch; }
+.beat--motion .line { max-width: 24ch; }
+.motion__credit {
+  margin: 1.6rem 0 0;
+  font: 500 13px/1 var(--mono);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgb(var(--ink-rgb) / 0.42);
+}
+
+/* ── 03 · SYSTEMS — the overlay ───────────────────────────────────────────
+   Content takes the frame while the machine keeps moving behind it. Two columns:
+   the argument on the left, the capability register on the right. The right
+   column is a REGISTER, not cards — hairlines, a mono index and one line each,
+   because five boxes with drop shadows is the exact thing this page is not.
+
+   THE OVERLAY LEAVES A COLUMN FOR THE MACHINE, AND THAT IS NOT OPTIONAL.
+
+   Measured on the render, this was the weakest frame on the page: the panel ran
+   the full 1420px, the veil sat at 0.92 across all of it, and what a visitor
+   actually saw was two columns of white text on black with no subject anywhere
+   in the frame. The machine had stopped being the hero and become a texture.
+
+   The panel is now held to 62vw and set hard left, so the right third of every
+   stopped frame in this chapter is the machine, lit and moving — and the veil's
+   far end opens from 0.66 to 0.34 so that third is genuinely a picture and not a
+   darker rectangle. Copy still takes the frame; it no longer takes all of it. */
+.beat--systems .panel {
+  max-width: min(1420px, 52vw);
+  justify-self: start;
+  gap: clamp(1.8rem, 3.4vw, 3.6rem);
+}
+.beat--systems .type,
+.beat--integration .type { align-content: center; }
+.panel {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  gap: clamp(2.5rem, 7vw, 8rem);
+  align-items: start;
+  width: 100%;
+  max-width: 1420px;
+}
+.panel__say { display: grid; gap: 1.7rem; align-content: start; }
+.panel__say .statement { max-width: 11ch; }
+
+.reg { display: grid; }
+.reg__row {
+  display: grid;
+  grid-template-columns: 3.2rem minmax(0, 15ch) minmax(0, 1fr);
+  gap: clamp(1rem, 2vw, 2.2rem);
+  align-items: baseline;
+  padding: 1.15rem 0;
+  border-top: 1px solid var(--rule-soft);
+}
+.reg__row:first-child { border-top: 1px solid var(--rule); }
+.reg__n {
+  font: 500 14px/1.4 var(--mono);
+  letter-spacing: 0.12em;
+  color: var(--steel);
+  font-variant-numeric: tabular-nums;
+}
+.reg__k {
+  font: 600 clamp(1rem, 1.18vw, 1.15rem)/1.4 var(--display);
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.reg__v {
+  font: 400 clamp(0.98rem, 1.1vw, 1.06rem)/1.55 var(--display);
+  color: rgb(var(--ink-rgb) / 0.62);
+  margin: 0;
+}
+
+/* ── 04 · FAMILY — the render window ──────────────────────────────────────
+   The class list owns the left; the stage is clipped to a tall panel on the
+   right and the machine stands inside it. The classes are set as TYPE, at a size
+   that makes the list the composition, and the one class the page can actually
+   evidence carries a steel tag saying so. */
+.beat--family .type { align-content: center; }
+.family {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 46vw;
+  gap: clamp(2rem, 4vw, 4.5rem);
+  width: 100%;
+  align-items: center;
+}
+.family__head { display: grid; gap: 1.1rem; margin-bottom: 2.4rem; }
+.class__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 1.5rem;
+  padding: 1.05rem 0;
+  border-top: 1px solid var(--rule-soft);
+}
+.class__tag { margin-top: 0.7em; }
+.class__row:first-of-type { border-top: 1px solid var(--rule); }
+.class__row:last-of-type { border-bottom: 1px solid var(--rule-soft); }
+.class__name {
+  margin: 0;
+  font: 300 clamp(2rem, 3.5vw, 3.6rem)/1 var(--display);
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+.class__note {
+  margin: 0.5rem 0 0;
+  font: 400 clamp(0.96rem, 1.06vw, 1.04rem)/1.5 var(--display);
+  color: rgb(var(--ink-rgb) / 0.58);
+  max-width: 34ch;
+}
+.class__tag {
+  font: 500 14px/1 var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgb(var(--ink-rgb) / 0.42);
+  white-space: nowrap;
+}
+.class__tag--live {
+  color: #fff;
+  background: var(--steel-deep);
+  padding: 0.5em 0.75em 0.45em;
+}
+
+/* ── 06 · INDUSTRIES — the quiet chapter ──────────────────────────────────
+   A large typographic list, one item lit at a time as the chapter advances. The
+   selection is scroll-linked rather than hover-linked: a quiet section should
+   not need the pointer to be legible, and it has to survive a stopped frame. */
+.beat--industries .type { align-content: center; }
+.inds { width: 100%; max-width: 1180px; display: grid; gap: 2.4rem; }
+/*
+  ONE SET OF COLUMNS FOR THE WHOLE LIST, NOT ONE PER ROW.
+
+  Each row used to be its own grid with an `auto` name column, so the column was
+  measured against ITS OWN name: the description behind METAL started 190px to
+  the left of the one behind MANUFACTURING. Nothing was aligned to anything —
+  the copy simply hung off whatever word preceded it, and the eye had to find a
+  new left edge on every row.
+
+  The tracks now live on the LIST and the rows subgrid into them, so the name
+  column is sized once against the longest name and every description starts on
+  the same axis whichever row is lit.
+*/
+.inds__list {
+  display: grid;
+  grid-template-columns: 3.4rem clamp(26px, 2.6vw, 38px) minmax(0, auto) minmax(0, 1fr);
+  column-gap: clamp(1rem, 2.4vw, 2.6rem);
+}
+.ind {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  align-items: baseline;
+  /* horizontal padding would shift this row's tracks off the list's own, which
+     is the alignment we just bought — so the inset is vertical only */
+  padding: 0.72rem 0;
+  border-top: 1px solid var(--rule-soft);
+}
+.ind:first-child { border-top: none; }
+/*
+  THE MARK — GOOGLE MATERIAL SYMBOLS, OUTLINED, WEIGHT 400.
+
+  One published set rather than five drawings of mine, which is the point: a
+  shipped icon family is internally consistent in a way hand-cut marks are not,
+  and these five (directions_car, local_shipping, factory,
+  precision_manufacturing, warehouse) come off the same 960-unit grid with the
+  same optical weight and the same terminals.
+
+  They are glyph OUTLINES, so they paint with `fill`, not `stroke` — the paths
+  describe the edge of the shape, and stroking them would draw an outline of an
+  outline. The viewBox is Material's own `0 -960 960 960`.
+
+  Optically centred against the name rather than sat on its baseline, and never
+  carrying the meaning alone: the word is beside it and says the same thing.
+
+  Material Symbols are Apache-2.0.
+*/
+.ind__i {
+  width: 100%; height: auto;
+  align-self: center;
+  fill: rgb(var(--ink-rgb) / 0.26);
+  stroke: none;
+  transition: fill 340ms var(--ease-standard);
+}
+.ind[data-on] .ind__i { fill: var(--machine); }
+.ind__n {
+  font: 500 14px/1 var(--mono);
+  letter-spacing: 0.12em;
+  color: rgb(var(--ink-rgb) / 0.3);
+  font-variant-numeric: tabular-nums;
+  transition: color 340ms var(--ease-standard);
+}
+.ind__k {
+  margin: 0;
+  font: 300 clamp(2.1rem, 4.4vw, 4.4rem)/1.06 var(--display);
+  letter-spacing: -0.022em;
+  text-transform: uppercase;
+  color: rgb(var(--ink-rgb) / 0.38);
+  transition: color 340ms var(--ease-standard);
+}
+.ind__v {
+  margin: 0;
+  font: 400 clamp(0.98rem, 1.08vw, 1.06rem)/1.5 var(--display);
+  color: rgb(var(--ink-rgb) / 0);
+  /* balanced, and narrow enough that the second line is never one short word */
+  max-width: 28ch;
+  text-wrap: balance;
+  transition: color 340ms var(--ease-standard);
+}
+.ind[data-on] .ind__n { color: var(--steel); }
+.ind[data-on] .ind__k { color: var(--ink); }
+.ind[data-on] .ind__v { color: rgb(var(--ink-rgb) / 0.66); }
+
+/* ── 07 · INTEGRATION — the sequence ──────────────────────────────────────
+   Five steps on one rule. It is a horizontal list because it is a sequence in
+   time, and because the chapter before it and the chapter after it are both
+   vertical — a row here is the only structural change of direction on the page. */
+.seq {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: clamp(1.2rem, 2.4vw, 2.6rem);
+  border-top: 1px solid var(--rule);
+  padding-top: 1.5rem;
+  margin-top: 2.8rem;
+  width: 100%;
+}
+/*
+  THE FIVE STEPS ARRIVE ONE AT A TIME, LEFT TO RIGHT.
+
+  Each step carries its own `data-r`, so the shared stagger in site/vreveal.js
+  lays them down in order instead of dropping the row as a single block — which
+  is the only honest reading of a list whose content IS an order of operations.
+  The chapter enters on `slide` rather than `rise`: it is the page's one
+  horizontal band, so its entrance travels along its own axis, and `slide`
+  carries no blur, so eight staged blocks stay on the compositor.
+
+  The rule the steps hang from does NOT animate. It is the ground they land on;
+  a ground that arrives with them has nothing to be a ground for.
+*/
+/* the row is the one thing in this sheet's type layer that answers the pointer,
+   so it opts back in — `.beat .type` is pointer-events: none, and without this
+   the hover below could never fire on anything */
+.seq { pointer-events: auto; }
+.step {
+  display: grid;
+  gap: 0.65rem;
+  align-content: start;
+  position: relative;
+  /*
+    NO `transition: transform` HERE. GSAP owns this element's transform for the
+    entrance, and a CSS transition on the same property makes the two fight: the
+    transition chases each frame GSAP writes, the element lags permanently, and
+    the slide settles wherever the last tick left it instead of at zero. Measured
+    before the fix — five steps stranded at x = -4, -11, -22, -7, -17.
+    The hover therefore moves only things GSAP never touches: the pseudo-element
+    and the child copy.
+  */
+}
+.step::before {
+  content: "";
+  position: absolute; top: -1.5rem; left: 0;
+  width: 26px; height: 2px;
+  background: var(--steel-deep);
+  transform-origin: 0 50%;
+  transition: transform var(--motion-base) var(--ease-standard),
+              background-color var(--motion-base) var(--ease-standard);
+}
+.step__v { transition: color var(--motion-base) var(--ease-standard); }
+/*
+  HOVER IS A READING AID, NOT A FALSE AFFORDANCE.
+
+  These steps go nowhere, so the hover deliberately does not offer a pointer, an
+  underline or a surface — it only makes the step you are on easier to read: the
+  index rule extends and the description moves from 0.58 to 0.82 alpha, which
+  takes it from 6.2:1 to 11.9:1 against the ground. Contrast goes UP on hover,
+  never down. One transform and one colour; nothing here triggers layout.
+*/
+.step:hover::before { transform: scaleX(2.6); }
+.step:hover .step__v { color: rgb(var(--ink-rgb) / 0.82); }
+.step__n {
+  font: 500 14px/1 var(--mono);
+  letter-spacing: 0.14em;
+  color: var(--steel);
+  font-variant-numeric: tabular-nums;
+}
+.step__k {
+  margin: 0;
+  font: 600 clamp(1rem, 1.2vw, 1.18rem)/1.32 var(--display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.step__v {
+  margin: 0;
+  font: 400 clamp(0.94rem, 1.02vw, 1rem)/1.52 var(--display);
+  color: rgb(var(--ink-rgb) / 0.58);
+}
+.beat--integration .panel { grid-template-columns: minmax(0, 1fr); gap: 0; }
+.beat--integration .panel__say { max-width: 62ch; }
+.beat--integration .panel__say .statement { max-width: 18ch; }
+
+/* ── 08 · RESOLUTION — the close ──────────────────────────────────────────
+   The claim, then one action. There is exactly one filled control on this page
+   and it is here; everything else that leads anywhere is a text link, so the
+   page never asks the same question twice in one viewport. */
+.beat--resolution .type { align-content: end; justify-items: start; }
+.claim {
+  margin: 0;
+  font: 300 clamp(2.8rem, 6vw, 6.4rem)/1.0 var(--display);
+  letter-spacing: -0.032em;
+  text-transform: uppercase;
+  max-width: 15ch;
+}
+.close {
+  display: flex; align-items: center;
+  gap: clamp(1.5rem, 3vw, 3rem);
+  margin-top: 2.6rem;
+  flex-wrap: wrap;
+}
+.btn {
+  display: inline-flex; align-items: center;
+  min-height: 52px;
+  padding: 0 2.1rem;
+  border: 1px solid rgb(var(--ink-rgb) / 0.9);
+  background: transparent;
+  color: var(--ink);
+  font: 700 14px/1 var(--display);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--motion-base) var(--ease-standard),
+              color var(--motion-base) var(--ease-standard),
+              border-color var(--motion-base) var(--ease-standard);
+}
+/* the invert swaps BOTH colours in one rule, so the pair is never half-applied */
+.btn:hover { background: var(--ink); color: var(--ground); border-color: var(--ink); }
+.link {
+  color: var(--steel);
+  font: 500 14px/1 var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-bottom: 1px solid rgb(var(--steel-rgb) / 0.4);
+  padding-bottom: 0.35em;
+  transition: color var(--motion-base) var(--ease-standard),
+              border-color var(--motion-base) var(--ease-standard);
+}
+.link:hover { color: #fff; border-color: #fff; }
+
+/* ══ THE CALLOUT, AS A MACHINED PLATE ═════════════════════════════════════
+   Hierarchy in three steps rather than two: a FILLED steel marker carrying the
+   number, the label in near-white above the rule, the measured value in mono
+   steel below it. The plate behind them is near-opaque, because the alternative
+   to a plate over a lit orange casting is white type at 2:1. */
+/*
+  THE BACKING IS A SHADOW, NOT A SIGN.
+
+  Near-opaque fill plus a visible outline plus a chamfer plus a heavy edge bar
+  was four structural devices around two words, and the result read as a plate
+  bolted to the picture. The fill drops to 0.72 and the outline to 0.09, so the
+  block still guarantees contrast over a lit casting but stops declaring its own
+  border. The accent survives as ONE mark: the standing tick where the leader
+  lands.
+*/
+.dir-presentation .co__cut {
+  fill: rgb(9 12 15 / 0.72);
+  stroke: rgb(var(--ink-rgb) / 0.09);
+  stroke-width: 1;
+}
+.dir-presentation .co__plate { fill: none; }
+.dir-presentation .co__edge { stroke: var(--steel-deep); stroke-width: 2; }
+.dir-presentation .co__lead {
+  stroke: rgb(var(--ink-rgb) / 0.5);
+  stroke-width: 1.25;
+}
+/* THE ANCHOR: a survey target in the machine's own colour, because the point it
+   is marking belongs to the machine and not to the annotation. Ring, standing
+   ticks and a filled centre — heavy enough to be the thing you see first, which
+   is the point of a starting point. */
+.dir-presentation .co__tick {
+  stroke: rgb(var(--machine-rgb) / 0.95);
+  stroke-width: 1.7;
+  fill: none;
+}
+.dir-presentation .co__dot { fill: var(--machine); r: 3.2px; }
+/*
+  THE NUMBER STOPS SHOUTING.
+
+  It was a filled saturated square with white numerals — the heaviest object in
+  the block, which made the INDEX outrank the thing it was indexing. A callout's
+  subject is its label; the number only orders it. So the chip is gone and the
+  index is quiet mono in the accent, set on the same baseline as the label and
+  reading into it.
+
+  The label loses a weight and half its tracking: 600 at 0.15em is a stamped
+  sign, 500 at 0.085em is a caption on a drawing. The value closes the line in
+  the same mono as the index, so the two ends of the sentence rhyme.
+*/
+.dir-presentation .co__box { fill: none; stroke: none; }
+.dir-presentation .co__num {
+  fill: var(--steel);
+  font: 500 13px/1 var(--mono);
+  letter-spacing: 0.16em;
+  font-variant-numeric: tabular-nums;
+}
+.dir-presentation .co__label {
+  fill: var(--ink);
+  font: 500 19px/1 var(--display);
+  letter-spacing: 0.085em;
+}
+.dir-presentation .co__value {
+  fill: var(--steel);
+  font: 500 15px/1 var(--mono);
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+}
+.dir-presentation .co__rule { stroke: rgb(var(--ink-rgb) / 0.22); stroke-width: 1; }
+
+/* ══ THE RECORD ═══════════════════════════════════════════════════════════ */
+.beat--record {
+  min-height: 100svh;
+  display: grid;
+  /* the pane hangs in the middle of the screen; the masthead's own band is the
+     only thing it has to clear */
+  align-content: center;
+  padding: 76px var(--gutter) 104px;
+}
+.dir-presentation .note { margin-bottom: 1.2rem; font-size: 15.5px; line-height: 1.55; }
+.dir-presentation .plate { margin-bottom: 1.5rem; }
+.dir-presentation .plate th,
+.dir-presentation .plate td { padding: 0.36rem 0; }
+.dir-presentation .provenance { font-size: 13.5px; line-height: 1.48; }
+/*
+  THE TABLE STANDS ON ITS OWN GROUND. The record arrives while the machine is
+  still lit and still turning behind it, and a column of sustained reading is the
+  one place on this page where "placed rather than defended" is not available —
+  the text is long and the ground moves under it. So it is a sibling panel the
+  column sits on, released in the last tenth where there is nothing but margin.
+*/
+.dir-presentation .record {
+  padding: 1.7rem 2.2rem 1.8rem;
+  margin-left: -2.2rem;
+  max-width: 62ch;
+  /*
+    FROST, NOT A GRADIENT.
+
+    The gradient was a panel pretending not to be one: opaque where the text is,
+    fading out to nothing at its right edge, which drew a soft vertical band
+    across the hall. Frosted glass is the honest version of the same job — the
+    hall stays visible THROUGH it, blurred, so the column reads as a pane held in
+    front of the machine rather than as a hole cut in it.
+  */
+  background: rgb(13 17 22 / 0.5);
+  -webkit-backdrop-filter: blur(26px) saturate(1.25);
+          backdrop-filter: blur(26px) saturate(1.25);
+  border: 1px solid rgb(var(--ink-rgb) / 0.1);
+}
+.dir-presentation .record__head {
+  margin-bottom: 1.1rem;
+  font: 300 clamp(1.45rem, 2.2vw, 2.05rem)/1.06 var(--display);
+  letter-spacing: -0.028em;
+  text-transform: uppercase;
+}
+.dir-presentation .record__head .plate-on {
+  background: var(--steel-deep);
+  color: #fff;
+  padding: 0.08em 0.34em 0.14em;
+}
+.dir-presentation .plate th { color: rgb(var(--ink-rgb) / 0.6); }
+.dir-presentation .plate tr { border-top-color: var(--rule-soft); }
+.dir-presentation .plate tr:last-child { border-bottom-color: var(--rule-soft); }
+.dir-presentation .orbit__hint {
+  border-color: var(--rule);
+  color: rgb(var(--ink-rgb) / 0.5);
+  font-family: var(--mono);
+  letter-spacing: 0.16em;
+}
+.sim {
+  margin: 0 0 1.15rem;
+  font: 500 14px/1.6 var(--mono);
+  letter-spacing: 0.1em;
+  color: var(--steel);
+  border-left: 2px solid var(--steel-deep);
+  padding-left: 1rem;
+  max-width: 62ch;
+}
+
+/* ══ REDUCED MOTION ═══════════════════════════════════════════════════════
+   The still is the peak's frame. Everything that was choreographed is simply
+   present: sections stack, the sticky containers release, the veils and the
+   window go away rather than freezing at whatever value the scroll last wrote. */
+@media (prefers-reduced-motion: reduce) {
+  .dir-presentation .beat { min-height: auto !important; }
+  .dir-presentation .beat .type {
+    position: static !important;
+    height: auto !important;
+    padding-block: 6rem;
+    overflow: visible;
+  }
+  .veil, .winframe { display: none; }
+  .dir-presentation .stage { clip-path: none; }
+  .ind__k { color: var(--ink); }
+  .ind__v { color: rgb(var(--ink-rgb) / 0.66); }
+  .ind__n { color: var(--steel); }
+  .chapter { display: none; }
+}
+:root[data-reduced] .dir-presentation .beat { min-height: auto !important; }
+:root[data-reduced] .dir-presentation .beat .type {
+  position: static !important; height: auto !important; padding-block: 6rem; overflow: visible;
+}
+:root[data-reduced] .veil,
+:root[data-reduced] .winframe,
+:root[data-reduced] .chapter { display: none; }
+:root[data-reduced] .dir-presentation .stage { clip-path: none; }
+:root[data-reduced] .ind__k { color: var(--ink); }
+:root[data-reduced] .ind__v { color: rgb(var(--ink-rgb) / 0.66); }
+:root[data-reduced] .ind__n { color: var(--steel); }
+
+/* ══ THE LEVEL LINE ═══════════════════════════════════════════════════════
+   The device the page is built to show, and the ONE place orange is allowed to
+   act as a line. That is the colour rule of this direction working: the datum is
+   a property of the machine, so it wears the machine's colour, and nothing the
+   company says is ever drawn in it. The measurement is therefore impossible to
+   confuse with a tag, a rule or a marker anywhere else on the page.
+
+   (The geometry is built by site/vlevel.js and is shared with `final`. What is
+   different here is only the dress — and the fact that in `final` the datum is
+   painted from `--accent`, which in this direction is the steel.) */
+.lvl {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  transition: opacity 420ms var(--e-enter);
+}
+.lvl--room  { z-index: -1; }
+.lvl--sheet { z-index: 9; }
+
+/* the datum: a hairline the length of the frame, and a solid tick at the plate */
+.lvl__rule {
+  stroke: rgb(var(--ink-rgb) / 0.6);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+.lvl__tri { fill: rgb(var(--ink-rgb) / 0.7); }
+
+/* the plate's own axis, heavy and in the machine's colour. If it ever pitched
+   away from the hairline behind it, the difference would be the most visible
+   thing on the screen — which is the entire argument. */
+.lvl__plate {
+  stroke: var(--machine);
+  stroke-width: 3;
+  stroke-linecap: butt;
+  vector-effect: non-scaling-stroke;
+}
+
+.lvl__flagbox { fill: none; stroke: rgb(var(--ink-rgb) / 0.48); stroke-width: 1; }
+.lvl__flag {
+  fill: rgb(var(--ink-rgb) / 0.72);
+  font: 500 14px/1 var(--mono);
+  letter-spacing: 0.06em;
+}
+
+/* the measurement, on its own ground so it is legible over the casting */
+.lvl__valbox { fill: url(#lvl-ground); }
+.lvl__value {
+  fill: var(--ink);
+  font: 600 58px/1 var(--mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.015em;
+}
+.lvl__cap {
+  fill: rgb(var(--ink-rgb) / 0.82);
+  font: 500 14px/1 var(--mono);
+  letter-spacing: 0.16em;
+}
+
+/* `quiet` introduces the instrument: the rule, and nothing that reads as a claim */
+.lvl--sheet[data-mode="quiet"] .lvl__plate,
+.lvl--sheet[data-mode="quiet"] .lvl__valbox,
+.lvl--sheet[data-mode="quiet"] .lvl__value,
+.lvl--sheet[data-mode="quiet"] .lvl__cap,
+.lvl--sheet[data-mode="quiet"] .lvl__flagbox,
+.lvl--sheet[data-mode="quiet"] .lvl__flag { opacity: 0; }
+.lvl--room[data-mode="quiet"] .lvl__tri { opacity: 0; }
+
+/*
+  ══ REDUCED MOTION IS A DOCUMENT OVER ONE STILL ═══════════════════════════
+
+  With nothing choreographed, every chapter is laid out in flow over a single
+  fixed frame — the peak's, because that is the moment the choreography existed
+  for. Two things follow from that and neither is optional.
+
+  1  THE FIRST CHAPTER HAS TO CLEAR THE MEASUREMENT. Measured on the render, the
+     designation at 18vw came down straight across the 0.000° panel: the page's
+     title and the page's proof, printed on top of each other. The opening block
+     is dropped below the datum instead, which is the same relationship the
+     moving version composes — the machine above, the word beneath it.
+
+  2  EVERY CHAPTER AFTER THE FIRST NEEDS ITS OWN GROUND. The still does not move,
+     so eight screens of copy would be read over one lit casting. They get an
+     opaque ground; the still keeps the first screen, where it is the subject.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .dir-presentation .beat--arrival .type { padding-top: 48vh; }
+  .monument { font-size: 13vw; }
+  .dir-presentation .beat:not(.beat--arrival) .type,
+  .dir-presentation .beat--record { background: rgb(7 9 11 / 0.95); }
+  .dir-presentation .record { background: none; margin-left: 0; padding-inline: 0; }
+}
+:root[data-reduced] .dir-presentation .beat--arrival .type { padding-top: 48vh; }
+:root[data-reduced] .monument { font-size: 13vw; }
+:root[data-reduced] .dir-presentation .beat:not(.beat--arrival) .type,
+:root[data-reduced] .dir-presentation .beat--record { background: rgb(7 9 11 / 0.95); }
+:root[data-reduced] .dir-presentation .record { background: none; margin-left: 0; padding-inline: 0; }
+
+/* ══ HOTSPOTS ═════════════════════════════════════════════════════════════
+   Five marks on the machine, each naming the part it sits on. They are buttons,
+   not links — pressing one opens a note about that joint and pressing it again
+   closes it, and nothing here navigates.
+
+   THE PANEL IS DELIBERATELY NOT A CALLOUT PLATE. The film's annotation is an
+   opaque chamfered slab with a steel edge, and repeating that here would say the
+   two things are the same device. This one is the opposite: frosted, soft-edged,
+   set well away from its mark with a hairline running out to it. It reads as
+   something the visitor asked for, over a picture, rather than as a measurement
+   printed on one. */
+.hot {
+  position: fixed; inset: 0;
+  z-index: 12;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 480ms var(--e-enter);
+}
+.hot[data-on] { opacity: 1; }
+
+.hot__dot {
+  position: absolute; top: 0; left: 0;
+  width: 48px; height: 48px;
+  margin: -24px 0 0 -24px;              /* transform positions the CENTRE */
+  display: grid; place-items: center;
+  padding: 0; border: 0; background: none;
+  pointer-events: auto;
+  cursor: pointer;
+  /* staggered up the arm rather than simultaneous: five circles landing on one
+     frame reads as an interface being switched on */
+  transition: opacity 320ms var(--e-enter), visibility 320ms;
+}
+.hot__dot:nth-child(1) { transition-delay: 0ms; }
+.hot__dot:nth-child(2) { transition-delay: 80ms; }
+.hot__dot:nth-child(3) { transition-delay: 160ms; }
+.hot__dot:nth-child(4) { transition-delay: 240ms; }
+.hot__dot:nth-child(5) { transition-delay: 320ms; }
+.hot__dot--off { opacity: 0; visibility: hidden; pointer-events: none; }
+
+.hot__ring {
+  position: relative;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  /* dark enough that the cross holds its contrast on a lit casting */
+  background: rgb(7 9 11 / 0.42);
+  -webkit-backdrop-filter: blur(3px);
+          backdrop-filter: blur(3px);
+  border: 2px solid rgb(var(--ink-rgb) / 0.78);
+  display: block;
+  transition: background 260ms var(--ease-standard),
+              border-color 260ms var(--ease-standard),
+              transform 380ms var(--ease-standard);
+}
+.hot__ring::before,
+.hot__ring::after {
+  content: "";
+  position: absolute; top: 50%; left: 50%;
+  background: var(--ink);
+  transition: transform 380ms var(--ease-standard),
+              opacity 260ms var(--ease-standard),
+              background 260ms var(--ease-standard);
+}
+.hot__ring::before { width: 15px; height: 2px; margin: -1px 0 0 -7.5px; }
+.hot__ring::after  { width: 2px; height: 15px; margin: -7.5px 0 0 -1px; }
+
+/*
+  THE PLUS TURNS INTO A SINGLE STROKE.
+
+  Not into a cross — a cross means close, and nothing here closes a window. The
+  vertical arm goes and the horizontal one rotates, so what is left under the
+  pointer is one diagonal mark: the same gesture a draughtsman makes to tick a
+  point he has already read. The ring draws in a little at the same time, which
+  is what tells you the mark is the thing you are pointing at.
+*/
+.hot__dot:hover .hot__ring,
+.hot__dot:focus-visible .hot__ring,
+.hot__dot[data-open] .hot__ring {
+  background: rgb(7 9 11 / 0.66);
+  border-color: var(--steel);
+  transform: scale(0.86);
+}
+.hot__dot:hover .hot__ring::before,
+.hot__dot:focus-visible .hot__ring::before,
+.hot__dot[data-open] .hot__ring::before {
+  transform: rotate(-45deg) scaleX(1.05);
+  background: var(--steel);
+}
+.hot__dot:hover .hot__ring::after,
+.hot__dot:focus-visible .hot__ring::after,
+.hot__dot[data-open] .hot__ring::after { opacity: 0; transform: scaleY(0.2); }
+
+.hot__dot:focus-visible { outline: none; }
+.hot__dot:focus-visible .hot__ring {
+  box-shadow: 0 0 0 2px var(--ground), 0 0 0 4px #fff;
+}
+
+/*
+  THE PANEL STANDS OFF, AND A HAIRLINE REACHES BACK TO THE MARK.
+
+  Butted against the ring it read as a tooltip stuck to a cursor. At 96px with a
+  drawn connector it reads as an annotation pointing at a part — and the gap is
+  what makes the frost legible as a material rather than as a smudge on the dot.
+*/
+.hot__pop {
+  position: absolute;
+  left: 150px; top: 50%;
+  transform: translateY(-50%) translateX(-10px);
+  width: 16.5rem;
+  padding: 1rem 1.15rem 1.05rem;
+  background: rgb(16 21 27 / 0.44);
+  -webkit-backdrop-filter: blur(22px) saturate(1.4);
+          backdrop-filter: blur(22px) saturate(1.4);
+  border: 1px solid rgb(var(--ink-rgb) / 0.14);
+  border-radius: 3px;
+  box-shadow: 0 18px 44px rgb(0 0 0 / 0.34);
+  opacity: 0; visibility: hidden;
+  pointer-events: none;
+  text-align: left;
+  transition: opacity 260ms var(--ease-standard),
+              transform 380ms var(--ease-standard),
+              visibility 260ms;
+}
+/* the connector: a hairline from the ring out to the panel's edge */
+.hot__pop::before {
+  content: "";
+  position: absolute;
+  right: 100%; top: 50%;
+  width: 110px; height: 1px;
+  background: linear-gradient(to left, rgb(var(--ink-rgb) / 0.45), rgb(var(--ink-rgb) / 0.08));
+}
+.hot__dot[data-flip] .hot__pop {
+  left: auto; right: 150px;
+  transform: translateY(-50%) translateX(10px);
+}
+.hot__dot[data-flip] .hot__pop::before {
+  right: auto; left: 100%;
+  background: linear-gradient(to right, rgb(var(--ink-rgb) / 0.45), rgb(var(--ink-rgb) / 0.08));
+}
+.hot__dot:hover .hot__pop,
+.hot__dot:focus-visible .hot__pop,
+.hot__dot[data-open] .hot__pop {
+  opacity: 1; visibility: visible;
+  transform: translateY(-50%) translateX(0);
+}
+.hot__pop b {
+  display: block;
+  font: 400 17px/1.25 var(--display);
+  letter-spacing: -0.005em;
+  color: var(--ink);
+}
+.hot__pop u {
+  display: block;
+  margin-top: 0.2rem;
+  font: 500 14px/1 var(--mono);
+  letter-spacing: 0.16em;
+  text-decoration: none;
+  color: var(--steel);
+}
+.hot__pop i {
+  display: block;
+  margin-top: 0.6rem;
+  font: 400 14.5px/1.5 var(--display);
+  font-style: normal;
+  color: rgb(var(--ink-rgb) / 0.7);
+}
+
+/*
+  THE FOOTER LIST IS THE NAVIGATION, AND IT STAYS.
+
+  It used to hide once the dots appeared, back when the dots were links. They are
+  annotations now, so hiding the only way off this screen would leave the last
+  frame with nowhere to go.
+*/
+.colophon__nav {
+  display: flex; flex-wrap: wrap;
+  gap: 0.35rem 1.4rem;
+  margin: 0.7rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.colophon__nav a {
+  font: 500 14px/1 var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgb(var(--ink-rgb) / 0.6);
+  text-decoration: none;
+  transition: color var(--motion-base) var(--ease-standard);
+}
+.colophon__nav a:hover { color: var(--ink); }
+
+/* ══ THE CALLOUT IS DRAWN, NOT SWITCHED ON ════════════════════════════════
+   `--d` is the group's own progress, stepped in site/vcallouts.js against real
+   elapsed time. The staging below is the order a draughtsman works in: the
+   leader runs out of the anchor first, the marker lands, then the label, and the
+   rule grows out under it last. The rule's LENGTH is geometry and is computed in
+   the module; what is here is only what becomes visible when. */
+.dir-presentation .co__g { --d: 1; transition: none; }
+/* THE MARK LANDS FIRST. The leader is held back for the first seventh of the
+   draw so the anchor is already a visible object when the line leaves it — that
+   is the whole difference between "a line arrived at a point" and "this point
+   is what we are talking about". */
+.dir-presentation .co__lead {
+  stroke-dasharray: 1800;
+  stroke-dashoffset: calc(1800px * (1 - clamp(0, (var(--d) - 0.14) / 0.86, 1)));
+}
+.dir-presentation .co__tick,
+.dir-presentation .co__dot { opacity: clamp(0, var(--d) * 14, 1); }
+.dir-presentation .co__cut { opacity: clamp(0, (var(--d) - 0.30) * 4, 1); }
+.dir-presentation .co__edge { opacity: clamp(0, (var(--d) - 0.42) * 5, 1); }
+.dir-presentation .co__num { opacity: clamp(0, (var(--d) - 0.48) * 5, 1); }
+.dir-presentation .co__label { opacity: clamp(0, (var(--d) - 0.56) * 5, 1); }
+.dir-presentation .co__value { opacity: clamp(0, (var(--d) - 0.74) * 6, 1); }

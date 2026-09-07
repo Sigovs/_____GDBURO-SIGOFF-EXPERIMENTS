@@ -1,4 +1,4 @@
-PAGE: http://127.0.0.1:5199/_buro%20test%202/index2.html
+PAGE: http://localhost:5199/_buro%20test%202/index5.html
   document height   14060
   acts in the DOM   00 01 02 03 04 05 06 07
   images            13 in markup, 2 loaded
@@ -36,9 +36,9 @@ ACT 02 INSIDE THE PAGE
 THE JOURNEY
    suite hover        03 · 05
    suite selected     03 · 05
-   ENTER             257x89 at 1214,782
+   ENTER             276x56 at 1214,787
    after ENTER       entered=true  level=suite
-   site plan         {"rect":[1425,900],"viewBox":"-94.38800277709962 -91.04800262451172 1221.1760375976562 597.3460205078125","coversAt700x500":true}
+   site plan         {"rect":[1373,900],"viewBox":"-94.38800277709962 -91.04800262451172 1221.1760375976562 597.3460205078125","coversAt700x500":true}
    escape from plan  state before "suite 03 · 05"  after "suite 03 · 05"  PRESERVED
    wheel after use   scrollY 2160 -> 5360   PAGE STILL SCROLLS
    wheel over model  scrollY 3060 -> 6260   passes through

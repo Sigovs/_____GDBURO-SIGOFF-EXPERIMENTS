@@ -68,7 +68,7 @@ for (const [type, sold] of cases) {
         lampMat = '#' + o.lamp.material.color.getHexString()
         glazeMat = '#' + o.glaze.material.color.getHexString() }
     }
-    gl.site.traverse(o => { if (o.isPointLight && o.color.getHexString() === 'ffd9ab') apron = o.intensity })
+    gl.scene.traverse(o => { if (o.isPointLight && o.color.getHexString() === 'ffd9ab') apron = o.intensity })
     return { hover: hs ? hs.ref : null, type: hs ? hs.type : null, doorMat, lampMat, glazeMat, apron } })()`)
   console.log('  ' + type + (sold ? ' sold     ' : ' available') + '  ->  state ' + JSON.stringify(st) + '   label: ' + pt[2])
 }
@@ -78,7 +78,7 @@ const pick = await ev(`(() => { const bs=[...document.querySelectorAll('[data-ba
   const r=bs[1].getBoundingClientRect(); return [Math.round(r.left+r.width/2), Math.round(r.top+r.height/2)] })()`)
 await move(pick[0], pick[1]); await sleep(200); await click(pick[0], pick[1]); await sleep(1600)
 console.log('after click: ' + JSON.stringify(await ev(`(() => { const S=window.__v5.S; const gl=window.__v5.gl
-  let apron=0, focus=0; gl.site.traverse(o=>{ if(o.isPointLight){ const h=o.color.getHexString(); if(h==='ffd9ab') apron=o.intensity; if(h==='cfe0ee') focus=o.intensity } })
+  let apron=0, focus=0; gl.scene.traverse(o=>{ if(o.isPointLight){ const h=o.color.getHexString(); if(h==='ffd9ab') apron=o.intensity; if(h==='cfe0ee') focus=o.intensity } })
   return { level:S.level, suite:S.suite?S.suite.ref:null, apronLight:apron, focusLight:focus,
     enterVisible: !!document.querySelector('[data-enter]') } })()`)))
 process.exit(0)

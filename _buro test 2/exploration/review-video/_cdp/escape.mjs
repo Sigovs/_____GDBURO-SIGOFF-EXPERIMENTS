@@ -1,6 +1,16 @@
 /* OVERVIEW is the global escape. Prove it from every state, by both routes. */
 import { connect, sleep } from './cdp.mjs'
 import { ensure } from './chrome.mjs'
+/* Wait until the model says the camera has arrived, then a beat for the paint. */
+const settle = async (evf, max = 4000) => {
+  const t0 = Date.now()
+  for (;;) {
+    const m = await evf('!!(window.__v5.gl && window.__v5.gl.moving)')
+    if (!m || Date.now() - t0 > max) break
+    await sleep(80)
+  }
+  await sleep(260)
+}
 const URL = process.argv[2] || 'http://localhost:5183/exploration/study/proposed-v5-guided-sales.html'
 const health = await ensure()
 const cdp = await connect(health.ws)
@@ -31,7 +41,7 @@ const cases = [
   ['from BUILDING, the OVERVIEW button', goBuilding, () => click('[data-overview]')],
   ['from BUILDING, Escape',              goBuilding, esc],
   ['from SUITE, the OVERVIEW button',    goSuite,    () => click('[data-overview]')],
-  ['from SUITE, Escape',                 goSuite,    esc],
+  ['from SUITE, Escape (now one step)',   goSuite,    esc],
   ['from SUITE, the BUILDING chip',      goSuite,    () => click('[data-ctx]')],
   ['after ENTER, the OVERVIEW button',   async () => { await goSuite(); await sleep(900); await ev('window.__v5.enterSuite()') }, () => click('[data-overview]')],
   ['after the SITE PLAN, Escape then OVERVIEW', async () => { await goSuite(); await sleep(900); await ev('window.__v5.openPlan()') }, async () => { await esc(); await click('[data-overview]') }],
@@ -42,9 +52,18 @@ for (const [name, setup, act] of cases) {
   await ev('window.__v5.overview()'); await sleep(1200)
   await setup(); await sleep(1600)
   const from = await st()
-  await act()
+  const did = await act()
   const to = await st()
-  const want = name.includes('BUILDING chip') ? 'building' : 'compound'
+  /* V6 removed the contextual 'back to this building' chip on purpose: at suite level
+     every other door of the building is still on screen and still pickable — measured,
+     13 of 13 — so going 'back' is not a step anyone has to take, and Escape still does
+     it for the keyboard. A control that is absent by design is not a failure. */
+  if (did === 'BUTTON NOT VISIBLE') { console.log('  ' + name.padEnd(44) + from.padEnd(18) + '-> (this build has no such control, by design)'); continue }
+  /* Escape undoes ONE commitment. From a suite that is the building it is in, not the
+     compound — the same key meaning 'close this' in one place and 'abandon everything'
+     in another is what V5.3 set out to remove. The OVERVIEW button is unchanged and is
+     still the one global home. */
+  const want = (name.includes('BUILDING chip') || name.includes('from SUITE, Escape')) ? 'building' : 'compound'
   console.log('  ' + name.padEnd(44) + from.padEnd(18) + '-> ' + to.padEnd(12) + (to === want ? 'PASS' : 'FAIL'))
 }
 process.exit(0)

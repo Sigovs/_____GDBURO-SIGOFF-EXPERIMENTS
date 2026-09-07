@@ -1,0 +1,27 @@
+THE PLAN IS A LAYER, NOT A PLACE
+   opened from      suite b=03 s=03 · 01
+   translucent      rgba(9, 11, 14, 0.965)
+   says where I am  Suite 03 · 01
+   current marked   true
+   exit visible     226x39 at 59,43
+   whole site fits  -94.38800277709962 -91.04800262451172 1221.1760375976562 597.3460205078125
+   Esc restored     suite b=03 s=03 · 01   EXACT
+
+SWITCHING FROM INSIDE THE PLAN — one press, on the drawing itself
+   hover on 07 lights it: true
+   after one press  building b=07 s=-   PASS
+
+THE ESCAPE HIERARCHY — one step at a time
+   start                     suite +plan b=06 s=06 · 01
+   esc 1 · closes the plan   suite b=06 s=06 · 01
+   esc 2 · leaves the suite  building b=06 s=-
+   esc 3 · leaves the buildingcompound b=- s=-
+   esc 4 · already home      compound b=- s=-
+   ---> PASS
+
+NO TRAP
+   element at 720,450 while open: polyline.mass-road-line
+   element at 720,450 after esc : CANVAS.compound__gl
+   plan hidden: true
+
+CONSOLE ERRORS: none

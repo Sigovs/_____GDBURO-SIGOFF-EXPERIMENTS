@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Act 02 — V6 · The model is the interface</title>
+<!-- A full-screen shell and nothing else. The interface lives in exploration/study/v6/,
+     so what is reviewed here and what runs inside the real site are the same files. -->
+<link rel="stylesheet" href="/exploration/study/v6/v6.css">
+<style>
+  html,body{margin:0;height:100%;background:#060708;overflow:hidden}
+  #act02{position:fixed;inset:0}
+</style>
+</head>
+<body>
+<div id="act02"></div>
+<script type="module">
+  import { mountV6 } from '/exploration/study/v6/v6.js'
+  const api = mountV6(document.getElementById('act02'), {
+    onEnter: (s) => console.log('[v6] entered', s.ref),
+    onContinue: (s) => console.log('[v6] continue from', s?.ref),
+    onSpecs: (s) => console.log('[v6] full specs for', s?.ref),
+  })
+  window.__v6 = api
+  window.__v5 = api   /* the review harness addresses whichever act 02 is mounted */
+</script>
+</body>
+</html>

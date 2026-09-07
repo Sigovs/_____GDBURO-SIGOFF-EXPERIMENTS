@@ -32,17 +32,36 @@
   .v5-host{position:relative;height:100vh;min-height:100vh;width:100%;background:#060708}
   /* The page already has a persistent header carrying the mark and the location, so the
      interface's own standalone mark would be the same words twice on the same screen. */
-  .v5-host .mark{display:none}
+  .v5-host.v5 .mark{display:none!important}
   /* The site header sits above act 02's own controls. */
-  .v5 .nav{top:70px}
+  /* A DESCENDANT SELECTOR NEEDS A DESCENDANT. mountV6 puts the class v6 on the HOST
+     element itself, so the host carries both v6-host and v6 and there is no .v6 INSIDE
+     a .v6-host to match — the first attempt at these overrides selected nothing at all.
+     Compounded on the one element, they also outrank v6.css's own single-class rules,
+     which is the other half of the problem: Vite emits that stylesheet as a link after
+     this block, so at equal specificity it wins. Measured on the published page before
+     this fix: Site plan at 32px under a 70px header, the way home at 98 where the
+     comment claimed 70. */
+  .v5-host.v5 .topright,.v5-host.v5 .nav{top:70px}
+  /* THE WAY HOME KEEPS ITS PLACE IN BOTH PAGES. Standalone it sits under act 02's own
+     mark; here that mark is hidden and the site's header is in the same band, so the
+     button moves up to sit level with Site plan. It is one variable, so the two pages
+     cannot drift into two different positions for the one control a lost visitor
+     depends on. */
+  /* TWO CLASSES, NOT ONE, and for the same reason min-height is spelled out above:
+     v6.css declares --home-top on its own .v6 rule, and in a BUILD Vite emits that
+     stylesheet as a link AFTER this inline block. At equal specificity the later rule
+     wins, so the override worked on the dev server and was silently ignored in the
+     published page — measured live at 98px where this claims 70. */
+  .v5-host.v5{--home-top:70px}
 </style>
-  <script type="module" crossorigin src="./assets2/v5site-CbmNWY4u.js"></script>
+  <script type="module" crossorigin src="./assets2/v5site-DcmcNqrW.js"></script>
   <link rel="modulepreload" crossorigin href="./assets2/preload-helper-DtWiEIvH.js">
-  <link rel="modulepreload" crossorigin href="./assets2/main-CZupjTKB.js">
-  <link rel="modulepreload" crossorigin href="./assets2/v5-j0OCEtuI.js">
+  <link rel="modulepreload" crossorigin href="./assets2/main-CaCSeQJ5.js">
+  <link rel="modulepreload" crossorigin href="./assets2/v5-C_ONc-Yj.js">
   <link rel="modulepreload" crossorigin href="./assets2/ScrollTrigger-BJZ90ViQ.js">
   <link rel="stylesheet" crossorigin href="./assets2/main-Wf1M1BYj.css">
-  <link rel="stylesheet" crossorigin href="./assets2/v5-CYjqT8rA.css">
+  <link rel="stylesheet" crossorigin href="./assets2/v5-DTBo8X1-.css">
 </head>
 <body>
 
@@ -166,13 +185,22 @@
      announces it. A reveal that explains itself is not a reveal.
      ================================================================================ -->
 <!-- ================================================================================
-     02 · COMPOUND / BUILDING / SUITE — the V5.2 guided sales interface.
+     02 · COMPOUND / BUILDING / SUITE — the guided sales interface, V5.3 or V6.
 
      The section, its id, its data-act, its data-pin and its heading are the live site's.
      What is replaced is the STAGE: instead of production's SVG drawing with a record
      column beside it, this mounts the V5 interface, which is the same module the
-     standalone exploration at /exploration/study/proposed-v5-guided-sales.html mounts.
-     data-compound is deliberately absent so main.js stands its own act 02 down.
+     standalone exploration mounts. data-compound is deliberately absent so main.js
+     stands its own act 02 down.
+
+     THE 02 -> 03 APERTURE IS STILL DESIGNED AND PARKED — BRIEF-seam-02-03.md carries
+     that concept and nothing here depends on it. What IS wired, in V6 only, is the far
+     smaller thing underneath it: exploration/study/v6/act03-link.js writes the suite the
+     visitor actually chose into act 03's existing plate. main.js does that in syncPeak()
+     behind an `if (compoundEl)` guard, and removing data-compound above takes the guard's
+     subject away with it — which is why act 03 went on describing a Type B at $549,000
+     after a visitor had chosen a Premium at $699,000. No layout is redesigned; the
+     numbers are simply the ones that were picked.
      ================================================================================ -->
 <section class="act" id="act-02" data-act="02" data-register="surveyed"
          data-pin="compound" aria-labelledby="h-02" style="padding:0">

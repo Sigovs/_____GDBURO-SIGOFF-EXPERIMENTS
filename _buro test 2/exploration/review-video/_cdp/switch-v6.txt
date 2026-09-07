@@ -1,0 +1,33 @@
+ADJACENT SWITCHING — no Overview between, ever
+   01 -> 02   PASS   via model
+   02 -> 03   PASS   via model
+   03 -> 04   PASS   via model
+   04 -> 05   PASS   via model
+   05 -> 06   PASS   via model
+   06 -> 07   PASS   via navigator
+   07 -> 08   PASS   via model
+   08 -> 09   PASS   via model
+   09 -> 10   PASS   via model
+   10 -> 11   PASS   via model
+   11 -> 10   PASS   via model
+   10 -> 09   PASS   via model
+   09 -> 08   PASS   via model
+   08 -> 07   PASS   via model
+   07 -> 06   PASS   via navigator
+   06 -> 05   PASS   via model
+   05 -> 04   PASS   via model
+   04 -> 03   PASS   via model
+   03 -> 02   PASS   via model
+   02 -> 01   PASS   via model
+   ---> 20/20   (18 by clicking the model, 2 by the navigator)
+
+RANDOM DIRECT SWITCHING — 30, never going home
+   ---> 30/30
+
+STALE STATE AFTER A SWITCH WITH A SUITE CHOSEN
+   before {"level":"suite","b":"03","s":"03 · 01","prev":null}
+   after  {"level":"building","b":"06","s":null,"prev":null}
+   mini bays now belong to building 06   PASS
+   ENTER present after switch: false   (must be false)
+
+CONSOLE ERRORS: none

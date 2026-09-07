@@ -1,0 +1,25 @@
+THE CRITICAL PATH — the model, and nothing else
+   building 03 answers the pointer   YES at 311,449
+   cursor says clickable             true
+   named before any click            0310 of 13 availableView →
+   after the click                   {"level":"building","b":"03","s":null,"hs":null,"hov":null}
+   anything appeared at the bottom?  (none)
+   doors reachable on screen         13 of 13
+   a real door answers the pointer   03 · 01 at 478,383
+   the door names its own suite      03 · 01Premium · 2,430 sq ft$699K
+   a sold door says so               03 · 03Sold
+   after clicking the door           {"level":"suite","b":"03","s":"03 · 01","hs":null,"hov":null}
+   ENTER                             {"w":276,"h":56,"bg":"rgb(206, 59, 50)","text":"Enter suite→"}
+   the product panel says            Suite 03 · 01 Premium · 2,430 sq ft $699,000 Enter suite→ Full specs →
+
+WHAT WAS NOT NEEDED TO GET HERE
+   site plan opened                  false
+   a building navigator exists       false
+   a legend exists                   false
+
+VISIBLE CONTROLS AND PANELS
+   compound   {"controls":1,"panels":0}
+   building   {"controls":17,"panels":0}
+   suite      {"controls":19,"panels":1}
+
+CONSOLE ERRORS: none

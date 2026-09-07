@@ -24,6 +24,15 @@ const STAGE = `
     <button type="button" data-overview hidden>← Overview</button>
   </div>
   <div class="dock" data-dock data-level="compound">
+    <!-- THE BUILDING NAVIGATOR. One line across the top of the dock, present from
+         the moment a building is chosen and never anywhere else. It is a SPATIAL
+         SELECTOR, not pagination: the compound is numbered 01 to 11 along its own
+         drive, so the strip is that order and the arrows are its neighbours. -->
+    <nav class="nav5" data-nav hidden aria-label="Buildings">
+      <button class="nav5__step" type="button" data-nav-prev aria-label="Previous building">‹</button>
+      <div class="nav5__strip" data-nav-strip></div>
+      <button class="nav5__step" type="button" data-nav-next aria-label="Next building">›</button>
+    </nav>
     <div class="cell">
       <div class="who__k" data-who-k>Luxe Corsa</div>
       <div class="who__f" data-who-f>121</div>
@@ -42,8 +51,10 @@ const STAGE = `
 const PLAN = `
 <div class="v5 plan" data-plan hidden>
   <div class="plan__bar">
-    <button class="plan__exit" type="button" data-plan-exit>← Back to 3D</button>
-    <div class="plan__t"><b>Site plan</b><span>11 buildings · 121 suites</span></div>
+    <button class="plan__exit" type="button" data-plan-exit>
+      <span aria-hidden="true">←</span> Back to 3D <kbd>Esc</kbd>
+    </button>
+    <div class="plan__t"><b>Site plan</b><span data-plan-where>Whole compound</span></div>
     <div class="plan__key">
       <span><i style="background:var(--sand)"></i>Premium — Type A</span>
       <span><i style="background:var(--steel-55)"></i>Standard — Type B</span>
@@ -71,10 +82,11 @@ export function mountV5(host, opts = {}) {
   const cellBays = q('[data-cell-bays]'), cellRight = q('[data-cell-right]')
   const whoK = q('[data-who-k]'), whoF = q('[data-who-f]'), whoS = q('[data-who-s]'), tell = q('[data-tell]')
   const planMap = q('[data-plan-map]', plan), planList = q('[data-plan-list]', plan)
+  const navEl = q('[data-nav]'), navStrip = q('[data-nav-strip]')
 
   const compound = buildCompound(mount)
   let gl = null, THREE = null
-  const S = { level: 'compound', building: null, suite: null, hover: null, hoverSuite: null, plan: false, entered: false }
+  const S = { level: 'compound', building: null, suite: null, hover: null, hoverSuite: null, preview: null, plan: false, entered: false }
   const TOTAL = compound.suites.length
   const AVAILABLE = compound.suites.filter((s) => !s.sold).length
   const say = (v) => String(v).replace(/\bSQ FT\b/g, 'sq ft').replace(/\bTYPE\b/g, 'Type').replace(/\bFROM\b/g, 'from')
@@ -90,15 +102,37 @@ export function mountV5(host, opts = {}) {
     paint()
   }
   function hoverSuite(s) { if (S.hoverSuite === s) return; S.hoverSuite = s; gl?.setHoverSuite(s || null); paint() }
+  /* The building offered as the next one while another is committed. Distinct from
+     hover, which is the question asked from the compound, and painted differently:
+     committed is the compound's own cold light, preview is sand. */
+  function previewBuilding(b) {
+    if (S.preview === b) return
+    S.preview = b
+    gl?.setPreviewBuilding(b ? b.num : null)
+    paint()
+  }
   function selectBuilding(b) {
     if (!b) return
-    Object.assign(S, { building: b, suite: null, hover: null, hoverSuite: null, level: 'building', entered: false })
+    /* SWITCHING BUILDINGS CLEARS THE PRODUCT CONTEXT. A suite belongs to the building
+       it is in; carrying 03's choice into 04 would leave a price on screen for a room
+       the visitor is no longer looking at. ENTER goes with it, which is the point. */
+    Object.assign(S, { building: b, suite: null, hover: null, hoverSuite: null, preview: null, level: 'building', entered: false })
     stage.dataset.hot = 'false'
     gl?.setLevel('building', b.num)
     /* the bays cell has to be laid out before renderBays can measure the track it must
        fit; paint() is what reveals it, so it goes first */
-    paint(); renderBays(); paint()
+    paint(); renderNav(); renderBays(); paint()
     opts.onLevel?.(S.level, S)
+  }
+
+  /* Step to a neighbour along the compound's own numbering. The list is the drive's
+     order, so previous and next are spatial rather than alphabetical. */
+  function stepBuilding(d) {
+    const list = compound.buildings
+    if (!S.building) return
+    const i = list.indexOf(S.building)
+    const next = list[(i + d + list.length) % list.length]
+    if (next && next !== S.building) selectBuilding(next)
   }
   function selectSuite(s) {
     if (!s || s.sold) return
@@ -109,7 +143,7 @@ export function mountV5(host, opts = {}) {
   }
   /* THE GLOBAL ESCAPE. One action, one place, and it always means the same thing. */
   function overview() {
-    Object.assign(S, { level: 'compound', building: null, suite: null, hover: null, hoverSuite: null, entered: false })
+    Object.assign(S, { level: 'compound', building: null, suite: null, hover: null, hoverSuite: null, preview: null, entered: false })
     stage.dataset.hot = 'false'
     gl?.setLevel('compound')
     paint()
@@ -118,7 +152,7 @@ export function mountV5(host, opts = {}) {
   function backToBuilding() {
     if (S.level !== 'suite' || !S.building) return overview()
     const b = S.building
-    Object.assign(S, { suite: null, level: 'building', entered: false })
+    Object.assign(S, { suite: null, level: 'building', preview: null, entered: false })
     gl?.setLevel('building', b.num)
     paint()
     opts.onLevel?.(S.level, S)
@@ -155,7 +189,11 @@ export function mountV5(host, opts = {}) {
     }
   }
   function drawTag() {
-    const subject = S.suite ? null : (S.building || S.hover)
+    /* THE TAG NAMES WHAT THE POINTER IS ON. While a building is committed and another
+       is being considered, the thing that needs naming is the OFFER — the visitor
+       already knows where they are, and the dock and the navigator both say so. It
+       comes up sand rather than red, which is the same distinction the model makes. */
+    const subject = S.suite ? null : (S.preview || S.building || S.hover)
     if (!gl || !THREE || !subject || !anchors.size || S.plan) { tag.hidden = true; return }
     const pts = anchors.get(subject.num)
     if (!pts) { tag.hidden = true; return }
@@ -171,7 +209,7 @@ export function mountV5(host, opts = {}) {
       if (py < top) { top = py; topX = px }
     }
     if (behind) { tag.hidden = true; return }
-    const on = !!S.building
+    const on = !!S.building && !S.preview
     tag.id = tag.id || 'tag'
     tag.dataset.s = on ? 'on' : 'hover'
     tag.style.left = Math.max(96, Math.min(w - 110, topX)) + 'px'
@@ -184,6 +222,31 @@ export function mountV5(host, opts = {}) {
   }
 
   /* --- the miniature bays ---------------------------------------------------------- */
+  /* THE NAVIGATOR. Eleven numbers on one line, in the compound's own order, and it
+     is deliberately not eleven buttons of equal shout: the current building is the
+     only one set solid, its neighbours are reachable, and the arrows say which way
+     the drive runs. Rendered once per building change rather than per paint, because
+     the set of buildings never changes and only the marks on it do. */
+  function renderNav() {
+    if (!navStrip) return
+    navStrip.replaceChildren()
+    for (const b of compound.buildings) {
+      const el = document.createElement('button')
+      el.type = 'button'
+      el.className = 'nav5__b'
+      el.dataset.navB = b.num
+      el.textContent = b.num
+      el.setAttribute('aria-label', 'Building ' + b.num + ', ' + b.open + ' of ' + b.suites.length + ' available')
+      el.addEventListener('pointerenter', () => previewBuilding(b))
+      el.addEventListener('pointerleave', () => previewBuilding(null))
+      el.addEventListener('focus', () => previewBuilding(b))
+      el.addEventListener('blur', () => previewBuilding(null))
+      el.addEventListener('click', () => selectBuilding(b))
+      el._b = b
+      navStrip.appendChild(el)
+    }
+  }
+
   function renderBays() {
     baysEl.replaceChildren()
     const list = S.building?.suites || []
@@ -236,6 +299,18 @@ export function mountV5(host, opts = {}) {
     cellBays.hidden = S.level === 'compound'
     cellRight.hidden = S.level === 'compound'
 
+    /* The navigator exists from the moment there is something to navigate BETWEEN,
+       and it is in the same place in every state that has it — a control that moves
+       between states is a control the visitor has to find twice. */
+    if (navEl) navEl.hidden = S.level === 'compound'
+    if (navStrip) {
+      for (const el of navStrip.children) {
+        el.setAttribute('aria-current', el._b === b ? 'true' : 'false')
+        if (el._b === S.preview && el._b !== b) el.setAttribute('data-preview', 'true')
+        else el.removeAttribute('data-preview')
+      }
+    }
+
     if (S.level === 'suite' && s) {
       const t = TYPE_SPEC[s.type]
       whoK.textContent = 'Suite'; whoF.textContent = s.ref
@@ -273,14 +348,25 @@ export function mountV5(host, opts = {}) {
 
   ov.addEventListener('click', overview)
   ctx.addEventListener('click', backToBuilding)
+  q('[data-nav-prev]')?.addEventListener('click', () => stepBuilding(-1))
+  q('[data-nav-next]')?.addEventListener('click', () => stepBuilding(1))
   cellRight.addEventListener('click', (e) => {
     if (e.target.closest('[data-enter]')) enterSuite()
     else if (e.target.closest('[data-go]')) opts.onContinue?.(S.suite)
   })
+  /* ONE PREDICTABLE HIERARCHY, one step at a time. Escape used to jump from a suite
+     all the way home, so the same key meant "close this" in one place and "abandon
+     everything" in another. It now undoes exactly the last commitment:
+
+       site plan open   ->  close it, and the 3D state underneath is untouched
+       suite chosen     ->  back to its building
+       building chosen  ->  back to the compound
+       already home     ->  nothing */
   const onKey = (e) => {
     if (e.key !== 'Escape') return
-    if (S.plan) closePlan()
-    else if (S.level !== 'compound') overview()
+    if (S.plan) { closePlan(); return }
+    if (S.level === 'suite') { backToBuilding(); return }
+    if (S.level === 'building') { overview(); return }
   }
   addEventListener('keydown', onKey)
 
@@ -318,12 +404,50 @@ export function mountV5(host, opts = {}) {
         t.setAttribute('class', 'pnum')
         planSvg.appendChild(t)
       }
+      /* THE DRAWING IS THE CONTROL, not a picture with a list beside it. A visitor
+         looking at a plan points at the building on the plan; making them find the
+         same number in a column to the right is a step that exists only because the
+         map was easier to draw than to wire. One press, and it is the same press
+         either way: choose, and you are there. */
       const row = document.createElement('button')
       row.type = 'button'; row.className = 'prow'
       const a = b.suites.filter((x) => x.type === 'A').length
       row.innerHTML = `<b>${b.num}</b><span>${b.suites.length} suites<i>${a} premium</i></span><em>${b.open} free</em>`
       row.addEventListener('click', () => { closePlan(); selectBuilding(b) })
+      row.addEventListener('pointerenter', () => b._planGroup?.setAttribute('data-hot', 'true'))
+      row.addEventListener('pointerleave', () => b._planGroup?.removeAttribute('data-hot'))
+      b._planRow = row
       planList.appendChild(row)
+
+      /* THE DRAWING IS THE CONTROL, not a picture with a list beside it. A visitor
+         looking at a plan points at the building on the plan; making them find the
+         same number in a column to the right is a step that exists only because the
+         map was easier to draw than to wire.
+
+         AND IT NEEDS ITS OWN HIT TARGET. A <g> is only hit where its CHILDREN paint,
+         so a run of eleven bays with air between them answers the pointer in stripes
+         and misses entirely at the centre of its own box — measured: pointing at the
+         middle of building 07 lit nothing. One transparent rectangle on the box the
+         drawing already measured makes the building a single target, which is the
+         same thing the model's pick proxies do and for the same reason. */
+      const g = planSvg.querySelector('g[data-building="' + b.num + '"]')
+      if (g && b.box && b.box.width) {
+        const hit = document.createElementNS(NS, 'rect')
+        hit.setAttribute('x', b.box.x); hit.setAttribute('y', b.box.y)
+        hit.setAttribute('width', b.box.width); hit.setAttribute('height', b.box.height)
+        hit.setAttribute('fill', 'transparent')
+        hit.setAttribute('class', 'phit')
+        hit.setAttribute('role', 'button')
+        hit.setAttribute('tabindex', '0')
+        hit.setAttribute('aria-label', 'Building ' + b.num + ', ' + b.open + ' of ' + b.suites.length + ' available')
+        const go = () => { closePlan(); selectBuilding(b) }
+        hit.addEventListener('click', go)
+        hit.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go() } })
+        hit.addEventListener('pointerenter', () => { g.setAttribute('data-hot', 'true'); row.setAttribute('data-hot', 'true') })
+        hit.addEventListener('pointerleave', () => { g.removeAttribute('data-hot'); row.removeAttribute('data-hot') })
+        g.appendChild(hit)
+        b._planGroup = g
+      }
     }
   }
   /* FIT TO VIEW ON EVERY OPEN. The panel has no size while hidden, so a viewBox solved
@@ -334,6 +458,24 @@ export function mountV5(host, opts = {}) {
     S.plan = true
     plan.hidden = false
     drawTag()
+    /* A REFERENCE LAYER HAS TO SAY WHERE YOU ALREADY ARE, or it is a second place
+       rather than a view of the one you are in. The building being inspected and the
+       suite chosen inside it are marked on the drawing and in the list. */
+    for (const b of compound.buildings) {
+      const on = b === S.building
+      b._planGroup?.toggleAttribute('data-current', on)
+      b._planRow?.toggleAttribute('data-current', on)
+    }
+    if (planSvg) {
+      planSvg.querySelectorAll('[data-here]').forEach((el) => el.removeAttribute('data-here'))
+      if (S.suite) planSvg.querySelector('[data-ref="' + CSS.escape(S.suite.ref) + '"]')?.setAttribute('data-here', 'true')
+    }
+    const t = q('[data-plan-where]', plan)
+    if (t) {
+      t.textContent = S.suite ? ('Suite ' + S.suite.ref)
+        : S.building ? ('Building ' + S.building.num)
+        : 'Whole compound'
+    }
     requestAnimationFrame(() => requestAnimationFrame(fitPlan))
   }
   function closePlan() { S.plan = false; plan.hidden = true; paint() }
@@ -347,6 +489,7 @@ export function mountV5(host, opts = {}) {
   const api = {
     S, compound, host, stage,
     selectBuilding, selectSuite, hoverBuilding, hoverSuite, overview, backToBuilding,
+    stepBuilding, previewBuilding,
     enterSuite, openPlan, closePlan,
     get gl() { return gl }, get THREE() { return THREE },
     destroy() {
@@ -366,6 +509,7 @@ export function mountV5(host, opts = {}) {
     const bldgOf = (n) => compound.byNum.get(n)
     gl.onHoverBuilding = (n) => hoverBuilding(n ? bldgOf(n) : null)
     gl.onHoverSuite = (i) => hoverSuite(i == null ? null : compound.suites[i])
+    gl.onPreviewBuilding = (n) => previewBuilding(n ? bldgOf(n) : null)
     gl.onPickBuilding = (n) => { const b = bldgOf(n); if (b) selectBuilding(b) }
     gl.onPickSuite = (i) => { const s = compound.suites[i]; if (s) selectSuite(s) }
     buildAnchors()

@@ -1,5 +1,8 @@
 /* ==================================================================================
-   BUILD exploration/integrated/v5-full-site.html — THE REAL HOMEPAGE WITH V5 IN ACT 02.
+   BUILD THE REAL HOMEPAGE WITH V5.3 OR V6 IN ACT 02.
+
+     node tools/build-integrated.mjs          -> v5-full-site.html
+     node tools/build-integrated.mjs --v6     -> v6-full-site.html
 
    GENERATED, NOT COPIED.  A hand-made duplicate of a 743-line index.html is a fork that
    rots the first time either side is touched, and this review has already been burned
@@ -13,13 +16,13 @@
      1. Every ./ reference becomes /, because the page is served from
         /exploration/integrated/ and the assets are not.
 
-     2. Act 02's stage is replaced by the V5 mount point, and `data-compound` goes with
+     2. Act 02's stage is replaced by the chosen mount point, and `data-compound` goes with
         it. main.js guards its whole act 02 block behind `if (compoundEl)`, so removing
         that one attribute makes the production interface stand down cleanly while every
         other act — the rail, the apertures, the pins, act 05's drift, act 03's states —
         keeps running exactly as it does on the live site.
 
-     3. The V5 stylesheet and a small boot module are added.
+     3. That variant's stylesheet and a small boot module are added.
 
    The boot module wires V5's own two handovers into the real page: ENTER moves the
    camera to the door, and CONTINUE scrolls the visitor into act 03. That is the join
@@ -34,7 +37,10 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
    published portal, and one path cannot be two files. */
 const SRC = path.join(ROOT, 'pages/home.html')
 const OUT_DIR = path.join(ROOT, 'exploration/integrated')
-const OUT = path.join(OUT_DIR, 'v5-full-site.html')
+/* One generator, two acts 02. V5.3 stays published as the baseline the V6 subtraction
+   is measured against; a fork of this file would be two copies of the same rewrite. */
+const V = process.argv.includes('--v6') ? 'v6' : 'v5'
+const OUT = path.join(OUT_DIR, V + '-full-site.html')
 
 let html = fs.readFileSync(SRC, 'utf8')
 
@@ -70,18 +76,27 @@ if (end < 0) throw new Error('act 02 closing tag not found')
 void close
 
 const ACT02 = `<!-- ================================================================================
-     02 · COMPOUND / BUILDING / SUITE — the V5.2 guided sales interface.
+     02 · COMPOUND / BUILDING / SUITE — the guided sales interface, V5.3 or V6.
 
      The section, its id, its data-act, its data-pin and its heading are the live site's.
      What is replaced is the STAGE: instead of production's SVG drawing with a record
-     column beside it, this mounts the V5 interface, which is the same module the
-     standalone exploration at /exploration/study/proposed-v5-guided-sales.html mounts.
-     data-compound is deliberately absent so main.js stands its own act 02 down.
+     column beside it, this mounts the ${V.toUpperCase()} interface, which is the same module the
+     standalone exploration mounts. data-compound is deliberately absent so main.js
+     stands its own act 02 down.
+
+     THE 02 -> 03 APERTURE IS STILL DESIGNED AND PARKED — BRIEF-seam-02-03.md carries
+     that concept and nothing here depends on it. What IS wired, in V6 only, is the far
+     smaller thing underneath it: exploration/study/v6/act03-link.js writes the suite the
+     visitor actually chose into act 03's existing plate. main.js does that in syncPeak()
+     behind an \`if (compoundEl)\` guard, and removing data-compound above takes the guard's
+     subject away with it — which is why act 03 went on describing a Type B at $549,000
+     after a visitor had chosen a Premium at $699,000. No layout is redesigned; the
+     numbers are simply the ones that were picked.
      ================================================================================ -->
 <section class="act" id="act-02" data-act="02" data-register="surveyed"
          data-pin="compound" aria-labelledby="h-02" style="padding:0">
   <h2 class="u-visually-hidden" id="h-02">121 private suites, 11 buildings</h2>
-  <div class="v5-host" data-pin-stage data-v5-host></div>
+  <div class="${V}-host" data-pin-stage data-${V}-host></div>
 </section>`
 
 html = html.slice(0, open) + ACT02 + html.slice(end)
@@ -89,7 +104,7 @@ html = html.slice(0, open) + ACT02 + html.slice(end)
 /* --- 3. the interface ------------------------------------------------------------ */
 html = html.replace('<link rel="stylesheet" href="/src/site/index.css">',
   `<link rel="stylesheet" href="/src/site/index.css">
-<link rel="stylesheet" href="/exploration/study/v5/v5.css">
+<link rel="stylesheet" href="/exploration/study/${V}/${V}.css">
 <style>
   /* Act 02 becomes a full-height stage inside the real page. It is the only act that
      owns the whole viewport, which is what a pinned interactive act needs and what the
@@ -102,17 +117,36 @@ html = html.replace('<link rel="stylesheet" href="/src/site/index.css">',
      of an auto-height section resolves to zero, and act 02 collapses to a 1425x0 strip
      with nothing selectable in it. Measured on the built page: 0 of 11 buildings.
      A min-height cannot be undone by a height, whatever the order turns out to be. */
-  .v5-host{position:relative;height:100vh;min-height:100vh;width:100%;background:#060708}
+  .${V}-host{position:relative;height:100vh;min-height:100vh;width:100%;background:#060708}
   /* The page already has a persistent header carrying the mark and the location, so the
      interface's own standalone mark would be the same words twice on the same screen. */
-  .v5-host .mark{display:none}
+  .${V}-host.${V} .mark{display:none!important}
   /* The site header sits above act 02's own controls. */
-  .v5 .nav{top:70px}
+  /* A DESCENDANT SELECTOR NEEDS A DESCENDANT. mountV6 puts the class v6 on the HOST
+     element itself, so the host carries both v6-host and v6 and there is no .v6 INSIDE
+     a .v6-host to match — the first attempt at these overrides selected nothing at all.
+     Compounded on the one element, they also outrank v6.css's own single-class rules,
+     which is the other half of the problem: Vite emits that stylesheet as a link after
+     this block, so at equal specificity it wins. Measured on the published page before
+     this fix: Site plan at 32px under a 70px header, the way home at 98 where the
+     comment claimed 70. */
+  .${V}-host.${V} .topright,.${V}-host.${V} .nav{top:70px}
+  /* THE WAY HOME KEEPS ITS PLACE IN BOTH PAGES. Standalone it sits under act 02's own
+     mark; here that mark is hidden and the site's header is in the same band, so the
+     button moves up to sit level with Site plan. It is one variable, so the two pages
+     cannot drift into two different positions for the one control a lost visitor
+     depends on. */
+  /* TWO CLASSES, NOT ONE, and for the same reason min-height is spelled out above:
+     v6.css declares --home-top on its own .v6 rule, and in a BUILD Vite emits that
+     stylesheet as a link AFTER this inline block. At equal specificity the later rule
+     wins, so the override worked on the dev server and was silently ignored in the
+     published page — measured live at 98px where this claims 70. */
+  .${V}-host.${V}{--home-top:70px}
 </style>`)
 
 html = html.replace('<script type="module" src="/src/site/main.js"></script>',
   `<script type="module" src="/src/site/main.js"></script>
-<script type="module" src="/exploration/integrated/v5-boot.js"></script>`)
+<script type="module" src="/exploration/integrated/${V}-boot.js"></script>`)
 
 fs.mkdirSync(OUT_DIR, { recursive: true })
 fs.writeFileSync(OUT, html)
@@ -123,7 +157,7 @@ console.log('  acts present        ' + acts.join(' '))
 console.log('  footer              ' + (html.includes('<footer class="footer">') ? 'yes' : 'MISSING'))
 console.log('  real main.js        ' + (html.includes('/src/site/main.js') ? 'yes' : 'MISSING'))
 console.log('  real stylesheet     ' + (html.includes('/src/site/index.css') ? 'yes' : 'MISSING'))
-console.log('  v5 mount            ' + (html.includes('data-v5-host') ? 'yes' : 'MISSING'))
+console.log('  ' + V + ' mount            ' + (html.includes('data-' + V + '-host') ? 'yes' : 'MISSING'))
 const live = html.replace(/<!--[^]*?-->/g, '')
 console.log('  production act02 UI ' + (live.includes('data-compound') ? 'STILL PRESENT' : 'stood down'))
 console.log('  remaining ./ refs   ' + (html.match(/["'(]\.\//g) || []).length)

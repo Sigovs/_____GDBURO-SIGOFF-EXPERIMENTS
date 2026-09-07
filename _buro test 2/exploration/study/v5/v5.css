@@ -118,6 +118,30 @@
   border:1px solid var(--ink-24);backdrop-filter:blur(8px);
   display:grid;grid-template-columns:248px 1fr 360px;align-items:stretch}
 .v5 .dock[data-level='suite']{grid-template-columns:248px 1fr 556px}
+/* THE NAVIGATOR SPANS THE DOCK AND COSTS IT ONE LINE. Anything taller turns the
+   bottom of the screen into a dashboard, and the building is the hero. */
+.v5 .dock[data-level='building'],.v5 .dock[data-level='suite']{grid-template-rows:auto 1fr}
+.v5 .nav5{grid-column:1/-1;display:flex;align-items:stretch;gap:0;
+  border-bottom:1px solid var(--ink-16);min-height:38px}
+.v5 .nav5__strip{display:flex;align-items:stretch;gap:0;overflow-x:auto;scrollbar-width:none;flex:1}
+.v5 .nav5__strip::-webkit-scrollbar{height:0}
+/* A number, not a tab. No box, no pill, no segmented control: the mark that says
+   'you are here' is a rule under the figure, which is how a plan numbers things. */
+.v5 .nav5__b{appearance:none;background:none;border:0;cursor:pointer;flex:0 0 auto;
+  font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.10em;
+  color:var(--ink-55);padding:11px 14px 9px;position:relative;
+  transition:color .14s var(--ease)}
+.v5 .nav5__b::after{content:'';position:absolute;left:14px;right:14px;bottom:0;height:2px;background:transparent}
+.v5 .nav5__b:hover,.v5 .nav5__b[data-preview='true']{color:var(--sand)}
+.v5 .nav5__b[data-preview='true']::after{background:var(--sand)}
+.v5 .nav5__b[aria-current='true']{color:var(--ink)}
+.v5 .nav5__b[aria-current='true']::after{background:var(--red)}
+.v5 .nav5__step{appearance:none;background:none;border:0;cursor:pointer;flex:0 0 auto;
+  color:var(--ink-55);font-size:19px;line-height:1;padding:0 15px;
+  transition:color .14s var(--ease),background-color .14s var(--ease)}
+.v5 .nav5__step:hover{color:var(--ink);background:var(--ink-10)}
+.v5 .nav5__step:first-child{border-right:1px solid var(--ink-16)}
+.v5 .nav5__step:last-child{border-left:1px solid var(--ink-16)}
 .v5 .dock[data-level='compound']{right:auto;grid-template-columns:auto}
 .v5 .dock::before{content:'';position:absolute;left:-1px;top:-1px;bottom:-1px;width:3px;background:var(--red)}
 .v5 .cell{padding:var(--s4) var(--s5);min-width:0}
@@ -200,7 +224,41 @@
 .v5 .v5-enter .a{display:flex;align-items:center;justify-content:center;font-size:22px;border-left:1px solid rgb(255 255 255/.28)}
 
 /* ---- SITE PLAN -------------------------------------------------------------------------- */
-.v5.plan{position:fixed;inset:0;z-index:30;background:var(--panel2);display:grid;grid-template-rows:auto 1fr}
+/* A REFERENCE LAYER, NOT A SECOND PLACE. It was an opaque panel with its own header
+   and its own column, which is a section of a website; the visitor could not tell they
+   were still inside act 02. It sits OVER the model now — translucent, blurred, with
+   the compound faintly present behind it — so the only reading available is",
+   "this is on top of what I was doing". Everything else about it is unchanged: it
+   still fits the whole site on open and still restores the exact state it opened from. */
+/* IT HAS TO LOOK LIKE A SHEET LYING ON THE MODEL, and translucency alone could not
+   do it: at 93% over a compound that is nearly black anyway there is nothing to read
+   through, so the only cues left were the header and the exit — which is exactly how
+   a page reads, not how an overlay reads. It is INSET instead. The model is visible
+   all the way round it, the sheet has an edge and casts, and no one has to be told
+   they are still in act 02. The fit re-solves to whatever room is left, so nothing
+   about seeing the whole site changes. */
+.v5.plan{position:fixed;inset:26px;z-index:30;display:grid;grid-template-rows:auto 1fr;
+  background:rgb(9 11 14/.965);backdrop-filter:blur(16px) saturate(.75);
+  border:1px solid var(--ink-24);box-shadow:0 26px 90px rgb(0 0 0/.62)}
+/* the ground the sheet is lying on */
+.v5.plan::before{content:"";position:fixed;inset:-26px;z-index:-1;
+  background:rgb(6 7 8/.55);backdrop-filter:blur(3px)}
+.v5.plan .plan__exit kbd{font:inherit;font-size:13px;opacity:.55;border:1px solid currentColor;
+  border-radius:2px;padding:0 4px;margin-left:8px;vertical-align:1px}
+/* the drawing is the control, so it has to answer the pointer like one */
+.v5 .plan__map g[data-building]{transition:opacity .14s var(--ease)}
+/* one target per building, the size the drawing measured it at */
+.v5 .plan__map .phit{cursor:pointer;pointer-events:all}
+.v5 .plan__map .phit:focus-visible{outline:2px solid var(--sand);outline-offset:2px}
+.v5 .plan__map g[data-building][data-hot] .bay[data-type]{fill:var(--sand)}
+.v5 .plan__map g[data-building][data-hot] .mass-run,
+.v5 .plan__map g[data-building][data-hot] .mass-side{fill:#3b4149;stroke:var(--sand-70)}
+.v5 .plan__map g[data-building][data-current] .mass-run,
+.v5 .plan__map g[data-building][data-current] .mass-side{stroke:var(--red);stroke-width:1.4}
+.v5 .plan__map .bay[data-here]{fill:var(--red);stroke:var(--red)}
+.v5 .prow[data-current]{color:var(--ink)}
+.v5 .prow[data-current] b{color:var(--red)}
+.v5 .prow[data-hot]{color:var(--sand)}
 .v5 .plan__bar{display:flex;align-items:center;justify-content:space-between;gap:var(--s6);padding:var(--s4) var(--s7);border-bottom:1px solid var(--ink-24)}
 .v5 .plan__exit{appearance:none;cursor:pointer;background:var(--ink);border:0;color:var(--void);
   font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;padding:11px 18px 10px}
@@ -231,7 +289,11 @@
 .v5 .plan__map .bay[data-sold='true']{fill:none;stroke:var(--ink-24)}
 .v5 .plan__map .door{fill:none;stroke:var(--ink-40);stroke-width:.8;vector-effect:non-scaling-stroke}
 .v5 .plan__map .leader,.v5 .plan__map .route{display:none}
-.v5 .plan__map .pnum{fill:var(--ink);font-size:15px;font-family:var(--mono);font-size:13px;font-weight:500;paint-order:stroke;stroke:rgb(6 7 8/.85);stroke-width:4px}
+/* A LABEL IS NOT A TARGET. The numbers are appended after the groups so they paint
+   last, which also made them the topmost hit — pointing at the middle of building 07
+   returned the text node and the building underneath never heard the pointer at all.
+   Measured with elementFromPoint at the centre of its own hit box. */
+.v5 .plan__map .pnum{pointer-events:none;fill:var(--ink);font-size:15px;font-family:var(--mono);font-size:13px;font-weight:500;paint-order:stroke;stroke:rgb(6 7 8/.85);stroke-width:4px}
 
 /* a short stage keeps the dock and the model apart at laptop heights */
 @media (max-height:880px){

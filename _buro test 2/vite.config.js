@@ -60,6 +60,11 @@ export default defineConfig(({ command }) => ({
         home: resolve(here, 'pages/home.html'),
         v5site: resolve(here, 'exploration/integrated/v5-full-site.html'),
         v5act02: resolve(here, 'exploration/study/proposed-v5-guided-sales.html'),
+        /* V6 is published BESIDE V5.3, not instead of it. The subtraction is only
+           legible against the thing it subtracted from, and the client review is a
+           comparison before it is a preference. */
+        v6site: resolve(here, 'exploration/integrated/v6-full-site.html'),
+        v6act02: resolve(here, 'exploration/study/proposed-v6-architecture-ui.html'),
       },
     },
   },

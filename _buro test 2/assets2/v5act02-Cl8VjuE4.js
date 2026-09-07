@@ -1,0 +1,1 @@
+import"./preload-helper-DtWiEIvH.js";import{t as e}from"./v5-FhNtfAFv.js";var t=e(document.getElementById(`act02`),{onEnter:e=>console.log(`[v5] entered`,e.ref),onContinue:e=>console.log(`[v5] continue from`,e?.ref)});window.__v5=t;

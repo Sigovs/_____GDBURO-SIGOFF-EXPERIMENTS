@@ -77,6 +77,11 @@ const ACT02 = `<!-- ============================================================
      column beside it, this mounts the V5 interface, which is the same module the
      standalone exploration at /exploration/study/proposed-v5-guided-sales.html mounts.
      data-compound is deliberately absent so main.js stands its own act 02 down.
+
+     THE 02 -> 03 APERTURE IS DESIGNED AND PARKED. BRIEF-seam-02-03.md carries the
+     concept and exploration/study/v5/act03-link.js carries the joint; neither is wired,
+     because a half-finished seam device has no business riding along inside a
+     navigation pass. Nothing here depends on them.
      ================================================================================ -->
 <section class="act" id="act-02" data-act="02" data-register="surveyed"
          data-pin="compound" aria-labelledby="h-02" style="padding:0">

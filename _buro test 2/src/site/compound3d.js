@@ -1830,6 +1830,15 @@ export function initCompound3D(mount, model, opts = {}) {
   let ptrInside = false
   let focusNum = null
   let hoverNum = null
+  /* THE BUILDING BEING CONSIDERED WHILE ANOTHER IS COMMITTED.
+
+     Two different questions need two different answers: hoverNum is "which building am
+     I pointing at from the compound", previewNum is "which building would I move to
+     next, from the one I am already in". They were the same variable, and paint3d threw
+     the second away entirely — `isHover = B.num === hoverNum && !focusNum` — so once a
+     building was selected the model stopped responding to the pointer at all. That is
+     what made a selection feel like a lock. */
+  let previewNum = null
   let hoverSuite = null
   let selectedSuite = null
 
@@ -1839,9 +1848,17 @@ export function initCompound3D(mount, model, opts = {}) {
     /* At compound level ONLY the pick proxies answer: one canonical box per measured
        run, so a hover resolves to exactly one building and never to whatever mesh the
        ray reached first. Inside a building, its own bays answer as suites. */
+    /* INSIDE A BUILDING, THE REST OF THE COMPOUND STAYS LIVE. This used to return that
+       building's bays and nothing else, which is what made a selection a LOCK: the only
+       way to look at the building next door was to go home first and come back in. The
+       focused building answers as suites, every other building answers as itself, and
+       the ray sorts them by distance exactly as before. The focused building's own proxy
+       is left out so its mass resolves to the suite under the pointer rather than to the
+       building the visitor is already standing in. */
     if (level === 'compound') return pickProxies
     const B = buildingObjs.get(focusNum)
-    return B ? B.bays.map((b) => b.mesh) : []
+    const own = B ? B.bays.map((b) => b.mesh) : []
+    return own.concat(pickProxies.filter((p) => p.userData.num !== focusNum))
   }
 
   const pick = () => {
@@ -1938,6 +1955,19 @@ export function initCompound3D(mount, model, opts = {}) {
      selection is a commitment and a hover is a question. */
   const M_hoverSub = M.wall.clone(); M_hoverSub.color.setHex(0x4a545f)
   const M_roofHoverSub = M.roof.clone(); M_roofHoverSub.color.setHex(0x2b323a)
+  /* PREVIEW IS SAND, COMMITTED IS COOL AND LIT. A building being considered from inside
+     another one must never look like the one that is selected, or switching is guesswork.
+     The committed building keeps the compound's own cold LED and its red corner reveal;
+     the preview warms instead — the sand the interface already uses for discovery — and
+     lifts a little less. Two different lights, not two intensities of one. */
+  const M_preview = M.wall.clone()
+  M_preview.color.setHex(0x9a8f7c)
+  M_preview.emissive = new THREE.Color(0xc9bca8); M_preview.emissiveIntensity = 0.13
+  const M_roofPreview = M.roof.clone()
+  M_roofPreview.color.setHex(0x5b5346)
+  M_roofPreview.emissive = new THREE.Color(0xc9bca8); M_roofPreview.emissiveIntensity = 0.07
+  const M_doorPreview = M.door.clone(); M_doorPreview.color.setHex(0x585043); M_doorPreview.metalness = 0.3
+
   const M_roofFocus = M.roof.clone()
   M_roofFocus.color.setHex(0x424b57)
   M_roofFocus.emissive = lume.clone(); M_roofFocus.emissiveIntensity = 0.05
@@ -1997,11 +2027,18 @@ export function initCompound3D(mount, model, opts = {}) {
     for (const B of buildingObjs.values()) {
       const isFocus = B.num === focusNum
       const isHover = B.num === hoverNum && !focusNum
-      const subordinate = (focusNum && !isFocus)
+      /* The building offered as the NEXT one, while another is committed. */
+      const isPreview = !!focusNum && B.num === previewNum && B.num !== focusNum
+      /* A SUBORDINATE BUILDING IS NOT A DEAD ONE ANY MORE. It fell to 0x272d35, which is
+         nearly the ground — right when the neighbours were scenery, wrong now that any
+         of them is one click away. They sit at the hover-subordinate step instead:
+         clearly behind the subject, clearly still there to be chosen. */
+      const subordinate = (focusNum && !isFocus && !isPreview)
 
       const hoverSubordinate = !focusNum && hoverNum && !isHover
       for (const r of B.roofs) {
-        r.material = isFocus || isHover ? M_roofFocus
+        r.material = isPreview ? M_roofPreview
+          : isFocus || isHover ? M_roofFocus
           : subordinate ? M_roofSub
           : hoverSubordinate ? M_roofHoverSub
           : M.roof
@@ -2021,6 +2058,7 @@ export function initCompound3D(mount, model, opts = {}) {
         o.door.material = picked ? M_doorLit
           : (considered && !o.suite.sold) ? M_doorPick
           : lit ? M_doorHot
+          : isPreview ? M_doorPreview
           : (subordinate || hoverSubordinate) ? M_doorSub : M.door
         if (o.glaze) o.glaze.material = (picked || (considered && !o.suite.sold)) ? M_glassPick : (lit ? M_glassHot : M.glass)
         if (o.lamp) o.lamp.material = picked ? M_lampPick : (lit && !soldConsidered ? M_lampHot : M.wallLight)
@@ -2029,6 +2067,7 @@ export function initCompound3D(mount, model, opts = {}) {
         if (picked) { o.mesh.material = M_lit; continue }
         if (isFocus) { o.mesh.material = considered ? M_hover : M_focus; continue }
         if (isHover) { o.mesh.material = M_focus; continue }
+        if (isPreview) { o.mesh.material = M_preview; continue }
         o.mesh.material = subordinate ? M_sub : (hoverSubordinate ? M_hoverSub : M.wall)
       }
 
@@ -2039,7 +2078,7 @@ export function initCompound3D(mount, model, opts = {}) {
          being pulled off a board; two and a half reads as the piece being eased
          forward for inspection, which is the gesture that was wanted. The separation
          is carried by light and by the neighbours falling away, not by altitude. */
-      const want = isFocus ? ft(2.6) : (isHover ? ft(1.1) : 0)
+      const want = isFocus ? ft(2.6) : (isHover ? ft(1.1) : (isPreview ? ft(1.6) : 0))
       if (Math.abs(B.lift - want) > 0.001) tweenGroupLift(B, want)
     }
 
@@ -2278,12 +2317,19 @@ export function initCompound3D(mount, model, opts = {}) {
 
     setLevel(next, num, suiteIndex) {
       entered = false
+      const wasLevel = level
+      const wasFocus = focusNum
+      void wasFocus
       level = next
       focusNum = next === 'compound' ? null : num
       selectedSuite = next === 'suite' && suiteIndex != null ? suiteObjs[suiteIndex]?.suite || null : null
       if (next !== 'suite') selectedSuite = null
       hoverSuite = null
       hoverNum = null
+      /* A preview is an offer, and committing to it — or to anything else — ends it. Left
+         standing it would paint the building the visitor just arrived AT as the one they
+         might go to next. */
+      previewNum = null
 
       if (next === 'compound') {
         /* HOME HAS TO BE THE SAME PLACE EVERY TIME.
@@ -2300,7 +2346,16 @@ export function initCompound3D(mount, model, opts = {}) {
         const B = buildingObjs.get(num)
         if (B?.roofs[0]) {
           const p = worldOf(B.roofs[0])
-          flyTo({ el: 0.32, dist: 12.4, target: p }, 1.1)
+          /* MOVING BETWEEN TWO BUILDINGS IS NOT ARRIVING AT ONE. Coming down from
+             the compound is a descent and takes the full move; going next door is a
+             step sideways, and re-running the descent for it reads as the site
+             teleporting rather than as the visitor moving. The elevation and the
+             distance are already right, so a switch only re-aims — shorter, and with
+             the frame it was already in. */
+          const switching = wasLevel === 'building' || wasLevel === 'suite'
+          flyTo(switching
+            ? { target: p }
+            : { el: 0.32, dist: 12.4, target: p }, switching ? 0.72 : 1.1)
         }
       } else if (next === 'suite') {
         const o = suiteObjs[suiteIndex]
@@ -2339,6 +2394,15 @@ export function initCompound3D(mount, model, opts = {}) {
       hoverSuite = s
       paint3d()
     },
+
+    /* The navigator in the dock hovers buildings too, and it has to speak the same
+       language the model does — otherwise pointing at 04 in the strip and pointing at
+       04 on the model would light two different things. */
+    setPreviewBuilding(num) {
+      if (previewNum === num) return
+      previewNum = num
+      paint3d()
+    },
     setRoute(planPts) {
       setRoute(planPts)
       const g = gsapRef.lib
@@ -2355,6 +2419,8 @@ export function initCompound3D(mount, model, opts = {}) {
 
     /* Callbacks main.js supplies. */
     onHoverBuilding: null,
+    /* the building offered as the next one, while another is committed */
+    onPreviewBuilding: null,
     onHoverSuite: null,
     onPickBuilding: null,
     onPickSuite: null,
@@ -2428,13 +2494,15 @@ export function initCompound3D(mount, model, opts = {}) {
      exists to remove. The leave is a state change like any other and it is announced. */
   el.addEventListener('pointerleave', () => {
     ptrInside = false
-    if (hoverNum || hoverSuite) {
+    if (hoverNum || hoverSuite || previewNum) {
       hoverNum = null
       hoverSuite = null
+      previewNum = null
       paint3d()
       api.syncCallouts()
       api.onHoverBuilding?.(null)
       api.onHoverSuite?.(null)
+      api.onPreviewBuilding?.(null)
     }
   })
 
@@ -2486,8 +2554,16 @@ export function initCompound3D(mount, model, opts = {}) {
         const n = hit ? (hit.userData.building || hit.userData.num) : null
         if (n !== hoverNum) { hoverNum = n; paint3d(); api.onHoverBuilding?.(n) }
       } else {
-        const i = hit && hit.userData.kind === 'suite' ? hit.userData.index : null
+        /* INSIDE A BUILDING THE POINTER ASKS TWO DIFFERENT QUESTIONS and the answer
+           depends on what it landed on: one of this building's own bays is a suite, and
+           anything else is another building offered as the next one. They are reported
+           separately, because "which suite" and "which building" are not the same
+           control and must never be shown as the same state. */
+        const onSuite = hit && hit.userData.kind === 'suite'
+        const i = onSuite ? hit.userData.index : null
+        const n = (!onSuite && hit) ? (hit.userData.building || hit.userData.num) : null
         api.onHoverSuite?.(i)
+        if (n !== previewNum) { previewNum = n; paint3d(); api.onPreviewBuilding?.(n) }
       }
     }
 

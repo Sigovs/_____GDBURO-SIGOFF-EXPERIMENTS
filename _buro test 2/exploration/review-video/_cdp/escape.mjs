@@ -31,7 +31,7 @@ const cases = [
   ['from BUILDING, the OVERVIEW button', goBuilding, () => click('[data-overview]')],
   ['from BUILDING, Escape',              goBuilding, esc],
   ['from SUITE, the OVERVIEW button',    goSuite,    () => click('[data-overview]')],
-  ['from SUITE, Escape',                 goSuite,    esc],
+  ['from SUITE, Escape (now one step)',   goSuite,    esc],
   ['from SUITE, the BUILDING chip',      goSuite,    () => click('[data-ctx]')],
   ['after ENTER, the OVERVIEW button',   async () => { await goSuite(); await sleep(900); await ev('window.__v5.enterSuite()') }, () => click('[data-overview]')],
   ['after the SITE PLAN, Escape then OVERVIEW', async () => { await goSuite(); await sleep(900); await ev('window.__v5.openPlan()') }, async () => { await esc(); await click('[data-overview]') }],
@@ -44,7 +44,11 @@ for (const [name, setup, act] of cases) {
   const from = await st()
   await act()
   const to = await st()
-  const want = name.includes('BUILDING chip') ? 'building' : 'compound'
+  /* Escape undoes ONE commitment. From a suite that is the building it is in, not the
+     compound — the same key meaning 'close this' in one place and 'abandon everything'
+     in another is what V5.3 set out to remove. The OVERVIEW button is unchanged and is
+     still the one global home. */
+  const want = (name.includes('BUILDING chip') || name.includes('from SUITE, Escape')) ? 'building' : 'compound'
   console.log('  ' + name.padEnd(44) + from.padEnd(18) + '-> ' + to.padEnd(12) + (to === want ? 'PASS' : 'FAIL'))
 }
 process.exit(0)

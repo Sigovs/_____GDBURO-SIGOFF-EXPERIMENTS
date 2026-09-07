@@ -10,15 +10,23 @@ picture of each, generated from [variants.json](variants.json). Start there.
 | | | |
 |---|---|---|
 | **[The level line](https://sigovs.github.io/_____GDBURO-SIGOFF-EXPERIMENTS/_buro%20test%201/index1.html)** | `index1.html` | six camera stations, the datum in the room |
-| **[Monumental](https://sigovs.github.io/_____GDBURO-SIGOFF-EXPERIMENTS/_buro%20test%201/index2.html)** | `index2.html` | direction A — the machine as architecture |
-| **[Editorial](https://sigovs.github.io/_____GDBURO-SIGOFF-EXPERIMENTS/_buro%20test%201/index3.html)** | `index3.html` | direction B — the machine as a printed subject |
-| **[Machine film](https://sigovs.github.io/_____GDBURO-SIGOFF-EXPERIMENTS/_buro%20test%201/index4.html)** | `index4.html` | direction C — the machine as footage |
+| **[Monumental](https://sigovs.github.io/_____GDBURO-SIGOFF-EXPERIMENTS/_buro%20test%201/indexA.html)** | `indexA.html` | direction A — the machine as architecture |
+| **[Editorial](https://sigovs.github.io/_____GDBURO-SIGOFF-EXPERIMENTS/_buro%20test%201/indexB.html)** | `indexB.html` | direction B — the type is the composition |
+| **[Machine film](https://sigovs.github.io/_____GDBURO-SIGOFF-EXPERIMENTS/_buro%20test%201/indexC.html)** | `indexC.html` | direction C — the machine as footage |
 
-index2/3/4 are three DIRECTIONS taken off index1, meant to be opened beside each
+A, B and C are three DIRECTIONS taken off index1, meant to be opened beside each
 other rather than in succession. They share one bootstrap — `src/site/vboot.js` —
 and differ in `src/directions/{a,b,c}.js` and `src/site/dir-{a,b,c}.css`. The
-letter names the direction; the page is still `indexN.html`, because that is the
-name the portal and the dashboard look for.
+letter names the direction end to end: the direction module, the stylesheet and
+the published page all carry it, so there is no mapping between the file you are
+editing and the page you are opening.
+
+Their markup is GENERATED. `tools/gen-variants.mjs` writes `src/index{A,B,C}.html`
+from one set of beat declarations and one copy of the record table — three
+hand-maintained copies of the same measurements is how the measurements drift
+apart. The files are committed, because a build must not depend on a generator
+having been run by hand; `npm run publish` runs the generator first, so the
+output cannot fall behind the declarations.
 
 All of it is served from this folder as part of the repository, which GitHub
 Pages publishes whole.
@@ -44,7 +52,7 @@ Pages publishes whole.
 | `npm run publish` | build EVERY registered version in one pass → copy to the top of this folder → rebuild the portal |
 | `npm run hub` | rebuild `index.html` alone |
 | `npm run shoot` | screenshot every version into `previews/` (`--local` shoots the dev server; `BURO_DEV=…` if it is not on 5200) |
-| `npm run new-variant -- index2.html "Name" "note"` | register a version |
+| `npm run new-variant -- index5.html "Name" "note"` | register a version |
 
 ### Adding a variant
 

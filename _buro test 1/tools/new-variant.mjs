@@ -22,12 +22,14 @@ if (!file) {
   console.error('\n  node tools/new-variant.mjs index2.html "Name" "note"\n');
   process.exit(1);
 }
-// A variant is indexN.html beside this folder's other versions, which is the
-// naming every _buro test uses and the name the dashboard links. Anything else
-// is registered under a name nothing will look for.
-if (!/^index\d+\.html$/.test(file)) {
+// A variant is index<something>.html beside this folder's other versions, which
+// is the naming every _buro test uses and the name the portal links. A LETTER is
+// usable too: indexA/B/C.html are the three art directions, named for the
+// direction rather than for their position in a queue. Anything outside this
+// shape is registered under a name nothing will look for.
+if (!/^index[0-9A-Z]+\.html$/.test(file)) {
   console.error(`\n  "${file}" is not a usable variant name.`);
-  console.error('  it must be indexN.html — index2.html, index3.html.\n');
+  console.error('  it must be indexN.html or indexL.html — index5.html, indexD.html.\n');
   process.exit(1);
 }
 

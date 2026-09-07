@@ -84,17 +84,45 @@ export function playIntro(world, callouts, D) {
   const AT = new URLSearchParams(location.search).get('introat');
 
   return new Promise((resolve) => {
-    const tl = gsap.timeline({
+    /*
+      THE LOCK MUST ALWAYS COME OFF.
+
+      The intro holds the page at the top, so anything that stops the timeline
+      finishing — a throw inside drive(), a tab suspended across the whole 2.5 s —
+      would leave a site nobody can scroll. The deadline is the guarantee: the
+      handoff runs on whichever comes first.
+    */
+    let done = false;
+    let tl;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      clearTimeout(deadline);
+      /*
+        KILL THE TIMELINE, not just the lock.
+
+        The deadline is wall-clock and the timeline is ticker-time, and under the
+        first heavy WebGL frames those two diverge. When the deadline won the race
+        it handed over correctly and then the still-running timeline kept driving
+        the camera back toward the intro station — the page sat inside the machine
+        until the first scroll event snapped it out. Whichever path finishes has
+        to end the other one.
+      */
+      tl?.kill();
+      // Land EXACTLY on the first scroll state. The film's own first update
+      // will write these same values, so the seam is a no-op.
+      k.cam = 1; k.light = 1;
+      try { drive(); callouts.setDraw(1); } catch (e) { console.error('[intro]', e); }
+      if (type.length) gsap.set(type, { x: 0, y: 0, xPercent: 0, scale: 1, opacity: 1, filter: 'none' });
+      delete document.documentElement.dataset.intro;
+      scrollTo(0, 0);
+      resolve();
+    };
+    const deadline = setTimeout(finish, ((I.duration ?? 2.45) + 3.0) * 1000);
+
+    tl = gsap.timeline({
       onUpdate: drive,
-      onComplete: () => {
-        // Land EXACTLY on the first scroll state. The film's own first update
-        // will write these same values, so the seam is a no-op.
-        k.cam = 1; k.light = 1; drive();
-        callouts.setDraw(1);
-        delete document.documentElement.dataset.intro;
-        scrollTo(0, 0);
-        resolve();
-      },
+      onComplete: finish,
     });
 
     tl.to(k, { light: 1, duration: 0.95, ease: 'power2.out' }, 0)
@@ -119,6 +147,6 @@ export function playIntro(world, callouts, D) {
     // suppressEvents FALSE: gsap's seek defaults to suppressing callbacks, so the
     // tween values land on `k` but drive() never runs and the frozen frame shows
     // the intro's opening state at every requested time.
-    if (AT != null) { tl.pause(parseFloat(AT), false); drive(); callouts.setDraw(k.draw); }
+    if (AT != null) { clearTimeout(deadline); tl.pause(parseFloat(AT), false); drive(); callouts.setDraw(k.draw); }
   });
 }

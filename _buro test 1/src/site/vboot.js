@@ -40,7 +40,8 @@ export async function bootVariant(direction) {
     */
     const entered = new Set();
     if (direction.intro && !Q.has('nointro')) {
-      await playIntro(world, callouts, direction);
+      try { await playIntro(world, callouts, direction); } catch (e) { console.error('[intro]', e); }
+      delete document.documentElement.dataset.intro;   // never ship a locked page
       entered.add(direction.shots[0].id);
     }
     createSmoothScroll();

@@ -34,6 +34,20 @@ import { execFileSync } from 'node:child_process';
 const ROOT = resolve(import.meta.dirname, '..');
 const DIST = join(ROOT, 'dist');
 
+// THE GENERATED PAGES ARE REGENERATED FIRST, EVERY TIME.
+//
+// indexA/B/C.html are emitted from tools/gen-variants.mjs. They are committed —
+// a build must not depend on a generator having been run by hand — but a
+// committed generated file is only correct until someone edits the generator and
+// not the output. Running it here makes the two impossible to get out of step,
+// and makes the pages reproducible from a clean checkout by `npm run publish`
+// alone. It also means they cannot go missing: the previous arrangement left
+// them untracked and outside the register, so nothing rebuilt them and anything
+// that swept untracked files took them away.
+execFileSync(process.execPath, [join(ROOT, 'tools', 'gen-variants.mjs')], {
+  cwd: ROOT, stdio: 'inherit',
+});
+
 const REGISTER = JSON.parse(readFileSync(join(ROOT, 'variants.json'), 'utf8'));
 
 // A registered version with no source under src/ is skipped rather than failing

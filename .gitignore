@@ -41,3 +41,10 @@ Thumbs.db
 # A stray verification capture at the project root. previews/ is the place for
 # deliberate ones; a screenshot dropped beside index.html is scratch.
 /_buro test 2/act00.png
+
+# ---------------------------------------------------------------------------
+# Screencast frames. The recorder writes one JPEG per delivered frame and the
+# encoder turns them into the mp4 that IS the deliverable — 8,173 of them and
+# 688 MB went into a commit once, which is what a push that never finishes
+# looks like. The mp4s under exploration/review-video/ stay tracked.
+**/frames-*/

@@ -48,3 +48,14 @@ Thumbs.db
 # 688 MB went into a commit once, which is what a push that never finishes
 # looks like. The mp4s under exploration/review-video/ stay tracked.
 **/frames-*/
+
+# ---------------------------------------------------------------------------
+# _buro test 2 — DCC source for the tree silhouettes. 409 MB of .blend, .fbx,
+# a .rar of textures and raw maps, two of which are over GitHub's 100 MB hard
+# limit and got a push rejected outright. Nothing at runtime reads any of it:
+# the site loads models/tree-N.glb, which are the exports. The README and the
+# conversion scripts stay tracked, because HOW the exports were made is the
+# part worth keeping.
+/_buro test 2/3D/*
+!/_buro test 2/3D/README.md
+!/_buro test 2/3D/convert-*.py

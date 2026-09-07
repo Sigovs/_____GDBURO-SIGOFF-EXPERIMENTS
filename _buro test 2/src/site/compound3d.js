@@ -89,6 +89,16 @@ const C = {
      sky is what blue-hour architectural photography is made of — which is also how act
      02 rejoins the evening that act 00 opens in. */
   wall: 0x8d8478,
+  /* THE ENTRY ELEVATION, read off the drawing rather than invented:
+       PIER      the structural rhythm, a full-height precast fin LIGHTER than the wall
+                 behind it. It is what divides one suite from the next, and it is the
+                 single strongest line in the architect's elevation.
+       TIMBER    a warm horizontal header band directly over every door. It is the only
+                 warm material on the building and the reason the facade is not grey.
+       BASE      a darker plinth course the whole run stands on. */
+  pier: 0xa39a8c,
+  timber: 0x8a5c34,
+  base: 0x5e584f,
   roof: 0x39424d,       /* parapet cap */
   membrane: 0x23292f,   /* the roof field, recessed inside the parapet */
   trim: 0x2c333b,       /* fascia, frames, kerbs, door segments — lifted off black:
@@ -374,7 +384,13 @@ export function initCompound3D(mount, model, opts = {}) {
     trim: new THREE.MeshStandardMaterial({ color: C.trim, roughness: 0.52, metalness: 0.34 }),
     civic: new THREE.MeshStandardMaterial({ color: C.civic, roughness: 0.68, metalness: 0.03 }),
     glass: new THREE.MeshStandardMaterial({ color: C.glass, roughness: 0.06, metalness: 0.5, envMapIntensity: 2.2 }),
-    door: new THREE.MeshStandardMaterial({ color: C.door, roughness: 0.54, metalness: 0.26 }),
+    /* A FULL-VIEW ALUMINIUM DOOR, which is what the elevation actually draws: a dark
+       frame carrying a grid of tinted panes, not a solid sectional slab. Darker and a
+       little more metallic than the painted steel it used to be. */
+    door: new THREE.MeshStandardMaterial({ color: 0x2b3138, roughness: 0.46, metalness: 0.34 }),
+    pier: new THREE.MeshStandardMaterial({ color: C.pier, roughness: 0.72, metalness: 0.02 }),
+    base: new THREE.MeshStandardMaterial({ color: C.base, roughness: 0.86, metalness: 0.02 }),
+    timber: new THREE.MeshStandardMaterial({ color: C.timber, roughness: 0.74, metalness: 0.02 }),
     sold: new THREE.MeshStandardMaterial({ color: C.sold, roughness: 0.85, metalness: 0.1 }),
     /* GRASS — the site's second ground. Utterly matte and a touch green, so it separates
        from concrete by material as well as by value. */
@@ -487,16 +503,40 @@ export function initCompound3D(mount, model, opts = {}) {
       diffuseColor.rgb *= (0.962 + m * 0.076) * (1.0 - joint * 0.17);
       roughnessFactor = clamp(roughnessFactor * (0.90 + m * 0.20) + joint * 0.14, 0.03, 1.0);
     `,
-    /* THE SECTIONAL DOOR. Four panels and the ribs inside them — the detail the brief
-       asks for by name, and the thing that tells the eye how big the opening is. The
-       grooves used to be three separate trim boxes standing PROUD of the leaf, which is
-       backwards: the joint between two door panels is a recess. */
+    /* THE DOOR IS A GRID, NOT A STACK OF SECTIONS.
+
+       Corrected against the ENTRY ELEVATION. What is drawn there is a full-view
+       aluminium door: a dark frame divided into roughly six columns and four courses of
+       tinted glass, with a heavier meeting rail. The horizontal-panel reading I built
+       from the brief was the wrong door — it gave the facade a banded, domestic look
+       where the drawing has a fine dark lattice. The vertical divisions are what was
+       missing, and they are most of the difference.
+
+       The frame members are LIGHTER than the glass between them, because an aluminium
+       stile catches the key and the tinted pane behind it does not. */
     door: `
       vec2 uv = dPlane(P, N);
-      float seam = dLine(uv.y + 0.30, 1.72, 0.035);
-      float rib  = dLine(uv.y + 0.30, 0.43, 0.05);
-      diffuseColor.rgb *= (1.0 - seam * 0.52) * (1.0 - rib * 0.10);
-      roughnessFactor = clamp(roughnessFactor + seam * 0.28 - rib * 0.04, 0.04, 1.0);
+      float mull = dLine(uv.x, 2.45, 0.055);
+      float rail = dLine(uv.y + 0.30, 2.30, 0.055);
+      float grid = max(mull, rail);
+      diffuseColor.rgb *= (1.0 + grid * 0.55);
+      roughnessFactor = clamp(roughnessFactor - grid * 0.18, 0.05, 1.0);
+    `,
+    /* THE GLAZED HEAD is the same lattice at the same pitch, so the head reads as the
+       top course of the door rather than as a separate window stuck above it. */
+    glazing: `
+      vec2 uv = dPlane(P, N);
+      float bar = dLine(uv.x, 2.45, 0.05);
+      diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.62, 0.60, 0.56), bar * 0.85);
+      roughnessFactor = clamp(roughnessFactor + bar * 0.5, 0.02, 1.0);
+    `,
+    /* THE HEADER BAND. Fine horizontal boarding — the warm line over every opening. */
+    timber: `
+      vec2 uv = dPlane(P, N);
+      float seam = dLine(uv.y, 0.62, 0.022);
+      float g = dnoise(vec2(uv.x * 0.6, uv.y * 9.0));
+      diffuseColor.rgb *= (1.0 - seam * 0.42) * (0.90 + g * 0.20);
+      roughnessFactor = clamp(roughnessFactor * (0.92 + g * 0.16) + seam * 0.12, 0.2, 1.0);
     `,
     /* ASPHALT. Aggregate, and a very slight unevenness in the sheen — a flat roughness
        over a 1,100-foot drive is a plastic ribbon. */
@@ -553,8 +593,39 @@ export function initCompound3D(mount, model, opts = {}) {
     `,
   }
 
+  /* ====================================================================================
+     SURFACES THAT ANSWER THE LIGHT, NOT JUST THE EYE.
+
+     THE ASSET AUDIT CAME BACK EMPTY FOR THIS. The library holds no asphalt, no concrete
+     and no ground texture — its textures/ folder is empty and the only surface maps
+     anywhere on the machine are snow and a mountain normal. So the road cannot be fixed
+     by dropping in a map, and inventing one was ruled out.
+
+     What was actually wrong is diagnosable without any asset. Every recipe so far
+     modulated COLOUR and ROUGHNESS, and neither of those tilts a surface. A drive with
+     a perfectly flat normal returns the key as one clean sweep however its albedo
+     varies, and that is exactly what "too clean / synthetic" describes: not a lack of
+     dirt, a lack of RELIEF. Real asphalt is aggregate a few millimetres proud of its
+     binder, and at blue hour with a low raking key that relief IS the material.
+
+     So each surface may declare a height field, and the normal is perturbed by its
+     gradient — three extra noise samples, no texture, no memory. The amplitudes are
+     deliberately tiny: this has to read as new construction under a low sun, not as a
+     damaged road. Everything fades out with dFine, so a surface seen from the compound
+     pose is as smooth as it looks from there.
+     ==================================================================================== */
+  const BUMP = {
+    /* aggregate: a fine grain plus a coarser lay pattern from the paver */
+    asphalt: { fn: 'dnoise(u * 5.5) * 0.62 + dnoise(u * 1.35) * 0.38', amp: 0.16, feat: 0.9 },
+    /* a float finish is much finer and much flatter than asphalt */
+    concrete: { fn: 'dnoise(u * 7.0) * 0.55 + dnoise(u * 2.2) * 0.45', amp: 0.085, feat: 0.8 },
+    /* precast carries the form face, not aggregate: a very broad, very shallow waver */
+    precast: { fn: 'dnoise(u * 0.55) * 0.7 + dnoise(u * 1.9) * 0.3', amp: 0.05, feat: 2.2 },
+  }
+
   const surfaced = (mat, kind) => {
     const body = DETAIL[kind]
+    const bump = BUMP[kind]
     if (!body) return mat
     mat.onBeforeCompile = (shader) => {
       shader.uniforms.uFeet = { value: FEET }
@@ -569,6 +640,38 @@ export function initCompound3D(mount, model, opts = {}) {
         .replace('#include <roughnessmap_fragment>',
           '#include <roughnessmap_fragment>\n{\n vec3 P = vDPos * uFeet;\n vec3 N = normalize(vDNrm);\n float UP = abs(N.y);\n'
           + body + '\n}')
+      if (bump) {
+        /* The two axes of whichever face this is, so relief runs along the surface
+           rather than through it — and taken into VIEW space, because that is where
+           Three does its lighting. */
+        shader.fragmentShader = shader.fragmentShader.replace('#include <normal_fragment_maps>', [
+          '#include <normal_fragment_maps>',
+          '{',
+          '  vec3 Pb = vDPos * uFeet;',
+          '  vec3 Nb = normalize(vDNrm);',
+          '  vec3 ab = abs(Nb);',
+          '  vec3 T; vec3 B;',
+          '  if (ab.y > max(ab.x, ab.z)) { T = vec3(1.0,0.0,0.0); B = vec3(0.0,0.0,1.0); }',
+          '  else if (ab.x > ab.z) { T = vec3(0.0,0.0,1.0); B = vec3(0.0,1.0,0.0); }',
+          '  else { T = vec3(1.0,0.0,0.0); B = vec3(0.0,1.0,0.0); }',
+          '  vec2 u = dPlane(Pb, Nb);',
+          '  float e = max(max(fwidth(u.x), fwidth(u.y)), 0.004);',
+          '  float h0 = ' + bump.fn + ';',
+          '  vec2 u1 = u + vec2(e, 0.0); float hx = ' + bump.fn.split('u ').join('u1 ') + ';',
+          '  vec2 u2 = u + vec2(0.0, e); float hy = ' + bump.fn.split('u ').join('u2 ') + ';',
+          '  float k = ' + bump.amp.toFixed(4) + ' * dFine(u, ' + bump.feat.toFixed(3) + ');',
+          '  vec3 dv = (T * (hx - h0) + B * (hy - h0)) * (k / max(e, 1e-4));',
+          '  vec3 dvv = (viewMatrix * vec4(dv, 0.0)).xyz;',
+          '  normal = normalize(normal - dvv);',
+          '}',
+        ].join('\n'))
+      }
+      /* DID THE INJECTION ACTUALLY LAND. A chunk name renamed upstream makes replace() a
+         silent no-op: the material still compiles, still renders, and simply has none of
+         the detail it was given. Recorded so a test can ask instead of a person guessing
+         at a screenshot. */
+      mat.userData.detailApplied = shader.fragmentShader.includes('vDPos * uFeet')
+      mat.userData.bumpApplied = shader.fragmentShader.includes('normal - dvv')
     }
     /* Three caches compiled programs by material signature; without a distinct key two
        recipes on the same base material would share one program and one of them would
@@ -582,6 +685,10 @@ export function initCompound3D(mount, model, opts = {}) {
   surfaced(M.civic, 'precast')
   surfaced(M.sold, 'precast')
   surfaced(M.door, 'door')
+  surfaced(M.glass, 'glazing')
+  surfaced(M.timber, 'timber')
+  surfaced(M.pier, 'precast')
+  surfaced(M.base, 'precast')
   surfaced(M.road, 'asphalt')
   surfaced(M.concrete, 'concrete')
   surfaced(M.membrane, 'membrane')
@@ -900,70 +1007,206 @@ export function initCompound3D(mount, model, opts = {}) {
     site.add(water)
   }
 
-  /* --- PLANTING — THE REAL TREES. --------------------------------------------------
+  /* ====================================================================================
+     PLANTING — THE REAL TREES, INSTANCED, AND IN THREE TIERS.
 
-     The procedural trunk-and-icosahedron was honest about being a placeholder and it
-     looked like one. These are the source library's own chestnuts: the FBX turned out
-     to hold FIVE distinct trees, so they are exported one per file and the site plants
-     different trees rather than one tree a hundred times.
+     AUDITED BEFORE ANYTHING WAS CHANGED. The library holds five Draco-compressed
+     chestnuts, 84k to 168k triangles each, with UVs but NO texture maps of any kind.
+     They were being planted with scene.clone(true) at 106 points, which measured:
 
-     Loaded asynchronously and added when they arrive. The compound is complete without
-     them and simply gains its planting a moment later, so a slow connection gets a
-     finished model rather than a broken one.
+         11,785,239 triangles in the scene       1,899 draw calls
+         11,760,455 of them the trees            2,189 meshes
 
-     Placement is unchanged and still derived — sampled along the measured parcel line,
-     stepped inward, rejected unless the point clears every building and the drive, and
-     now also drawn toward the landscaped zones, which is where planting belongs. What
-     changed is what gets planted.
+     The entire compound — every building, door, pier, frame, reveal, roof and light
+     fitting — is 24,784 triangles. The planting was 474 times the architecture, and it
+     was drawn one clone at a time.
 
-     Blue hour: the loaded materials are overridden to the site's own foliage value.
-     A daylight-green tree at dusk is the single fastest way to break the hour. */
+     THREE THINGS FOLLOW FROM THE AUDIT.
+
+     1. INSTANCE THEM. clone() already shares the geometry, so this was never a memory
+        problem; it was 1,899 draw calls. One InstancedMesh per silhouette draws the
+        whole planting in ten.
+
+     2. BARK IS NOT FOLIAGE. Each GLB carries two materials — the names say which is
+        which — and both were being overwritten with a single flat colour, so every
+        tree rendered as one dark mass with no trunk in it. They are graded separately
+        now: bark darker and warmer, canopy cooler and lifted, and the canopy takes a
+        vertical gradient because light at this hour comes from above.
+
+     3. A RING IS NOT A LANDSCAPE. Two trees per perimeter edge at fixed insets of 24
+        and 52 feet, plus one at every other vertex of each planted zone, is a rule
+        rather than a scheme, and it read as one. Planting is in tiers now, each with
+        its own job in the frame:
+
+          TREELINE   the parcel boundary, walked by ARC LENGTH with jittered gaps and
+                     whole stretches left empty, at a jittered depth. It is a belt, not
+                     a fence, and it is what closes the compound off from the fog.
+          GROVE      irregular clusters inside the measured landscape zones: a few
+                     centres per zone, a few trees around each. Planting grows in groups.
+          SPECIMEN   a handful of big ones on the arrival sequence — the gate, the drive,
+                     the clubhouse forecourt — where the camera passes closest and a tree
+                     has to hold up at fifty feet.
+
+     The tiers also carry the triangle budget: the two heaviest silhouettes are reserved
+     for specimens, and the treeline gets the lightest.
+     ==================================================================================== */
+
+  /* One deterministic hash, so the planting is identical on every load and on every
+     machine — a landscape that reshuffles on refresh is not a design. */
+  const rnd = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x) }
+
+  const TREE_TIERS = { treeline: 0, grove: 1, specimen: 2 }
   const treeSpots = []
   {
+    /* A BUILDING IS A RECTANGLE, AND THE TEST HAS TO BE ONE TOO.
+
+       Every mass was excluded as a CIRCLE of radius 0.62 x its longest side. Run 02 is
+       195 units long and 39 deep, so it reserved a 121-unit disc — three times its own
+       depth in every direction, over ground where there is no building at all. Across
+       eleven buildings and three civic masses those discs covered most of the parcel,
+       which is why a scheme that generated sixty-six perimeter points planted twenty-two
+       of them. The distance to the real oriented footprint costs a rotation and a
+       max(), and it gives the landscape back the ground it is entitled to. */
     const occupied = []
-    for (const row of data.rows) occupied.push([row.cx, row.cy, Math.max(row.length, row.depth) * 0.62])
-    for (const c of data.civic) occupied.push([c.cx, c.cy, Math.max(c.length, c.depth) * 0.62])
-    const clear = (x, y) => {
-      for (const [ox, oy, rad] of occupied) if (Math.hypot(x - ox, y - oy) < rad) return false
-      if (spine) { const n = nearestOnSpine(spine, x, y); if (n.d < ROAD_W * 1.55) return false }
+    const box = (cx, cy, len, dep, ang) => ({ cx, cy, hx: len / 2, hy: dep / 2, c: Math.cos(-(ang * Math.PI) / 180), s: Math.sin(-(ang * Math.PI) / 180) })
+    for (const row of data.rows) occupied.push(box(row.cx, row.cy, row.length, row.depth, row.ang))
+    for (const c of data.civic) occupied.push(box(c.cx, c.cy, c.length, c.depth, c.ang))
+    /* how far outside the footprint, in site units; negative inside */
+    const outside = (b, x, y) => {
+      const dx = x - b.cx, dy = y - b.cy
+      const lx = Math.abs(dx * b.c + dy * b.s) - b.hx
+      const ly = Math.abs(-dx * b.s + dy * b.c) - b.hy
+      return Math.hypot(Math.max(lx, 0), Math.max(ly, 0)) + Math.min(Math.max(lx, ly), 0)
+    }
+    /* MARGIN is a real setback: nothing plants within about twenty-five feet of a wall,
+       which is roughly a mature crown's radius away from the elevation it frames. */
+    const MARGIN = 19
+    const clear = (x, y, road = 1.55) => {
+      for (const b of occupied) if (outside(b, x, y) < MARGIN) return false
+      if (spine) { const n = nearestOnSpine(spine, x, y); if (n.d < ROAD_W * road) return false }
+      return true
+    }
+    /* nothing plants on top of anything else */
+    const spaced = (x, y, min) => !treeSpots.some((t) => Math.hypot(t[0] - x, t[1] - y) < min)
+    /* A SPECIMEN MUST NOT STAND IN THE ENTER FRAME. These chestnuts carry no texture of
+       any kind — the leaves are solid cards — so at thirty feet a crown resolves into
+       the flat quads it is made of. That is the asset's limit, not a shading fault, and
+       the way to respect it is to keep the biggest trees out of the one pose that gets
+       that close to a wall. `hold` is a per-tier setback from every building footprint. */
+    const put = (x, y, tier, seed, min, hold = 0) => {
+      if (hold) { for (const b of occupied) if (outside(b, x, y) < hold) return false }
+      if (!clear(x, y) || !spaced(x, y, min)) return false
+      treeSpots.push([x, y, seed, tier])
       return true
     }
 
-    /* Along the parcel line, stepped inward. */
-    const per = data.perimeter
-    for (let i = 0; i < per.length; i++) {
-      const [px, py] = per[i]
-      const [qx, qy] = per[(i + 1) % per.length]
-      const mx = (px + qx) / 2, my = (py + qy) / 2
-      const toC = [cX - mx, cY - my]
-      const l = Math.hypot(toC[0], toC[1]) || 1
-      for (const inset of [24, 52]) {
-        const x = mx + (toC[0] / l) * inset
-        const y = my + (toC[1] / l) * inset
-        if (clear(x, y)) treeSpots.push([x, y, i])
+    /* SPECIMENS ARE PLACED FIRST. They are the trees seen from ten feet away, they are
+       the fewest, and they are the only ones whose position is not negotiable — so they
+       claim their ground before the belt and the groves compete for it. Placed last,
+       one of twelve survived the spacing test. */
+    if (spine) {
+      let seed = 8000
+      for (const frac of [0.10, 0.24, 0.42, 0.58, 0.76, 0.9]) {
+        const idx = Math.min(spine.length - 2, Math.floor(frac * (spine.length - 1)))
+        const [ax, ay] = spine[idx]
+        const [bx, by] = spine[idx + 1]
+        const ux = bx - ax, uy = by - ay
+        const l = Math.hypot(ux, uy) || 1
+        for (const side of [1, -1]) {
+          seed += 7
+          const off = ROAD_W * 1.9 + rnd(seed) * 46
+          const x = ax + (-uy / l) * off * side + (rnd(seed * 2.1) - 0.5) * 30
+          const y = ay + (ux / l) * off * side + (rnd(seed * 3.7) - 0.5) * 30
+          if (rnd(seed * 5.3) > 0.12) put(x, y, TREE_TIERS.specimen, seed, 30, 44)
+        }
       }
     }
 
-    /* And clustered inside the landscaped zones — a planted area with no planting in it
-       is just a differently coloured floor. Three per zone, at its own vertices pulled
-       toward its centroid, so the group sits inside the shape rather than on its edge. */
-    for (const [zi, z] of SV.landscape.entries()) {
-      const pts = z.outline
-      const cx2 = pts.reduce((a, q) => a + q[0], 0) / pts.length
-      const cy2 = pts.reduce((a, q) => a + q[1], 0) / pts.length
-      for (let k = 0; k < pts.length; k += 2) {
-        const x = cx2 + (pts[k][0] - cx2) * 0.55
-        const y = cy2 + (pts[k][1] - cy2) * 0.55
-        if (clear(x, y)) treeSpots.push([x, y, zi * 7 + k])
+    /* --- TREELINE. Walked by arc length round the parcel, with gaps. ------------- */
+    {
+      const per = data.perimeter
+      let carry = 0, seed = 1000
+      for (let i = 0; i < per.length; i++) {
+        const [px, py] = per[i]
+        const [qx, qy] = per[(i + 1) % per.length]
+        const segLen = Math.hypot(qx - px, qy - py)
+        const ux = (qx - px) / (segLen || 1), uy = (qy - py) / (segLen || 1)
+        /* inward normal, from the segment toward the site centre */
+        let nx = -uy, ny = ux
+        if ((cX - px) * nx + (cY - py) * ny < 0) { nx = -nx; ny = -ny }
+        let t = carry
+        while (t < segLen) {
+          seed++
+          /* a quarter of the walk plants nothing, which is what makes it a belt */
+          if (rnd(seed) > 0.12) {
+            const depth = 16 + rnd(seed * 3.1) * 58
+            const wob = (rnd(seed * 7.7) - 0.5) * 26
+            put(px + ux * (t + wob) + nx * depth, py + uy * (t + wob) + ny * depth,
+              TREE_TIERS.treeline, seed, 17)
+          }
+          t += 22 + rnd(seed * 2.3) * 30
+        }
+        carry = t - segLen
       }
     }
+
+    /* --- GROVES. Clusters inside the measured landscape zones. ------------------- */
+    {
+      let seed = 4000
+      for (const z of SV.landscape) {
+        const pts = z.outline
+        const zx = pts.reduce((a, q) => a + q[0], 0) / pts.length
+        const zy = pts.reduce((a, q) => a + q[1], 0) / pts.length
+        /* how big is this zone — a verge gets one cluster, a basin gets three */
+        let rad = 0
+        for (const [x, y] of pts) rad = Math.max(rad, Math.hypot(x - zx, y - zy))
+        const clusters = Math.max(2, Math.min(5, Math.round(rad / 42)))
+        for (let c = 0; c < clusters; c++) {
+          seed += 13
+          const a = rnd(seed) * Math.PI * 2
+          const d = rad * (0.18 + rnd(seed * 1.7) * 0.5)
+          const ccx = zx + Math.cos(a) * d, ccy = zy + Math.sin(a) * d
+          const n = 3 + Math.floor(rnd(seed * 3.3) * 4)
+          for (let k = 0; k < n; k++) {
+            seed++
+            const ka = rnd(seed) * Math.PI * 2
+            const kd = 12 + rnd(seed * 5.1) * 44
+            put(ccx + Math.cos(ka) * kd, ccy + Math.sin(ka) * kd, TREE_TIERS.grove, seed, 13, 30)
+          }
+        }
+      }
+    }
+
   }
 
-  /* The library, loaded once and instanced by cloning. Draco-compressed GLB, ~1.3 MB
-     each, three silhouettes — enough variation that no two neighbours match. */
+  /* SAY HOW MANY, so a scheme that quietly rejects most of its own points is visible
+     rather than merely sparse. The first cut planted 21 trees on a 26-acre site. */
+  console.info('[luxe-corsa] planting scheme: ' + treeSpots.length + ' points  ('
+    + treeSpots.filter((t) => t[3] === 0).length + ' treeline, '
+    + treeSpots.filter((t) => t[3] === 1).length + ' grove, '
+    + treeSpots.filter((t) => t[3] === 2).length + ' specimen)')
+
+  /* The library. Five silhouettes, and which tier each belongs to: the two heaviest are
+     kept for the trees a visitor gets close to. */
   const TREES = ['tree-1', 'tree-2', 'tree-3', 'tree-4', 'tree-5']
-  const foliage = new THREE.MeshStandardMaterial({ color: 0x1c2620, roughness: 1, metalness: 0 })
-  const barkMat = new THREE.MeshStandardMaterial({ color: 0x14161a, roughness: 0.95, metalness: 0 })
+  const TIER_MODELS = [[0, 1, 4], [0, 1, 2, 4], [2, 3]]
+
+  /* BARK AND CANOPY ARE TWO MATERIALS, and the GLB says which is which. Both sit well
+     below the architecture in value: untextured foliage takes the full key, and a mid
+     green renders as a pale pom-pom against a dark site. */
+  const foliage = new THREE.MeshStandardMaterial({ color: 0x2a3327, roughness: 0.92, metalness: 0 })
+  const barkMat = new THREE.MeshStandardMaterial({ color: 0x241f1b, roughness: 0.95, metalness: 0 })
+  /* THE CANOPY IS LIT FROM ABOVE. A single flat colour over a forty-foot crown gives it
+     no form at all — the shape is there and the modelling is not. This lifts the top of
+     each crown and drops its underside, which is what the sky actually does, and adds a
+     broad variation so a hundred chestnuts are not one chestnut a hundred times. */
+  DETAIL.canopy = `
+      float up = clamp(N.y * 0.5 + 0.5, 0.0, 1.0);
+      float v = dnoise(P.xz * 0.021);
+      diffuseColor.rgb *= (0.84 + up * 0.34) * (0.90 + v * 0.22);
+      roughnessFactor = clamp(roughnessFactor * (0.94 + v * 0.12), 0.5, 1.0);
+  `
+  surfaced(foliage, 'canopy')
 
   const plantTrees = async () => {
     const [{ GLTFLoader }, { DRACOLoader }] = await Promise.all([
@@ -971,20 +1214,10 @@ export function initCompound3D(mount, model, opts = {}) {
       import('three/examples/jsm/loaders/DRACOLoader.js'),
     ])
     const draco = new DRACOLoader()
-    /* The decoder that ships with the installed three, vendored into public/ — the CDN
-       path guessed at first simply 404s, and a decoder that is not there fails silently
-       into a compound with no planting. */
-      /* ROOT-RELATIVE, NOT DOCUMENT-RELATIVE.  './draco/' and './models/' resolve against
-       whatever URL the page happens to sit at, so the whole planting silently vanished
-       on every page that is not the site root — the exploration at /exploration/study/
-       and the integrated review at /exploration/integrated/ both requested
-       .../study/models/tree-1.glb, got index.html back, and logged a JSON parse error
-       nobody was reading. Measured: 0 silhouettes planted at 106 points. */
-      /* BASE_URL, NOT A LEADING SLASH. A root-absolute path is right on a dev server at
-       / and wrong the moment this folder is published under
-       /_____GDBURO-SIGOFF-EXPERIMENTS/_buro%20test%202/ — it would ask the domain root
-       for a decoder that lives two directories down. Vite substitutes the real base at
-       build time, so one expression is correct in both places. */
+    /* BASE_URL, NOT A LEADING SLASH AND NOT A DOCUMENT-RELATIVE PATH. The first resolves
+       against whatever URL the page sits at and the second is wrong the moment this
+       folder is published under a sub-path; both have silently emptied the site of its
+       planting before. Vite substitutes the real base at build time. */
     draco.setDecoderPath(import.meta.env.BASE_URL + 'draco/gltf/')
     const loader = new GLTFLoader()
     loader.setDRACOLoader(draco)
@@ -992,90 +1225,92 @@ export function initCompound3D(mount, model, opts = {}) {
     const models = []
     for (const name of TREES) {
       try {
-        /* A PLAIN RUNTIME PATH, not a bundler URL.
-
-           `new URL(..., import.meta.url)` makes Vite's import-analysis try to resolve
-           the whole family at build time — it globbed every GLB into the module graph
-           and then failed to parse the result. Large binary assets belong in `public/`
-           and are fetched by path: nothing to analyse, nothing to inline, and the files
-           are served exactly as they were exported. */
-        const g = await loader.loadAsync(`${import.meta.env.BASE_URL}models/${name}.glb`)
+        const g = await loader.loadAsync(import.meta.env.BASE_URL + 'models/' + name + '.glb')
         models.push(g.scene)
       } catch (err) { console.warn('[luxe-corsa] tree', name, 'did not load', err) }
     }
-    console.info('[luxe-corsa] planting', models.length, 'silhouettes at', treeSpots.length, 'points')
-    if (!models.length) return
+    if (!models.length) { console.warn('[luxe-corsa] no planting loaded'); return }
 
-    /* KEEP THE GLB'S OWN MATERIALS, and grade them.
-
-       A first pass replaced every tree material with two of our own, which threw away
-       the leaf alpha the whole silhouette depends on — the export renames meshes to
-       'Mesh'/'Mesh_1', so a name-based leaf test matched nothing and both halves of the
-       tree became opaque dark bark. Invisible against a dark site.
-
-       The imported materials already carry the source's bark and leaf maps. So they are
-       kept and TUNED instead: alpha cut-out enabled wherever a map has transparency,
-       roughness pushed up, and the colour multiplied down toward the site's foliage
-       value so a daylight-green tree reads at blue hour. */
-    for (const m of models) {
-      m.traverse((n) => {
-        if (!n.isMesh || !n.material) return
-        const mats = Array.isArray(n.material) ? n.material : [n.material]
-        for (const mat of mats) {
-          mat.roughness = 1
-          mat.metalness = 0
-          mat.envMapIntensity = 0.10
-          /* Foliage at dusk is nearly black with a green bias; multiplying the map by a
-             dark colour keeps its variation and removes the daylight. */
-          /* Well below the architecture. Untextured foliage takes the full key, so a
-             mid green renders as a pale pom-pom against a dark site — landscape has to
-             sit under the buildings in value or it stops framing them and starts
-             competing with them. */
-          /* RE-GRADED FOR THE NEW PRINT. This value was tuned at exposure 1.22 with a 4.6 key;
-             opening the print up to 1.46 / 6.0 to make the garage doors read turned the same
-             foliage back into pale daylight pom-poms, brighter than the buildings they are
-             meant to frame. Scaled by the same factor the exposure moved. */
-          mat.color.setRGB(0.052, 0.064, 0.044)
-          if (mat.map) {
-            mat.alphaTest = 0.4
-            mat.transparent = false
-            mat.side = THREE.DoubleSide
-          }
-          mat.needsUpdate = true
-        }
-        n.castShadow = true
-        n.receiveShadow = false
+    /* --- READ EACH SILHOUETTE ONCE ------------------------------------------------
+       The exporter puts Blender's unit conversion on an ancestor of the mesh, so the
+       geometry that arrives is about a six-thousandth of a unit tall while its own local
+       box still measures a tidy 0..1. Every instance therefore carries the mesh's own
+       world matrix as a BASE and the placement multiplies that — whatever an exporter
+       does to the transform, the tree ends up the size the site asked for. */
+    /* A glTF MESH WITH TWO PRIMITIVES ARRIVES AS TWO MESHES, NOT AS ONE WITH GROUPS.
+       Each chestnut is one glTF mesh carrying a leaves primitive and a bark primitive,
+       and GLTFLoader expands that into a Group of two child Meshes. Taking the first
+       isMesh therefore instanced HALF of every tree — measured: tree-1 came through at
+       17,996 triangles against the 83,956 the file holds, and the trunks were missing
+       from the whole site. Every part is read, and each gets its own instanced draw
+       sharing the same per-tree transform. */
+    const proto = []
+    for (const root of models) {
+      root.updateWorldMatrix(true, true)
+      const parts = []
+      root.traverse((n) => {
+        if (!n.isMesh) return
+        const mat = Array.isArray(n.material) ? n.material[0] : n.material
+        const nm = (mat && mat.name) || n.name || ''
+        parts.push({ geo: n.geometry, mat: /leaf|leaves/i.test(nm) ? foliage : barkMat, base: n.matrixWorld.clone() })
       })
+      if (!parts.length) { proto.push(null); continue }
+      const box = new THREE.Box3().setFromObject(root)
+      proto.push({ parts, unit: Math.max(1e-6, box.max.y - box.min.y), minY: box.min.y })
     }
 
-    /* NORMALISE ON THE MODEL THAT ACTUALLY ARRIVED.
-
-       The export normalises each tree to one unit tall in Blender, but glTF carries
-       Blender's own unit conversion on the scene root — so the model that reaches the
-       browser was about 1/6000th of a unit, and multiplying it by a height in feet gave
-       trees three thousandths of a unit tall. Invisible, and the geometry probe still
-       reported a tidy 0..1 local box because the shrink lives on an ancestor.
-
-       So each silhouette is measured once, here, and every clone is scaled by the
-       ratio that actually puts it at the height we want. Whatever any exporter does to
-       the transform, the tree ends up the size the site asked for. */
-    const unit = models.map((m) => {
-      const box = new THREE.Box3().setFromObject(m)
-      return Math.max(1e-6, box.max.y - box.min.y)
-    })
-
-    for (const [x, y, seed] of treeSpots) {
-      const pick = seed % models.length
-      const src = models[pick]
-      const t = src.clone(true)
-      const h = ft(26) + ((seed * 37) % 11) * ft(2.2)
-      t.scale.setScalar(h / unit[pick])
-      t.position.set(x, 0, y)
-      t.rotation.y = seed * 1.31
-      site.add(t)
-      if (!window.__lcTree) { window.__lcTree = t }
+    /* --- ASSIGN EVERY SPOT A SILHOUETTE, THEN DRAW EACH SILHOUETTE ONCE ---------- */
+    const byModel = new Map()
+    for (const spot of treeSpots) {
+      const pool = (TIER_MODELS[spot[3]] || TIER_MODELS[0]).filter((i) => proto[i])
+      if (!pool.length) continue
+      const mi = pool[Math.floor(rnd(spot[2] * 1.9) * pool.length) % pool.length]
+      if (!byModel.has(mi)) byModel.set(mi, [])
+      byModel.get(mi).push(spot)
     }
-    console.info('[luxe-corsa] planted', treeSpots.length)
+
+    /* the height bands are what make the tiers read as depth rather than as sizes */
+    const BAND = [[ft(34), ft(20)], [ft(29), ft(17)], [ft(44), ft(20)]]
+    const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler()
+    const pos = new THREE.Vector3(), scl = new THREE.Vector3()
+    let planted = 0, tris = 0
+
+    let draws = 0
+    for (const [mi, spots] of byModel) {
+      const P = proto[mi]
+      /* one transform per tree, reused by every part of it */
+      const place = spots.map((spot) => {
+        const x = spot[0], y = spot[1], seed = spot[2], tier = spot[3]
+        const band = BAND[tier] || BAND[0]
+        const s = (band[0] + rnd(seed * 1.31) * band[1]) / P.unit
+        /* a crown is never a surface of revolution and never plumb */
+        const sx = s * (0.9 + rnd(seed * 2.71) * 0.22)
+        const sz = s * (0.9 + rnd(seed * 3.77) * 0.22)
+        e.set((rnd(seed * 4.9) - 0.5) * 0.07, rnd(seed * 5.3) * Math.PI * 2, (rnd(seed * 6.1) - 0.5) * 0.07)
+        q.setFromEuler(e)
+        pos.set(x, -P.minY * s, y)
+        scl.set(sx, s, sz)
+        return new THREE.Matrix4().compose(pos, q, scl)
+      })
+      planted += spots.length
+      for (const part of P.parts) {
+        const inst = new THREE.InstancedMesh(part.geo, part.mat, spots.length)
+        inst.castShadow = true
+        inst.receiveShadow = false
+        inst.frustumCulled = false        /* one object spans the whole site */
+        inst.name = 'planting-' + TREES[mi]
+        for (let i = 0; i < place.length; i++) {
+          m4.copy(place[i]).multiply(part.base)
+          inst.setMatrixAt(i, m4)
+        }
+        inst.instanceMatrix.needsUpdate = true
+        site.add(inst)
+        draws++
+        tris += ((part.geo.index ? part.geo.index.count : part.geo.attributes.position.count) / 3) * spots.length
+      }
+    }
+    console.info('[luxe-corsa] planted ' + planted + ' trees in ' + draws
+      + ' instanced draws, ' + Math.round(tris / 1000) + 'k triangles')
   }
   plantTrees()
 
@@ -1290,14 +1525,17 @@ export function initCompound3D(mount, model, opts = {}) {
        bay carries the pier on its own leading edge, so a run of n suites draws n piers
        and the last bay's far edge is closed by the run's end pier below. */
     const slotW = s.slot ?? s.w
-    const PIER_W = ft(1.9)
+    /* THE PIER IS THE ELEVATION'S STRONGEST LINE, and at 1.9 ft in the same precast as
+       the wall it was neither wide enough nor light enough to be one. The drawing shows
+       a broad fin standing proud of the wall, in a paler mix, running the full height. */
+    const PIER_W = ft(3.4)
     const clear = slotW - PIER_W          /* the opening available between two piers */
     const rot0 = -(s.ang * Math.PI) / 180
     const [fnx0, fny0] = s.faceNormal
     const faceD0 = (s.depth ?? s.dep) * 0.5
 
-    const pierL = new THREE.Mesh(bayGeo, M.wall)
-    pierL.scale.set(PIER_W, H_SUITE, ft(1.5))
+    const pierL = new THREE.Mesh(bayGeo, M.pier)
+    pierL.scale.set(PIER_W, H_SUITE, ft(2.4))
     pierL.position.set(
       s.cx - Math.cos(rot0) * (slotW / 2) + fnx0 * (faceD0 - ft(0.4)),
       H_SUITE / 2,
@@ -1312,7 +1550,9 @@ export function initCompound3D(mount, model, opts = {}) {
        reference elevation shows and what a car actually needs — and the share is where
        PREMIUM and STANDARD become architecture rather than a colour key. */
     const dw = clear * (s.type === 'A' ? 0.88 : 0.72)
-    const dh = H_SUITE * 0.5
+    /* The elevation puts the head of the opening a little over halfway up the wall,
+       with the timber band above it and a plain precast panel above that. */
+    const dh = H_SUITE * 0.56
     const [fnx, fny] = s.faceNormal
     const rot = -(s.ang * Math.PI) / 180
     const faceD = faceD0
@@ -1353,6 +1593,35 @@ export function initCompound3D(mount, model, opts = {}) {
     /* The leaf, just inside the reveal so the frame's own edge shades its head and one
        jamb. Segmented: a commercial sectional door is four horizontal panels, and at
        this scale the segmentation is what tells the eye how big the opening is. */
+    /* THE TIMBER HEADER. A warm boarded band across the head of every opening, standing
+       proud of the wall, running the full width between the piers. It is the one warm
+       material on the elevation and the detail that makes the row read as designed
+       rather than as extruded. */
+    {
+      const head = new THREE.Mesh(bayGeo, M.timber)
+      head.scale.set(clear * 0.99, ft(2.3), ft(0.7))
+      head.position.set(
+        s.cx + fnx0 * (faceD0 + ft(0.24)),
+        dh + ft(1.9),
+        s.cy + fny0 * (faceD0 + ft(0.24)),
+      )
+      head.rotation.y = rot0
+      head.castShadow = true
+      head.receiveShadow = true
+      B.group.add(head)
+    }
+
+    /* THE BASE COURSE. A darker plinth the whole run stands on — without it the wall
+       meets the apron with no transition and the building looks like it was dropped. */
+    {
+      const plinth = new THREE.Mesh(bayGeo, M.base)
+      plinth.scale.set(slotW, ft(2.2), (s.depth ?? s.dep) + ft(0.5))
+      plinth.position.set(s.cx, ft(1.1), s.cy)
+      plinth.rotation.y = rot0
+      plinth.receiveShadow = true
+      B.group.add(plinth)
+    }
+
     const door = new THREE.Mesh(bayGeo, M.door)
     door.scale.set(dw, dh, ft(0.5))
     door.position.set(s.cx + fnx * (faceD + ft(0.04)), dh / 2, s.cy + fny * (faceD + ft(0.04)))
@@ -1905,7 +2174,7 @@ export function initCompound3D(mount, model, opts = {}) {
        photographer does between the two shots and what an eye does by itself. It only
        bites inside four world units, so every composed frame above that is untouched. */
     const close = Math.max(0, Math.min(1, (4.0 - dist) / 3.2))
-    renderer.toneMappingExposure = EXPOSURE - 0.48 * close
+    renderer.toneMappingExposure = EXPOSURE - 0.66 * close
 
     scene.fog.near = dist * 0.9
     scene.fog.far = dist * 3.0
@@ -2391,7 +2660,7 @@ export function initCompound3D(mount, model, opts = {}) {
      light on shows that through its WINDOW: the glazed head goes warm, the leaf stays
      the dark coated steel it is, and the two together say occupied far more plainly
      than a glowing rectangle did. */
-  const M_doorLit = variant(M.door, 'door', 0x3f4750)
+  const M_doorLit = variant(M.door, 'door', 0x333a42)
   M_doorLit.emissive = new THREE.Color(0xffc27a)
   M_doorLit.emissiveIntensity = 0.05
   M_doorLit.roughness = 0.56
@@ -2415,11 +2684,11 @@ export function initCompound3D(mount, model, opts = {}) {
      Applied to every bay of the subject building, and one step further on the single
      suite being considered — which is what ties a control in the dock to a door in the
      world without drawing a line between them. */
-  const M_doorHot = variant(M.door, 'door', 0x424b55, { metalness: 0.3 })
+  const M_doorHot = variant(M.door, 'door', 0x363d45, { metalness: 0.36 })
   /* THE ONE DOOR BEING CONSIDERED. A step above the rest of its own building, because
      "which real door is this control?" has to be answerable in the frame, not by
      elimination. Measured against M_doorHot it is a full value apart. */
-  const M_doorPick = variant(M.door, 'door', 0x616f7d, { metalness: 0.32 })
+  const M_doorPick = variant(M.door, 'door', 0x4b5561, { metalness: 0.38 })
   const M_doorSub = variant(M.door, 'door', 0x232a33)
   const M_glassHot = M.glass.clone(); M_glassHot.color.setHex(0x40596f); M_glassHot.envMapIntensity = 3.1
   const M_glassPick = M.glass.clone(); M_glassPick.color.setHex(0x6d8ba6); M_glassPick.envMapIntensity = 3.6
@@ -2583,7 +2852,18 @@ export function initCompound3D(mount, model, opts = {}) {
       /* A DOWNLIGHT LIGHTS ITS OWN BAY. At a 62-foot radius the pools reached over the
          next run and put a bright disc on ITS roof — a pool with no visible source, which
          is the exact failure the review names. Thirty-three feet is wall, door and apron. */
-      const strength = focusNum && focusNum === subject ? 0.98 : 0.66
+      /* INTENSITY HAS TO BE QUOTED AT THE DISTANCE THE LIGHT ACTUALLY STANDS OFF.
+
+         A downlight sits about two and a half feet from the wall it washes. In WORLD
+         units, which is what a PointLight's inverse-square falloff works in, that is
+         0.039 — so an intensity of 1 delivers roughly 650 at the wall. It looked
+         plausible from the compound because the hot core is only a few pixels across;
+         at the ENTER pose the camera is inside it, and the precast, the timber and the
+         door all came back cream. The number is now solved for the irradiance wanted at
+         ten feet rather than guessed at, which is why it looks small: T * d^2, with d
+         the ten feet expressed in world units. */
+      const REF = wft(10)
+      const strength = (focusNum && focusNum === subject ? 2.3 : 1.5) * REF * REF
       for (let i = 0; i < SCONCE_N; i++) {
         const sc = sconces[i]
         if (!pool.length) { sc.want = 0; sc.delay = 0; continue }
@@ -2624,7 +2904,8 @@ export function initCompound3D(mount, model, opts = {}) {
         /* A REQUEST, NOT AN ASSIGNMENT. Snapping a light on is the difference between
            light arriving on a door and a rectangle changing colour, and it is most of
            what made the suite hover read as mechanical. The frame loop rolls it. */
-        suiteWant = selectedSuite ? 0.80 : 0.58
+        /* the apron pool stands nineteen feet out — same arithmetic, same reason */
+        suiteWant = (selectedSuite ? 1.5 : 1.0) * wft(19) * wft(19)
       } else {
         suiteWant = 0
       }

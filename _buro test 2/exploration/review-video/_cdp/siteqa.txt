@@ -1,4 +1,4 @@
-PAGE: https://sigovs.github.io/_____GDBURO-SIGOFF-EXPERIMENTS/_buro%20test%202/index5.html
+PAGE: http://localhost:5199/_buro%20test%202/index5.html
   document height   14060
   acts in the DOM   00 01 02 03 04 05 06 07
   images            13 in markup, 2 loaded

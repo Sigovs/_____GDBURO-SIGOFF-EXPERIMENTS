@@ -1,7 +1,7 @@
 ADJACENT SWITCHING — no Overview between, ever
    01 -> 02   PASS   via model
    02 -> 03   PASS   via model
-   03 -> 04   PASS   via navigator
+   03 -> 04   PASS   via model
    04 -> 05   PASS   via model
    05 -> 06   PASS   via model
    06 -> 07   PASS   via navigator
@@ -19,7 +19,7 @@ ADJACENT SWITCHING — no Overview between, ever
    04 -> 03   PASS   via model
    03 -> 02   PASS   via model
    02 -> 01   PASS   via model
-   ---> 20/20   (17 by clicking the model, 3 by the navigator)
+   ---> 20/20   (18 by clicking the model, 2 by the navigator)
 
 RANDOM DIRECT SWITCHING — 30, never going home
    ---> 30/30

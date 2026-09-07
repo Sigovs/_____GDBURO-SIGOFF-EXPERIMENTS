@@ -1,0 +1,194 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+/* ======================================================================================
+   V6 — THE MODEL IS THE INTERFACE.
+
+   The whole stylesheet is smaller than V5.3's because most of what V5.3 styled no longer
+   exists: no dock, no navigator, no legend, no cells, no counts. What is left is type on
+   the ground, two tags that sit on the objects they name, and one panel that arrives only
+   when there is a product to put in it.
+
+   NOTHING HERE DRAWS A BOX AROUND THE SUBJECT. State is carried by the model — light,
+   material, the camera — and the interface only says the things a building cannot say
+   about itself: a number, a size, a price, and what happens next.
+   ====================================================================================== */
+.v6{
+  --void:#060708; --ground:#0A0B0D; --panel:#0C0F13;
+  --ink:#F2F4F6; --ink-85:rgb(242 244 246/.85); --ink-70:rgb(242 244 246/.70);
+  --ink-55:rgb(242 244 246/.55); --ink-40:rgb(242 244 246/.40);
+  --ink-24:rgb(242 244 246/.24); --ink-16:rgb(242 244 246/.16); --ink-10:rgb(242 244 246/.10);
+  --red:#CE3B32; --red-40:rgb(206 59 50/.40); --red-16:rgb(206 59 50/.16);
+  --sand:#C9BCA8; --sand-70:rgb(201 188 168/.70); --sand-24:rgb(201 188 168/.24);
+  --steel:#8FA4B4; --steel-55:rgb(143 164 180/.55); --steel-24:rgb(143 164 180/.24);
+  --grot:'Archivo',ui-sans-serif,system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  --s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--s7:48px;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+.v6 *,.v6 *::before,.v6 *::after{box-sizing:border-box}
+.v6{position:relative;height:100%;color:var(--ink);font-family:var(--grot);-webkit-font-smoothing:antialiased}
+.v6[hidden],.v6 [hidden]{display:none!important}
+
+/* The stage fills its host: a full-screen shell standalone, act 02's pinned stage inside
+   the site. One interface, one stylesheet. */
+.v6 .stage{position:absolute;inset:0;background:var(--ground);isolation:isolate;overflow:hidden}
+.v6 .mount{position:absolute;inset:0}
+.v6 .compound__svg{width:100%;height:100%;display:block;overflow:hidden}
+.v6 .compound__gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y;cursor:grab}
+/* THE MODEL IS THE BUTTON — buildings at rest, doors once you are in one. */
+.v6 .stage[data-hot='true'] .compound__gl{cursor:pointer}
+.v6 .stage[data-gl='on'] .compound__svg{visibility:hidden}
+.v6 .cal{display:none}
+/* A light top and bottom hold, so type has a ground without a panel under it. */
+.v6 .stage::after{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(to bottom,rgb(6 7 8/.44) 0%,rgb(6 7 8/0) 14%),
+             linear-gradient(to top,rgb(6 7 8/.62) 0%,rgb(6 7 8/.18) 14%,rgb(6 7 8/0) 32%)}
+
+/* ---- the mark, and the one instruction ------------------------------------------- */
+.v6 .mark{position:absolute;z-index:6;top:var(--s6);left:var(--s7);display:grid;gap:var(--s1);pointer-events:none}
+.v6 .mark b{font-size:15px;font-weight:600;letter-spacing:.10em;text-transform:uppercase}
+.v6 .mark span{font-family:var(--mono);font-size:14px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-55)}
+
+/* TYPE ON THE GROUND, NOT A CONSOLE. V5.3 put this in a bordered plate with a red rule
+   down its edge, which is a panel and reads as one. It is four lines of type now. */
+.v6 .say{position:absolute;z-index:6;left:var(--s7);bottom:var(--s6);display:grid;gap:2px;pointer-events:none;max-width:34ch}
+.v6 .say__n{margin:0;font-size:44px;font-weight:600;line-height:1;letter-spacing:-.035em;font-variant-numeric:tabular-nums}
+.v6 .say__s{margin:0;font-size:15px;color:var(--ink-70)}
+.v6 .say__t{margin:var(--s3) 0 0;font-size:19px;font-weight:600;letter-spacing:-.01em;color:var(--sand)}
+
+/* ---- the two quiet actions -------------------------------------------------------- */
+.v6 .topright{position:absolute;z-index:8;top:var(--s6);right:var(--s7);display:flex;gap:var(--s5);align-items:center}
+.v6 .quiet{appearance:none;background:none;border:0;padding:4px 0;cursor:pointer;
+  font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-70);border-bottom:1px solid var(--ink-24);transition:color .16s var(--ease),border-color .16s var(--ease)}
+.v6 .quiet:hover{color:var(--ink);border-color:var(--ink)}
+.v6 .quiet:focus-visible{outline:2px solid var(--sand);outline-offset:3px}
+
+/* ---- the fallback, at the edges of the frame -------------------------------------- */
+/* Two chevrons, unlabelled at rest. V5.3's switching matrix moved 19 of 20 buildings by
+   clicking the model; this carries the twentieth and asks for nothing until it is used. */
+/* A SCRIM, NOT A PLATE. The first cut gave each chevron a 38x64 box of rgb(8 9 11/.5).
+   Over the blue-hour rest pose that box is invisible; over the warm ground at building
+   level it is a grey slab clipped by the edge of the window, and it reads as something
+   broken rather than as something to press. A soft column that fades out of the frame
+   carries the glyph's contrast without ever drawing an edge. */
+.v6 .step{position:absolute;z-index:7;top:50%;transform:translateY(-50%);appearance:none;border:0;cursor:pointer;
+  color:var(--ink-85);font-size:26px;line-height:1;
+  width:76px;height:132px;display:grid;align-items:center;padding:0 16px;
+  transition:color .16s var(--ease),opacity .16s var(--ease)}
+.v6 .step:hover{color:var(--ink)}
+.v6 .step:focus-visible{outline:2px solid var(--sand);outline-offset:-4px}
+/* MEASURED, NOT ASSUMED. The first scrim was rgb(8 9 11/.5) fading to nothing and the
+   glyph was ink-55; on the composited render that came out at 2.15:1 and 2.65:1 against
+   the 3.0 a 26px mark needs, because what is behind a chevron is a live scene and
+   changes with every camera move. The scrim is deepest exactly where the glyph sits and
+   still fades to nothing before it can draw an edge. Re-measured: both ends clear 3.0. */
+.v6 .step--prev{left:0;justify-items:start;background:linear-gradient(90deg,rgb(8 9 11/.86) 0 42px,rgb(8 9 11/0))}
+.v6 .step--next{right:0;justify-items:end;background:linear-gradient(270deg,rgb(8 9 11/.86) 0 42px,rgb(8 9 11/0))}
+
+/* ---- the tags: on the object, never over empty space ------------------------------ */
+.v6 .tag{position:absolute;z-index:5;transform:translate(-50%,0);pointer-events:none;
+  display:grid;gap:1px;padding:7px 11px 8px;background:var(--sand);color:var(--void);
+  box-shadow:0 0 0 1px rgb(0 0 0/.42),0 12px 30px rgb(0 0 0/.42)}
+.v6 .tag::after{content:'';position:absolute;left:50%;bottom:-11px;width:1px;height:11px;background:var(--sand)}
+.v6 .tag__n{font-size:17px;font-weight:600;line-height:1.05;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.v6 .tag__m{font-family:var(--mono);font-size:14px;letter-spacing:.04em;opacity:.78}
+.v6 .tag__p{font-size:16px;font-weight:600;letter-spacing:-.01em;margin-top:2px}
+.v6 .tag__go{font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;
+  margin-top:4px;padding-top:5px;border-top:1px solid rgb(0 0 0/.26)}
+.v6 .tag[data-s='on']{background:var(--red);color:#fff}
+.v6 .tag[data-s='on']::after{background:var(--red)}
+.v6 .tag[data-s='sold']{background:rgb(16 19 23/.95);color:var(--ink-70);box-shadow:0 0 0 1px var(--ink-24)}
+.v6 .tag[data-s='sold']::after{background:var(--ink-24)}
+
+/* ---- the rail: secondary, and it looks it ----------------------------------------- */
+/* V5.3 gave the miniature bays a cell of their own in a full-width dock, which made them
+   the way a suite was chosen. They are a shortcut to a door that is off screen now. */
+.v6 .v6-rail{position:absolute;z-index:6;left:var(--s7);bottom:var(--s6);display:grid;gap:var(--s2)}
+.v6 .v6-rail__bays{display:flex;align-items:flex-end;gap:2px;padding-top:22px}
+.v6 .v6-bay{appearance:none;flex:0 0 auto;padding:0;position:relative;cursor:pointer;height:30px;border:0;
+  background:var(--steel-24);border-top:2px solid var(--steel-55);
+  transition:background-color .14s var(--ease),border-color .14s var(--ease)}
+.v6 .v6-bay[data-type='A']{border-top-color:var(--sand-70)}
+.v6 .v6-bay:hover,.v6 .v6-bay[data-hot='true']{background:var(--sand-24);border-top-color:var(--sand)}
+.v6 .v6-bay[data-sold='true']{cursor:not-allowed;background:none;border-top-color:var(--ink-16)}
+.v6 .v6-bay[data-sold='true']::after{content:'';position:absolute;inset:2px 1px 1px;
+  background:repeating-linear-gradient(135deg,var(--ink-10) 0 2px,transparent 2px 5px)}
+.v6 .v6-bay[aria-pressed='true']{background:var(--red-16);border-top-color:var(--red)}
+
+/* ---- the product, and only when there is one -------------------------------------- */
+/* NOT A FOOTER. A bar the width of the screen is a website chrome; this is a small plate
+   in the corner the product is in, with one committed action on it. */
+.v6 .prod{position:absolute;z-index:7;right:var(--s7);bottom:var(--s6);width:298px;
+  background:linear-gradient(to bottom,rgb(13 16 20/.97),rgb(9 11 14/.97));
+  border:1px solid var(--ink-24);backdrop-filter:blur(8px);
+  padding:var(--s5) var(--s5) var(--s4);display:grid;gap:2px;
+  animation:prodIn .26s var(--ease) both}
+@keyframes prodIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.v6 .prod{animation:none}}
+.v6 .prod__k{margin:0;font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.20em;text-transform:uppercase;color:var(--ink-55)}
+.v6 .prod__n{margin:5px 0 0;font-size:33px;font-weight:600;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.v6 .prod__t{margin:7px 0 0;font-size:15px;color:var(--ink-70)}
+.v6 .prod__t em{font-style:normal;font-weight:500;color:var(--steel)}
+.v6 .prod__t em[data-type='A']{color:var(--sand)}
+.v6 .prod__p{margin:2px 0 var(--s4);font-size:25px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.v6 .go{appearance:none;width:100%;cursor:pointer;display:grid;grid-template-columns:1fr 46px;align-items:stretch;
+  border:0;padding:0;font:inherit;background:var(--red);color:#fff;
+  box-shadow:0 0 0 1px var(--red-40),0 12px 30px rgb(206 59 50/.22);
+  transition:filter .18s var(--ease)}
+.v6 .go:hover{filter:brightness(1.1)}
+.v6 .go span{padding:15px var(--s4) 14px;text-align:left;font-size:18px;font-weight:600;letter-spacing:-.005em}
+.v6 .go i{display:flex;align-items:center;justify-content:center;font-style:normal;font-size:20px;border-left:1px solid rgb(255 255 255/.28)}
+.v6 .specs{appearance:none;background:none;border:0;cursor:pointer;margin-top:var(--s3);padding:0;text-align:left;
+  font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-55)}
+.v6 .specs:hover{color:var(--ink)}
+
+/* ---- the site plan: a sheet lying on the model ------------------------------------ */
+.v6.plan{position:fixed;inset:26px;z-index:30;display:grid;grid-template-rows:auto 1fr;
+  background:rgb(9 11 14/.965);backdrop-filter:blur(16px) saturate(.75);
+  border:1px solid var(--ink-24);box-shadow:0 26px 90px rgb(0 0 0/.62)}
+.v6.plan::before{content:'';position:fixed;inset:-26px;z-index:-1;background:rgb(6 7 8/.55);backdrop-filter:blur(3px)}
+.v6 .plan__bar{display:flex;align-items:center;justify-content:space-between;gap:var(--s6);padding:var(--s4) var(--s6);border-bottom:1px solid var(--ink-24)}
+.v6 .plan__exit{appearance:none;cursor:pointer;background:var(--ink);border:0;color:var(--void);
+  font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;padding:11px 18px 10px}
+.v6 .plan__exit:hover{background:#fff}
+.v6 .plan__exit kbd{font:inherit;font-size:13px;opacity:.55;border:1px solid currentColor;border-radius:2px;padding:0 4px;margin-left:8px;vertical-align:1px}
+.v6 .plan__t{display:flex;align-items:baseline;gap:var(--s4)}
+.v6 .plan__t b{font-size:19px;font-weight:600}
+.v6 .plan__t span{font-family:var(--mono);font-size:14px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-55)}
+.v6 .plan__key{display:flex;gap:var(--s5);font-family:var(--mono);font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-55)}
+.v6 .plan__key i{display:inline-block;width:20px;height:9px;margin-right:7px;font-style:normal}
+.v6 .plan__grid{position:relative;overflow:hidden}
+.v6 .plan__map{position:relative;overflow:hidden;height:100%}
+.v6 .plan__map svg{width:100%;height:100%;display:block;visibility:visible}
+.v6 .plan__map .perimeter{fill:none;stroke:var(--ink-40);stroke-width:1.4;vector-effect:non-scaling-stroke}
+.v6 .plan__map .mass-road-trace,.v6 .plan__map .compound__road{fill:#171d24;stroke:none}
+.v6 .plan__map .mass-road-line{fill:none;stroke:var(--ink-16);stroke-width:1;vector-effect:non-scaling-stroke}
+.v6 .plan__map .mass-run,.v6 .plan__map .mass-side{fill:#232b34;stroke:var(--ink-24);stroke-width:.8;vector-effect:non-scaling-stroke}
+.v6 .plan__map .mass-civic{fill:#3a434e;stroke:var(--ink-40);stroke-width:.8;vector-effect:non-scaling-stroke}
+.v6 .plan__map .bay{stroke:rgb(10 12 15/.9);stroke-width:.6;vector-effect:non-scaling-stroke}
+.v6 .plan__map .bay[data-type='A']{fill:var(--sand)}
+.v6 .plan__map .bay[data-type='B']{fill:#7f93a4}
+.v6 .plan__map .bay[data-sold='true']{fill:none;stroke:var(--ink-24)}
+.v6 .plan__map .bay[data-here]{fill:var(--red);stroke:var(--red)}
+.v6 .plan__map .door{fill:none;stroke:var(--ink-40);stroke-width:.8;vector-effect:non-scaling-stroke}
+.v6 .plan__map .leader,.v6 .plan__map .route{display:none}
+/* a label is not a target */
+.v6 .plan__map .pnum{pointer-events:none;fill:var(--ink);font-family:var(--mono);font-size:15px;font-weight:500;
+  paint-order:stroke;stroke:rgb(6 7 8/.85);stroke-width:4px}
+.v6 .plan__map .phit{cursor:pointer;pointer-events:all}
+.v6 .plan__map .phit:focus-visible{outline:2px solid var(--sand);outline-offset:2px}
+.v6 .plan__map g[data-building][data-hot] .bay[data-type]{fill:var(--sand)}
+.v6 .plan__map g[data-building][data-hot] .mass-run,
+.v6 .plan__map g[data-building][data-hot] .mass-side{fill:#3b4149;stroke:var(--sand-70)}
+.v6 .plan__map g[data-building][data-current] .mass-run,
+.v6 .plan__map g[data-building][data-current] .mass-side{stroke:var(--red);stroke-width:1.4}
+
+@media (max-height:880px){
+  .v6 .mark{top:var(--s5);left:var(--s6)}
+  .v6 .topright{top:var(--s5);right:var(--s6)}
+  .v6 .say{left:var(--s6);bottom:var(--s5)}
+  .v6 .say__n{font-size:38px}
+  .v6 .v6-rail{left:var(--s6);bottom:var(--s5)}
+  .v6 .prod{right:var(--s6);bottom:var(--s5);width:282px;padding:var(--s4) var(--s4) var(--s3)}
+  .v6 .prod__n{font-size:29px}
+}

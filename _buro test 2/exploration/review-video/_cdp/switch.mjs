@@ -67,13 +67,30 @@ const pointOn = async (num) => {
   }
   return null
 }
-/* the navigator is the declared fallback when the camera hides a building */
+/* THE DECLARED FALLBACK, whichever one this build has. V5.3 offers a numbered strip;
+   V6 removed it and offers two chevrons that step to the neighbour along the drive.
+   Both are real controls and both are driven here by a real pointer — the point of
+   the test is that a building can always be reached without going home. */
 const navClick = async (num) => {
   const p = await ev(`(() => { const b=document.querySelector('[data-nav-b="${num}"]'); if(!b) return null
     const r=b.getBoundingClientRect(); return [Math.round(r.left+r.width/2), Math.round(r.top+r.height/2)] })()`)
-  if (!p) return false
-  await move(p[0], p[1]); await sleep(160); await click(p[0], p[1]); await sleep(1100)
-  return true
+  if (p) { await move(p[0], p[1]); await sleep(160); await click(p[0], p[1]); await sleep(1100); return true }
+  /* no strip: walk with the chevrons, the short way round */
+  const list = nums
+  for (let guard = 0; guard < list.length; guard++) {
+    const cur = (await state()).b
+    if (cur === num) return true
+    const i = list.indexOf(cur), j = list.indexOf(num)
+    if (i < 0 || j < 0) return false
+    const fwd = (j - i + list.length) % list.length
+    const dir = fwd <= list.length - fwd ? 1 : -1
+    const sel = dir === 1 ? '[data-step="1"]' : '[data-step="-1"]'
+    const q = await ev(`(() => { const b=document.querySelector(${JSON.stringify(sel)}); if(!b||b.hidden) return null
+      const r=b.getBoundingClientRect(); return [Math.round(r.left+r.width/2), Math.round(r.top+r.height/2)] })()`)
+    if (!q) return false
+    await move(q[0], q[1]); await sleep(120); await click(q[0], q[1]); await sleep(1000)
+  }
+  return (await state()).b === num
 }
 
 await ev('window.__v5.overview()'); await sleep(1700)

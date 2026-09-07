@@ -18,7 +18,7 @@
 
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230E1013'/%3E%3Crect x='6' y='9' width='20' height='14' fill='none' stroke='%23ECEEF1' stroke-width='1.5'/%3E%3Crect x='13' y='9' width='6' height='14' fill='%236E7C88'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="/src/site/index.css">
-<link rel="stylesheet" href="/exploration/study/v5/v5.css">
+<link rel="stylesheet" href="/exploration/study/v6/v6.css">
 <style>
   /* Act 02 becomes a full-height stage inside the real page. It is the only act that
      owns the whole viewport, which is what a pinned interactive act needs and what the
@@ -31,12 +31,12 @@
      of an auto-height section resolves to zero, and act 02 collapses to a 1425x0 strip
      with nothing selectable in it. Measured on the built page: 0 of 11 buildings.
      A min-height cannot be undone by a height, whatever the order turns out to be. */
-  .v5-host{position:relative;height:100vh;min-height:100vh;width:100%;background:#060708}
+  .v6-host{position:relative;height:100vh;min-height:100vh;width:100%;background:#060708}
   /* The page already has a persistent header carrying the mark and the location, so the
      interface's own standalone mark would be the same words twice on the same screen. */
-  .v5-host .mark{display:none}
+  .v6-host .mark{display:none}
   /* The site header sits above act 02's own controls. */
-  .v5 .topright,.v5 .nav{top:70px}
+  .v6 .topright,.v6 .nav{top:70px}
 </style>
 </head>
 <body>
@@ -165,7 +165,7 @@
 
      The section, its id, its data-act, its data-pin and its heading are the live site's.
      What is replaced is the STAGE: instead of production's SVG drawing with a record
-     column beside it, this mounts the V5 interface, which is the same module the
+     column beside it, this mounts the V6 interface, which is the same module the
      standalone exploration mounts. data-compound is deliberately absent so main.js
      stands its own act 02 down.
 
@@ -181,7 +181,7 @@
 <section class="act" id="act-02" data-act="02" data-register="surveyed"
          data-pin="compound" aria-labelledby="h-02" style="padding:0">
   <h2 class="u-visually-hidden" id="h-02">121 private suites, 11 buildings</h2>
-  <div class="v5-host" data-pin-stage data-v5-host></div>
+  <div class="v6-host" data-pin-stage data-v6-host></div>
 </section>
 
 <!-- ================================================================================
@@ -644,6 +644,6 @@
 </footer>
 
 <script type="module" src="/src/site/main.js"></script>
-<script type="module" src="/exploration/integrated/v5-boot.js"></script>
+<script type="module" src="/exploration/integrated/v6-boot.js"></script>
 </body>
 </html>

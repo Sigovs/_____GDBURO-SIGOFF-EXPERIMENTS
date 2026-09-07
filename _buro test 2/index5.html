@@ -16,10 +16,33 @@
       imagesrcset="./assets2/perimeter-1100-DksFj9pN.jpg 1100w, ./assets2/perimeter-1600-C7J2cH9I.jpg 1600w, ./assets2/perimeter-2200-BmcXoEQ0.jpg 2200w"
       imagesizes="100vw" fetchpriority="high">
 
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230E1013'/%3E%3Crect x='6' y='9' width='20' height='14' fill='none' stroke='%23ECEEF1' stroke-width='1.5'/%3E%3Crect x='13' y='9' width='6' height='14' fill='%236E7C88'/%3E%3C/svg%3E">
-  <script type="module" crossorigin src="./assets2/preload-helper-DtWiEIvH.js"></script>
-  <script type="module" crossorigin src="./assets2/main-8aeX4WXh.js"></script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230E1013'/%3E%3Crect x='6' y='9' width='20' height='14' fill='none' stroke='%23ECEEF1' stroke-width='1.5'/%3E%3Crect x='13' y='9' width='6' height='14' fill='%236E7C88'/%3E%3C/svg%3E">
+<style>
+  /* Act 02 becomes a full-height stage inside the real page. It is the only act that
+     owns the whole viewport, which is what a pinned interactive act needs and what the
+     production act 02 already asks for with data-pin.
+
+     MIN-HEIGHT, NOT ONLY HEIGHT, AND THAT IS NOT BELT AND BRACES. mountV5 puts the
+     class v5 on this element, and v5.css carries .v5{height:100%} at the same
+     specificity as this rule. In dev the inline block below wins on order; in a BUILD
+     Vite emits the bundled stylesheet as a <link> that lands after it, height:100%
+     of an auto-height section resolves to zero, and act 02 collapses to a 1425x0 strip
+     with nothing selectable in it. Measured on the built page: 0 of 11 buildings.
+     A min-height cannot be undone by a height, whatever the order turns out to be. */
+  .v6-host{position:relative;height:100vh;min-height:100vh;width:100%;background:#060708}
+  /* The page already has a persistent header carrying the mark and the location, so the
+     interface's own standalone mark would be the same words twice on the same screen. */
+  .v6-host .mark{display:none}
+  /* The site header sits above act 02's own controls. */
+  .v6 .topright,.v6 .nav{top:70px}
+</style>
+  <script type="module" crossorigin src="./assets2/v6site-CzylIWDV.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets2/preload-helper-DtWiEIvH.js">
+  <link rel="modulepreload" crossorigin href="./assets2/main-8aeX4WXh.js">
+  <link rel="modulepreload" crossorigin href="./assets2/ScrollTrigger-BJZ90ViQ.js">
+  <link rel="modulepreload" crossorigin href="./assets2/v6-DWUdsBVs.js">
   <link rel="stylesheet" crossorigin href="./assets2/main-Wf1M1BYj.css">
+  <link rel="stylesheet" crossorigin href="./assets2/v6-G7eFtdTh.css">
 </head>
 <body>
 
@@ -142,143 +165,28 @@
      marginal hairline for two acts is now the subject at full scale, and nothing
      announces it. A reveal that explains itself is not a reveal.
      ================================================================================ -->
+<!-- ================================================================================
+     02 · COMPOUND / BUILDING / SUITE — the guided sales interface, V5.3 or V6.
+
+     The section, its id, its data-act, its data-pin and its heading are the live site's.
+     What is replaced is the STAGE: instead of production's SVG drawing with a record
+     column beside it, this mounts the V6 interface, which is the same module the
+     standalone exploration mounts. data-compound is deliberately absent so main.js
+     stands its own act 02 down.
+
+     THE 02 -> 03 APERTURE IS STILL DESIGNED AND PARKED — BRIEF-seam-02-03.md carries
+     that concept and nothing here depends on it. What IS wired, in V6 only, is the far
+     smaller thing underneath it: exploration/study/v6/act03-link.js writes the suite the
+     visitor actually chose into act 03's existing plate. main.js does that in syncPeak()
+     behind an `if (compoundEl)` guard, and removing data-compound above takes the guard's
+     subject away with it — which is why act 03 went on describing a Type B at $549,000
+     after a visitor had chosen a Premium at $699,000. No layout is redesigned; the
+     numbers are simply the ones that were picked.
+     ================================================================================ -->
 <section class="act" id="act-02" data-act="02" data-register="surveyed"
-         data-pin="compound" aria-labelledby="h-02">
-  <div class="act__grid" data-pin-stage>
-
-    <div class="span-stage">
-      <p class="t-label" style="margin-bottom:var(--s-5)">02 — The compound</p>
-      <!-- The plan is the dominant mass in this act, so the heading is a heading and
-           not a display moment: `T4` gives display scale to acts 00 and 07 only, and a
-           second full-width headline here would make the drawing the illustration of a
-           sentence rather than the subject. 121 carries its authority from the drawing
-           and from the record beside it. -->
-      <h2 class="t-h3" id="h-02">121 private suites, 11 buildings</h2>
-
-      <!-- The level instrument, second copy, and it exists ONLY for one column.
-           In the record column it sits below the drawing, which on a phone means the
-           way back out is off-screen the moment you tap into a building — the one
-           control a visitor needs most, placed where they cannot see it. Here it is
-           directly above the plan it steers, and it runs horizontally because vertical
-           space above a drawing on a 844px screen is the scarcest thing on the page.
-
-           Exactly one of the two is ever rendered (`display:none` removes the other
-           from the accessibility tree as well as the picture), and both are wired by
-           the same `data-level-btn` selector, so there is one control with two
-           authored placements rather than two controls. -->
-      <nav class="levels levels--inline" data-levels aria-label="Where you are in the compound">
-        <button class="level-btn" type="button" data-level-btn="compound" aria-current="true">Compound</button>
-        <button class="level-btn" type="button" data-level-btn="building" hidden>
-          Bldg <span class="level-btn__val" data-level-building></span>
-        </button>
-        <button class="level-btn" type="button" data-level-btn="suite" hidden>
-          Suite <span class="level-btn__val" data-level-suite></span>
-        </button>
-        <!-- Reset belongs beside the levels on one column, because that strip is the
-             only navigation a phone can see without scrolling past the model. On two
-             columns it lives in the record with the other controls and this copy is
-             removed from the document entirely. -->
-        <button class="level-btn level-btn--reset" type="button" data-nav-reset-inline>Reset view</button>
-      </nav>
-
-      <div class="compound" data-compound data-level="compound" style="margin-top:var(--s-5)">
-        <div class="compound__stage" data-compound-mount></div>
-
-        <!-- THE DISCOVERY LINE. One sentence, at the model's own edge, and it retires
-             permanently the moment anything is selected. It is not onboarding: it names
-             the one action available and then gets out of the way, which is what a
-             visitor needs in the first five seconds and never again. -->
-        <p class="hint" data-hint>
-          <span class="hint__k">Explore the compound</span>
-          <span class="hint__v">Point at a building to see it · click to enter it</span>
-        </p>
-      </div>
-
-    </div>
-
-    <!-- The record column, established here and held for the rest of the page. -->
-    <div class="span-record record" data-record>
-      <div class="record__head">
-        <p class="t-label">Index</p>
-        <p class="t-mono t-fig" style="color:var(--ink-70)">
-          121 suites <span aria-hidden="true">·</span> 11 buildings <span aria-hidden="true">·</span> 1 clubhouse
-        </p>
-      </div>
-
-      <!-- The level instrument. Three stops on one spine, and a stop appears only once
-           the visitor has reached it, so the stack is the path in and clicking up it is
-           the way out. This is the rail's drawing brought into the record, where a
-           14px label fits; the rail itself reports the same state as pure line. -->
-      <nav class="levels" data-levels aria-label="Where you are in the compound">
-        <button class="level-btn" type="button" data-level-btn="compound" aria-current="true">Compound</button>
-        <button class="level-btn" type="button" data-level-btn="building" hidden>
-          Building <span class="level-btn__val" data-level-building></span>
-        </button>
-        <button class="level-btn" type="button" data-level-btn="suite" hidden>
-          Suite <span class="level-btn__val" data-level-suite></span>
-        </button>
-      </nav>
-
-      <!-- THE ACT'S CONTROLS. Three, and each one is a state rather than a permanent
-           button: BACK exists only when there is somewhere to go back to, RESET only
-           matters once the visitor has turned the model, and ENTER is explicitly not
-           available until a suite is chosen — which is how it teaches that choosing a
-           suite is the thing that unlocks it. No toolbar, no icons, no map chrome:
-           three lines of the record's own mono, rules and all. -->
-      <div class="acts" role="group" aria-label="Compound controls">
-        <button class="act-btn" type="button" data-nav-back hidden>Back to compound</button>
-        <button class="act-btn" type="button" data-nav-reset>Reset view</button>
-        <button class="act-btn act-btn--enter" type="button" data-nav-enter data-ready="false" aria-disabled="true">
-          Select a suite to enter
-        </button>
-      </div>
-
-      <!-- A typographic key. The drawing carries no swatch, chip or coloured marker;
-           the key names what the light is doing instead of sampling it. -->
-      <div class="legend">
-        <span class="legend__item"><span class="t-label legend__term">Lit</span><span class="t-label legend__gloss">selected</span></span>
-        <span class="legend__item"><span class="t-label legend__term">Raised</span><span class="t-label legend__gloss">building in focus</span></span>
-        <span class="legend__item"><span class="t-label legend__term">Unlit</span><span class="t-label legend__gloss">sold — listed below</span></span>
-      </div>
-
-      <!-- The selected suite's record. Live, and it is the accessibility floor for the
-           whole rail: a visitor who cannot see the drawing loses none of what it
-           reports. -->
-      <div data-selection-record aria-live="polite">
-        <dl class="plate" data-plate>
-          <div class="plate__row"><dt class="plate__k">Selection</dt><dd class="plate__v">None — choose a suite</dd></div>
-        </dl>
-      </div>
-
-      <!-- The same control the drawing is, reachable without seeing it. Not a
-           substitute: a suite is a focusable node in the drawing AND a button here, and
-           both write the same state. Bounded on desktop so it cannot inflate a pinned
-           act's height; on mobile, where tapping a 121-bay drawing is not realistic,
-           this is where selection actually happens and it runs full length. -->
-      <!-- The index, at the level the drawing is at. At COMPOUND it lists the measured
-           buildings; once one is chosen it lists that building's suites. Both are real
-           controls writing the same state the drawing writes, so a visitor who cannot
-           see the plan loses none of what it reports — that is this act's
-           accessibility floor and it has not moved, only stopped being a 121-row
-           spreadsheet. -->
-      <div>
-        <h3 class="t-label" data-index-head style="margin-bottom:var(--s-3)">Buildings</h3>
-        <div class="bldg-index" data-bldg-index role="group" aria-label="Select a building"></div>
-        <p class="dated" data-index-gap hidden></p>
-        <div class="bay-list" data-bay-list role="group" aria-label="Select a suite" hidden></div>
-        <p class="dated" data-index-note hidden>
-          Bay numbers reference this drawing only — the published material numbers
-          buildings, not suites.
-        </p>
-      </div>
-
-      <!-- Dated figures carry their date in the render. The ledger is not the reader's. -->
-      <div>
-        <p class="t-mono t-fig" style="color:var(--ink-70)">98 available <span aria-hidden="true">·</span> <span class="t-scarce">23 sold</span></p>
-        <p class="dated">As of 4 Sep 2026 <span aria-hidden="true">·</span> Type A 21 of 26 <span aria-hidden="true">·</span> Type B 77 of 95</p>
-      </div>
-    </div>
-  </div>
+         data-pin="compound" aria-labelledby="h-02" style="padding:0">
+  <h2 class="u-visually-hidden" id="h-02">121 private suites, 11 buildings</h2>
+  <div class="v6-host" data-pin-stage data-v6-host></div>
 </section>
 
 <!-- ================================================================================

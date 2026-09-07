@@ -895,7 +895,20 @@ export function initCompound3D(mount, model, opts = {}) {
         plate.position.set(gx - px * ft(1.9), ft(15.2), gy - py * ft(1.9))
         plate.rotation.y = beam.rotation.y
         site.add(plate)
-        const wash = new THREE.PointLight(0xffd0a4, 5, ft(52), 2)
+        /* RANGE IS A WORLD LENGTH, NOT A SITE ONE — the same defect that was found and
+           fixed on the focus and apron lights, still sitting on the three warm lamps at
+           the gate. THREE.PointLight.distance is used raw by the shader; it is NOT
+           scaled by the light's parent, and this light's parent is scaled by 0.02. So
+           ft(52) asked for a 52-foot pool and produced a 39-WORLD-UNIT one — a radius
+           more than twice the width of the whole compound. At the rest pose the camera
+           is far enough out and the terrain dark enough that it passes for haze; the
+           moment a building is selected the camera drops into the middle of it and the
+           entire frame turns warm. MEASURED, at building level, before the fix: red ran
+           ahead of blue by +7 to +21 across the top half of the frame, against −4 to −14
+           at the compound rest pose — the same site changing colour temperature when a
+           visitor selects a building. wft() is the conversion, and it is the one the
+           rest of this file already uses. */
+        const wash = new THREE.PointLight(0xffd0a4, 5, wft(52), 2)
         wash.position.set(gx, ft(12), gy)
         site.add(wash)
       }
@@ -906,7 +919,10 @@ export function initCompound3D(mount, model, opts = {}) {
       lamp.position.set(pier.position.x, ft(15.4), pier.position.z)
       lamp.rotation.y = pier.rotation.y
       site.add(lamp)
-      const glow = new THREE.PointLight(0xffc98a, 9, ft(70), 2)
+      /* Same conversion, same reason. Decay is 2, so the falloff CLOSE to the lamp is
+         unchanged by this: `distance` only adds the window that takes the light to zero
+         at its edge. The lamp keeps its pool and stops lighting the far side of the site. */
+      const glow = new THREE.PointLight(0xffc98a, 9, wft(70), 2)
       glow.position.set(pier.position.x, ft(14), pier.position.z)
       site.add(glow)
     }
@@ -1192,6 +1208,15 @@ export function initCompound3D(mount, model, opts = {}) {
     lamp.rotation.y = rot
     B.group.add(lamp)
 
+    /* THE DOOR IS A CONTROL, so it has to answer a ray as one. The bay mass already
+       carried the suite's identity and was generous to hit; the leaf and its glazed head
+       carry it too now, so a visitor pointing AT THE DOOR is pointing at the suite rather
+       than at the box the door happens to be on. Same index, same building — three
+       surfaces, one answer. */
+    const tag = { kind: 'suite', index: s.index, building: s.building }
+    door.userData = tag
+    glaze.userData = tag
+
     const obj = { suite: s, mesh: m, door, glaze, transom, lamp, baseY: H_SUITE / 2 }
     B.bays.push(obj)
     suiteObjs[s.index] = obj
@@ -1359,6 +1384,37 @@ export function initCompound3D(mount, model, opts = {}) {
     pickProxies.push(p)
   }
 
+  /* WHICH WAY EACH BUILDING'S DOORS FACE, resolved once for all of them.
+
+     Two things need it and both were getting it wrong: the CAMERA, which arrived at a
+     blind rear wall on the double-row buildings, and the FACADE WASH, which lit the roof.
+     Computed per RUN and resolved to the run carrying the most AVAILABLE suites — the
+     mean of a whole double-row building is zero, because its two rows face opposite ways
+     and cancel exactly. For a single-run building it is simply that run.
+
+     Here rather than on first selection, so a building hovered from the compound is lit
+     on the same side it will be approached from. */
+  for (const B of buildingObjs.values()) {
+    const runs = new Map()
+    for (const o of B.bays) {
+      const k = o.suite.ang.toFixed(2)
+      if (!runs.has(k)) runs.set(k, { nx: 0, nz: 0, open: 0, n: 0 })
+      const r = runs.get(k)
+      r.nx += o.suite.faceNormal[0]
+      r.nz += o.suite.faceNormal[1]
+      r.n += 1
+      if (!o.suite.sold) r.open += 1
+    }
+    let best = null
+    for (const r of runs.values()) {
+      if (!best || r.open > best.open || (r.open === best.open && r.n > best.n)) best = r
+    }
+    if (best && (best.nx || best.nz)) {
+      const len = Math.hypot(best.nx, best.nz) || 1
+      B.faceDir = [best.nx / len, best.nz / len]
+    }
+  }
+
   /* --- CIVIC MASSES. The clubhouse and the dealership: taller, smoother, no bays.
      The material does the distinguishing — a civic building in this compound is the one
      that is not a row of doors. */
@@ -1478,6 +1534,13 @@ export function initCompound3D(mount, model, opts = {}) {
      the frame having been drawn too small. */
   const HERO = { az: -0.58, el: 0.42, dist: 20.4, ty: -2.1, tx: 0, tz: 0 }
   const ARRIVE = { az: -1.12, el: 0.055, dist: 12.4, ty: 0.6 }
+  /* THE POSE A SELECTED BUILDING IS SEEN FROM. Named, because it is a composition and
+     not an implementation detail: at el 0.40 / dist 12.4 the horizon sat a third of the
+     way down the frame and the top 45% of every building shot was empty ground running
+     to the fog, with the subject in a band along the bottom. Looking down more steeply
+     and standing off a little less puts the site — neighbours, drive, trees — where the
+     void was, without going close enough to lose the building's context. */
+  const FOCUS = { el: 0.36, dist: 9.6, swing: 0.44 }
   const SAFE = { left: 44, right: 56, top: 104, bottom: 132 }
 
   const cam = { az: HERO.az, el: HERO.el, dist: HERO.dist, target: new THREE.Vector3(0, HERO.ty, 0) }
@@ -1522,6 +1585,26 @@ export function initCompound3D(mount, model, opts = {}) {
       target.z + dist * Math.cos(el) * Math.cos(az),
     )
     camera.lookAt(target.x, ty, target.z)
+
+    /* THE AIR THICKENS AS THE VISITOR COMES DOWN INTO THE SITE.
+
+       The terrain is a 9000-unit plane and the fog was a pair of fixed numbers solved
+       against the rest pose. From the rest pose that is right; from a selected building
+       it is not, because the camera has come in to half the distance and the fog has
+       not, so the plane stays lit all the way to the top of the picture. MEASURED with
+       the terrain hidden: the top third of a building shot went from #34302d, warm, to
+       #0c1521 — the blue-hour sky it was covering. A third of every building frame was
+       a field of lit ground standing in for a sky.
+
+       Tying the fog to the camera's own distance fixes it once, for every level and for
+       every point in a fly BETWEEN levels, and it is what dusk actually does: the
+       further you are from a thing, the more air is in the way. The multipliers are
+       chosen so the rest pose keeps the frame it was composed with — at dist 20.4 this
+       gives 18.4 and 61.2 against the 19 and 62 that were hand-set — and everything
+       closer tightens from there. */
+    scene.fog.near = dist * 0.9
+    scene.fog.far = dist * 3.0
+
     key.target.position.copy(target)
     key.target.updateMatrixWorld()
 
@@ -1857,7 +1940,8 @@ export function initCompound3D(mount, model, opts = {}) {
        building the visitor is already standing in. */
     if (level === 'compound') return pickProxies
     const B = buildingObjs.get(focusNum)
-    const own = B ? B.bays.map((b) => b.mesh) : []
+    const own = []
+    if (B) for (const o of B.bays) { own.push(o.mesh, o.door); if (o.glaze) own.push(o.glaze) }
     return own.concat(pickProxies.filter((p) => p.userData.num !== focusNum))
   }
 
@@ -1947,7 +2031,13 @@ export function initCompound3D(mount, model, opts = {}) {
   M_lit.emissiveIntensity = 0.10
   M_lit.roughness = 0.5
 
-  const M_sub = M.wall.clone(); M_sub.color.setHex(0x272d35)
+  /* A SUBORDINATE BUILDING IS STILL PART OF THE PLACE. 0x272d35 is within a value of the
+     ground, which was survivable while the building camera looked down at one mass from
+     outside the cluster. V6 arrives low and on the door side, so the neighbours now fill
+     the foreground — and at that value they filled it with black. They step back, they do
+     not switch off; the subject is separated by its own facade wash, not by everything
+     else being extinguished. */
+  const M_sub = M.wall.clone(); M_sub.color.setHex(0x424b56)
   /* HOVER HAS TO BE VISIBLE IN THE MODEL, NOT ONLY IN A TAG.  Considering a building now
      steps every other building back to roughly two thirds of its emphasis — far enough
      that the subject separates instantly, not so far that the compound stops being a
@@ -1971,7 +2061,7 @@ export function initCompound3D(mount, model, opts = {}) {
   const M_roofFocus = M.roof.clone()
   M_roofFocus.color.setHex(0x424b57)
   M_roofFocus.emissive = lume.clone(); M_roofFocus.emissiveIntensity = 0.05
-  const M_roofSub = M.roof.clone(); M_roofSub.color.setHex(0x1d2228)
+  const M_roofSub = M.roof.clone(); M_roofSub.color.setHex(0x2a3038)
 
   /* THE DOOR, LIT FROM INSIDE. The one detail that says a suite is OCCUPIED rather than
      available: warm light behind the opening of the selected suite. It is the only warm
@@ -1984,7 +2074,14 @@ export function initCompound3D(mount, model, opts = {}) {
   const M_doorLit = M.door.clone()
   M_doorLit.color.setHex(0x5a4f41)
   M_doorLit.emissive = new THREE.Color(0xffc27a)
-  M_doorLit.emissiveIntensity = 0.62
+  /* 0.45, and the number is smaller than it was after a measurement that did NOT say
+     what I expected. Magnified three times on the composited render the chosen door was
+     very close to white, so the emissive was the obvious suspect; dropping it from 0.62
+     to 0.30 changed the crop almost not at all. The brightness is the apron pool, which
+     is why that light was moved back and turned down rather than this number being
+     chased. This sits between the two: still the brightest thing on the run, with a
+     little more room under the clip. */
+  M_doorLit.emissiveIntensity = 0.45
   M_doorLit.roughness = 0.62
   M_doorLit.metalness = 0.12
 
@@ -2011,17 +2108,25 @@ export function initCompound3D(mount, model, opts = {}) {
   const M_lampPick = new THREE.MeshBasicMaterial({ color: 0xfff3e2 })
 
   /* the one light that follows a decision */
-  const focusLight = new THREE.PointLight(0xcfe0ee, 0, ft(150), 2)
-  focusLight.position.set(0, ft(60), 0)
-  site.add(focusLight)
+  /* IN THE SCENE, NOT IN THE SITE — and this has been a real bug for as long as these
+     lights have existed. Both are POSITIONED from worldOf(), which returns world
+     coordinates, and both were parented to `site`, which sits inside a group scaled by
+     0.02. A world coordinate used as a local position inside a 1/50 scale lands at 1/50
+     of where it was meant to be: both were bunched near the site origin, which is the
+     stray bright patch that has been floating in the middle of the compound. Parented
+     to the scene, a world position means what it says — and the ranges become world
+     lengths, so the wash dies before it reaches the terrain behind the building. */
+  const focusLight = new THREE.PointLight(0xcfe0ee, 0, 4.2, 2)
+  focusLight.position.set(0, 1, 0)
+  scene.add(focusLight)
 
   /* THE APRON POOL. A second, much tighter light that sits low in front of ONE door:
      the suite being considered or the suite chosen. It is what makes the answer to
      "which real door is this?" instant — the ground in front of it lights up, the way
      it would if someone had switched that bay on. */
-  const suiteLight = new THREE.PointLight(0xffd9ab, 0, ft(46), 2)
-  suiteLight.position.set(0, ft(12), 0)
-  site.add(suiteLight)
+  const suiteLight = new THREE.PointLight(0xffd9ab, 0, 0.9, 2)
+  suiteLight.position.set(0, 0.2, 0)
+  scene.add(suiteLight)
 
   const paint3d = () => {
     for (const B of buildingObjs.values()) {
@@ -2101,12 +2206,25 @@ export function initCompound3D(mount, model, opts = {}) {
       const B = subject ? buildingObjs.get(subject) : null
       if (B && B.roofs[0]) {
         const p = worldOf(B.roofs[0])
-        focusLight.position.set(p.x, p.y + ft(46), p.z)
+        /* IT LIGHTS THE FACADE, NOT THE ROOF.
+
+           Forty-six feet directly above the ridge, this washed the one surface nobody is
+           looking at. That was survivable while the building camera kept whatever angle
+           it happened to have; once it started arriving AT THE DOORS — which face away
+           from the key on more than half the compound — it left the entire garage
+           elevation in shadow. Measured on building 03: a black slab with the glazing
+           barely readable, and the doors are the whole product.
+
+           The wash stands off the door side now, at the height a facade light would be,
+           so the elevation being looked at is the elevation that is lit. It still casts
+           nothing, and at compound distance the difference is a lifted face rather than
+           a spot. */
+        const fd = B.faceDir
+        if (fd) focusLight.position.set(p.x + fd[0] * wft(104), p.y - wft(9), p.z + fd[1] * wft(104))
+        else focusLight.position.set(p.x, p.y + wft(46), p.z)
         /* A hover is a question and used to get half the light a selection gets, which
-           made considering a building almost indistinguishable from not. It now gets
-           most of it — the difference between the two states is carried by the camera
-           and by the dock, which is where a difference of KIND belongs. */
-        focusLight.intensity = focusNum ? 30 : 24
+           made considering a building almost indistinguishable from not. */
+        focusLight.intensity = focusNum ? 8.5 : 4.5
       } else {
         focusLight.intensity = 0
       }
@@ -2119,8 +2237,14 @@ export function initCompound3D(mount, model, opts = {}) {
       if (o && o.door) {
         const p = worldOf(o.door)
         const n = o.suite.faceNormal || [0, 0]
-        suiteLight.position.set(p.x + n[0] * wft(9), p.y + wft(7), p.z + n[1] * wft(9))
-        suiteLight.intensity = selectedSuite ? 15 : 11
+        /* NINE FEET OUT AND SEVEN FEET UP IS A LAMP PRESSED AGAINST THE WALL. At the
+           suite pose the chosen door came back as a blown white rectangle — the one
+           door a visitor has actually picked, and the only one they could not see. It is
+           an APRON pool: it belongs on the ground in front of the door, standing off far
+           enough that the leaf is lit rather than erased, and low enough to rake across
+           the concrete the way a real bay light does. */
+        suiteLight.position.set(p.x + n[0] * wft(19), p.y + wft(2), p.z + n[1] * wft(19))
+        suiteLight.intensity = selectedSuite ? 1.15 : 0.82
       } else {
         suiteLight.intensity = 0
       }
@@ -2184,6 +2308,21 @@ export function initCompound3D(mount, model, opts = {}) {
     roofTopLocal: H_SUITE + H_PARAPET,
     /* one bay, by suite index — what a test needs to ask the model a direct question */
     bayOf: (i) => suiteObjs[i] || null,
+
+    /* WHERE A REAL DOOR IS ON SCREEN. V6 puts the suite's identity beside the door
+       itself rather than in a rail at the bottom, so the interface has to be able to
+       ask the model where that door currently is. Returns null when the door is
+       behind the camera, which is the only honest answer to draw nothing from. */
+    doorPoint(index, w, h) {
+      const o = suiteObjs[index]
+      if (!o || !o.door) return null
+      const v = new THREE.Vector3()
+      o.door.getWorldPosition(v)
+      v.y += wft(9)
+      v.project(camera)
+      if (v.z > 1) return null
+      return [(v.x * 0.5 + 0.5) * w, (-v.y * 0.5 + 0.5) * h]
+    },
     /* Author's handle on the rest pose: set the azimuth, refit, and land there. Used to
        compare candidate rest frames against each other in the browser rather than by
        arguing about numbers in a file. */
@@ -2346,6 +2485,28 @@ export function initCompound3D(mount, model, opts = {}) {
         const B = buildingObjs.get(num)
         if (B?.roofs[0]) {
           const p = worldOf(B.roofs[0])
+          /* ARRIVE AT THE DOORS, NOT AT THE BACK OF THE BUILDING.
+
+             The camera kept whatever azimuth it happened to have, which is fine for a
+             single run whose doors face the drive and wrong for the two double-row
+             buildings: 02 and 10 are two runs back to back facing OPPOSITE ways, so half
+             the time the visitor arrived looking at a blind rear wall with no doors on it
+             at all. Measured on 10: blank white slabs, nothing to click, nothing to read.
+
+             The mean normal of a whole double-row building is zero — the two rows cancel —
+             so the runs are taken separately and the one with the most AVAILABLE suites
+             wins. That is the side worth showing, and for a single-run building it is
+             simply that run. */
+          const fd = B.faceDir
+          /* THREE QUARTERS, NOT DEAD ON. Standing exactly on the door normal is the most
+             static view a building has, and on this site it is also the least legible
+             one: the runs are parallel, so a perpendicular camera stacks the neighbours
+             directly in front of the subject and the frame becomes bands. Swinging off
+             the normal turns the door row into a receding line, gives the building a
+             second visible face so it reads as a volume, and moves the neighbours to the
+             sides where they are context instead of obstruction. It is also the pose the
+             compound rest frame is already composed in, so arriving keeps the grammar. */
+          const az = fd ? Math.atan2(fd[0], fd[1]) + site.rotation.y + FOCUS.swing : cam.az
           /* MOVING BETWEEN TWO BUILDINGS IS NOT ARRIVING AT ONE. Coming down from
              the compound is a descent and takes the full move; going next door is a
              step sideways, and re-running the descent for it reads as the site
@@ -2353,13 +2514,26 @@ export function initCompound3D(mount, model, opts = {}) {
              distance are already right, so a switch only re-aims — shorter, and with
              the frame it was already in. */
           const switching = wasLevel === 'building' || wasLevel === 'suite'
-          flyTo(switching
-            ? { target: p }
-            : { el: 0.32, dist: 12.4, target: p }, switching ? 0.72 : 1.1)
+          /* AIM AT THE DOORS, NOT AT THE ROOF. worldOf(roofs[0]) is the middle of the
+             roof slab, so the camera looked at a lid and the horizon landed a third of
+             the way down the frame — a band of subject along the bottom under a large
+             empty field of ground running out to the fog. Dropping the aim to the door
+             band and stepping it out onto the apron does two things at once: it puts the
+             row a visitor is choosing FROM at the centre of the frame, and it pitches
+             the camera down far enough that the fog line leaves the top of the picture. */
+          const aim = p.clone()
+          aim.y -= wft(16)
+          if (fd) { aim.x += fd[0] * wft(12); aim.z += fd[1] * wft(12) }
+          flyTo({ az, el: FOCUS.el, dist: FOCUS.dist, target: aim }, switching ? 0.78 : 1.1)
         }
       } else if (next === 'suite') {
         const o = suiteObjs[suiteIndex]
-        if (o) flyTo({ el: 0.30, dist: 8.2, target: worldOf(o.mesh) }, 1.0)
+        /* AIM AT THE DOOR ITSELF, not at the middle of the shell behind it. The door is
+           what was chosen, it is what the apron light is on, and it is what the product
+           plate is about; the bay's centroid is a foot or two of concrete away from all
+           three. Closer than the building pose and no closer — ENTER is the move that
+           gets close, and if this pose does its job there is somewhere left to go. */
+        if (o) flyTo({ el: 0.28, dist: 6.9, target: worldOf(o.door) }, 1.0)
       }
       paint3d()
       this.syncCallouts()

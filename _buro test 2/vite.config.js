@@ -23,13 +23,14 @@ const here = import.meta.dirname
 //      directories down — the planting silently vanished on every page that was
 //      not at /.
 //
-//   3. THE SOURCE ENTRY IS home.html, NOT index.html. index.html at the top of
-//      this folder is the published portal that lists the versions, the way
-//      _buro test 1 does it. One path cannot be two files.
+//   3. THE SOURCE ENTRY IS pages/home.html, NOT index.html. index.html at the top of
+//      this folder is the published portal, and a source entry sitting beside it
+//      would be listed by the catalog as a page of its own and served as the raw
+//      source it is. It lives one level down instead.
 //
 // Three pages are built, and they are the three things worth showing:
 //
-//   home.html                                    the site as it stands, production act 02
+//   pages/home.html                              the site as it stands, production act 02
 //   exploration/integrated/v5-full-site.html     the same site with V5.2 in act 02
 //   exploration/study/proposed-v5-guided-sales.html   act 02 on its own
 //
@@ -56,7 +57,7 @@ export default defineConfig(({ command }) => ({
     assetsDir: process.env.VITE_ASSETS_DIR || 'assets2',
     rollupOptions: {
       input: {
-        home: resolve(here, 'home.html'),
+        home: resolve(here, 'pages/home.html'),
         v5site: resolve(here, 'exploration/integrated/v5-full-site.html'),
         v5act02: resolve(here, 'exploration/study/proposed-v5-guided-sales.html'),
       },

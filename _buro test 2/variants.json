@@ -45,7 +45,7 @@
     },
     {
       "file": "index4.html",
-      "from": "home.html",
+      "from": "pages/home.html",
       "name": "The site as it stands",
       "sub": "Acts 00–07, production act 02",
       "note": "The same eight acts with the earlier act 02: an SVG drawing and a record column rather than a model. Kept beside the others because the comparison is the argument.",

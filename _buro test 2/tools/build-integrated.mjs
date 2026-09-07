@@ -32,7 +32,7 @@ import { fileURLToPath } from 'node:url'
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 /* The homepage SOURCE is home.html: index.html at the top of this folder is the
    published portal, and one path cannot be two files. */
-const SRC = path.join(ROOT, 'home.html')
+const SRC = path.join(ROOT, 'pages/home.html')
 const OUT_DIR = path.join(ROOT, 'exploration/integrated')
 const OUT = path.join(OUT_DIR, 'v5-full-site.html')
 
@@ -45,9 +45,12 @@ let html = fs.readFileSync(SRC, 'utf8')
    through four pointing at /exploration/integrated/assets/. The browser then picked one
    of the survivors, reported complete=true with naturalWidth 0, and every photograph on
    the page was silently missing while the markup looked correct. */
+/* The source is pages/home.html, one level down, so its references are ../ — and the
+   dot-dot has to be consumed with the dot. Matching only './' turned '../assets/' into
+   './assets/' and left every image pointing one directory above the generated page. */
 const DIRS = ['assets', 'src', 'models', 'draco', 'exploration', 'public']
-html = html.replace(new RegExp('\\./(' + DIRS.join('|') + ')/', 'g'), '/$1/')
-const leftover = (html.match(/\.\//g) || []).length
+html = html.replace(new RegExp('(?:\\.\\.?/)+(' + DIRS.join('|') + ')/', 'g'), '/$1/')
+const leftover = (html.match(/(?:\.\.?\/)+(?:assets|src|models|draco|exploration|public)\//g) || []).length
 
 /* --- 2. act 02 ------------------------------------------------------------------- */
 const open = html.indexOf('<section class="act" id="act-02"')

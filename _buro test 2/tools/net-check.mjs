@@ -1,3 +1,12 @@
+#!/usr/bin/env node
+/* Every request a page makes, and every one that failed.
+
+     node tools/net-check.mjs <url>
+
+   A build can look right and still be missing half its photographs: an image whose
+   srcset candidate 404s reports complete=true with naturalWidth 0, which no visual
+   check catches. This asks the network, not the DOM.
+*/
 import { connect, sleep } from '../exploration/review-video/_cdp/cdp.mjs'
 import { ensure } from '../exploration/review-video/_cdp/chrome.mjs'
 const h = await ensure(); const cdp = await connect(h.ws)

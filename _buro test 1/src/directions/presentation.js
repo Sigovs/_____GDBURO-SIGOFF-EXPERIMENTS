@@ -513,7 +513,56 @@ export default {
     (x 44..1468, y 96..901): flange 856,600 · elbow 1157,399 · shoulder
     1297,644 · column 1389,739 · base 1389,816.
   */
-  record: { station: st(-388, 5.5, 1.68, [-2.730, 1.68, -0.995], 40), from: 1.16, floor: 0.9, spinHome: 128.4 },
+  /*
+    AND IT IS CENTRED IN THE SCREEN, NOT COMPOSED AGAINST THE COLUMN.
+
+    The previous station carried the machine to the right of the reading panel
+    and cropped it off the right edge — measured, its projected box ran
+    x 717..1719 in a 1512-wide frame, so its centre sat at 1218 against a
+    viewport centre of 756 and a fifth of it was outside the picture. That is a
+    subject pushed aside to leave room for a table, and on the one screen where
+    the machine can be TURNED it should be the thing the screen is about.
+
+    The target is carried 2.063m along the view's own screen-right axis, which
+    is the offset that puts the projected centre on 756 exactly. The machine now
+    runs x 281..1229 — whole, horizontally centred, still cropping 85px off the
+    floor so it stands in the room rather than floating in it.
+
+    THE SIDE VIEW IS NOW EXACT, AND IT IS SOLVED RATHER THAN JUDGED.
+
+    A side view is a geometric condition: the arm's plane of motion perpendicular
+    to the view axis. Measured on the live rig — the horizontal reach vector,
+    column to flange, against the camera's own horizontal forward — the inherited
+    128.4 was reading 90.464°, half a degree off true and enough to open the
+    parallelogram slightly. Bisected on the live geometry:
+
+      spin 128.400   reach at 90.464° to the view axis   0.464° of residual
+      spin 127.936   reach at 90.000° to the view axis   true profile
+
+    The camera is level (eye 1.68 against a target at 1.68), so there is no
+    vertical angle left to remove either. The drag still owns the machine from
+    there; this is only where it starts.
+
+    WHAT CENTRING COSTS, MEASURED RATHER THAN GUESSED.
+
+    The reading column occupies x 43..612 — the left 40% of the frame — and a
+    machine 947px wide centred on 756 necessarily runs from 282, so about a third
+    of it stands behind that column. Three arrangements were rendered and
+    measured before this one was kept:
+
+      centred, arm left (this)   anchors visible 4/5 — the flange goes behind
+      centred, arm right (+180)  anchors visible 2/5 — column and base go behind
+      off-centre right (before)  anchors visible 5/5 — but centre at 1218 and
+                                 207px of the machine cropped off the right edge
+
+    The +180 variant holds the side view exactly — perpendicularity survives a
+    half turn — and puts the wrist in the clear, but it hides the pedestal AND
+    the shoulder, which is a worse trade than hiding one flange.
+
+    To get 5/5 back with the machine still centred, the reading column has to
+    give up width; nothing about the camera can buy it.
+  */
+  record: { station: st(-388, 5.5, 1.68, [-0.909, 1.68, -0.026], 40), from: 1.16, floor: 0.9, spinHome: 127.936 },
 
   /* Reduced motion is given the peak's own frame, not the last one: the
      measurement is what the page is for, so the visitor who cannot have the

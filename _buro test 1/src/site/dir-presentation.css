@@ -1485,6 +1485,11 @@
 :root[data-reduced] .dir-presentation .beat .type {
   position: static !important; height: auto !important; padding-block: 6rem; overflow: visible;
 }
+/* the ping is an attention device, and a visitor who has asked for less motion
+   has asked not to be pinged at. The anchors keep their white and their collar,
+   which is what makes them findable in the first place. */
+@media (prefers-reduced-motion: reduce) { .hot__dot::before { animation: none; opacity: 0; } }
+:root[data-reduced] .hot__dot::before { animation: none; opacity: 0; }
 :root[data-reduced] .veil,
 :root[data-reduced] .winframe,
 :root[data-reduced] .chapter { display: none; }
@@ -1664,13 +1669,34 @@
   and a cool outer ring at r 15 that cannot be confused with a casting highlight.
   Both of those are now on the scroll anchor too, so the two are the same object.
 */
+/*
+  ── AND ON THIS SCREEN THE ANCHOR IS WHITE, NOT ORANGE ─────────────────────
+
+  The collar and the outer ring bought separation, but they were propping up a
+  colour that was still fighting its own ground: a machine-orange hairline laid
+  on a lit machine-orange casting. Everywhere else on the page the anchor sits
+  over the dark hall and the orange reads as "this point belongs to the machine".
+  Here the machine IS the background, and the one place the hue means something
+  is the one place it cannot be seen.
+
+  So the record's anchors — and only the record's — are cool white. The scroll
+  callouts keep the orange, because over the hall it still works and it still
+  says what it says. White against a lit orange casting is the largest contrast
+  step available without inventing a colour the page does not already use, and
+  it is the same near-white the leader's core and the card's title are set in.
+
+  THE SIZE DOES NOT CHANGE. 18px, a hairline, a 4.4px pip. What makes it findable
+  is contrast and the ping, not mass — a bigger dot on a machine is a sticker.
+*/
 .hot__ring {
   width: 18px; height: 18px;
   border-radius: 50%;
-  background: rgb(var(--machine-rgb) / 0.1);
-  border: 1px solid rgb(var(--machine-rgb) / 0.95);
-  box-shadow: 0 0 0 1px rgb(7 9 11 / 0.5),
-              0 0 15px rgb(var(--machine-rgb) / 0.5);
+  background: rgb(255 255 255 / 0.12);
+  border: 1px solid rgb(255 255 255 / 0.95);
+  /* the dark collar still does the structural work: it guarantees an edge
+     against a highlight as well as against a shadow */
+  box-shadow: 0 0 0 1px rgb(7 9 11 / 0.55),
+              0 0 12px rgb(255 255 255 / 0.4);
   position: relative;
   transition: border-color var(--motion-base) var(--ease-standard),
               background var(--motion-base) var(--ease-standard),
@@ -1683,7 +1709,7 @@
   position: absolute;
   inset: -6px;
   border-radius: 50%;
-  border: 1px solid rgb(var(--ink-rgb) / 0.22);
+  border: 1px solid rgb(255 255 255 / 0.28);
   transition: border-color var(--motion-base) var(--ease-standard);
 }
 /* the pip at the centre, exactly the callout anchor's */
@@ -1693,22 +1719,69 @@
   margin: auto;
   width: 4.4px; height: 4.4px;
   border-radius: 50%;
-  background: rgb(var(--machine-rgb) / 0.92);
+  background: #fff;
 }
+/*
+  THE PING — WHICH IS WHAT ACTUALLY MAKES THEM FINDABLE.
+
+  A static mark on a busy casting has to win on contrast alone at every pixel it
+  covers. A mark that expands once every two and a half seconds wins on MOTION
+  instead, and motion is what the eye finds in peripheral vision — so the dots
+  are noticed without being made bigger or louder.
+
+  One hairline ring growing out of the anchor to 2.4x and fading, on an ease that
+  spends its speed early, so it reads as a pulse leaving the point rather than a
+  circle being scaled. The five are staggered by roughly a fifth of the cycle: in
+  lockstep they read as a UI blinking, out of step they read as five instruments
+  each reporting on its own.
+
+  It stops the moment the pointer arrives — once you have found it, the ping has
+  done its job and would only compete with the card that is opening.
+
+  transform and opacity only, five elements, so it is a compositor animation and
+  costs nothing against the render.
+*/
+.hot__dot::before {
+  content: "";
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 18px; height: 18px;
+  margin: -9px 0 0 -9px;
+  border-radius: 50%;
+  border: 1px solid #fff;
+  pointer-events: none;
+  opacity: 0;
+  animation: hotPing 2600ms var(--ease-standard) infinite;
+}
+@keyframes hotPing {
+  0%   { transform: scale(1);   opacity: 0.6; }
+  72%  { transform: scale(2.4); opacity: 0; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+.hot__dot:nth-child(2)::before { animation-delay: 520ms; }
+.hot__dot:nth-child(3)::before { animation-delay: 1040ms; }
+.hot__dot:nth-child(4)::before { animation-delay: 1560ms; }
+.hot__dot:nth-child(5)::before { animation-delay: 2080ms; }
+/* found: stop pinging */
+.hot__dot:hover::before,
+.hot__dot:focus-visible::before,
+.hot__dot[data-open]::before { animation: none; opacity: 0; }
+/* a hidden dot must not go on pinging behind the machine it has passed behind */
+.hot__dot--off::before { animation: none; opacity: 0; }
 /* hover and focus raise the ring rather than changing the glyph: contrast goes
    UP on both, and the mark never turns into a different object */
 .hot__dot:hover .hot__ring,
 .hot__dot:focus-visible .hot__ring,
 .hot__dot[data-open] .hot__ring {
-  background: rgb(var(--machine-rgb) / 0.2);
-  border-color: rgb(var(--machine-rgb) / 1);
-  box-shadow: 0 0 0 1px rgb(7 9 11 / 0.5),
-              0 0 22px rgb(var(--machine-rgb) / 0.75);
+  background: rgb(255 255 255 / 0.24);
+  border-color: #fff;
+  box-shadow: 0 0 0 1px rgb(7 9 11 / 0.55),
+              0 0 20px rgb(255 255 255 / 0.7);
   transform: scale(1.18);
 }
 .hot__dot:hover .hot__ring::before,
 .hot__dot:focus-visible .hot__ring::before,
-.hot__dot[data-open] .hot__ring::before { border-color: rgb(var(--ink-rgb) / 0.44); }
+.hot__dot[data-open] .hot__ring::before { border-color: rgb(255 255 255 / 0.5); }
 .hot__dot:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
 
 /*

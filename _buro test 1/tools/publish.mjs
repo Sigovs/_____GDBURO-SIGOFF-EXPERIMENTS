@@ -61,6 +61,40 @@ if (!publishing.length) {
   process.exit(1);
 }
 
+/*
+  ALIASES, AND WHY THE URL IS NOT THE SOURCE NAME.
+
+  index1.html is the CANONICAL URL for this folder. It is what the dashboard
+  links, what every other _buro test is called, and the address Alex hands out —
+  and the page it should serve is whichever version is current, which changes.
+  Binding that URL to a source FILE name meant the two could only be kept
+  together by renaming the source, and renaming a source loses the page that
+  used to be there.
+
+  So a register entry may name `alias`: extra published names the built page is
+  copied to. The presentation currently claims index1.html. `npm run publish`
+  reproduces the mapping from a clean checkout every time, which is the whole
+  point — a hand-copied index1.html would be correct until the next publish
+  quietly rebuilt over it from a different source.
+
+  TWO ENTRIES MAY NOT CLAIM THE SAME NAME. Without this check the folder's most
+  important URL would be decided by the order of an array, and a rename that
+  accidentally collided would publish silently and look fine until someone
+  opened the page. It is a hard failure before anything is copied.
+*/
+const claims = new Map();
+for (const v of publishing) {
+  for (const name of [v.file, ...(v.alias ?? [])]) {
+    if (claims.has(name)) {
+      console.error(`\n  ${claims.get(name)} and ${v.file} both publish as ${name} — nothing copied.\n`);
+      process.exit(1);
+    }
+    claims.set(name, v.file);
+  }
+}
+const aliased = publishing.filter((v) => v.alias?.length);
+for (const v of aliased) console.log(`    ${v.file}  ->  also ${v.alias.join(', ')}`);
+
 // ONE hashed folder for all of them — the note on assetsDir in vite.config.js
 // says why the per-page numbering does not apply to a single build pass.
 const assetsDir = process.env.VITE_ASSETS_DIR || 'assets1';
@@ -102,6 +136,18 @@ for (const item of [...publishing.map((v) => v.file), assetsDir, 'decoders', 'me
   rmSync(join(ROOT, item), { recursive: true, force: true });
   cpSync(from, join(ROOT, item), { recursive: true });
   console.log(`  published  ${item}`);
+}
+
+// The aliases are copies of a page that is already at the top of this folder, so
+// they sit at the same depth and the build's relative asset paths — `./assets1/…`
+// — resolve identically. That is the reason this can be a byte copy rather than
+// a second build with a different base.
+for (const v of aliased) {
+  for (const name of v.alias) {
+    rmSync(join(ROOT, name), { recursive: true, force: true });
+    cpSync(join(DIST, v.file), join(ROOT, name));
+    console.log(`  published  ${name}  (alias of ${v.file})`);
+  }
 }
 
 execFileSync(process.execPath, [join(ROOT, 'tools', 'build-hub.mjs')], {

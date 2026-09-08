@@ -51,15 +51,44 @@ export function createHotspots({ rig, camera, spots, guard = null }) {
     }
   };
 
-  const built = spots.map((s) => {
+  const built = spots.map((s, i) => {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'hot__dot';
+    /*
+      THE SAME OBJECT THE SCROLL CALLOUTS ARE, ASKED FOR RATHER THAN AUTHORED.
+
+      Anchor, leader, card, text — in that order, in that language. The leader is
+      an SVG cubic and not a CSS bar, because a CSS pseudo-element cannot curve
+      and a straight hairline here against a curved luminous one four chapters
+      earlier is two annotation systems again.
+
+      Its geometry is CONSTANT, which is why it can be hard-coded: the panel
+      stands off a fixed 150px at the dot's own height, so the run is always the
+      same 17 → 137 at the same y. The shape is the scroll leader's construction
+      exactly — it leaves the ring with some lift and the last control point
+      shares the endpoint's y, so it arrives at the card dead level.
+
+      `pathLength="100"` normalises the dash to percent, so the sheet can draw it
+      0 → 100 without measuring anything, and the three glow layers stay in step
+      because they share the number rather than a length.
+    */
+    const L = 'M17 32 C 52 20, 96 32, 137 32';
     b.innerHTML =
-      '<span class="hot__ring" aria-hidden="true"></span>'
+      `<svg class="hot__lead" viewBox="0 0 160 64" aria-hidden="true" focusable="false">`
+      + `<defs><linearGradient id="hot-lead-${i}" x1="17" y1="32" x2="137" y2="32" gradientUnits="userSpaceOnUse">`
+      + '<stop offset="0" stop-color="currentColor" stop-opacity="0.18"/>'
+      + '<stop offset="0.45" stop-color="currentColor" stop-opacity="0.72"/>'
+      + '<stop offset="1" stop-color="currentColor" stop-opacity="0.98"/>'
+      + '</linearGradient></defs>'
+      + `<path class="hot__lead-far"  pathLength="100" d="${L}"/>`
+      + `<path class="hot__lead-near" pathLength="100" d="${L}"/>`
+      + `<path class="hot__lead-core" pathLength="100" d="${L}" stroke="url(#hot-lead-${i})"/>`
+      + '</svg>'
+      + '<span class="hot__ring" aria-hidden="true"></span>'
       + '<span class="hot__pop">'
-      + `<b>${s.part}</b>`
-      + (s.axis ? `<u>${s.axis}</u>` : '')
+      + `<s>${String(i + 1).padStart(2, '0')}</s>`
+      + `<span class="hd"><b>${s.part}</b>${s.axis ? `<u>${s.axis}</u>` : ''}</span>`
       + `<i>${s.note}</i>`
       + '</span>';
     b.setAttribute('aria-label', `${s.part}${s.axis ? ', ' + s.axis : ''}. ${s.note}`);

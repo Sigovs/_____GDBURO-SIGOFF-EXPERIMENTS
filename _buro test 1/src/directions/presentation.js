@@ -68,15 +68,33 @@ export default {
   id: 'presentation',
   title: 'Buro Automation — engineering motion at industrial scale',
 
+  /*
+    THE LEVEL LINE IS THE PROOF, AND IT IS NOT A CALLOUT.
+
+    It was switched off during the legacy-annotation cleanup, which was wrong:
+    the drafting CALLOUTS were the second language, the datum never was. This is
+    the device the page is built to show — the arm articulates, the camera
+    travels, and a world-horizontal line stays horizontal against the tool
+    plate's own axis. A card cannot do that. The card EXPLAINS the proof; the
+    line IS the proof, and only the shot that needs it turns it on.
+
+    What does not come back is the floating value plate it used to hang off
+    itself. See dir-presentation.css: hairline, no panel, the figure set small
+    and cool beside the plate it measures.
+  */
   level: true,
   camera: { fov: 38, lambda: 2.6 },
 
-  /* THE ANNOTATION IS ONE LINE, NOT A PLATE. See site/vcallouts.js — index,
-     label and value on a single baseline under a hairline, 44px tall instead
-     of 124. A / B / C / final keep the two-storey plate. */
-  /* `below` is 10, not 18: at 18 the backing carried thirty-one empty pixels
-     under the hairline and the block read bottom-heavy. */
-  callout: { above: 30, below: 10, marker: 26, gap: 15, inline: true, min: 236 },
+  /*
+    THE ANNOTATION LANGUAGE, AND ITS ART DIRECTION.
+
+    Every callout below carries `place: { dx, dy }` — an authored offset from its
+    own anchor to the card's anchor-side edge. These are composition decisions
+    made per shot, not runtime ones: site/vcards.js honours them and does not
+    search. Each sits in the 246–340px band — opened up about a seventh from the first
+    cut, which was correct but a little compressed. No leader crosses the frame.
+  */
+  callout: { card: true },
 
   /*
     ENVIRONMENT. `final`'s panels, cooled.
@@ -171,8 +189,19 @@ export default {
            the machine takes the right, above the designation's own band. The
            solver enforces the split (SPREAD_COST) and charges for leader length,
            so these are the authored intent rather than a hard assignment. */
-        { id: 'p-col', n: '01', label: 'COLUMN AXIS', value: 'A1', anchor: 'column', side: 'l', band: 0.30, at: 0.06 },
-        { id: 'p-h', n: '02', label: 'OVERALL HEIGHT', value: '2 744 mm', anchor: 'top', side: 'r', at: 0.20 },
+        { id: 'p-col', n: '01', label: 'Column axis', value: 'A1', anchor: 'column', side: 'l', at: 0.02, span: 0.09,
+          /* upper-left of the column: the designation owns the lower half of this
+           frame and the machine stands right of centre, so the card takes the
+           quiet air ABOVE the word — at dy -120 the card landed on the designation
+           itself. 314px, which is the one placement on the page that needs the
+           upper end of the band. */
+          place: { dx: -248, dy: -232 }, width: 244,
+          note: 'The axis the whole machine turns on.' },
+        { id: 'p-h', n: '02', label: 'Overall height', value: '2 744 mm', anchor: 'top', side: 'r', at: 0.14, span: 0.09,
+          /* right and slightly BELOW the highest point — above it is the masthead
+           band, and a card that has to be nudged down is a card drawn twice. 215px. */
+          place: { dx: 228, dy: 92 }, width: 252,
+          note: 'Measured off the source file, not quoted.' },
       ],
     },
     {
@@ -195,13 +224,25 @@ export default {
       from: st(30, 3.2, 0.80, [0.38, 1.55, 0], 46), to: st(-24, 6.0, 2.28, [1.16, 1.94, 0], 33),
       pose: [0.30, 0.55], poseAt: [0.30, 0.86],
       pool: { radius: [3.4, 13], floor: 0.03 },
-      level: { mode: 'proof', in: [0.28, 0.44] },
+      /* the figure arrives early in the beat, not two thirds through it: the
+         proof is the whole point of this chapter and it should be readable for
+         most of the travel, not only at the end of it */
+      level: { mode: 'proof', in: [0.08, 0.22] },
       callouts: [
         /* BANDED AWAY FROM THE TOP EDGE. At its own feature's height the plate
            landed at the solver's ceiling — cut box top 108px, hard against the
            masthead band, which reads as a label that ran out of room rather
            than one that was placed. */
-        { id: 'p-cl', n: '03', label: 'CLOSED LOOPS', value: '2', anchor: 'loops', side: 'r', band: 0.36, at: 0.06 },
+        /* 06 — the figure the level line used to draw. Lower-right of the plate,
+           into the open floor under the arm. 232px. */
+        { id: 'p-tilt', n: '06', label: 'Plate tilt', live: 'tilt', anchor: 'plate', at: 0.24, span: 0.12,
+          note: 'Worst elevation of the tool plate across the full range of the arm.',
+          place: { dx: 228, dy: 135 }, width: 246 },
+        { id: 'p-cl', n: '03', label: 'Closed loops', value: '2', anchor: 'loops', side: 'r', at: 0.03, span: 0.11,
+          /* upper-left of the wrist. The proof shot puts the arm across the lower
+           right, so the open quarter is up and left of the linkage. 239px. */
+          place: { dx: -245, dy: -120 }, width: 250,
+          note: 'The linkage that holds the plate’s attitude.' },
       ],
     },
     {
@@ -270,7 +311,10 @@ export default {
         up to as its heaviest annotation.
       */
       callouts: [
-        { id: 'p-pv', n: '04', label: 'ELBOW PIVOT', value: 'A3', anchor: 'elbow', side: 'r', at: 0.07 },
+        { id: 'p-pv', n: '04', label: 'Elbow pivot', value: 'A3', anchor: 'elbow', side: 'r', at: 0.03, span: 0.10,
+          /* upper-right of the elbow, into the dark above the casting. 224px. */
+          place: { dx: 222, dy: -126 }, width: 258,
+          note: 'Hinge centre derived from the geometry, not approximated.' },
         /* THE SECOND CALLOUT NAMES SOMETHING THIS FRAME CONTAINS. The tool plate
            projects between x = -150 and x = -23 for the WHOLE of this chapter —
            off the left edge, every frame — so the annotation was correctly
@@ -278,7 +322,11 @@ export default {
            frame throughout (x 641 -> 1136) and low, so the pair opens on a
            diagonal: A3 top-right, A2 bottom-left. The tool plate is not lost —
            the level line draws its datum and the record names it on the dot. */
-        { id: 'p-tp', n: '05', label: 'SHOULDER', value: 'A2', anchor: 'shoulder', side: 'l', at: 0.16 },
+        { id: 'p-tp', n: '05', label: 'Shoulder', value: 'A2', anchor: 'shoulder', side: 'l', at: 0.15, span: 0.10,
+          /* upper-right of the shoulder. Below-left put it on the chapter's own
+           sub-line; the open air in this frame is up and out. 225px. */
+          place: { dx: 217, dy: -137 }, width: 236,
+          note: 'The first joint the load is felt in.' },
       ],
     },
     {
@@ -433,7 +481,39 @@ export default {
 
     The drag still owns the machine from there; this is only where it starts.
   */
-  record: { station: st(-388, 7.0, 1.32, [-2.553, 1.30, -0.901], 40), from: 1.16, floor: 0.9, spinHome: 128.4 },
+  /*
+    AND IT COMES FORWARD, BECAUSE AT SEVEN METRES IT WAS A PRODUCT SHOT.
+
+    Measured on the render at the old station: the machine's projected box ran
+    x 684..1468, y 148..784 in a 1512x945 frame — inside the frame on all four
+    sides, 44px clear of the right edge, 161px clear of the floor. Nothing
+    touched, nothing left, nothing cropped. That is a catalogue photograph of a
+    robot placed next to a table of figures, and on the page's LAST screen it
+    read as the 3D subject withdrawing so the UI could have the frame.
+
+    At 5.5m with the eye line carried up to 1.68 the same box runs x 717..1710,
+    y 157..1030:
+
+      · the machine crops 198px off the right edge and 85px off the floor, so it
+        is standing IN the room rather than photographed against it
+      · 105px of air still separates it from the reading column, which is more
+        clearance than it had before
+      · 157px of headroom, so the arm's top is composed and not decapitated
+      · the FLANGE lands at 856,600 — in the open half, low and left of the
+        machine's mass, which makes the wrist the focal point of the frame
+        instead of the base
+
+    THE VIEW IS STILL LEVEL. The eye rises from 1.32 to 1.68 and the target
+    rises with it by exactly the same amount, so there is no vertical tilt
+    introduced — this is a higher station, not a raised angle. The azimuth is
+    untouched, so the solved side view (the arm's plane of motion perpendicular
+    to the view axis, measured, not judged) survives the recomposition intact.
+
+    All five anchors stay inside the dot layer's own visibility window
+    (x 44..1468, y 96..901): flange 856,600 · elbow 1157,399 · shoulder
+    1297,644 · column 1389,739 · base 1389,816.
+  */
+  record: { station: st(-388, 5.5, 1.68, [-2.730, 1.68, -0.995], 40), from: 1.16, floor: 0.9, spinHome: 128.4 },
 
   /* Reduced motion is given the peak's own frame, not the last one: the
      measurement is what the page is for, so the visitor who cannot have the
@@ -441,6 +521,7 @@ export default {
   still: st(-14, 5.7, 2.14, [1.08, 1.86, 0], 34),
   stillPose: 0.48,
   stillLight: 'metrol',
-  stillCallouts: [{ id: 'p-cl', n: '03', label: 'CLOSED LOOPS', value: '2', anchor: 'loops', side: 'r', at: 0 }],
+  stillCallouts: [{ id: 'p-cl', n: '03', label: 'Closed loops', value: '2', anchor: 'loops', side: 'r', at: 0,
+    note: 'The linkage that holds the plate’s attitude.' }],
   stillLevel: { mode: 'proof', at: 1 },
 };

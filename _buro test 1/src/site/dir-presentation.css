@@ -153,7 +153,6 @@
   -webkit-mask-image: linear-gradient(104deg, #000 6%, rgb(0 0 0 / 0.5) 48%, transparent 86%);
           mask-image: linear-gradient(104deg, #000 6%, rgb(0 0 0 / 0.5) 48%, transparent 86%);
   opacity: var(--atmos-cool, 0.55);
-  transition: opacity 500ms linear;
 }
 /* the machine's own spill: warm, low, mostly off the right edge */
 .atmos b.a2 {
@@ -164,7 +163,6 @@
   -webkit-mask-image: linear-gradient(198deg, #000 16%, transparent 88%);
           mask-image: linear-gradient(198deg, #000 16%, transparent 88%);
   opacity: var(--atmos-warm, 0.6);
-  transition: opacity 500ms linear;
 }
 /* a hall haze sitting on the horizon, denser at one end than the other */
 .atmos b.a3 {
@@ -175,7 +173,6 @@
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 24%, rgb(0 0 0 / 0.3) 64%, transparent 97%);
           mask-image: linear-gradient(90deg, transparent, #000 24%, rgb(0 0 0 / 0.3) 64%, transparent 97%);
   opacity: var(--atmos-haze, 0.7);
-  transition: opacity 500ms linear;
 }
 /* the big soft one, bleeding off the bottom-left corner */
 .atmos b.a4 {
@@ -183,7 +180,6 @@
   transform: rotate(21deg) scale(1, 0.62);
   background: radial-gradient(ellipse 46% 62% at 62% 34%, rgb(44 86 134 / 0.30), transparent 70%);
   opacity: var(--atmos-cool, 0.55);
-  transition: opacity 500ms linear;
 }
 
 /* ══ THE STAGE'S FOUR REGISTERS ═══════════════════════════════════════════ */
@@ -191,13 +187,30 @@
 /* WINDOW. The canvas is clipped, not scaled — the render stays at its native
    resolution and the frame is a crop, so nothing resamples and the silhouette
    inside keeps its edge. */
+/*
+  ══ NOTHING HERE MAY TRANSITION A SCRUBBED VARIABLE ══════════════════════════
+
+  Every custom property below — `--veil-side`, `--veil-flat`, `--win-t/r/b/l`,
+  `--win-on`, `--stage-x`, `--atmos-cool/warm/haze` — is written by the page's
+  chrome module on EVERY scroll frame, from a ramp that is already smooth and
+  already continuous across chapter boundaries by construction.
+
+  Each of them used to carry a CSS transition as well: 420ms on the stage's clip
+  and the canvas's pan, 420ms on the window frame's four insets, 500ms on the
+  atmosphere, 380ms on the veils. A transition against a value that changes every
+  frame is not a smoothing — it is a LAG. The property never reaches the target
+  before the next one arrives, so during a scroll the whole render sits about
+  four hundred milliseconds behind the wheel and then glides forward when you
+  stop. That is the "screen jerks, then catches up" the page was doing, and it
+  was doing it to the canvas itself, not only to the annotations.
+
+  The ramps do the smoothing. The transitions are gone.
+*/
 .dir-presentation .stage {
   clip-path: inset(var(--win-t, 0px) var(--win-r, 0px) var(--win-b, 0px) var(--win-l, 0px));
-  transition: clip-path 420ms var(--e-enter);
 }
 .dir-presentation .stage canvas {
   transform: translateX(var(--stage-x, 0vw));
-  transition: transform 420ms var(--e-enter);
 }
 .winframe {
   position: fixed;
@@ -207,8 +220,6 @@
   pointer-events: none;
   border: 1px solid rgb(var(--ink-rgb) / 0.16);
   opacity: var(--win-on, 0);
-  transition: opacity 320ms linear, top 420ms var(--e-enter), right 420ms var(--e-enter),
-              bottom 420ms var(--e-enter), left 420ms var(--e-enter);
 }
 /* a steel tick in the window's top-left corner: the frame is a device, and a
    device with a mark on it is a decision rather than a border */
@@ -228,7 +239,6 @@
   position: fixed; inset: 0;
   z-index: 4;
   pointer-events: none;
-  transition: opacity 380ms linear;
 }
 .veil--side {
   opacity: var(--veil-side, 0);
@@ -440,7 +450,16 @@
   /* NO GROUND OF ITS OWN. The chapter underneath keeps rendering and keeps
      showing; painting a black plane here is what turned this beat into a
      separate screen in the first cut. */
-  opacity: var(--film-on, 0);
+  /*
+    THE LAYER NO LONGER FADES IN, BECAUSE THE FADE WAS THE ENTRANCE.
+
+    Driving the whole layer off `--film-on` meant the beat's one gesture was a
+    dissolve with a rise attached — "here is a rectangle, now the video is
+    visible". The layer now reaches full strength in the first eighth of the
+    ramp, purely so nothing pops on the first frame, and the ARRIVAL is the mask
+    below. What opens the film is the film opening, not the film appearing.
+  */
+  opacity: clamp(0, var(--film-on, 0) * 8, 1);
   /* invisible AND out of the compositor until the beat opens: a fixed
      full-viewport video layer left at opacity 0 is still a layer the GPU pays
      for on every frame of the other eight chapters */
@@ -460,17 +479,47 @@
   position: absolute;
   inset: 0;
   background: rgb(7 9 11 / 0.66);
+  /* the room dims across the WHOLE ramp even though the layer is up in the
+     first eighth of it — so the chapter underneath recedes gradually while the
+     plate opens, instead of both happening in the same two hundred pixels */
+  opacity: var(--film-on, 0);
 }
 /*
   THE PLATE. Inset on all four edges so the chapter it overlays reads as a live
   border around it — the machine is still turning out there while the footage
-  runs. One hairline and a long shadow put it above the page rather than in it;
-  THE PLATE RISES INTO PLACE. It comes up forty pixels and grows the last one
-  and a half percent, both driven off `--film-on`, which is the chapter's own
-  scrubbed position — so the arrival is scroll-linked, reversible, and stoppable
-  on any frame rather than a fire-and-forget entrance. It is a rise and not a
-  lateral slide because the plate is landing ON something; the lateral move
-  belongs to chapter 08, which is the page's horizontal band.
+  runs. One hairline and a long shadow put it above the page rather than in it.
+
+  ─────────────────────────────────────────────────────────────────────────────
+  THE PLATE IS UNVEILED, NOT INSERTED.
+
+  It used to rise forty pixels and grow one and a half percent — which is a card
+  sliding in, and read exactly like one: a rectangle appeared and then a video
+  was inside it. Nothing about that was about film.
+
+  What happens now is a MASK. A window opens across the composition from the
+  right edge to the left, and the picture is already there behind it — the plate
+  itself does not travel at all. `clip-path: inset()` with the left inset run
+  from 97.4% down to 0 means:
+
+      0%    a 2.6% vertical sliver at the right edge, hairline and shadow
+            included, because the clip takes the plate's own border with it
+      25%   the first quarter of the film is standing open
+      50%   the window is across the middle of the frame
+      75%   most of the plate is open and the image is nearly resolved
+      100%  the whole plate, sharp, still, and it never moved
+
+  Two things happen INSIDE the window while it grows, and they are what make it
+  read as film rather than as a wipe. The picture carries a very slight
+  right-to-left drift, so it trails the opening edge instead of being pinned to
+  it — parallax between the mask and its content, four and a half percent, which
+  is the difference between a window opening on a scene and a rectangle being
+  resized. And it opens SOFT and resolves SHARP, which is the focus pull that was
+  already here and is the one blur this page can justify.
+
+  The driver is the chapter's own smoothstepped scrub, so the whole reveal is
+  scroll-linked, stoppable on any frame, and runs exactly backwards on the way
+  out — the window closes to the right and the picture goes soft again. Nothing
+  here is a fire-and-forget entrance.
 */
 .film__plate {
   position: absolute;
@@ -478,9 +527,35 @@
   overflow: hidden;
   border: 1px solid rgb(var(--ink-rgb) / 0.16);
   box-shadow: 0 44px 130px rgb(0 0 0 / 0.62);
-  transform: translateY(calc((1 - var(--film-on, 0)) * 40px))
-             scale(calc(0.985 + 0.015 * var(--film-on, 0)));
-  transform-origin: 50% 52%;
+  clip-path: inset(0 0 0 calc((1 - var(--film-on, 0)) * 97.4%));
+}
+/*
+  THE OPENING EDGE.
+
+  One steel hairline standing exactly on the mask's own boundary, so the reveal
+  has a leading edge rather than a soft nothing — the mechanical part of a
+  mechanical gesture, and the reason the 0% state reads as a sliver of light
+  rather than as a plate that has not loaded. It travels with the mask and goes
+  out as the window finishes, because once the plate is open there is no edge
+  left for it to be.
+*/
+.film__plate::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0;
+  /* the clip resolves its percentage against the BORDER box and this one
+     against the padding box, so the two land about two pixels apart and the
+     line was being cut in half by the mask it is supposed to be marking. It is
+     seated one pixel inside the open side, where it belongs anyway. */
+  left: calc((1 - var(--film-on, 0)) * 97.4%);
+  margin-left: 1.5px;
+  width: 1.5px;
+  z-index: 3;
+  background: linear-gradient(to bottom,
+    rgb(var(--steel-rgb) / 0), rgb(var(--steel-rgb) / 0.9) 22%,
+    rgb(var(--steel-rgb) / 0.9) 78%, rgb(var(--steel-rgb) / 0));
+  box-shadow: 0 0 14px rgb(var(--steel-rgb) / 0.6), 0 0 34px rgb(var(--steel-rgb) / 0.24);
+  opacity: clamp(0, (1 - var(--film-on, 0)) * 4.4, 1);
 }
 .film[data-live] { visibility: visible; content-visibility: visible; }
 /* the readout prints the live camera's azimuth and distance. During the film
@@ -500,7 +575,7 @@
      MEDIUM rather than a change of brightness, without regrading somebody
      else's film into a different picture. */
   filter: brightness(0.86) contrast(1.07)
-          blur(calc((1 - var(--film-on, 0)) * 22px));
+          blur(calc((1 - var(--film-on, 0)) * 12px));
   /*
     THE FOCUS PULL, AND WHY THE PICTURE IS OVERSCALED WHILE IT IS SOFT.
 
@@ -516,7 +591,15 @@
     extra 7% costs nothing but a slightly tighter framing, and it doubles as a
     push-in that settles with the rise.
   */
-  transform: scale(calc(1 + (1 - var(--film-on, 0)) * 0.07));
+  /*
+    AND THE DRIFT. The picture is carried 4.5% to the right at the start and
+    settles to nothing — so while the mask travels leftward the image trails it
+    rather than being nailed to it. It is deliberately small: at anything you
+    can name as movement it stops being a window opening on a scene and becomes
+    a slide. The overscale keeps the drift inside the `cover` crop for free.
+  */
+  transform: translateX(calc((1 - var(--film-on, 0)) * 4.5%))
+             scale(calc(1 + (1 - var(--film-on, 0)) * 0.07));
 }
 /*
   THE COUNT AND THE PROGRESS RULE.
@@ -572,6 +655,11 @@
   filter: brightness(0.86) contrast(1.07);
   transform: none;
 }
+/* arrived: the mask is not merely at zero, it is gone — a clip-path still costs
+   a compositing pass over a decoding full-plate video, and there is nothing left
+   for it to cut */
+.film[data-settled] .film__plate { clip-path: none; }
+.film[data-settled] .film__plate::after { opacity: 0; }
 /*
   THE SCRIM IS THREE GRADIENTS, NOT A FLAT WASH.
 
@@ -602,7 +690,8 @@
   content-visibility: visible;
 }
 .film[data-still] .film__back { display: none; }
-.film[data-still] .film__plate { inset: 0; transform: none; box-shadow: none; }
+.film[data-still] .film__plate { inset: 0; box-shadow: none; clip-path: none; }
+.film[data-still] .film__plate::after { display: none; }
 /* nothing drives `--film-on` on this path, so the arrival state has to be
    cancelled explicitly or the still would render blurred and overscaled */
 .film[data-still] .film__v { filter: brightness(0.86) contrast(1.07); transform: none; }
@@ -780,31 +869,73 @@
 }
 .ind:first-child { border-top: none; }
 /*
-  THE MARK — GOOGLE MATERIAL SYMBOLS, OUTLINED, WEIGHT 400.
+  THE MARK — A CONSTRUCTED SET, NOT A SHIPPED ICON FAMILY.
 
-  One published set rather than five drawings of mine, which is the point: a
-  shipped icon family is internally consistent in a way hand-cut marks are not,
-  and these five (directions_car, local_shipping, factory,
-  precision_manufacturing, warehouse) come off the same 960-unit grid with the
-  same optical weight and the same terminals.
+  These were Material Symbols: a car, a lorry, a factory, a robot arm, a shed.
+  A published set is internally consistent, which is why it was chosen — but it
+  is consistent with the wrong world. Filled interface glyphs off a 960 grid sit
+  in the same frame as a rendered casting, a survey ring and a hairline leader
+  and announce that part of this page came from a component library.
 
-  They are glyph OUTLINES, so they paint with `fill`, not `stroke` — the paths
-  describe the edge of the shape, and stroking them would draw an outline of an
-  outline. The viewBox is Material's own `0 -960 960 960`.
+  So they are drawn here, on ONE construction, and the construction is the whole
+  argument for them being a family:
 
-  Optically centred against the name rather than sat on its baseline, and never
-  carrying the meaning alone: the word is beside it and says the same thing.
+    .d  THE DATUM     a rule at y 28.5 across all five. It is the floor the
+                      machine is bolted to. It is the element they all share, so
+                      they read as one set before you have read any of them.
+    .g  THE GEOMETRY  thin, open, mitred. Arcs, linkage, lattice, force axes.
+                      Nothing closed, nothing filled, no container, no bubble.
+    .p  THE PIVOT     exactly one filled node per mark, and the ONLY place the
+                      machine's orange is spent anywhere in this chapter. Where
+                      the pivot sits is what each mark actually says: the swing
+                      centre, the wrist that sets the course down, the point of
+                      applied force, the flange, the addressed cell.
 
-  Material Symbols are Apache-2.0.
+  They are technical symbols rather than explanatory icons — none of them draws
+  the noun beside it, because the noun is already written and legible, and the
+  mark's job is to say which MECHANICAL IDEA that industry is here. That is also
+  why they survive at 26px: three strokes and a dot degrade to three strokes and
+  a dot, where a filled lorry degrades to a blob.
+
+  1.35px on a 32 grid rendered at ~32px is a true hairline at the same optical
+  weight as the page's own rules, so the marks sit in the type's tonal band and
+  not above it. Butt caps and mitre joins, because this is drawn geometry and a
+  round terminal is a UI terminal.
+
+  Optically centred against the name, and never carrying the meaning alone.
 */
 .ind__i {
   width: 100%; height: auto;
   align-self: center;
-  fill: rgb(var(--ink-rgb) / 0.26);
+  overflow: visible;
+  fill: none;
+  stroke: none;
+}
+.ind__i .g {
+  fill: none;
+  stroke: rgb(var(--ink-rgb) / 0.26);
+  stroke-width: 1.45;
+  stroke-linecap: butt;
+  stroke-linejoin: miter;
+  transition: stroke 340ms var(--ease-standard);
+}
+/* the floor sits under everything, so it is quieter than everything */
+.ind__i .d {
+  fill: none;
+  stroke: rgb(var(--ink-rgb) / 0.13);
+  stroke-width: 1.05;
+  transition: stroke 340ms var(--ease-standard);
+}
+.ind__i .p {
+  fill: rgb(var(--ink-rgb) / 0.3);
   stroke: none;
   transition: fill 340ms var(--ease-standard);
 }
-.ind[data-on] .ind__i { fill: var(--machine); }
+/* LIT: the geometry goes steel and the pivot goes to the machine's orange. One
+   accent, one node, and it is the node the sentence is about. */
+.ind[data-on] .ind__i .g { stroke: var(--steel); }
+.ind[data-on] .ind__i .d { stroke: rgb(var(--steel-rgb) / 0.3); }
+.ind[data-on] .ind__i .p { fill: var(--machine); }
 .ind__n {
   font: 500 14px/1 var(--mono);
   letter-spacing: 0.12em;
@@ -968,6 +1099,230 @@
               border-color var(--motion-base) var(--ease-standard);
 }
 .link:hover { color: #fff; border-color: #fff; }
+
+/* ══ THE CALLOUT, AS AN INDUSTRIAL ANNOTATION ═════════════════════════════
+   Anchor on the machine, two short segments, air, then a compact graphite
+   block. Positions are AUTHORED per callout in directions/presentation.js —
+   this sheet only says what they look like. */
+.dir-presentation .co--card { color: rgb(var(--ink-rgb) / 1); }
+
+/*
+  THE LEADER IS LIT IN THREE LAYERS PLUS A SPARK.
+
+  A 1px hairline over a rendered orange casting is a line you have to look for.
+  What is wanted is not a thicker line — a thicker line is a bar, and the card
+  stops being the loudest object — but a line that is THIN and BRIGHT, sitting in
+  its own small atmosphere. So it is built the way a lit filament reads:
+
+    far    12px, blurred wide, alpha 0.055   the room the line is in
+    near   3.2px, blurred small, alpha 0.30  the halo you register as glow
+    core   1.05px, the gradient, up to 0.98  the only edge in the whole stack
+
+  Numbers, not adjectives: the outer bloom's peak alpha is under one twentieth,
+  which is below the page's own rule hairlines, so it lifts the line off the
+  render without putting a second value into the composition. Measured on the
+  frame, the card's title stays the highest-contrast element by a wide margin —
+  which is the constraint. The glow is premium technical, not a nightclub.
+
+  Cool white through steel: the core carries `currentColor` (near-white ink) and
+  the two soft layers are steel, so the halo is BLUE and the edge is WHITE. That
+  is the same relationship a hot filament has, and it is the page's own accent.
+*/
+.dir-presentation .co--card .co__lead,
+.dir-presentation .co--card .co__spark {
+  fill: none;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.dir-presentation .co--card .co__lead--far {
+  stroke: rgb(var(--steel-rgb) / 0.055);
+  stroke-width: 12;
+  filter: blur(6px);
+}
+.dir-presentation .co--card .co__lead--near {
+  stroke: rgb(var(--steel-rgb) / 0.30);
+  stroke-width: 3.2;
+  filter: blur(2px);
+}
+.dir-presentation .co--card .co__lead--core {
+  /* variant.css sets a flat `stroke` for the drafting leader and a CSS property
+     beats the `stroke="url(#…)"` attribute, so the fade is named again here.
+     The url is per callout — the shared gradient was being overwritten. */
+  stroke: url(#co-lead-p-col);
+  stroke-width: 1.05;
+}
+.dir-presentation .co__g[data-co="p-h"]    .co__lead--core { stroke: url(#co-lead-p-h); }
+.dir-presentation .co__g[data-co="p-cl"]   .co__lead--core { stroke: url(#co-lead-p-cl); }
+.dir-presentation .co__g[data-co="p-tilt"] .co__lead--core { stroke: url(#co-lead-p-tilt); }
+.dir-presentation .co__g[data-co="p-pv"]   .co__lead--core { stroke: url(#co-lead-p-pv); }
+.dir-presentation .co__g[data-co="p-tp"]   .co__lead--core { stroke: url(#co-lead-p-tp); }
+/*
+  THE SPARK: energy moving along the path, and only while it moves.
+
+  It is at full strength across the middle of the draw and gone by the time the
+  line is home, so the settled state is a calm luminous line and nothing on the
+  last screen is still flickering under the words. `--t` is the LINE's own
+  progress, not the callout's, so this cannot outlive the growth it belongs to.
+*/
+.dir-presentation .co--card .co__spark {
+  stroke: #eaf4ff;
+  stroke-width: 1.7;
+  filter: drop-shadow(0 0 3px rgb(var(--steel-rgb) / 0.95));
+  opacity: calc(clamp(0, var(--t, 0) * 7, 1) * clamp(0, (1 - var(--t, 0)) * 4.5, 1));
+}
+/* the anchor: a quiet ring in the machine's own colour, because the point it
+   marks belongs to the machine and not to the annotation — with one soft warm
+   response behind it where the line touches the casting, and nowhere else */
+.dir-presentation .co__halo {
+  fill: rgb(var(--machine-rgb) / 0.13);
+  filter: blur(5px);
+}
+.dir-presentation .co__ring {
+  fill: rgb(var(--machine-rgb) / 0.06);
+  stroke: rgb(var(--machine-rgb) / 0.7);
+  stroke-width: 1;
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+.dir-presentation .co__pip { fill: rgb(var(--machine-rgb) / 0.95); }
+/* the cool outer ring — the record's pins carry the same one at the same radius,
+   which is most of what makes the two read as one object */
+.dir-presentation .co__ring2 {
+  fill: none;
+  stroke: rgb(var(--ink-rgb) / 0.22);
+  stroke-width: 1;
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+
+.co-cards { position: fixed; inset: 0; z-index: 9; pointer-events: none; }
+
+/*
+  GRAPHITE, NOT A TOOLTIP.
+
+  Two columns: the index keeps its own narrow track at the left, the title and
+  the measured value share the row beside it, and the rule and the sentence hang
+  under the TITLE rather than under the whole block — so the index reads as a
+  margin number on a drawing instead of as part of the sentence.
+
+  8px radius, a 1px edge, and a 2px steel tick down the side the leader arrives
+  on. That tick is the only accent in the block; the rest is graphite and type.
+*/
+.dir-presentation .co-card {
+  position: absolute;
+  top: 0; left: 0;
+  width: var(--cw, 250px);
+  display: grid;
+  grid-template-columns: 1.9rem minmax(0, 1fr);
+  column-gap: 0.85rem;
+  padding: 1rem 1.2rem 1.05rem;
+  border-radius: 8px;
+  /* 0.90, not 0.84: at the lower value a pin standing behind an open panel
+     punched through and read as a mark inside the block. A card has to own
+     its own ground. */
+  background: rgb(11 14 18 / 0.9);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+          backdrop-filter: blur(16px) saturate(1.15);
+  border: 1px solid rgb(var(--ink-rgb) / 0.09);
+  box-shadow: 0 18px 46px rgb(0 0 0 / 0.44);
+  will-change: transform;
+  visibility: hidden;
+}
+.dir-presentation .co-card[data-live] { visibility: visible; }
+/* the tick sits on the edge the leader lands on — the block gets a front */
+.dir-presentation .co-card::before {
+  content: "";
+  position: absolute;
+  top: 1rem; bottom: 1rem;
+  width: 2px;
+  background: var(--steel-deep);
+  opacity: clamp(0, (var(--d) - 0.82) * 12, 1);
+}
+.dir-presentation .co-card[data-side="r"]::before { left: 0; }
+.dir-presentation .co-card[data-side="l"]::before { right: 0; }
+
+.dir-presentation .co-card s {
+  grid-column: 1;
+  font: 500 12px/1.5 var(--mono);
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  color: rgb(var(--ink-rgb) / 0.34);
+  font-variant-numeric: tabular-nums;
+}
+.dir-presentation .co-card .hd {
+  grid-column: 2;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.2rem;
+}
+.dir-presentation .co-card b {
+  font: 500 15.5px/1.24 var(--display);
+  letter-spacing: 0.085em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.dir-presentation .co-card u {
+  font: 500 12px/1 var(--mono);
+  letter-spacing: 0.16em;
+  text-decoration: none;
+  color: var(--steel);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.dir-presentation .co-card i {
+  grid-column: 2;
+  margin-top: 0.62rem;
+  padding-top: 0.66rem;
+  border-top: 1px solid rgb(var(--ink-rgb) / 0.11);
+  font: 400 13px/1.46 var(--display);
+  font-style: normal;
+  color: rgb(var(--ink-rgb) / 0.66);
+  text-wrap: pretty;
+}
+
+/*
+  THE ORDER IS THE POINT, AND IT IS NOT NEGOTIABLE.
+
+  anchor (0 → .14) → the line grows (.14 → .60) → the card lands (.60 → .70)
+  → the words resolve in a short stagger (.70 → 1). The card cannot appear with
+  the line, and the line is never drawn at full length: its dash is set from the
+  path's own measured length in site/vcards.js. Reverse scroll runs the same
+  numbers backwards — text out, card out, line retracts into the anchor.
+*/
+/*
+  `--d` IS THE SCROLL'S POSITION IN THE CALLOUT'S WINDOW. `--vis` IS WHETHER THE
+  ANCHOR IS ON SCREEN.
+
+  They are deliberately two variables and the group carries the second one, so an
+  anchor drifting toward the edge of the frame takes the WHOLE annotation down
+  together instead of making the leader look half-drawn. Both are written by
+  site/vcards.js as a pure function of the frame; neither is transitioned, so
+  what is on screen is always the current scroll position and never a value on
+  its way to one.
+*/
+/* BOTH factors, or the leader outlives the callout. The dash is only rewritten
+   while the annotation is up, so a group held visible on `--vis` alone kept the
+   last stroke-dashoffset it was given — measured after a fast reverse: `--d` 0
+   with the line still painted at 39%. The group has to go out when EITHER the
+   scroll has left the window or the anchor has left the frame. */
+.dir-presentation .co--card .co__g {
+  opacity: calc(var(--vis, 1) * clamp(0, var(--d) * 120, 1));
+}
+.dir-presentation .co__ring,
+.dir-presentation .co__pip { opacity: clamp(0, var(--d) * 12, 1); }
+.dir-presentation .co__halo { opacity: calc(clamp(0, var(--d) * 12, 1) * 0.9); }
+.dir-presentation .co__ring2 {
+  opacity: calc(clamp(0, (var(--d) - 0.03) * 10, 1) * 0.9);
+  transform: scale(calc(0.7 + 0.3 * clamp(0, var(--d) * 10, 1)));
+}
+.dir-presentation .co__ring { transform: scale(calc(0.55 + 0.45 * clamp(0, var(--d) * 12, 1))); }
+/* the card does not start until 0.80, and the leader is complete at 0.78 */
+.dir-presentation .co-card   { opacity: calc(clamp(0, (var(--d) - 0.80) * 14, 1) * var(--vis, 1)); }
+.dir-presentation .co-card s { opacity: clamp(0, (var(--d) - 0.84) * 14, 1); }
+.dir-presentation .co-card b { opacity: clamp(0, (var(--d) - 0.87) * 14, 1); }
+.dir-presentation .co-card u { opacity: clamp(0, (var(--d) - 0.90) * 14, 1); }
+.dir-presentation .co-card i { opacity: clamp(0, (var(--d) - 0.93) * 15, 1); }
 
 /* ══ THE CALLOUT, AS A MACHINED PLATE ═════════════════════════════════════
    Hierarchy in three steps rather than two: a FILLED steel marker carrying the
@@ -1160,41 +1515,52 @@
 
 /* the datum: a hairline the length of the frame, and a solid tick at the plate */
 .lvl__rule {
-  stroke: rgb(var(--ink-rgb) / 0.6);
-  stroke-width: 1.2;
+  stroke: rgb(var(--ink-rgb) / 0.42);
+  stroke-width: 1;
   vector-effect: non-scaling-stroke;
 }
-.lvl__tri { fill: rgb(var(--ink-rgb) / 0.7); }
+.lvl__tri { fill: rgb(var(--ink-rgb) / 0.5); }
 
 /* the plate's own axis, heavy and in the machine's colour. If it ever pitched
    away from the hairline behind it, the difference would be the most visible
    thing on the screen — which is the entire argument. */
 .lvl__plate {
   stroke: var(--machine);
-  stroke-width: 3;
+  stroke-width: 2.5;
   stroke-linecap: butt;
   vector-effect: non-scaling-stroke;
 }
 
-.lvl__flagbox { fill: none; stroke: rgb(var(--ink-rgb) / 0.48); stroke-width: 1; }
-.lvl__flag {
-  fill: rgb(var(--ink-rgb) / 0.72);
-  font: 500 14px/1 var(--mono);
-  letter-spacing: 0.06em;
-}
+/*
+  NO PANEL, NO FLAG.
 
-/* the measurement, on its own ground so it is legible over the casting */
-.lvl__valbox { fill: url(#lvl-ground); }
+  The datum used to hang a 58px figure off a filled ground with a boxed flag
+  beside it — a floating label plate, which is exactly the drafting furniture the
+  page stopped speaking. The instrument is now the LINE, and the figure reads as
+  a caption on it: two thirds the size, cool rather than white, and legible over
+  a lit casting by a shadow rather than by a slab.
+*/
+.lvl__flagbox { fill: none; stroke: none; }
+.lvl__flag { fill: none; }
+.lvl__valbox { fill: none; }
 .lvl__value {
   fill: var(--ink);
-  font: 600 58px/1 var(--mono);
+  font: 500 34px/1 var(--mono);
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.01em;
+  paint-order: stroke fill;
+  stroke: rgb(7 9 11 / 0.72);
+  stroke-width: 5px;
+  stroke-linejoin: round;
 }
 .lvl__cap {
-  fill: rgb(var(--ink-rgb) / 0.82);
-  font: 500 14px/1 var(--mono);
-  letter-spacing: 0.16em;
+  fill: var(--steel);
+  font: 500 11.5px/1 var(--mono);
+  letter-spacing: 0.2em;
+  paint-order: stroke fill;
+  stroke: rgb(7 9 11 / 0.72);
+  stroke-width: 4px;
+  stroke-linejoin: round;
 }
 
 /* `quiet` introduces the instrument: the rule, and nothing that reads as a claim */
@@ -1256,150 +1622,230 @@
 }
 .hot[data-on] { opacity: 1; }
 
-.hot__dot {
-  position: absolute; top: 0; left: 0;
-  width: 48px; height: 48px;
-  margin: -24px 0 0 -24px;              /* transform positions the CENTRE */
-  display: grid; place-items: center;
-  padding: 0; border: 0; background: none;
-  pointer-events: auto;
-  cursor: pointer;
-  /* staggered up the arm rather than simultaneous: five circles landing on one
-     frame reads as an interface being switched on */
-  transition: opacity 320ms var(--e-enter), visibility 320ms;
-}
-.hot__dot:nth-child(1) { transition-delay: 0ms; }
-.hot__dot:nth-child(2) { transition-delay: 80ms; }
-.hot__dot:nth-child(3) { transition-delay: 160ms; }
-.hot__dot:nth-child(4) { transition-delay: 240ms; }
-.hot__dot:nth-child(5) { transition-delay: 320ms; }
-.hot__dot--off { opacity: 0; visibility: hidden; pointer-events: none; }
+/*
+  THE RECORD'S PINS SPEAK THE CALLOUT'S LANGUAGE.
 
-.hot__ring {
-  position: relative;
-  width: 40px; height: 40px;
-  border-radius: 50%;
-  /* dark enough that the cross holds its contrast on a lit casting */
-  background: rgb(7 9 11 / 0.42);
-  -webkit-backdrop-filter: blur(3px);
-          backdrop-filter: blur(3px);
-  border: 2px solid rgb(var(--ink-rgb) / 0.78);
-  display: block;
-  transition: background 260ms var(--ease-standard),
-              border-color 260ms var(--ease-standard),
-              transform 380ms var(--ease-standard);
+  They used to be their own thing — a 40px plus-in-a-circle and a frosted panel
+  with a different type ramp — which made the last screen the page's second
+  annotation vocabulary. They are still BUTTONS and still interactive; they now
+  wear the anchor ring and the graphite card the scroll callouts wear, so the
+  whole presentation annotates in one voice.
+*/
+.hot__dot {
+  position: absolute;
+  top: 0; left: 0;
+  width: 44px; height: 44px;
+  margin: -22px 0 0 -22px;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  /* the `.hot` layer is pointer-events: none so the drag surface underneath
+     still works; the dots are the one thing in it that must answer */
+  pointer-events: auto;
+  transition: opacity 320ms var(--ease-standard);
 }
-.hot__ring::before,
+.hot__dot--off { opacity: 0; pointer-events: none; }
+/*
+  THE ANCHOR HAD GONE MISSING, AND IT WENT MISSING BY BEING RIGHT.
+
+  It is the callout anchor's colour — a machine-orange ring, because the point it
+  marks belongs to the machine — and on this screen the thing it sits on IS the
+  machine: a 0.55-alpha orange hairline laid on a lit orange casting. Measured on
+  the record frame, all five dots were painting at opacity 1 and not one of them
+  was findable. The last screen's whole interaction was invisible until the
+  pointer happened to cross it.
+
+  The hue is not the fix — changing it would put a second anchor colour on the
+  page. What it needed was SEPARATION, so it gets the survey target's other two
+  parts: a dark collar one pixel wide that guarantees an edge against any ground,
+  and a cool outer ring at r 15 that cannot be confused with a casting highlight.
+  Both of those are now on the scroll anchor too, so the two are the same object.
+*/
+.hot__ring {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: rgb(var(--machine-rgb) / 0.1);
+  border: 1px solid rgb(var(--machine-rgb) / 0.95);
+  box-shadow: 0 0 0 1px rgb(7 9 11 / 0.5),
+              0 0 15px rgb(var(--machine-rgb) / 0.5);
+  position: relative;
+  transition: border-color var(--motion-base) var(--ease-standard),
+              background var(--motion-base) var(--ease-standard),
+              box-shadow var(--motion-base) var(--ease-standard),
+              transform var(--motion-base) var(--ease-standard);
+}
+/* the cool outer ring — the same r 15 the scroll anchor carries */
+.hot__ring::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1px solid rgb(var(--ink-rgb) / 0.22);
+  transition: border-color var(--motion-base) var(--ease-standard);
+}
+/* the pip at the centre, exactly the callout anchor's */
 .hot__ring::after {
   content: "";
-  position: absolute; top: 50%; left: 50%;
-  background: var(--ink);
-  transition: transform 380ms var(--ease-standard),
-              opacity 260ms var(--ease-standard),
-              background 260ms var(--ease-standard);
+  position: absolute; inset: 0;
+  margin: auto;
+  width: 4.4px; height: 4.4px;
+  border-radius: 50%;
+  background: rgb(var(--machine-rgb) / 0.92);
 }
-.hot__ring::before { width: 15px; height: 2px; margin: -1px 0 0 -7.5px; }
-.hot__ring::after  { width: 2px; height: 15px; margin: -7.5px 0 0 -1px; }
-
-/*
-  THE PLUS TURNS INTO A SINGLE STROKE.
-
-  Not into a cross — a cross means close, and nothing here closes a window. The
-  vertical arm goes and the horizontal one rotates, so what is left under the
-  pointer is one diagonal mark: the same gesture a draughtsman makes to tick a
-  point he has already read. The ring draws in a little at the same time, which
-  is what tells you the mark is the thing you are pointing at.
-*/
+/* hover and focus raise the ring rather than changing the glyph: contrast goes
+   UP on both, and the mark never turns into a different object */
 .hot__dot:hover .hot__ring,
 .hot__dot:focus-visible .hot__ring,
 .hot__dot[data-open] .hot__ring {
-  background: rgb(7 9 11 / 0.66);
-  border-color: var(--steel);
-  transform: scale(0.86);
+  background: rgb(var(--machine-rgb) / 0.2);
+  border-color: rgb(var(--machine-rgb) / 1);
+  box-shadow: 0 0 0 1px rgb(7 9 11 / 0.5),
+              0 0 22px rgb(var(--machine-rgb) / 0.75);
+  transform: scale(1.18);
 }
 .hot__dot:hover .hot__ring::before,
 .hot__dot:focus-visible .hot__ring::before,
-.hot__dot[data-open] .hot__ring::before {
-  transform: rotate(-45deg) scaleX(1.05);
-  background: var(--steel);
-}
-.hot__dot:hover .hot__ring::after,
-.hot__dot:focus-visible .hot__ring::after,
-.hot__dot[data-open] .hot__ring::after { opacity: 0; transform: scaleY(0.2); }
-
-.hot__dot:focus-visible { outline: none; }
-.hot__dot:focus-visible .hot__ring {
-  box-shadow: 0 0 0 2px var(--ground), 0 0 0 4px #fff;
-}
+.hot__dot[data-open] .hot__ring::before { border-color: rgb(var(--ink-rgb) / 0.44); }
+.hot__dot:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
 
 /*
-  THE PANEL STANDS OFF, AND A HAIRLINE REACHES BACK TO THE MARK.
-
-  Butted against the ring it read as a tooltip stuck to a cursor. At 96px with a
-  drawn connector it reads as an annotation pointing at a part — and the gap is
-  what makes the frost legible as a material rather than as a smudge on the dot.
+  THE PANEL IS THE CALLOUT CARD. Same graphite, same radius, same edge, same two
+  columns — index in its own track, title and axis on one row, rule and sentence
+  hanging under the title. The only difference is that this one is asked for.
 */
 .hot__pop {
   position: absolute;
   left: 150px; top: 50%;
-  transform: translateY(-50%) translateX(-10px);
-  width: 16.5rem;
-  padding: 1rem 1.15rem 1.05rem;
-  background: rgb(16 21 27 / 0.44);
-  -webkit-backdrop-filter: blur(22px) saturate(1.4);
-          backdrop-filter: blur(22px) saturate(1.4);
-  border: 1px solid rgb(var(--ink-rgb) / 0.14);
-  border-radius: 3px;
-  box-shadow: 0 18px 44px rgb(0 0 0 / 0.34);
+  transform: translateY(-50%) translateX(-8px);
+  width: 17rem;
+  display: grid;
+  grid-template-columns: 1.9rem minmax(0, 1fr);
+  column-gap: 0.85rem;
+  padding: 1rem 1.2rem 1.05rem;
+  border-radius: 8px;
+  /* 0.90, not 0.84: at the lower value a pin standing behind an open panel
+     punched through and read as a mark inside the block. A card has to own
+     its own ground. */
+  background: rgb(11 14 18 / 0.9);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+          backdrop-filter: blur(16px) saturate(1.15);
+  border: 1px solid rgb(var(--ink-rgb) / 0.09);
+  box-shadow: 0 18px 46px rgb(0 0 0 / 0.44);
   opacity: 0; visibility: hidden;
   pointer-events: none;
   text-align: left;
-  transition: opacity 260ms var(--ease-standard),
-              transform 380ms var(--ease-standard),
-              visibility 260ms;
+  /* 300ms of delay against a 320ms draw: the card cannot begin until the leader
+     is about 94% home, which is the same rule the scroll cards are held to */
+  transition: opacity 220ms var(--ease-standard) 300ms,
+              transform 300ms var(--ease-standard) 300ms,
+              visibility 220ms 300ms;
 }
-/* the connector: a hairline from the ring out to the panel's edge */
-.hot__pop::before {
+.hot__dot:not(:hover):not([data-open]) .hot__pop {
+  transition: opacity 180ms var(--ease-standard),
+              transform 220ms var(--ease-standard),
+              visibility 180ms;
+}
+/*
+  THE LEADER DRAWS HERE TOO, AND IT IS THE SAME LINE.
+
+  It was a flat CSS bar that scaled in — a straight hairline of one alpha, which
+  made the record the one place on the page annotating with a different object.
+  It is now the scroll callout's leader exactly: the same cubic construction, the
+  same three luminous layers over one path, the same cool-white core through a
+  steel halo, and the same order — the ring is already there, the line grows out
+  of it, and only then does the card fade up behind it.
+
+  Leaving runs backwards: the card goes first, then the line retracts into the
+  ring. Reverse is authored, not replayed.
+*/
+.hot__lead {
+  position: absolute;
+  left: 22px; top: -10px;
+  width: 160px; height: 64px;
+  overflow: visible;
+  pointer-events: none;
+  color: rgb(var(--ink-rgb) / 1);
+}
+/* the flip is a mirror of the same gesture, not a second drawing */
+.hot__dot[data-flip] .hot__lead { left: auto; right: 22px; transform: scaleX(-1); }
+.hot__lead path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  /* pathLength normalises the run to 100, so the dash is a percentage and the
+     three layers cannot drift out of step with one another */
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  transition: stroke-dashoffset 320ms var(--ease-standard);
+}
+.hot__lead-far  { stroke: rgb(var(--steel-rgb) / 0.055); stroke-width: 12; filter: blur(6px); }
+.hot__lead-near { stroke: rgb(var(--steel-rgb) / 0.3);   stroke-width: 3.2; filter: blur(2px); }
+.hot__lead-core { stroke-width: 1.05; }
+.hot__dot:hover .hot__lead path,
+.hot__dot:focus-visible .hot__lead path,
+.hot__dot[data-open] .hot__lead path { stroke-dashoffset: 0; }
+/* leaving: the line retracts only after the card has gone */
+.hot__dot:not(:hover):not([data-open]) .hot__lead path {
+  transition: stroke-dashoffset 300ms var(--ease-standard) 150ms;
+}
+/* the steel tick on the edge the leader lands on */
+.hot__pop::after {
   content: "";
   position: absolute;
-  right: 100%; top: 50%;
-  width: 110px; height: 1px;
-  background: linear-gradient(to left, rgb(var(--ink-rgb) / 0.45), rgb(var(--ink-rgb) / 0.08));
+  top: 1rem; bottom: 1rem; left: 0;
+  width: 2px;
+  background: var(--steel-deep);
 }
 .hot__dot[data-flip] .hot__pop {
   left: auto; right: 150px;
-  transform: translateY(-50%) translateX(10px);
+  transform: translateY(-50%) translateX(8px);
 }
-.hot__dot[data-flip] .hot__pop::before {
-  right: auto; left: 100%;
-  background: linear-gradient(to right, rgb(var(--ink-rgb) / 0.45), rgb(var(--ink-rgb) / 0.08));
-}
+.hot__dot[data-flip] .hot__pop::after { left: auto; right: 0; }
 .hot__dot:hover .hot__pop,
 .hot__dot:focus-visible .hot__pop,
 .hot__dot[data-open] .hot__pop {
   opacity: 1; visibility: visible;
   transform: translateY(-50%) translateX(0);
 }
+.hot__pop s {
+  grid-column: 1;
+  font: 500 12px/1.5 var(--mono);
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  color: rgb(var(--ink-rgb) / 0.34);
+  font-variant-numeric: tabular-nums;
+}
+.hot__pop .hd {
+  grid-column: 2;
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 1.2rem;
+}
 .hot__pop b {
-  display: block;
-  font: 400 17px/1.25 var(--display);
-  letter-spacing: -0.005em;
+  font: 500 15.5px/1.24 var(--display);
+  letter-spacing: 0.085em;
+  text-transform: uppercase;
   color: var(--ink);
 }
 .hot__pop u {
-  display: block;
-  margin-top: 0.2rem;
-  font: 500 14px/1 var(--mono);
+  font: 500 12px/1 var(--mono);
   letter-spacing: 0.16em;
   text-decoration: none;
   color: var(--steel);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .hot__pop i {
-  display: block;
-  margin-top: 0.6rem;
-  font: 400 14.5px/1.5 var(--display);
+  grid-column: 2;
+  margin-top: 0.62rem;
+  padding-top: 0.66rem;
+  border-top: 1px solid rgb(var(--ink-rgb) / 0.11);
+  font: 400 13px/1.46 var(--display);
   font-style: normal;
-  color: rgb(var(--ink-rgb) / 0.7);
+  color: rgb(var(--ink-rgb) / 0.66);
+  text-wrap: pretty;
 }
 
 /*
@@ -1437,7 +1883,21 @@
    draw so the anchor is already a visible object when the line leaves it — that
    is the whole difference between "a line arrived at a point" and "this point
    is what we are talking about". */
-.dir-presentation .co__lead {
+/*
+  THIS RULE IS THE DRAFTING SYSTEM'S, AND IT HAD BEEN EATING THE CARD SYSTEM'S.
+
+  `.dir-presentation .co__lead` also matches the card leaders, and a CSS
+  declaration outranks a presentation attribute — so the 1800 constant here was
+  overriding the measured `stroke-dasharray` that site/vcards.js writes every
+  frame. With a run of ~325px against a dash of 1800 the line reached full length
+  at about a third of its phase and then sat still for the rest of it: the exact
+  "the line appears rather than draws" failure the card system was rebuilt to
+  fix. Measured on the render at `--d 0.50` the leader was already 100% drawn
+  while its own attribute said 59%.
+
+  Scoped to the drafting variants, which are the only ones that want a constant.
+*/
+.dir-presentation .co:not(.co--card) .co__lead {
   stroke-dasharray: 1800;
   stroke-dashoffset: calc(1800px * (1 - clamp(0, (var(--d) - 0.14) / 0.86, 1)));
 }

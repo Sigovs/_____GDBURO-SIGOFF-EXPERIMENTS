@@ -28,12 +28,16 @@ const VARIANT_ENTRIES = Object.fromEntries(
 export default defineConfig({
   // ROOT IS src/, AND THAT IS WHAT PUTS THE PAGE AT ITS PUBLISHED NAME.
   //
-  // Vite names an output HTML file by its path relative to `root`. The published
-  // page has to be `index1.html` at the top of this folder — that is the naming
-  // every _buro test uses, and it is the URL the dashboard links. So the SOURCE
-  // entry cannot also be `index1.html` at the top of this folder: one path, two
-  // files. With root at src/, the entry is src/index1.html and the build emits
-  // exactly `index1.html`, with no renaming step to get wrong.
+  // Vite names an output HTML file by its path relative to `root`. A published
+  // page has to sit at the top of this folder, so the SOURCE cannot also be a
+  // file of that name at the top of this folder: one path, two files. With root
+  // at src/, the entry is src/<name>.html and the build emits exactly
+  // <name>.html, with no renaming step to get wrong.
+  //
+  // index1.html — the canonical URL for this folder — is no longer one of these
+  // names. It is an ALIAS declared in variants.json and written by
+  // tools/publish.mjs, so the URL and the source that serves it can move
+  // independently. See the note beside `alias` in publish.mjs.
   root: resolve(here, 'src'),
   publicDir: resolve(here, 'public'),
 
@@ -52,7 +56,10 @@ export default defineConfig({
   server: {
     port: 5200,
     strictPort: true,
-    open: '/index1.html',
+    // the register's first entry is what the dev server should open, and since
+    // index1.html is now an ALIAS produced at publish time there is no such file
+    // under src/ to open
+    open: '/indexPresentation.html',
     // The models live in assets/, one level ABOVE root. Without this the dev
     // server refuses to serve them and the stage comes up empty.
     fs: { allow: [here] },

@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KR 700 PA — engineered in motion · Buro Lab</title>
+<meta name="description" content="A KUKA KR 700 PA palletiser, reconstructed from a 107-solid CAD file and re-articulated on its real hinge centres. Its arm sweeps three metres and its tool plate never tilts.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Crect width=%2716%27 height=%2716%27 fill=%27%230a0c0d%27/%3E%3Crect x=%271%27 y=%277.5%27 width=%2714%27 height=%271%27 fill=%27%23f2903f%27/%3E%3C/svg%3E">
+  <script type="module" crossorigin src="./assets1/indexLevelLine-C5a21cVQ.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets1/kr700pa-rig2-v8O1xihs.js">
+  <link rel="stylesheet" crossorigin href="./assets1/indexLevelLine-CmRCo_Xi.css">
+</head>
+<body>
+
+<!--
+  Six shots, one continuous world, one camera journey of about 490 degrees.
+
+  The static build stands alone (DNA39, MJ5, G7): every statement and figure is
+  in the document. Remove the scripts and what is lost is the machine moving,
+  which is the argument rather than the content. The canvas is decoration to
+  assistive tech (DNA80).
+-->
+
+<a class="skip" href="#record">Skip to the measurements</a>
+
+<header class="masthead">
+  <span class="wordmark">Buro&nbsp;Lab</span>
+  <span class="masthead__meta">Machine study 01</span>
+</header>
+
+
+<!--
+  THE READOUT. Real camera state, printed: azimuth around the machine and the
+  distance the lens is standing at, read off the camera every frame rather than
+  mirrored from the station table — so if the two ever disagree, this tells the
+  truth about what is on screen.
+
+  The four corner registrations that used to sit with it are gone. They were the
+  only marks on the page that measured nothing.
+-->
+<div class="marks" aria-hidden="true">
+  <span class="marks__readout" data-readout></span>
+</div>
+
+<div class="stage" aria-hidden="true">
+  <canvas id="scene"></canvas>
+</div>
+
+
+
+<!--
+  The wait, and only the wait.
+
+  A tumbling wireframe cube with a plus on each face, and a status word under it.
+  Ported from a React/Tailwind component; this project is Vite + vanilla JS, so it
+  is the same object built in the stack that is actually here (see preload.js).
+
+  HIDDEN in the document, exactly like the level line, and script unhides it. A
+  loader present in the static build would be a permanent "FETCHING" over a page
+  that is already finished reading (G7, DNA74) — with no script there is no load,
+  so there is nothing to report. Decoration to assistive tech for the same reason
+  the canvas is (DNA80): every word of this page is already in the document and
+  readable while the model is still on the wire.
+
+  The status word is bound to the REAL phase of the transfer. The source cycled
+  six words on a 600ms timer regardless of what was happening — on a page whose
+  whole argument is that its figures were measured rather than quoted, a loader
+  narrating work it is not doing would be the one dishonest mark on it (CP1).
+
+  And it does not appear for a fast load: under 200ms it is never shown at all.
+-->
+<div class="preload" data-preload hidden aria-hidden="true">
+  <div class="preload__group">
+    <div class="preload__cube">
+      <span class="preload__face"></span>
+      <span class="preload__face"></span>
+      <span class="preload__face"></span>
+      <span class="preload__face"></span>
+      <span class="preload__face"></span>
+      <span class="preload__face"></span>
+    </div>
+    <p class="preload__status" data-preload-status>Fetching</p>
+  </div>
+</div>
+
+<!--
+  The opening. Real text at its final size, present in the document before any
+  script runs — the intro REVEALS it, it does not create it, so with JavaScript
+  gone this is simply the page's first heading (DNA74, G7).
+
+  ONE LINE, EDGE TO EDGE. The designation is the machine's name and it is set as
+  one word-shape at the width of the screen. It was two stacked lines; a name
+  broken across a line break is two things being read, and this is one.
+
+  aria-label carries the accessible name because the characters below CHURN
+  during the split-flap, and a heading whose accessible name is a moving pile of
+  random glyphs is worse than one that never animated at all.
+-->
+<div class="intro" data-intro="idle">
+  <div class="intro__type">
+    <h1 class="intro__title" aria-label="KR 700 PA">
+      <span class="intro__line" data-flap>KR 700 PA</span>
+    </h1>
+  </div>
+</div>
+
+<!--
+  The secondary line is NOT inside the opening.
+
+  It has to survive it. The title steps back behind the machine and goes to a
+  distance; this stays in front, at the foot of the screen, where it can still be
+  read once the movement has finished. Its resting place in the stylesheet IS the
+  bottom of the screen — the opening lifts it up to the title and lets it fall
+  back, so with no script it is simply a caption where it belongs.
+-->
+<p class="intro__sub" data-intro-sub>Engineered in motion</p>
+
+<main>
+
+  <!-- 01 IMPACT — low, close, cropped. Azimuth 40 -> 18, camera below the shoulder. -->
+  <section class="shot shot--impact" id="impact" data-shot="1">
+    <div class="frame frame--end">
+      <p class="kicker">KUKA &middot; palletiser</p>
+      <p class="edge">Nothing here moves by accident.</p>
+    </div>
+  </section>
+
+  <!-- 02 SCALE — 178 degrees round to the far side, and wide. -->
+  <section class="shot shot--scale" id="scale" data-shot="2">
+    <div class="type type--scale">
+      <h2 class="stat"><span class="stat__fig">2 744</span><span class="stat__unit">mm</span></h2>
+      <p class="stat__cap">Standing still</p>
+    </div>
+  </section>
+
+  <!-- 03 REAR — rear three-quarter, the balance linkage nearest the camera. -->
+  <section class="shot shot--rear" id="rear" data-shot="3">
+    <!--
+      A leader, not a caption. It names the part the shot is pointing at and
+      gives its measured figure — and the figure is one the record already
+      carries, so nothing is claimed here that is not already in the ledger.
+      Decoration to assistive tech: every one of these numbers is in the table.
+    -->
+    <div class="type type--rear">
+      <h2>Four axes.<br>One motion.</h2>
+    </div>
+  </section>
+
+  <!-- 04 ABOVE — high angle down the boom while the tool comes round. -->
+  <section class="shot shot--above" id="above" data-shot="4">
+    <div class="frame frame--start">
+      <p class="edge">Two closed linkages. The plate holds flat while the arm drives.</p>
+    </div>
+    <div class="type type--above">
+      <h2 class="stat"><span class="stat__fig">3 070</span><span class="stat__unit">mm</span></h2>
+      <p class="stat__cap">Across, at full span</p>
+    </div>
+  </section>
+
+  <!-- 05 MACRO — one joint. The machine leaves the frame entirely. -->
+  <section class="shot shot--macro" id="macro" data-shot="5">
+    <div class="type type--macro">
+      <h2>Precision<br>is mechanical.</h2>
+    </div>
+  </section>
+
+  <!-- 06 HERO — 130 degrees round from the opening, low and wide. -->
+  <section class="shot shot--hero" id="hero" data-shot="6">
+    <div class="type type--hero">
+      <h2 class="huge">The hand that<br>never tilts.</h2>
+    </div>
+  </section>
+
+  <!-- The record. Convention is permitted; formlessness is not (C19). -->
+  <section class="shot shot--record" id="record" data-shot="7">
+    <div class="record">
+      <h2 class="record__head">Measured, not quoted</h2>
+      <div class="note-wrap"><p class="note">
+        Every figure below was measured from the file in this repository. No
+        manufacturer specification is used. The designation &ldquo;KR 700 PA&rdquo;
+        conventionally implies a 700&nbsp;kg payload, and that figure does not
+        appear here, because an implication is not a source.
+      </p></div>
+
+      <table class="plate">
+        <caption class="visually-hidden">Measured properties of the KR 700 PA model</caption>
+        <tbody>
+          <tr><th scope="row">Overall height</th><td class="fig">2 744 mm</td></tr>
+          <tr><th scope="row">Overall span</th><td class="fig">3 070 mm</td></tr>
+          <tr><th scope="row">Linkage members</th><td class="fig">3 &times; 1 300 mm</td></tr>
+          <tr><th scope="row">Driven axes</th><td class="fig">4</td></tr>
+          <tr><th scope="row">Closed loops</th><td class="fig">2</td></tr>
+          <tr><th scope="row">Solids in source</th><td class="fig">107</td></tr>
+          <tr><th scope="row">Triangles</th><td class="fig">137 613</td></tr>
+          <tr><th scope="row">Draw-call floor</th><td class="fig">9</td></tr>
+          <tr><th scope="row">Payload</th><td class="fig">442 KB</td></tr>
+          <tr><th scope="row">Worst plate tilt, full range</th><td class="fig">0.000&deg;</td></tr>
+        </tbody>
+      </table>
+
+      <p class="provenance">
+        <em>KR 700 PA</em>, obtained from CGTrader under its Royalty&nbsp;Free
+        License. STEP converted with <code>tools/step-to-glb.mjs</code>; hinge
+        centres derived by <code>tools/rod-ends.mjs</code> and the hierarchy
+        recorded in <code>assets/robo&nbsp;hand/rig.json</code>. KUKA and
+        KR&nbsp;700&nbsp;PA are marks of their owner, used to name the machine
+        accurately and not under licence or endorsement.
+      </p>
+    </div>
+
+    <!--
+      The colophon belongs to this screen, not after it. As a band of its own it
+      added its full height to the document, so arriving at the end of the page
+      pushed the record up under the masthead and the last screen could never be
+      seen whole. Inside the section and taken out of the flow, the page ends
+      exactly where the record ends.
+    -->
+    <!--
+      The one interactive surface on the page. It covers the half of the last
+      screen the machine stands in, and it carries a visible label rather than
+      relying on a hover state — a route nobody can find without a mouse over it
+      is not a route (U-discoverability).
+    -->
+    <div class="orbit" data-orbit>
+      <span class="orbit__hint">Drag to rotate &middot; 360&deg;</span>
+    </div>
+
+    <footer class="colophon">
+      <p><span class="wordmark">Buro&nbsp;Lab</span> &mdash; machine study 01</p>
+    </footer>
+  </section>
+
+</main>
+
+</body>
+</html>

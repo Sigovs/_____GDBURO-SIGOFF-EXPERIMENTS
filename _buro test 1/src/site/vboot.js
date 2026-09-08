@@ -38,15 +38,37 @@ export async function bootVariant(direction) {
   */
   const level = direction.level ? createLevel({ camera: world.camera, rig: world.rig }) : null;
 
-  const callouts = createCallouts({ camera: world.camera, rig: world.rig, metrics: direction.callout });
+  /*
+    TWO ANNOTATION LANGUAGES, AND THE DIRECTION CHOOSES.
+
+    `card` is the editorial one in site/vcards.js — block placed near the
+    feature, one soft diagonal, real text. Everything else keeps the drafting
+    callout in site/vcallouts.js, unchanged, because that is what A, B, C and
+    `final` are composed in.
+  */
+  const makeCallouts = direction.callout?.card
+    ? (await import('./vcards.js')).createCallouts
+    : createCallouts;
+  const callouts = makeCallouts({ camera: world.camera, rig: world.rig, metrics: direction.callout });
   world.onFrame(() => { level?.update(); callouts.update(); });
-  if (level) {
-    // The verification harness reads the measurement, and the rig and camera it
-    // was taken from — so a claim about the level line can be checked against the
-    // geometry rather than against a screenshot.
-    window.__level = level;
-    window.__probe = { rig: world.rig, camera: world.camera };
-  }
+  /*
+    THE RIG AND CAMERA ARE PUBLISHED WHETHER OR NOT THERE IS A LEVEL LINE.
+
+    They were inside `if (level)`, which made them look like part of the
+    measurement harness. They are not: the record's hotspots wait on `__probe`
+    before they will build, so a direction that turns the datum off lost its
+    last screen's five markers entirely and did it without an error. The
+    measurement's own handle stays gated, because that one really is the level
+    line's.
+  */
+  /* The callout module goes on the same handle. `setDraw` already exists for
+     the intro's own hand-off, and being able to HOLD the draw at an exact
+     progress is what lets a proof capture caption a frame with the number that
+     is actually in it — read, screenshot, read again and the state has moved on
+     between the three, which is how a sheet ends up claiming a card is at zero
+     underneath a picture of the card. */
+  window.__probe = { rig: world.rig, camera: world.camera, callouts };
+  if (level) window.__level = level;
 
   if (reduced) {
     createStill(world, callouts, direction, level);

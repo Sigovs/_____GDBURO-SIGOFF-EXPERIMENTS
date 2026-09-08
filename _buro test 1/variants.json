@@ -25,6 +25,19 @@
     "has no `direction` and is hand-authored.",
     "",
     "A variant is REMOVED by deleting its entry here, deleting its index<name>.html",
+    "",
+    "A VARIANT MAY ALSO PUBLISH UNDER ALIASES. `alias` is a list of extra names the",
+    "built page is copied to at the top of this folder. It exists because index1.html",
+    "is the CANONICAL URL for this folder — it is the name the dashboard links, the",
+    "name every other _buro test uses, and the one Alex hands out — while the page",
+    "that URL should serve changes as the work moves on. An alias keeps the URL and",
+    "the source decoupled: tools/publish.mjs copies dist/<file> to <file> and then to",
+    "every alias, so the mapping is reproduced by `npm run publish` from a clean",
+    "checkout and cannot drift into a hand-copied file nobody can regenerate.",
+    "",
+    "Two entries may not claim the same published name; publish.mjs refuses the run",
+    "rather than letting copy order decide which page wins the URL.",
+    "",
     "and its previews/<stem>.jpg, and running `npm run publish`."
   ],
   "title": "Machine study 01",
@@ -35,9 +48,12 @@
       "file": "indexPresentation.html",
       "name": "Presentation",
       "date": "2026-09-07",
-      "status": "current",
-      "scroll": 0.30,
-      "note": "The company around the machine. Nine chapters over one unbroken 478° camera take, with the stage changing register chapter by chapter — full, veiled, render window, macro, a film plate laid over the frame before it, quiet, held — and a last screen that stops in true profile and can be turned. Five callouts set as single annotation lines. Desktop only."
+      "status": "current — canonical index1",
+      "scroll": 0.3,
+      "note": "The company around the machine. Nine chapters over one unbroken 478° camera take, with the stage changing register chapter by chapter — full, veiled, render window, macro, a film plate laid over the frame before it, quiet, held — and a last screen that stops in true profile and can be turned. Five callouts set as single annotation lines. Desktop only. Published as the canonical index1.html for this folder as well as under its own name.",
+      "alias": [
+        "index1.html"
+      ]
     },
     {
       "file": "indexA.html",
@@ -67,11 +83,11 @@
       "note": "Direction C. Shot as a film about a machine: a cold open on one joint, light that warms through the middle and resolves cool, one line of copy per beat and six callouts in the whole run."
     },
     {
-      "file": "index1.html",
+      "file": "indexLevelLine.html",
       "name": "The level line",
       "note": "Six camera stations around roughly 490° of travel. The datum lives in the room rather than on the glass, so the arm occludes it. Split-flap opening; instrument layer reads real azimuth and distance.",
       "date": "2026-09-03",
-      "status": "current"
+      "status": "superseded — was index1.html"
     }
   ]
 }

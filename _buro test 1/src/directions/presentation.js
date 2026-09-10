@@ -543,26 +543,38 @@ export default {
     vertical angle left to remove either. The drag still owns the machine from
     there; this is only where it starts.
 
-    WHAT CENTRING COSTS, MEASURED RATHER THAN GUESSED.
+    WHERE IT IS CENTRED, AND WHY NOT ON 756.
 
-    The reading column occupies x 43..612 — the left 40% of the frame — and a
-    machine 947px wide centred on 756 necessarily runs from 282, so about a third
-    of it stands behind that column. Three arrangements were rendered and
-    measured before this one was kept:
+    Centring on the VIEWPORT's centre was tried and cost a hotspot, and no
+    amount of marker placement could recover it: the reading column occupies
+    x 43..612, and a 947px machine centred on 756 runs from 282, which puts the
+    tool plate at x 399 — physically behind the column. A marker on a part the
+    reader cannot see is a marker that lies, so the module correctly suppressed
+    it and the record dropped to 4/5.
 
-      centred, arm left (this)   anchors visible 4/5 — the flange goes behind
-      centred, arm right (+180)  anchors visible 2/5 — column and base go behind
-      off-centre right (before)  anchors visible 5/5 — but centre at 1218 and
-                                 207px of the machine cropped off the right edge
+    Measured on the render, sweeping the target along the view's screen-right
+    axis (dots are suppressed below x 648, which is the column's right edge plus
+    the module's 36px guard):
 
-    The +180 variant holds the side view exactly — perpendicularity survives a
-    half turn — and puts the wrist in the clear, but it hides the pedestal AND
-    the shoulder, which is a worse trade than hiding one flange.
+      centre  756   plate 399   plate hidden          4/5
+      centre  891   plate 532   plate hidden          4/5
+      centre 1003   plate 643   plate hidden          4/5
+      centre 1039   plate 679   nothing hidden        5/5
+      centre 1060   plate 699   nothing hidden        5/5   ← kept
+      centre 1115   plate 754   nothing hidden        5/5
 
-    To get 5/5 back with the machine still centred, the reading column has to
-    give up width; nothing about the camera can buy it.
+    1060 is not an arbitrary retreat from 756: the free area the column leaves
+    runs 612..1512 and its centre is 1062. So the machine IS centred — in the
+    space it actually has, which is what composing the two together means. It
+    stays 947px wide and 873px tall, crops about 40px off the right edge and 85
+    off the floor, and every one of the five anchors clears the column with
+    margin: plate 699, elbow 1005, shoulder 1147, column and base 1240.
+
+    The +180 variant was also measured. It holds the side view exactly —
+    perpendicularity survives a half turn — and puts the wrist in the clear, but
+    it hides the pedestal AND the shoulder: 2/5, a worse trade than one flange.
   */
-  record: { station: st(-388, 5.5, 1.68, [-0.909, 1.68, -0.026], 40), from: 1.16, floor: 0.9, spinHome: 127.936 },
+  record: { station: st(-388, 5.5, 1.68, [-2.101, 1.68, -0.660], 40), from: 1.16, floor: 0.9, spinHome: 127.936 },
 
   /* Reduced motion is given the peak's own frame, not the last one: the
      measurement is what the page is for, so the visitor who cannot have the

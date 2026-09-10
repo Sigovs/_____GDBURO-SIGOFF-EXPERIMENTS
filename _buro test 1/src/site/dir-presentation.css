@@ -1087,6 +1087,17 @@
 }
 /* the invert swaps BOTH colours in one rule, so the pair is never half-applied */
 .btn:hover { background: var(--ink); color: var(--ground); border-color: var(--ink); }
+/*
+  THE CLOSING CONTROL JOINS THE MICRO SYSTEM.
+
+  It was the one filled surface on the page — a solid near-white slab, which was
+  defensible when it was the only call to action and stopped being so the moment
+  there were four. Four filled slabs would be a product UI. It now wears the same
+  graphite plate, steel edge and directional mark as the other three, and the
+  hierarchy that used to come from FILL comes from POSITION instead: this is the
+  one under the closing claim.
+*/
+.dir-presentation .close { align-items: center; }
 .link {
   color: var(--steel);
   font: 500 14px/1 var(--mono);
@@ -1606,6 +1617,233 @@
 :root[data-reduced] .dir-presentation .beat:not(.beat--arrival) .type,
 :root[data-reduced] .dir-presentation .beat--record { background: rgb(7 9 11 / 0.95); }
 :root[data-reduced] .dir-presentation .record { background: none; margin-left: 0; padding-inline: 0; }
+
+
+/* ══ THE MICRO LAYER ═══════════════════════════════════════════════════════
+   TAGS, MICRO LABELS AND CALLS TO ACTION — ONE CONSTRUCTION, THREE SHAPES.
+
+   The page was composed of large masses with a lot of air between them, which
+   is right for the monument and the macro and leaves the argued chapters — the
+   ones carrying capabilities, classes, industries and process — reading as a
+   headline, a paragraph and a list with nothing at the small end of the scale.
+   There was no small type on this page that was not a caption.
+
+   So there is now one micro system, and it is built the way every other object
+   here is built: mono, uppercase, tracked, on a graphite ground with a hairline
+   edge and ONE chamfered corner. The chamfer is what keeps it a machined plate
+   rather than a rounded chip, and it is the single detail that stops these
+   reading as interface pills borrowed from somewhere else.
+
+   THREE SHAPES, AND THEY ARE NOT INTERCHANGEABLE:
+
+     .tag       a chamfered rectangle. A THING the company does or handles —
+                a capability, a class, a state. Rectangles are for nouns.
+     .tag--pill a true pill, used ONLY for applications: the industries a
+                machine is put to work in. A different shape because it is a
+                different kind of claim — a context, not a capability.
+     .mlab      an index, a hairline and a word. Not a container at all: it is a
+                margin mark, for labelling a region rather than naming a thing.
+
+   ONE ACCENT RULE. Steel for the state dot, and the machine's orange ONLY on a
+   `--live` mark — something the page can actually evidence. Everything else is
+   graphite and near-white. Orange here is a claim, not a colour.
+*/
+.dir-presentation .mset {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.55rem;
+}
+.dir-presentation .tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.52em 0.78em 0.46em;
+  font: 500 10.5px/1 var(--mono);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgb(var(--ink-rgb) / 0.58);
+  background: rgb(var(--ink-rgb) / 0.035);
+  border: 1px solid rgb(var(--ink-rgb) / 0.1);
+  /* the chamfer — one corner taken off, 5px, top right */
+  clip-path: polygon(0 0, calc(100% - 5px) 0, 100% 5px, 100% 100%, 0 100%);
+  white-space: nowrap;
+}
+/* applications are pills, because they are a context rather than a capability */
+.dir-presentation .tag--pill {
+  clip-path: none;
+  border-radius: 999px;
+  padding: 0.52em 0.9em 0.46em;
+}
+/* the state mark: 4px, steel, and orange only where the page can evidence it */
+.dir-presentation .tag i {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: rgb(var(--steel-rgb) / 0.8);
+  flex: none;
+}
+.dir-presentation .tag--live {
+  color: rgb(var(--ink-rgb) / 0.86);
+  border-color: rgb(var(--ink-rgb) / 0.18);
+  background: rgb(var(--ink-rgb) / 0.06);
+}
+.dir-presentation .tag--live i {
+  background: var(--machine);
+  box-shadow: 0 0 7px rgb(var(--machine-rgb) / 0.85);
+}
+/* an index inside a tag keeps the page's tabular habit */
+.dir-presentation .tag b {
+  font-weight: 500;
+  color: rgb(var(--ink-rgb) / 0.32);
+  font-variant-numeric: tabular-nums;
+}
+
+/* THE MARGIN MARK. Index, rule, word — no container, because it labels a region
+   rather than naming an object, and a box around it would make it a thing. */
+.dir-presentation .mlab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.62rem;
+  font: 500 10.5px/1 var(--mono);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.dir-presentation .mlab b { color: var(--steel); font-weight: 500; font-variant-numeric: tabular-nums; }
+.dir-presentation .mlab s {
+  text-decoration: none;
+  width: 26px; height: 1px;
+  background: rgb(var(--ink-rgb) / 0.2);
+}
+.dir-presentation .mlab u { text-decoration: none; color: rgb(var(--ink-rgb) / 0.5); }
+
+/*
+  ── THE CALL TO ACTION ─────────────────────────────────────────────────────
+
+  A thin graphite plate with a luminous steel edge down the side the eye enters
+  from, an index, the words, and a mechanical directional mark. Not a rounded
+  filled button: this page has no other filled surface, and one would read as a
+  control borrowed from a product UI.
+
+  THE MOTION IS THE MECHANISM, NOT THE BOX. On hover the plate itself does not
+  move and does not scale — the RULE inside the arrow extends, the chevron shifts
+  three pixels, and the steel edge lights. That is a mark being drawn, which is
+  the same gesture the leaders make, and it costs a transform and a box-shadow.
+*/
+.dir-presentation .cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.95rem;
+  padding: 0.92em 1.15em 0.86em 1.3em;
+  font: 500 11.5px/1 var(--mono);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+  background: rgb(255 255 255 / 0.035);
+  border: 1px solid rgb(var(--ink-rgb) / 0.12);
+  clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 0 100%);
+  position: relative;
+  transition: background var(--motion-base) var(--ease-standard),
+              border-color var(--motion-base) var(--ease-standard);
+}
+/* the standing edge — the same steel tick the callout cards carry */
+.dir-presentation .cta::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--steel-deep);
+  transition: box-shadow var(--motion-base) var(--ease-standard);
+}
+.dir-presentation .cta b {
+  font-weight: 500;
+  color: var(--steel);
+  font-variant-numeric: tabular-nums;
+}
+/* the directional mark: a rule that extends and a chevron that steps */
+.dir-presentation .cta i {
+  position: relative;
+  width: 20px; height: 6px;
+  flex: none;
+}
+.dir-presentation .cta i::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 50%;
+  width: 100%; height: 1px;
+  background: currentColor;
+  transform-origin: 0 50%;
+  transform: scaleX(0.55);
+  transition: transform 320ms var(--ease-standard);
+}
+.dir-presentation .cta i::after {
+  content: "";
+  position: absolute;
+  right: 0; top: 50%;
+  width: 5px; height: 5px;
+  border-top: 1px solid currentColor;
+  border-right: 1px solid currentColor;
+  transform: translate(0, -50%) rotate(45deg);
+  transition: transform 320ms var(--ease-standard);
+}
+.dir-presentation .cta:hover,
+.dir-presentation .cta:focus-visible {
+  background: rgb(255 255 255 / 0.065);
+  border-color: rgb(var(--ink-rgb) / 0.24);
+}
+.dir-presentation .cta:hover::before,
+.dir-presentation .cta:focus-visible::before {
+  box-shadow: 0 0 14px rgb(var(--steel-rgb) / 0.9);
+}
+.dir-presentation .cta:hover i::before,
+.dir-presentation .cta:focus-visible i::before { transform: scaleX(1); }
+.dir-presentation .cta:hover i::after,
+.dir-presentation .cta:focus-visible i::after { transform: translate(3px, -50%) rotate(45deg); }
+/* a CTA sitting under a lede or a claim needs air above it, and the page's own
+   rhythm gives it — declared here so no call site has to carry a style attr */
+.dir-presentation .mset--after { margin-top: 1.5rem; }
+.dir-presentation .mset--tight { margin-top: 1rem; }
+
+/*
+  THE RECORD'S OWN MICRO ROW sits between the simulated-company line and the
+  measured note, which is exactly where the reader is deciding how much of this
+  page to believe — so it carries the two states that answer that: the figures
+  are measured, and the tilt is read live rather than typed.
+*/
+.dir-presentation .record .mset { margin: 0.9rem 0 1rem; }
+.dir-presentation .record .cta { margin-top: 1.15rem; }
+
+/*
+  ── THE RECORD PANEL HAS TO FIT THE VIEWPORT, AND ON A SHORT ONE IT DID NOT ──
+
+  This is the only block on the page in normal flow inside a fixed viewport, so
+  its height is a hard constraint rather than a preference: anything added to it
+  pushes the column up until the heading leaves the screen.
+
+  Measured on the published build, before any of this was added:
+
+    1512x945   panel 79..838   heading top  107   fits
+    1920x1080  panel 147..905  heading top  175   fits
+    1440x820   panel -41..716  heading top  -13   ALREADY CLIPPED
+
+  So the short-viewport case was already losing its first line, and the micro row
+  and the CTA took it from -13 to -90. Both are fixed here rather than only the
+  part I added: below 980px of viewport the panel tightens its own rhythm —
+  padding, the gaps around the note and the table's row height — which buys back
+  more than the micro layer costs. Nothing changes above 980px, where the panel
+  was never in trouble.
+*/
+@media (max-height: 980px) {
+  .dir-presentation .record { padding: 1.25rem 2.2rem 1.3rem; }
+  .dir-presentation .record__head { margin-bottom: 0.7rem; }
+  .dir-presentation .sim { margin-bottom: 0.85rem; }
+  .dir-presentation .note { margin-bottom: 0.85rem; font-size: 14.5px; line-height: 1.48; }
+  .dir-presentation .plate th,
+  .dir-presentation .plate td { padding: 0.24rem 0; }
+  .dir-presentation .provenance { font-size: 12.5px; line-height: 1.42; }
+  .dir-presentation .record .mset { margin: 0.7rem 0 0.85rem; }
+  .dir-presentation .record .cta { margin-top: 0.9rem; padding: 0.78em 1.05em 0.72em 1.2em; }
+}
 
 /* ══ HOTSPOTS ═════════════════════════════════════════════════════════════
    Five marks on the machine, each naming the part it sits on. They are buttons,
